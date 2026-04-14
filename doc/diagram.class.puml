@@ -1,0 +1,238 @@
+@startuml "diagramme de classe"
+class Main
+package view {
+    class MainWindow
+    class MenuWindow
+
+    Main -down-> MainWindow
+    MainWindow --> MenuWindow
+}
+
+package business {
+
+}
+
+package controler {
+
+}
+
+package exception {
+
+}
+
+package model {
+    class Locality {
+        -postalCode : int
+        -city : String
+    }
+
+    class Address {
+        -streetName : String
+        -streetNumber : int
+    }
+
+    Address "1" --> "1" Locality
+
+    class Employee {
+        -matricule : String
+        -lastname : String
+        -firstname : String
+        -phoneNumber : String
+        -email : String
+        -IBAN : String
+        -salaryPerHour : float
+        -nbHourPerWeek : int
+        -entryDate : Date
+        -nbPaidHoliday : int
+        -password : String
+    }
+
+    Employee "1" --> "1" Address
+    Employee "0..1" --> "1" Employee : manager
+
+    class Pointage {
+        -date : Date
+        -startTime : Time
+        -endTime : Time
+    }
+
+    Pointage "*" --> "1" Employee
+
+    class Function {
+        -name : String
+    }
+
+    class Position {
+    }
+
+    Position "*" --> "*" Employee
+    Position "*" --> "1" Function
+
+    class AbsenceType {
+        -name : String
+    }
+
+    class Absence {
+        -startDate : Date
+        -endDate : Date
+        -description : String
+    }
+
+    Absence "*" --> "1" AbsenceType
+    Absence "*" --> "1" Employee
+
+    class ClientSupplier {
+        -id : int
+        -name : String
+        -firstName : String
+        -email : String
+        -phoneNumber : String
+        -isClient : bool
+        -isSupplier : bool
+        -VATNumber : String
+        -dateBecameClient : Date
+    }
+
+    ClientSupplier "*" --> "1" Address
+
+    class FidelityCard {
+        -id : int
+        -totalPoint : int
+        -isValid : bool
+    }
+
+    FidelityCard "1" --> "1" ClientSupplier
+
+    class WorkflowType {
+        -name : String
+        -isBuy : bool
+        -isSupplier : bool
+        -isInternal : bool
+    }
+
+    class Status {
+        -name : String
+    }
+
+    class Workflow {
+        -id : String
+    }
+
+    Workflow "*" --> "1" Status
+    Workflow "*" --> "1" WorkflowType
+
+    class Document {
+        -id : int
+        -date : Date
+        -plannedSendDate : Date
+        -plannedReceptionDate : Date
+        -effectiveSendDate : Date
+        -effectiveReceptionDate : Date
+        -paymentDelay : int
+        -commentary : String
+        -isChecked : bool
+    }
+
+    Document "*" --> "1" Workflow
+    Document "*" --> "1" ClientSupplier
+    Document "*" --> "1" Address
+
+    class ProductCategory {
+        -name : String
+    }
+
+    class Product {
+        -id : int
+        -name : String
+        -price : float
+        -VAT : int
+        -fidelityPoint : int
+    }
+
+    Product "*" --> "1" ProductCategory
+
+    class Promotion {
+        -requiredQuantity : int
+        -discount : int
+        -startDate : Date
+        -endDate : Date
+        -name : String
+    }
+
+    Promotion "*" --> "*" Product
+
+    class Location {
+        -shelf : String
+        -floor : String
+    }
+
+    class Quantity {
+        -nbProduct : int
+    }
+
+    Quantity "*" --> "1" Product
+    Quantity "*" --> "1" Location
+
+    class Recipe {
+        -name : String
+        -explanation : String
+    }
+
+    class Composition {
+        -quantity : int
+    }
+
+    Composition "*" --> "1" Recipe
+    Composition "*" --> "1" Product
+
+    class Detail {
+        -id : int
+        -quantity : float
+        -price : float
+    }
+
+    Detail "*" --> "1" Document
+    Detail "*" --> "1" Product
+
+    class Batch {
+        -id : int
+        -expirationDate : Date
+        -originCountry : String
+    }
+
+    Batch "*" --> "1" Product
+    Batch "*" --> "1" Detail
+}
+
+package data {
+
+    class SingletonConnetion {
+        -connexionUnique : Connection
+        +getInstance() : Connection
+    }
+
+    class ClientSupplierDBAccess {
+        +getAllClients() : List<ClientSupplier>
+        +getClient(int id, String name) : ClientSupplier
+        +insertClient(ClientSupplier c) : void
+        +updateClient(ClientSupplier c) : void
+        +deleteClient(int id) : void
+    }
+    
+    ClientSupplierDBAccess -up-> SingletonConnetion
+    ClientSupplierDBAccess -- ClientSupplier
+
+    class EmployeeDBAccess {
+        +getAllEmployees() : List<Employee>
+        +getEmployee(int matricule) : Employee
+        +insertEmployee(Employee) : void
+        +updateEmployee(Employee) : void
+        +deleteEmployeeint matricule) : void
+    }
+
+    EmployeeDBAccess -- Employee
+    EmployeeDBAccess -up-> SingletonConnetion
+
+}
+
+@enduml
