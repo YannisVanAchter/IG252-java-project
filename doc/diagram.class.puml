@@ -1,24 +1,271 @@
 @startuml "diagramme de classe"
-class Main
-package view {
-    class MainWindow
-    class MenuWindow
+skinparam linetype ortho
 
-    Main -down-> MainWindow
+class Main
+
+package view {
+
+    class MainWindow{
+        -title : String
+    }
+
+    class MenuWindow{
+        -mainPanel : JPanel
+        -appMenu : JMenu
+        -appItem : JMenuItem
+
+        +openDocumentForm() : void
+        +openClientSupplierForm() : void
+        +openProductSearchForm() : void
+        +openRecipeSearchForm() : void
+    }
+
+    'CRUD 1
+    class DocumentForm {
+        -name : JTextField
+        -commentary : JTextArea
+        -checkIsChecked : JCheckBox
+        -pickerPlannedSendDate : JDatePicker
+        -pickerPlannedReceptionDate : JDatePicker
+        -pickerEffectiveSendDate : JDatePicker
+        -pickerEffectiveReceptionDate : JDatePicker
+        -pickerPaymentDelay : JDatePicker
+        -comboWorkflow : JComboBox
+        -comboClientSupplier : JComboBox
+        -comboAddress : JComboBox
+        -table : JTable
+
+        +displayDocuments(List<Document>) : void
+        +onSaveClicked() : void
+        +onUpdateClicked() : void
+        +onDeleteClicked() : void
+        +clearForm() : void
+    }
+
+    'CRUD 2
+    class ClientSupplierForm {
+        -txtName : JTextField
+        -txtFirstName : JTextField
+        -txtEmail : JTextField
+        -txtVATNumber : JTextField
+        -pickerDateBecameClient : JDatePicker
+        -boxIsClient : JCheckBox
+        -boxIsSupplier : JCheckBox
+        -boxIsUs : JCheckBox
+        -spnFidelityPoints : JSpinner
+        -table : JTable
+
+        +displayClients(List<ClientSupplier>) : void
+        +onSaveClicked() : void
+        +onUpdateClicked() : void
+        +onDeleteClicked() : void
+        +clearForm() : void
+    }
+
+    'Recherche 1
+    class ProductSearchForm {
+        -txtProductName : JTextField
+        -comboCategory : JComboBox
+        -promotion : JCheckBox
+        -btnSearch : JButton
+        -table : JTable
+
+        +onSearchClicked() : void
+        +clearForm() : void
+        +displayResults(List<Product>) : void
+    }
+
+    'Recherche 2
+    class RecipeSearchForm {
+        -txtName : JTextField
+        -txtProduct : JTextField
+        -table : JTable
+
+        +onSearchClicked() : void
+        +clearForm() : void
+        +displayResults(List<Recipe>) : void
+    }
+
+    'Recherche 3
+    class ClientSupplierSearchForm {
+        -txtName : JTextField
+        -txtEmail : JTextField
+        -boxFidelityValid : JCheckBox
+        -table : JTable
+
+        +onLoadClicked() : void
+        +onSearchClicked() : void
+        +clearForm() : void
+        +displayResults(List<ClientSupplier>) : void
+    }
+
+    Main --> MainWindow
     MainWindow --> MenuWindow
+
+    MenuWindow --> ClientSupplierForm
+    MenuWindow --> DocumentForm
+    MenuWindow --> RecipeSearchForm
+    MenuWindow --> ProductSearchForm
+    MenuWindow --> ClientSupplierSearchForm
 }
+
+package controller {
+
+    class DocumentController {
+        +getAllDocuments() : List<Document>
+        +createDocument(title : String, commentary : String) : void
+        +updateDocument(id : int, title : String, commentary : String) : void
+        +deleteDocument(id : int) : void
+    }
+
+    class ClientSupplierController {
+        +getAllClientsSuppliers() : List<ClientSupplier>
+        +createClientSupplier(name : String, email : String) : void
+        +updateClientSupplier(id : int, name : String, email : String) : void
+        +deleteClientSupplier(id : int) : void
+    }
+
+    class ProductSearchController {
+        +searchProducts(name : String, category : String, promotion : boolean) : List<Product>
+    }
+
+    class RecipeSearchController {
+        +searchRecipes(name : String, product : String) : List<Recipe>
+    }
+
+    class ClientSupplierSearchController {
+        +search(name : String, email : String, fidelityValid : boolean) : List<ClientSupplier>
+    }
+}
+
+' VIEW → CONTROLLER
+DocumentForm --> DocumentController
+ClientSupplierForm --> ClientSupplierController
+ProductSearchForm --> ProductSearchController
+RecipeSearchForm --> RecipeSearchController
+ClientSupplierSearchForm --> ClientSupplierSearchController
 
 package business {
 
+    class DocumentManager {
+        +getAllDocuments() : List<Document>
+        +createDocument(title : String, commentary : String) : void
+        +updateDocument(id : int, title : String, commentary : String) : void
+        +deleteDocument(id : int) : void
+    }
+
+    class ClientSupplierManager {
+        +getAllClientsSuppliers() : List<ClientSupplier>
+        +createClientSupplier(name : String, email : String) : void
+        +updateClientSupplier(id : int, name : String, email : String) : void
+        +deleteClientSupplier(id : int) : void
+    }
+
+    class ProductManager {
+        +searchProducts(name : String, category : String, promotion : boolean) : List<Product>
+    }
+
+    class RecipeSearchManager {
+        +searchRecipes(name : String, product : String) : List<Recipe>
+    }
 }
 
-package controler {
+' CONTROLLER → BUSINESS
+DocumentController --> DocumentManager
+ClientSupplierController --> ClientSupplierManager
+ProductSearchController --> ProductManager
+RecipeSearchController --> RecipeSearchManager
+ClientSupplierSearchController --> ClientSupplierManager
+
+package data {
+
+    class SingletonConnection {
+        -connexionUnique : Connection
+        +getInstance() : Connection
+    }
+
+    class ClientSupplierDBAccess {
+        +getAll() : List<ClientSupplier>
+        +getById(id : int) : ClientSupplier
+        +insert(c : ClientSupplier) : void
+        +update(c : ClientSupplier) : void
+        +delete(id : int) : void
+    }
+
+    class EmployeeDBAccess {
+        +getAll() : List<Employee>
+        +getByMatricule(matricule : int) : Employee
+        +insert(e : Employee) : void
+        +update(e : Employee) : void
+        +delete(matricule : int) : void
+    }
+
+    class DocumentDBAccess {
+        +getAll() : List<Document>
+        +getById(id : int) : Document
+        +insert(d : Document) : void
+        +update(d : Document) : void
+        +delete(id : int) : void
+    }
+
+    class ProductDBAccess {
+        +getAll() : List<Product>
+        +getById(id : int) : Product
+        +insert(p : Product) : void
+        +update(p : Product) : void
+        +delete(id : int) : void
+    }
+
+    class RecipeDBAccess {
+        +getAll() : List<Recipe>
+        +getById(id : int) : Recipe
+        +insert(r : Recipe) : void
+        +update(r : Recipe) : void
+        +delete(id : int) : void
+    }
+
+    ClientSupplierDBAccess --> SingletonConnection
+    EmployeeDBAccess --> SingletonConnection
+    DocumentDBAccess --> SingletonConnection
+    ProductDBAccess --> SingletonConnection
+    RecipeDBAccess --> SingletonConnection
 
 }
+
+' BUSINESS → DATA
+DocumentManager --> DocumentDBAccess
+ClientSupplierManager --> ClientSupplierDBAccess
+ProductManager --> ProductDBAccess
+RecipeSearchManager --> RecipeDBAccess
 
 package exception {
+    exception InvalidUserException
 
+    exception InvalidClientSupplierException
+    exception InvalidDocumentException
+    exception InvalidProductException
+    exception InvalidRecipeException
+    exception NotFoundException
+
+    exception DataValidationException
+    exception DatabaseConnectionException
 }
+
+' EXCEPTIONS
+DocumentController ..> InvalidDocumentException
+ClientSupplierController ..> InvalidClientSupplierException
+ProductSearchController ..> InvalidProductException
+RecipeSearchController ..> InvalidRecipeException
+
+DocumentManager ..> DataValidationException
+ClientSupplierManager ..> DataValidationException
+ProductManager ..> DataValidationException
+RecipeSearchManager ..> DataValidationException
+
+DocumentDBAccess ..> DatabaseConnectionException
+ClientSupplierDBAccess ..> DatabaseConnectionException
+ProductDBAccess ..> DatabaseConnectionException
+RecipeDBAccess ..> DatabaseConnectionException
 
 package model {
     class Locality {
@@ -31,7 +278,7 @@ package model {
         -streetNumber : int
     }
 
-    Address "1" --> "1" Locality
+    Address --> Locality
 
     class Employee {
         -matricule : String
@@ -47,8 +294,8 @@ package model {
         -password : String
     }
 
-    Employee "1" --> "1" Address
-    Employee "0..1" --> "1" Employee : manager
+    Employee --> Address
+    Employee "0..*" --> "0..1" Employee : manager
 
     class Pointage {
         -date : Date
@@ -204,35 +451,26 @@ package model {
     Batch "*" --> "1" Detail
 }
 
-package data {
+' MODEL
+' DocumentController ..> Document
+' ClientSupplierController ..> ClientSupplier
+' ProductSearchController ..> Product
+' RecipeSearchController ..> Recipe
 
-    class SingletonConnetion {
-        -connexionUnique : Connection
-        +getInstance() : Connection
-    }
+' DocumentManager ..> Document
+' ClientSupplierManager ..> ClientSupplier
+' ProductManager ..> Product
+' RecipeSearchManager ..> Recipe
 
-    class ClientSupplierDBAccess {
-        +getAllClients() : List<ClientSupplier>
-        +getClient(int id, String name) : ClientSupplier
-        +insertClient(ClientSupplier c) : void
-        +updateClient(ClientSupplier c) : void
-        +deleteClient(int id) : void
-    }
-    
-    ClientSupplierDBAccess -up-> SingletonConnetion
-    ClientSupplierDBAccess -- ClientSupplier
+' DocumentDBAccess ..> Document
+' ClientSupplierDBAccess ..> ClientSupplier
+' ProductDBAccess ..> Product
+' RecipeDBAccess ..> Recipe
 
-    class EmployeeDBAccess {
-        +getAllEmployees() : List<Employee>
-        +getEmployee(int matricule) : Employee
-        +insertEmployee(Employee) : void
-        +updateEmployee(Employee) : void
-        +deleteEmployeeint matricule) : void
-    }
+view ..> model
+controller ..> model
+business ..> model
+data ..> model
 
-    EmployeeDBAccess -- Employee
-    EmployeeDBAccess -up-> SingletonConnetion
-
-}
 
 @enduml
