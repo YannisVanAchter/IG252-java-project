@@ -20,8 +20,23 @@ package view {
         +openRecipeSearchForm() : void
     }
 
-    'CRUD 1
-    class DocumentForm {
+    'CRUD 1'
+    'Read '
+    class DocumentTable {
+        -documents : ArrayList<Document> 'All docs'
+        -displayDocuments : ArrayList<Document> 'Displayed docs in the table'
+        -typeDocmentFilter : JComboBox
+        -startCreationDate : JDatePicker
+        -endCreationDate : JDatePicker
+
+        +onFilterClick() : void
+        +onCreateClick() : void
+        +onUpdateClick(Document) : void
+        +onDeleteClick(Document) : void
+    }
+
+    'Create'
+    class DocumentCreationForm {
         -name : JTextField
         -commentary : JTextArea
         -checkIsChecked : JCheckBox
@@ -35,14 +50,36 @@ package view {
         -comboAddress : JComboBox
         -table : JTable
 
-        +displayDocuments(List<Document>) : void
         +onSaveClicked() : void
-        +onUpdateClicked() : void
-        +onDeleteClicked() : void
         +clearForm() : void
     }
 
-    'CRUD 2
+    'Update'
+    class DocumentUpdateForm {
+        -name : JTextField
+        -commentary : JTextArea
+        -checkIsChecked : JCheckBox
+        -pickerPlannedSendDate : JDatePicker
+        -pickerPlannedReceptionDate : JDatePicker
+        -pickerEffectiveSendDate : JDatePicker
+        -pickerEffectiveReceptionDate : JDatePicker
+        -pickerPaymentDelay : JDatePicker
+        -comboWorkflow : JComboBox
+        -comboClientSupplier : JComboBox
+        -comboAddress : JComboBox
+        -table : JTable
+
+        +onValidateClick(Document) : void
+        +onCancelClick() : void
+    }
+
+    'CRUD 2 '
+    'Read' 
+    class ClientSupplierTable {
+
+    }
+
+    'Create' 
     class ClientSupplierForm {
         -txtName : JTextField
         -txtFirstName : JTextField
@@ -62,7 +99,7 @@ package view {
         +clearForm() : void
     }
 
-    'Recherche 1
+    'Recherche 1 '
     class ProductSearchForm {
         -txtProductName : JTextField
         -comboCategory : JComboBox
@@ -75,7 +112,7 @@ package view {
         +displayResults(List<Product>) : void
     }
 
-    'Recherche 2
+    'Recherche 2 '
     class RecipeSearchForm {
         -txtName : JTextField
         -txtProduct : JTextField
@@ -86,7 +123,7 @@ package view {
         +displayResults(List<Recipe>) : void
     }
 
-    'Recherche 3
+    'Recherche 3 '
     class ClientSupplierSearchForm {
         -txtName : JTextField
         -txtEmail : JTextField
@@ -103,10 +140,14 @@ package view {
     MainWindow --> MenuWindow
 
     MenuWindow --> ClientSupplierForm
-    MenuWindow --> DocumentForm
+    MenuWindow --> DocumentTable
     MenuWindow --> RecipeSearchForm
     MenuWindow --> ProductSearchForm
     MenuWindow --> ClientSupplierSearchForm
+    MenuWindow --> ClientSupplierTable
+
+    DocumentTable --> DocumentUpdateForm
+    DocumentTable --> DocumentCreationForm
 }
 
 package controller {
@@ -139,8 +180,11 @@ package controller {
 }
 
 ' VIEW → CONTROLLER
-DocumentForm --> DocumentController
+DocumentCreationForm --> DocumentController
+DocumentTable --> DocumentController
+DocumentUpdateForm --> DocumentController
 ClientSupplierForm --> ClientSupplierController
+ClientSupplierTable --> ClientSupplierController
 ProductSearchForm --> ProductSearchController
 RecipeSearchForm --> RecipeSearchController
 ClientSupplierSearchForm --> ClientSupplierSearchController
