@@ -1,0 +1,44 @@
+
+services:
+    app:
+        build:
+            context: ./src
+            dockerfile: Dockerfile
+        env_file: ./.env
+        environment:
+            - DISPLAY=${DISPLAY}
+            - DEBIAN_FRONTEND=${DEBIAN_FRONTEND}
+            - TZ=${TZ}
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            - MYSQL_DATABASE=${MYSQL_DATABASE}
+            - MYSQL_USER=${MYSQL_USER}
+            - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        ports:
+            - "3000:3000"
+            - "6901:6901"
+        stdin_open: true
+        tty: true
+        networks:
+            - app-network
+        depends_on:
+            - database
+
+    database:
+        build:
+            context: ./database
+            dockerfile: Dockerfile
+        env_file: ./.env
+        environment:
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            - MYSQL_DATABASE=${MYSQL_DATABASE}
+            - MYSQL_USER=${MYSQL_USER}
+            - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        ports:
+            - "3306:3306"
+
+networks:
+    app-network:
+        driver: bridge
+
+volumes:
+    mysql-data: {}
