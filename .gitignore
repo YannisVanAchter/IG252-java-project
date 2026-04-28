@@ -29,4 +29,5 @@ replay_pid*
 lib/
 out/
 build/
+*.ignore.*
 *.env
