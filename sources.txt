@@ -1,0 +1,4 @@
+C:\Users\Yannis\Documents\iesn\b2\Q2\java\IG252-java-project\src\Main.java  
+C:\Users\Yannis\Documents\iesn\b2\Q2\java\IG252-java-project\src\exception\DataValidationException.java  
+C:\Users\Yannis\Documents\iesn\b2\Q2\java\IG252-java-project\src\model\Location.java  
+C:\Users\Yannis\Documents\iesn\b2\Q2\java\IG252-java-project\src\test\LocationTest.java  

@@ -26,4 +26,7 @@ replay_pid*
 # Environement 
 .idea/
 .vscode/
+lib/
+out/
+build/
 *.env

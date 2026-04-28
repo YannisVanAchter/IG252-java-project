@@ -1,0 +1,27 @@
+
+Thanks for using JUnit! Support its development at https://junit.org/sponsoring
+
+.
++-- JUnit Platform Suite [OK]
++-- JUnit Jupiter [OK]
+| '-- LocationTest [OK]
+|   +-- comparisonEqualTest() [OK]
+|   +-- wrongPostalCode() [OK]
+|   +-- basicCreationTest() [OK]
+|   '-- comparisonNotEqualTest() [OK]
+'-- JUnit Vintage [OK]
+
+Test run finished after 651 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         4 tests found           ]
+[         0 tests skipped         ]
+[         4 tests started         ]
+[         0 tests aborted         ]
+[         4 tests successful      ]
+[         0 tests failed          ]
+
