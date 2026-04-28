@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="JUnit Jupiter" tests="4" skipped="0" failures="0" errors="0" time="0.22" hostname="PC-de-Yannis" timestamp="2026-04-28T09:00:12">
+<testsuite name="JUnit Jupiter" tests="4" skipped="0" failures="0" errors="0" time="0.381" hostname="PC-de-Yannis" timestamp="2026-04-28T21:39:03">
 <properties>
 <property name="file.encoding" value="UTF-8"/>
 <property name="file.separator" value="\"/>
@@ -7,7 +7,7 @@
 <property name="java.class.version" value="66.0"/>
 <property name="java.home" value="C:\Program Files\Java\jdk-22"/>
 <property name="java.io.tmpdir" value="C:\Users\Yannis\AppData\Local\Temp\"/>
-<property name="java.library.path" value="C:\Program Files\Java\jdk-22\bin;C:\Windows\Sun\Java\bin;C:\Windows\system32;C:\Windows;c:\Users\Yannis\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\debugCommand;c:\Users\Yannis\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\copilotCli;C:\Program Files\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Common Files\Oracle\Java\java8path;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\Microsoft VS Code\bin;C:\ProgramData\chocolatey\bin;C:\Program Files\Git\cmd;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\swipl\bin;C:\Users\Yannis\AppData\Roaming\nvm;C:\Program Files\nodejs;C:\Program Files\dotnet\;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;C:\Program Files (x86)\Microsoft SQL Server\170\Tools\Binn\;C:\Program Files\Microsoft SQL Server\170\Tools\Binn\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\180\Tools\Binn\;C:\Program Files\Microsoft SQL Server\170\DTS\Binn\;C:\Program Files (x86)\Microsoft SQL Server\170\DTS\Binn\;C:\Users\Yannis\AppData\Local\Programs\Python\Python313\Scripts\;C:\Users\Yannis\AppData\Local\Programs\Python\Python313\;C:\Users\Yannis\AppData\Local\Programs\Python\Launcher\;C:\Users\Yannis\.cargo\bin;C:\Users\Yannis\AppData\Local\Microsoft\WindowsApps;C:\Users\Yannis\AppData\Local\GitHubDesktop\bin;C:\Users\Yannis\AppData\Roaming\npm;C:\ghcup\bin;C:\ghcup\bin;C:\Users\Yannis\AppData\Roaming\nvm;C:\Program Files\nodejs;C:\Users\Yannis\.dotnet\tools;c:\Users\Yannis\.vscode\extensions\vscjava.vscode-java-debug-0.59.0\bundled\scripts\noConfigScripts;."/>
+<property name="java.library.path" value="C:\Program Files\Java\jdk-22\bin;C:\Windows\Sun\Java\bin;C:\Windows\system32;C:\Windows;c:\Users\Yannis\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\debugCommand;c:\Users\Yannis\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\copilotCli;C:\Program Files\Microsoft VS Code;C:\Program Files\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Common Files\Oracle\Java\java8path;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\Microsoft VS Code\bin;C:\ProgramData\chocolatey\bin;C:\Program Files\Git\cmd;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\swipl\bin;C:\Users\Yannis\AppData\Roaming\nvm;C:\Program Files\nodejs;C:\Program Files\dotnet\;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;C:\Program Files (x86)\Microsoft SQL Server\170\Tools\Binn\;C:\Program Files\Microsoft SQL Server\170\Tools\Binn\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\180\Tools\Binn\;C:\Program Files\Microsoft SQL Server\170\DTS\Binn\;C:\Program Files (x86)\Microsoft SQL Server\170\DTS\Binn\;C:\Users\Yannis\AppData\Local\Programs\Python\Python313\Scripts\;C:\Users\Yannis\AppData\Local\Programs\Python\Python313\;C:\Users\Yannis\AppData\Local\Programs\Python\Launcher\;C:\Users\Yannis\.cargo\bin;C:\Users\Yannis\AppData\Local\Microsoft\WindowsApps;C:\Users\Yannis\AppData\Local\GitHubDesktop\bin;C:\Users\Yannis\AppData\Roaming\npm;C:\ghcup\bin;C:\ghcup\bin;C:\Users\Yannis\AppData\Roaming\nvm;C:\Program Files\nodejs;C:\Users\Yannis\.dotnet\tools;C:\Users\Yannis\AppData\Local\JetBrains\Toolbox\scripts;c:\Users\Yannis\.vscode\extensions\vscjava.vscode-java-debug-0.59.0\bundled\scripts\noConfigScripts;."/>
 <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
 <property name="java.runtime.version" value="22.0.1+8-16"/>
 <property name="java.specification.name" value="Java Platform API Specification"/>
@@ -55,25 +55,25 @@
 <property name="user.timezone" value="Europe/Brussels"/>
 <property name="user.variant" value=""/>
 </properties>
-<testcase name="comparisonEqualTest()" classname="test.LocationTest" time="0.064">
+<testcase name="comparisonEqualTest()" classname="test.LocationTest" time="0.083">
 <system-out><![CDATA[
 unique-id: [engine:junit-jupiter]/[class:test.LocationTest]/[method:comparisonEqualTest()]
 display-name: comparisonEqualTest()
 ]]></system-out>
 </testcase>
-<testcase name="basicCreationTest()" classname="test.LocationTest" time="0.002">
+<testcase name="basicCreationTest()" classname="test.LocationTest" time="0">
 <system-out><![CDATA[
 unique-id: [engine:junit-jupiter]/[class:test.LocationTest]/[method:basicCreationTest()]
 display-name: basicCreationTest()
 ]]></system-out>
 </testcase>
-<testcase name="wrongPostalCode()" classname="test.LocationTest" time="0.018">
+<testcase name="wrongPostalCode()" classname="test.LocationTest" time="0.016">
 <system-out><![CDATA[
 unique-id: [engine:junit-jupiter]/[class:test.LocationTest]/[method:wrongPostalCode()]
 display-name: wrongPostalCode()
 ]]></system-out>
 </testcase>
-<testcase name="comparisonNotEqualTest()" classname="test.LocationTest" time="0.004">
+<testcase name="comparisonNotEqualTest()" classname="test.LocationTest" time="0.015">
 <system-out><![CDATA[
 unique-id: [engine:junit-jupiter]/[class:test.LocationTest]/[method:comparisonNotEqualTest()]
 display-name: comparisonNotEqualTest()
