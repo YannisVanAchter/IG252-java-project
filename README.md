@@ -2,7 +2,7 @@
 
 ## Lancer le projet
 
-Pour lance le projet, assurez-vous d'être en possession de l'application Docker pour gérer la conteneurisation.
+Pour lancer le projet, assurez-vous d'être en possession de l'application Docker pour gérer la conteneurisation.
 
 ### Gestion des variables d'environnement
 
