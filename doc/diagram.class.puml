@@ -38,39 +38,52 @@ package view {
     ' TODO: Discus if we create one object for both create and update'
     'Create'
     class DocumentCreationForm {
-        -name : JTextField
+        -id : JTextField
         -commentary : JTextArea
         -checkIsChecked : JCheckBox
         -pickerPlannedSendDate : JDatePicker
         -pickerPlannedReceptionDate : JDatePicker
         -pickerEffectiveSendDate : JDatePicker
         -pickerEffectiveReceptionDate : JDatePicker
-        -pickerPaymentDelay : JDatePicker
+        -txtPaymentDelay : JTextField
         -comboWorkflow : JComboBox
         -comboClientSupplier : JComboBox
-        -comboAddress : JComboBox
+        -spnStreetNumber : JSpinner
+        -spnPostalCode : JSpinner
+        -txtStreet : JComboBox
+        -txtCity : JComboBox
+        -txtCountry : JComboBox
 
         +onSaveClicked() : void
         +clearForm() : void
+
+        +showError(message : String) : void
+        +validateFields() : boolean
     }
 
     'Update'
     class DocumentUpdateForm {
-        -name : JTextField
+        -id : JTextField
         -commentary : JTextArea
         -checkIsChecked : JCheckBox
         -pickerPlannedSendDate : JDatePicker
         -pickerPlannedReceptionDate : JDatePicker
         -pickerEffectiveSendDate : JDatePicker
         -pickerEffectiveReceptionDate : JDatePicker
-        -pickerPaymentDelay : JDatePicker
+        -txtPaymentDelay : JTextField
         -comboWorkflow : JComboBox
         -comboClientSupplier : JComboBox
-        -comboAddress : JComboBox
-        -table : JTable
+        -spnStreetNumber : JSpinner
+        -spnPostalCode : JSpinner
+        -txtStreet : JComboBox
+        -txtCity : JComboBox
+        -txtCountry : JComboBox
 
         +onValidateClick(Document) : void
         +onCancelClick() : void
+
+        +showError(message : String) : void
+        +validateFields() : boolean
     }
 
     'CRUD 2 '
@@ -78,8 +91,10 @@ package view {
     class ClientSupplierTable {
         -clientSuppliers: ArrayList<ClientSupplier> // All client and supplier
         -displayClientSupplier: ArrayList<ClientSupplier> // Displayed client and supplier in the table
+        -isStaff : boolean
         -isClient: boolean
         -isSupplier: boolean
+        -typeFilter : JComboBox
 
         +onFilterClick() : void
         +onCreateClick() : void
@@ -87,7 +102,7 @@ package view {
         +onDeleteClick(Document) : void
     }
 
-    'Create' 
+    'Create'
     class ClientSupplierCreationForm {
         -txtName : JTextField
         -txtFirstName : JTextField
@@ -98,9 +113,17 @@ package view {
         -boxIsSupplier : JCheckBox
         -boxIsUs : JCheckBox
         -spnFidelityPoints : JSpinner
+        -spnStreetNumber : JSpinner
+        -spnPostalCode : JSpinner
+        -txtStreet : JComboBox
+        -txtCity : JComboBox
+        -txtCountry : JComboBox
 
         +onSaveClicked() : void
         +clearForm() : void
+
+        +showError(message : String) : void
+        +validateFields() : boolean
     }
 
     'Update '
@@ -114,34 +137,77 @@ package view {
         -boxIsSupplier : JCheckBox
         -boxIsUs : JCheckBox
         -spnFidelityPoints : JSpinner
-        -table : JTable
+        -spnStreetNumber : JSpinner
+        -spnPostalCode : JSpinner
+        -txtStreet : JComboBox
+        -txtCity : JComboBox
+        -txtCountry : JComboBox
 
         +onSaveClicked() : void
         +clearForm() : void
+
+        +showError(message : String) : void
+        +validateFields() : boolean
     }
 
     'Recherche 1 '
     class ProductSearchForm {
         -txtProductName : JTextField
         -comboCategory : JComboBox
-        -promotion : JCheckBox
+        -boxpromotion : JCheckBox
         -btnSearch : JButton
         -table : JTable
 
         +onSearchClicked() : void
+        +onViewClicked() : void
         +clearForm() : void
         +displayResults(List<Product>) : void
+    }
+    class ProductView {
+        -lblName : JLabel
+        -lblPriceExclTax : JLabel
+        -lblVAT : JLabel
+        -lblFidelityPoints : JLabel
+
+        -lblShelf : JLabel
+        -lblFloor : JLabel
+        -lblQuantity : JLabel
+        -lblMinimumThreshold : JLabel
+        -lblIsRefrigerated : JLabel
+
+        -lblPromotionPercentage : JLabel
+        -lblPromotionActive : JLabel
+        -lblRequiredQuantity : JLabel
+        -lblPromotionStartDate : JLabel
+        -lblPromotionEndDate : JLabel
+        -btnBack : JButton
+
+        +displayProduct(Product) : void
     }
 
     'Recherche 2 '
     class RecipeSearchForm {
         -txtName : JTextField
         -txtProduct : JTextField
+        -btnSearch : JButton
+        -btnAddProduct : JButton
+        -btnViewProduct : JButton
         -table : JTable
 
+        +onAddProductClicked() : void
         +onSearchClicked() : void
         +clearForm() : void
         +displayResults(List<Recipe>) : void
+    }
+    class RecipeView {
+        -tableComposition : JTable
+        -txtSteps : JTextArea
+        -btnEdit : JButton
+        -btnBack : JButton
+
+        +onBackClicked() : void
+        +onModifyClicked() : void
+        +displayRecipe(Recipe) : void
     }
 
     'Recherche 3 '
@@ -157,6 +223,83 @@ package view {
         +displayResults(List<ClientSupplier>) : void
     }
 
+    'Tâche métier 1'
+    class StockAlertView {
+        -suppliers : ArrayList<ClientSupplier>
+        -selectedSupplier :ClientSupplier
+        -products : ArrayList<ProductRow>
+        -selectedProducts : ArrayList<ProductRowViewModel>
+        -productTable : JTable
+
+        +onSupplierSelected(supplier :ClientSupplier) : void
+        +onCreatePurchaseOrderClicked() : void
+    }
+    class OrderCreationView {
+        -selectedSupplier :ClientSupplier
+        -productsTable : JTable
+        -createButton : JButton
+        -cancelButton : JButton
+
+        +displayProducts(products : ArrayList<Product>) : void
+        +onQuantityChanged(productId : int, quantity : int) : void
+
+        +onCreateOrderClicked() : void
+        +onCancelClicked() : void
+    }
+
+    'Tâche métier 2'
+    class TicketView {
+        - txtSearchProduct : JTextField
+        - btnScan : JButton
+        - productTable : JTable
+        - ticketTable : JTable
+        - btnAddItem : JButton
+        - btnRemoveItem : JButton
+        - btnNext : JButton
+
+        + displayProducts(products : ArrayList<Product>) : void
+        + displayCart(items : ArrayList<TicketItem>) : void
+        + updateTotal(total : double) : void
+
+        + onAddItem(product : Product) : void
+        + onRemoveItem(item : TicketItem) : void
+        + onNextClicked() : void
+    }
+    class TicketClientSelectView {
+        - clients : ArrayList<ClientSupplier>
+        - selectedClient : ClientSupplier
+        - comboSearchClient : JComboBox
+        - btnNewClient : JButton
+        - btnScanCard : JButton
+        - btnBack : JButton
+        - btnNext : JButton
+
+        + displaySelectedClient(ClientSupplier)
+
+        + onNewClientClicked()
+        + onScanCardClicked()
+        + onBackClicked()
+        + onNextClicked()
+    }
+    class TicketPaymentView {
+        - client : ClientSupplier
+        - btnUsePoints : JButton
+        - comboPaymentMethod : JComboBox
+
+        - btnBack : JButton
+        - btnPay : JButton
+
+        + displayClient(ClientSupplier) : void
+        + displayLoyalty(int available, int used)
+        + displaySummary(double subtotal, double discount, double total) : void
+        + showPaymentStatus() : void
+
+        + onUsePointsClicked() : void
+        + onPaymentMethodChanged() : void
+        + onBackClicked() : void
+        + onPayClicked() : void
+    }
+
     Main --> MainWindow
     MainWindow --> MenuWindow
 
@@ -165,13 +308,21 @@ package view {
     MenuWindow --> RecipeSearchForm
     MenuWindow --> ProductSearchForm
     MenuWindow --> ClientSupplierSearchForm
-    MenuWindow --> ClientSupplierTable
+    MenuWindow --> TicketView
+    MenuWindow --> RecipeView
+    MenuWindow --> StockAlertView
 
     DocumentTable --> DocumentUpdateForm
     DocumentTable --> DocumentCreationForm
 
     ClientSupplierTable --> ClientSupplierCreationForm
     ClientSupplierTable --> ClientSupplierUpdateForm
+
+    StockAlertView --> OrderCreationView
+
+    TicketView --> TicketClientSelectView
+    TicketView --> ProductView
+    TicketClientSelectView --> TicketPaymentView
 }
 
 package controller {
@@ -230,7 +381,7 @@ package business {
         +updateDocument(id : int, commentary : String) : void
         +deleteDocument(id : int) : void
 
-        note "TODO: Update to take into account the different type of documents and there attributes" 
+        note "TODO: Update to take into account the different type of documents and there attributes"
     }
 
     class ClientSupplierManager {
@@ -532,6 +683,21 @@ package model {
 
     Batch "*" --> "1" Product
     Batch "*" --> "1" Detail
+
+    'ModelView'
+    class ProductRowViewModel {
+        - productName : String
+        - currentStock : int
+        - minimumThreshold : int
+        - quantityToOrder : int
+        - status : String
+        - isSelected : boolean
+    }
+    class TicketItem {
+        - product : Product
+        - quantity : int
+        - price : double
+    }
 }
 
 ' MODEL
