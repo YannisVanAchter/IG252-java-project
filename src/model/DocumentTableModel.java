@@ -1,7 +1,5 @@
 package model;
 
-import view.Document;
-
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 
@@ -45,8 +43,8 @@ public class DocumentTableModel extends AbstractTableModel {
             case 1 -> doc.getId();
             case 2 -> doc.getType();
             case 3 -> doc.getCreationDate();
-            case 4 -> "✏";
-            case 5 -> "\uD83D\uDDD1";
+            case 4 -> "Edit";
+            case 5 -> "Delete";
             default -> null;
         };
     }

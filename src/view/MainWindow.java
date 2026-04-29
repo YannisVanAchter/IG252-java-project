@@ -29,6 +29,7 @@ public class MainWindow extends JFrame {
 
         addPage(new MainPanel(), "MAIN");
         addPage(new DocumentTable(this), "DOCUMENT");
+        addPage(new DocumentCreationForm(this), "DOCUMENT_FORM");
         add(container);
 
         setVisible(true);

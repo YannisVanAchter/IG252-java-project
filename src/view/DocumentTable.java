@@ -1,6 +1,7 @@
 package view;
 
 import controler.DocumentController;
+import model.Document;
 import model.DocumentTableModel;
 
 import javax.swing.*;
