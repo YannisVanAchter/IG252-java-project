@@ -1,4 +1,59 @@
 
+
+Create table employee (
+    id numeric(10) primary key,
+    lastname varchar(255) not null,
+    address_id numeric(10),
+    firstname varchar(255) not null,
+    phone_number numeric(12) not null,
+    email varchar(255) not null,
+    Iban varchar(255) not null,
+    hourly_wage decimal(10, 2) not null,
+    nb_hours_planned_week numeric(2) not null,
+    hiring_date date not null,
+    nb_paid_nails_half_day numeric(2) not null,
+    pwd varchar(255) not null,
+    FOREIGN KEY (address_id) REFERENCES address(street_number, street_name),
+);
+
+Create table absence (
+    id numeric(10) primary key,
+    employee_id numeric(10) not null,
+    start_date date not null,
+    end_date date,
+    description varchar(255) not null,
+    FOREIGN KEY (employee_id) REFERENCES employee(id),
+);
+
+Create table address (
+    street_name varchar(255) not null,
+    street_number numeric(5) not null,
+);
+
+Create table pointing (
+    date date not null,
+    employee_id numeric(10) not null,
+    start_time time not null,
+    end_time time,
+    FOREIGN KEY (employee_id) REFERENCES employee(id),
+);
+
+Create table position (
+    function_id numeric(10) not null,
+    employee_id numeric(10) not null,
+    FOREIGN KEY (function_id) REFERENCES function(id),
+    FOREIGN KEY (employee_id) REFERENCES employee(id),
+);
+
+Create table role (
+    name varchar(255) not null,
+);
+
+
+
+
+
+
 CREATE TABLE ProductCategory (
     name varchar(64) not null primary key
 );
