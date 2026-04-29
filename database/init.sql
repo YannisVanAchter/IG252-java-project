@@ -12,7 +12,7 @@ CREATE TABLE StoreLocation (
     primary key (shelf, floor, isStock)
 );
 
-CREATE TABLE DiscountPromotion (
+CREATE TABLE Discount (
     productCode varchar(64) not null,
     startDate date not null,
     endDate date not null,
@@ -27,12 +27,12 @@ CREATE TABLE DiscountPromotion (
 CREATE TABLE Product (
     code varchar(64) not null primary key,
     label varchar(255) not null,
-    priceHTVA decimal(10, 2) not null,
-    tva decimal(5, 2) not null,
+    priceEVAT decimal(10, 2) not null,
+    VAT decimal(5, 2) not null,
     loyaltyPoints int not null,
     isEdible boolean not null,
     minStockQuantity int not null constraint min_stock_quantity_positive check (minStockQuantity >= 0),
-    minPromotionQuantity int not null constraint min_promotion_quantity_positive check (minPromotionQuantity >= 0),
+    minDiscountQuantity int not null constraint min_discount_quantity_positive check (minDiscountQuantity >= 0),
     categoryName varchar(64) not null,
 
     foreign key (categoryName) references ProductCategory(name)
