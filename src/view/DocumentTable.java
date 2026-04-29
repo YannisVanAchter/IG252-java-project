@@ -6,11 +6,11 @@ public class DocumentTable extends JPanel {
 
     public DocumentTable(MainWindow window) {
 
-        JButton back = new JButton("Retour");
+        JButton back = new JButton("Back");
 
-        back.addActionListener(e -> window.setPage(new JPanel()));
+        back.addActionListener(e -> window.setPage("MAIN"));
 
-        add(new JLabel("Félicitation !!"));
+        add(new JLabel("Félicitations !!"));
         add(back);
     }
 }

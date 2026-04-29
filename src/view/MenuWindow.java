@@ -6,7 +6,7 @@ public class MenuWindow extends JMenuBar {
     private JMenu appMenu, searchMenu, receipeMenu;
     private JMenuItem closeItem, helpItem, clientItem, suplierItem, documentItem, recipeItem;
 
-    public MenuWindow(){
+    public MenuWindow(MainWindow window){
         appMenu = new JMenu("Application");
         appMenu.setMnemonic('A');
 
@@ -25,8 +25,7 @@ public class MenuWindow extends JMenuBar {
         searchMenu.add(suplierItem);
         documentItem = new JMenuItem("Document");
         documentItem.addActionListener(e -> {
-            MainWindow window = (MainWindow) SwingUtilities.getWindowAncestor(this);
-            window.setPage(new DocumentTable(window));
+            window.setPage("DOCUMENT");
         });
         searchMenu.add(documentItem);
         recipeItem = new JMenuItem("Recipe");
