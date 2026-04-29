@@ -2,6 +2,12 @@ package model;
 
 import exception.DataValidationException;
 
+/**
+ * This class represents a location, which is a part of an address. 
+ * It contains the name of the location and its postal code. 
+ * The class also includes validation for the postal code \
+ * to ensure it is a positive integer and does not exceed a specified maximum value.
+ */
 public class Location {
     private String name;
     private int postalCode;
@@ -39,5 +45,12 @@ public class Location {
 
         Location other = (Location) obj;
         return name.equals(other.getName()) && postalCode == other.getPostalCode();
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name.hashCode();
+        result = 31 * result + postalCode;
+        return result;
     }
 }
