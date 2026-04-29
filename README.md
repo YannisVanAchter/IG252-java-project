@@ -17,7 +17,7 @@ java -jar lib\junit-platform-console-standalone-1.13.0-M3.jar execute -cp "build
 
 ## Lancer le projet
 
-Pour lance le projet, assurez-vous d'être en possession de l'application Docker pour gérer la conteneurisation.
+Pour lancer le projet, assurez-vous d'être en possession de l'application Docker pour gérer la conteneurisation.
 
 ### Gestion des variables d'environnement
 
