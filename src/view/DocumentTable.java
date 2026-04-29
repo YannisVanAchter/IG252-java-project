@@ -1,5 +1,6 @@
 package view;
 
+import controler.DocumentController;
 import model.DocumentTableModel;
 
 import javax.swing.*;
@@ -20,9 +21,11 @@ import java.util.Date;
  * Deleting a document
  */
 public class DocumentTable extends JPanel {
+    private MainWindow mainWindow;
+    private DocumentController controller;
+    private DocumentTableModel model;
     private ArrayList<Document> documents;
     private ArrayList<Document> displayDocuments;
-    DocumentTableModel model;
 
     private JPanel searchPanel, tablePanel;
     private JTextField idDocument;
@@ -34,11 +37,13 @@ public class DocumentTable extends JPanel {
 
     private JTable table;
 
-    public DocumentTable(MainWindow window) {
+    public DocumentTable(MainWindow mainWindow) {
+        this.mainWindow = mainWindow;
+        this.controller = new DocumentController();
+
         setLayout(new BorderLayout(0, 16));
 
-        documents = new ArrayList<>();
-
+        documents = controller.getAllDocuments();
         displayDocuments = new ArrayList<>(documents);
 
         buildSearchPanel();
@@ -89,6 +94,8 @@ public class DocumentTable extends JPanel {
         btnSearch.addActionListener(e -> onFilterClick());
 
         JButton btnCreate = new JButton("Create");
+        btnCreate.addActionListener(e -> onCreateClick());
+
 
         buttonPanel.add(btnSearch);
         buttonPanel.add(btnCreate);
@@ -114,10 +121,10 @@ public class DocumentTable extends JPanel {
                 int row = table.rowAtPoint(e.getPoint());
                 int col = table.columnAtPoint(e.getPoint());
                 if (col == 4) {
-                    System.out.println("Edit: " + row);
+                    onModifyClick();
                 };
                 if (col == 5) {
-                    System.out.println("Delete: " + row);
+                    onDeleteClick();
                 };
             }
         });
@@ -158,7 +165,6 @@ public class DocumentTable extends JPanel {
      *
      * Updates the table model with the filtered documents.
      */
-
     public void onFilterClick() {
         String idText = idDocument.getText().trim();
         String selectedType = (String) comboTypeDocumentFilter.getSelectedItem();
@@ -195,4 +201,39 @@ public class DocumentTable extends JPanel {
 
         model.setDocuments(displayDocuments);
     }
+
+    public void onCreateClick(){
+        mainWindow.setPage("DOCUMENT_FORM");
+    }
+
+    public void onModifyClick(){
+
+    }
+
+    public void onDeleteClick() {
+        int selectedRow = table.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a document to delete.");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to delete this document?",
+                "Confirm deletion",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            Document docToDelete = displayDocuments.get(selectedRow);
+
+            controller.deleteDocument(docToDelete);
+
+            documents.remove(docToDelete);
+            displayDocuments.remove(selectedRow);
+            model.setDocuments(displayDocuments);
+        }
+    }
+
 }
