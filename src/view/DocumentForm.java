@@ -1,6 +1,7 @@
 package view;
 
 import controler.DocumentController;
+import exception.DataValidationException;
 import model.ClientSupplier;
 import model.Document;
 
@@ -18,7 +19,7 @@ import java.util.Date;
  * <p>
  * The form communicates with {@link DocumentController}
  */
-public class DocumentCreationForm extends JPanel {
+public class DocumentForm extends JPanel {
     private MainWindow mainWindow;
     private DocumentController controller;
     private Document currentDocument;
@@ -52,7 +53,7 @@ public class DocumentCreationForm extends JPanel {
     private JButton btnClear;
     private JButton btnNewClient;
 
-    public DocumentCreationForm(MainWindow mainWindow) {
+    public DocumentForm(MainWindow mainWindow) throws DataValidationException {
         this.mainWindow = mainWindow;
         this.controller = new DocumentController();
 
@@ -62,7 +63,17 @@ public class DocumentCreationForm extends JPanel {
 
         JLabel title = new JLabel("Document Details");
         title.setFont(new Font("Inter", Font.BOLD, 20));
-        add(title, BorderLayout.NORTH);
+
+        JPanel topBar = new JPanel(new BorderLayout());
+
+        JButton btnBack = new JButton("←");
+        btnBack.addActionListener(e -> mainWindow.goBack());
+
+        topBar.add(btnBack, BorderLayout.WEST);
+        topBar.add(title, BorderLayout.CENTER);
+
+        add(topBar, BorderLayout.NORTH);
+
 
         appPanel = new JPanel(new BorderLayout(20, 20));
         panelContent = new JPanel(new GridLayout(1, 2, 20, 0));
@@ -129,17 +140,16 @@ public class DocumentCreationForm extends JPanel {
         rightPanel.add(labeled("Client / Supplier", clientPanel));
 
         spnStreetNumber = new JSpinner(new SpinnerNumberModel(1, 0, 10000, 1));
+        spnStreetNumber.setEditor(new JSpinner.NumberEditor(spnStreetNumber, "#"));
         rightPanel.add(labeled("Street Number", spnStreetNumber));
-
         spnPostalCode = new JSpinner(new SpinnerNumberModel(1000, 0, 99999, 1));
+        spnPostalCode.setEditor(new JSpinner.NumberEditor(spnStreetNumber, "#"));
         rightPanel.add(labeled("Postal Code", spnPostalCode));
 
         txtStreet = new JTextField();
-        txtStreet.setEditable(true);
         rightPanel.add(labeled("Street", txtStreet));
 
         txtCity = new JTextField();
-        txtCity.setEditable(true);
         rightPanel.add(labeled("City", txtCity));
 
         txtCountry = new JTextField();
@@ -234,7 +244,7 @@ public class DocumentCreationForm extends JPanel {
             }
             JOptionPane.showMessageDialog(this, "Document saved !");
             clearForm();
-            mainWindow.setPage("DOCUMENT");
+            mainWindow.goBack();
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
@@ -293,11 +303,9 @@ public class DocumentCreationForm extends JPanel {
     }
 
     /**
-     * Permet de récupérer une LocalDate depuis JSpinner
-     * utile pour la comparaison et convestion
-     *
-     * @param spinner
-     * @return LocalDate
+     * Converts a JSpinner containing a Date to a LocalDate.
+     * @param spinner component containing a Date
+     * @return LocalDate corresponding to the spinner's value
      */
     private LocalDate getDate(JSpinner spinner) {
         return ((Date) spinner.getValue())
@@ -307,11 +315,9 @@ public class DocumentCreationForm extends JPanel {
     }
 
     /**
-     * Permet de recupérer Date depuis Localdate
-     * Utile pour préremplir les spinnerDate
-     *
-     * @param localDate
-     * @return Date
+     * Converts a LocalDate to Date.
+     * @param localDate date to convert
+     * @return Date usable by JSpinners
      */
     private Date toDate(LocalDate localDate) {
         if (localDate == null) return null;
@@ -334,6 +340,13 @@ public class DocumentCreationForm extends JPanel {
         }
     }
 
+    /**
+
+     * Loads data from a Document into the form.
+     * @param doc document to display
+     * If doc is null:
+     * - the form is in create mode
+     */
     public void loadDocument(Document doc) {
         if (doc == null) {
             currentDocument = null;
