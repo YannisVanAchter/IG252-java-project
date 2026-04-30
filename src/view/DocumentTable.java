@@ -6,12 +6,14 @@ import model.DocumentTableModel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 
 
 /**
- * This view allows search for and display documents
+ * This view allows search and display documents
  *
  * This class extends {@link JPanel} and contains:
  * A search panel allowing you to filter documents according to several criteria
@@ -91,7 +93,7 @@ public class DocumentTable extends JPanel {
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-        JButton btnSearch = new JButton("Rechercher");
+        JButton btnSearch = new JButton("Search");
         btnSearch.addActionListener(e -> onFilterClick());
 
         JButton btnCreate = new JButton("Create");
@@ -155,6 +157,10 @@ public class DocumentTable extends JPanel {
         return p;
     }
 
+    private LocalDate toLocalDate(Date date) {
+            return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+
     /**
      * Method called when the search button is clicked.
      * 
@@ -170,15 +176,15 @@ public class DocumentTable extends JPanel {
         String idText = idDocument.getText().trim();
         String selectedType = (String) comboTypeDocumentFilter.getSelectedItem();
 
-        Date startDate = useStartDate.isSelected() ? (Date) startCreationDate.getValue() : null;
-        Date endDate = useEndDate.isSelected() ? (Date) endCreationDate.getValue()   : null;
+        LocalDate startDate = useStartDate.isSelected() ? toLocalDate((Date) startCreationDate.getValue()) : null;
+        LocalDate endDate = useEndDate.isSelected() ? toLocalDate((Date) endCreationDate.getValue()) : null;
 
         displayDocuments = new ArrayList<>();
 
         for (Document doc : documents) {
             boolean match = true;
 
-            if (!idText.isEmpty() && !doc.getId().contains(idText)) {
+            if (!idText.isEmpty() && !doc.getId().toLowerCase().contains(idText.toLowerCase())) {
                 match = false;
             }
 
@@ -187,11 +193,12 @@ public class DocumentTable extends JPanel {
                 match = false;
             }
 
-            if (startDate != null && doc.getCreationDate().before(startDate)) {
+
+            if (startDate != null && doc.getCreationDate().isBefore(startDate)) {
                 match = false;
             }
 
-            if (endDate != null && doc.getCreationDate().after(endDate)) {
+            if (endDate != null && doc.getCreationDate().isAfter(endDate)) {
                 match = false;
             }
 
@@ -208,7 +215,7 @@ public class DocumentTable extends JPanel {
     }
 
     public void onModifyClick(){
-
+        mainWindow.setPage("DOCUMENT_FORM");
     }
 
     public void onDeleteClick() {

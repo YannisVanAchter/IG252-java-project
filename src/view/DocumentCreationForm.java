@@ -1,10 +1,13 @@
 package view;
 
 import controler.DocumentController;
+import model.ClientSupplier;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.*;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * DocumentCreationForm represents the Form panel for creating a new document.
@@ -70,12 +73,13 @@ public class DocumentCreationForm extends JPanel {
 
         appPanel.add(panelContent, BorderLayout.CENTER);
         add(appPanel, BorderLayout.CENTER);
+        clearForm();
     }
 
     private void buildLeftPanel() {
         leftPanel = createColumnPanel();
 
-        id = new JTextField(1);
+        id = new JTextField(10);
         leftPanel.add(labeled("ID du document", id));
 
         commentary = new JTextArea(4, 20);
@@ -168,7 +172,7 @@ public class DocumentCreationForm extends JPanel {
             return;
         }
 
-        if (comboWorkflow.getSelectedItem() == null) {
+        if (comboWorkflow.getSelectedItem() == null || comboWorkflow.getSelectedItem().toString().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Workflow required");
             return;
         }
@@ -181,14 +185,24 @@ public class DocumentCreationForm extends JPanel {
         String documentId = id.getText().trim();
         String commentaryText = commentary.getText();
 
-        java.util.Date plannedSend = (java.util.Date) pickerPlannedSendDate.getValue();
-        java.util.Date plannedReception = (java.util.Date) pickerPlannedReceptionDate.getValue();
-        java.util.Date effectiveSend = (java.util.Date) pickerEffectiveSendDate.getValue();
-        java.util.Date effectiveReception = (java.util.Date) pickerEffectiveReceptionDate.getValue();
+        LocalDate plannedSend = getDate(pickerPlannedSendDate);
+        LocalDate plannedReception = getDate(pickerPlannedReceptionDate);
+        LocalDate effectiveSend = getDate(pickerEffectiveSendDate);
+        LocalDate effectiveReception = getDate(pickerEffectiveReceptionDate);
 
-        String paymentDelay = txtPaymentDelay.getText();
+        int paymentDelay;
+        if (txtPaymentDelay.getText().trim().isEmpty()){
+            paymentDelay= -1;
+        } else {
+            try {
+                paymentDelay = Integer.parseInt(txtPaymentDelay.getText());
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Payment delay must be a number");
+                return;
+            }
+        }
 
-        String workflow = comboWorkflow.getSelectedItem().toString();
+        String workflow = comboWorkflow.getSelectedItem().toString().trim();
         String clientSupplier = comboClientSupplier.getSelectedItem().toString();
 
         int streetNumber = (int) spnStreetNumber.getValue();
@@ -231,7 +245,7 @@ public class DocumentCreationForm extends JPanel {
 
         checkIsChecked.setSelected(false);
 
-        comboWorkflow.setSelectedIndex(0);
+        comboWorkflow.setSelectedIndex(-1);
         comboClientSupplier.setSelectedIndex(-1);
 
         spnStreetNumber.setValue(0);
@@ -262,6 +276,13 @@ public class DocumentCreationForm extends JPanel {
         p.add(Box.createVerticalStrut(4));
         p.add(comp);
         return p;
+    }
+
+    private LocalDate getDate(JSpinner spinner) {
+        return ((Date) spinner.getValue())
+                .toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
     }
 
     /**
