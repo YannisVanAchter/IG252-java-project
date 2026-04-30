@@ -1,7 +1,10 @@
 package view;
 
+import exception.DataValidationException;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.Stack;
 
 /**
  * This class acts as the central frame of the application.
@@ -12,12 +15,16 @@ import java.awt.*;
  * It also contains the {@link JMenuBar} to display navigation buttons between views.
  */
 public class MainWindow extends JFrame {
-    private DocumentCreationForm documentForm;
+    private Stack<String> history = new Stack<>();
+    private String currentPage;
+
+    private DocumentForm documentForm;
+    private ClientSupplierForm clientSupplierForm;
 
     private CardLayout cardLayout;
     private JPanel container;
 
-    public MainWindow() {
+    public MainWindow() throws DataValidationException {
         super("Magasin du Grand Bazard");
 
         setSize(800, 600);
@@ -29,11 +36,16 @@ public class MainWindow extends JFrame {
         container = new JPanel(cardLayout);
 
         addPage(new MainPanel(), "MAIN");
-        addPage(new DocumentTable(this), "DOCUMENT");
-        documentForm = new DocumentCreationForm(this);
-        addPage(documentForm, "DOCUMENT_FORM");
-        add(container);
 
+        addPage(new DocumentTable(this), "DOCUMENT");
+        documentForm = new DocumentForm(this);
+        addPage(documentForm, "DOCUMENT_FORM");
+
+        addPage(new ClientSupplierTable(this), "CLIENT_SUPPLIER");
+        clientSupplierForm = new ClientSupplierForm(this);
+        addPage(clientSupplierForm, "CLIENT_SUPPLIER_FORM");
+
+        add(container);
         setVisible(true);
     }
 
@@ -54,11 +66,25 @@ public class MainWindow extends JFrame {
      * @see #addPage(JPanel, String)
      */
     public void setPage(String name) {
+        if (currentPage != null) {
+            history.push(currentPage);
+        }
+        currentPage = name;
         cardLayout.show(container, name);
     }
 
-    public DocumentCreationForm getDocumentForm() {
+    public void goBack() {
+        if (!history.isEmpty()) {
+            String previous = history.pop();
+            currentPage = previous;
+            cardLayout.show(container, previous);
+        }
+    }
+    public DocumentForm getDocumentForm() {
         return documentForm;
     }
 
+    public ClientSupplierForm getClientSupplierForm() {
+        return clientSupplierForm;
+    }
 }
