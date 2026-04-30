@@ -2,6 +2,7 @@ package view;
 
 import controler.DocumentController;
 import model.ClientSupplier;
+import model.Document;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,15 +12,16 @@ import java.util.Date;
 
 /**
  * DocumentCreationForm represents the Form panel for creating a new document.
- *
+ * <p>
  * This form allows the user to enter all required information related to a document
  * (dates, workflow, client/supplier, address, etc.).
- *
+ * <p>
  * The form communicates with {@link DocumentController}
  */
 public class DocumentCreationForm extends JPanel {
     private MainWindow mainWindow;
     private DocumentController controller;
+    private Document currentDocument;
 
     private ArrayList<ClientSupplier> allClients;
 
@@ -73,7 +75,6 @@ public class DocumentCreationForm extends JPanel {
 
         appPanel.add(panelContent, BorderLayout.CENTER);
         add(appPanel, BorderLayout.CENTER);
-        clearForm();
     }
 
     private void buildLeftPanel() {
@@ -146,7 +147,13 @@ public class DocumentCreationForm extends JPanel {
         rightPanel.add(labeled("Country", txtCountry));
 
         btnSave = new JButton("Save");
-        btnSave.addActionListener(e -> saveForm());
+        if (currentDocument == null) {
+            btnSave = new JButton("Save");
+
+        } else {
+            btnSave = new JButton("Edit");
+        }
+        btnSave.addActionListener(e -> saveEditForm());
         btnClear = new JButton("Clear");
         btnClear.addActionListener(e -> clearForm());
 
@@ -161,11 +168,11 @@ public class DocumentCreationForm extends JPanel {
     /**
      * Validates user input and sends the document data to the controller
      * for creation.
-     *
+     * <p>
      * If required fields are missing, a dialog is displayed and the process
      * is stopped.
      */
-    private void saveForm() {
+    private void saveEditForm() {
 
         if (id.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "ID required");
@@ -191,8 +198,8 @@ public class DocumentCreationForm extends JPanel {
         LocalDate effectiveReception = getDate(pickerEffectiveReceptionDate);
 
         int paymentDelay;
-        if (txtPaymentDelay.getText().trim().isEmpty()){
-            paymentDelay= -1;
+        if (txtPaymentDelay.getText().trim().isEmpty()) {
+            paymentDelay = -1;
         } else {
             try {
                 paymentDelay = Integer.parseInt(txtPaymentDelay.getText());
@@ -213,15 +220,21 @@ public class DocumentCreationForm extends JPanel {
         String country = txtCountry.getText();
 
         boolean isChecked = checkIsChecked.isSelected();
-
         try {
-            controller.createDocument(documentId, commentaryText, plannedSend, plannedReception,
-                    effectiveSend, effectiveReception, paymentDelay, workflow, clientSupplier,
-                    streetNumber, postalCode, street, city, country, isChecked
-            );
-
+            if (currentDocument == null) {
+                controller.createDocument(documentId, commentaryText, plannedSend, plannedReception,
+                        effectiveSend, effectiveReception, paymentDelay, workflow, clientSupplier,
+                        streetNumber, postalCode, street, city, country, isChecked
+                );
+            } else {
+                controller.updateDocument(documentId, commentaryText, plannedSend, plannedReception,
+                        effectiveSend, effectiveReception, paymentDelay, workflow, clientSupplier,
+                        streetNumber, postalCode, street, city, country, isChecked
+                );
+            }
             JOptionPane.showMessageDialog(this, "Document saved !");
             clearForm();
+            mainWindow.setPage("DOCUMENT");
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
@@ -232,14 +245,14 @@ public class DocumentCreationForm extends JPanel {
     /**
      * Resets all input fields in the form to their default values.
      */
-    private void clearForm() {
+    public void clearForm() {
         id.setText("");
         commentary.setText("");
 
-        pickerPlannedSendDate.setValue(new java.util.Date());
-        pickerPlannedReceptionDate.setValue(new java.util.Date());
-        pickerEffectiveSendDate.setValue(new java.util.Date());
-        pickerEffectiveReceptionDate.setValue(new java.util.Date());
+        pickerPlannedSendDate.setValue(new Date());
+        pickerPlannedReceptionDate.setValue(new Date());
+        pickerEffectiveSendDate.setValue(new Date());
+        pickerEffectiveReceptionDate.setValue(new Date());
 
         txtPaymentDelay.setText("");
 
@@ -254,8 +267,9 @@ public class DocumentCreationForm extends JPanel {
         txtStreet.setText("");
         txtCity.setText("");
         txtCountry.setText("");
-    }
 
+        currentDocument = null;
+    }
 
     private JPanel createColumnPanel() {
         JPanel panel = new JPanel();
@@ -278,11 +292,33 @@ public class DocumentCreationForm extends JPanel {
         return p;
     }
 
+    /**
+     * Permet de récupérer une LocalDate depuis JSpinner
+     * utile pour la comparaison et convestion
+     *
+     * @param spinner
+     * @return LocalDate
+     */
     private LocalDate getDate(JSpinner spinner) {
         return ((Date) spinner.getValue())
                 .toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
+    }
+
+    /**
+     * Permet de recupérer Date depuis Localdate
+     * Utile pour préremplir les spinnerDate
+     *
+     * @param localDate
+     * @return Date
+     */
+    private Date toDate(LocalDate localDate) {
+        if (localDate == null) return null;
+
+        return Date.from(
+                localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+        );
     }
 
     /**
@@ -296,5 +332,47 @@ public class DocumentCreationForm extends JPanel {
         for (ClientSupplier client : clientSupplier) {
             comboClientSupplier.addItem(client.getName());
         }
+    }
+
+    public void loadDocument(Document doc) {
+        if (doc == null) {
+            currentDocument = null;
+            clearForm();
+            return;
+        }
+
+        currentDocument = doc;
+
+        id.setText(doc.getId());
+        commentary.setText(doc.getCommentary());
+
+        if (doc.getPlannedSend() != null)
+            pickerPlannedSendDate.setValue(toDate(doc.getPlannedSend()));
+
+        if (doc.getPlannedReception() != null)
+            pickerPlannedReceptionDate.setValue(toDate(doc.getPlannedReception()));
+
+        if (doc.getEffectiveSend() != null)
+            pickerEffectiveSendDate.setValue(toDate(doc.getEffectiveSend()));
+
+        if (doc.getEffectiveReception() != null)
+            pickerEffectiveReceptionDate.setValue(toDate(doc.getEffectiveReception()));
+
+        txtPaymentDelay.setText(
+                doc.getPaymentDelay() == -1 ? "" : String.valueOf(doc.getPaymentDelay())
+        );
+
+        comboWorkflow.setSelectedItem(doc.getWorkflow());
+
+        comboClientSupplier.setSelectedItem(doc.getClientSupplier());
+
+        spnStreetNumber.setValue(doc.getStreetNumber());
+        spnPostalCode.setValue(doc.getPostalCode());
+
+        txtStreet.setText(doc.getStreet());
+        txtCity.setText(doc.getCity());
+        txtCountry.setText(doc.getCountry());
+
+        checkIsChecked.setSelected(doc.isChecked());
     }
 }

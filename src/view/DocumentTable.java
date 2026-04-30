@@ -211,13 +211,24 @@ public class DocumentTable extends JPanel {
     }
 
     public void onCreateClick(){
+        mainWindow.getDocumentForm().clearForm();
         mainWindow.setPage("DOCUMENT_FORM");
     }
 
     public void onModifyClick(){
+        int selectedRow = table.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a document to modify.");
+            return;
+        }
+
+        Document doc = displayDocuments.get(selectedRow);
+
+        mainWindow.getDocumentForm().loadDocument(doc);
+
         mainWindow.setPage("DOCUMENT_FORM");
     }
-
     public void onDeleteClick() {
         int selectedRow = table.getSelectedRow();
 
