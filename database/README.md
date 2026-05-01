@@ -22,6 +22,10 @@ Le trigger doit vérifier la présence de l'``addresse de livraison`` et du ``co
 
 Le trigger doit vérifier la présence d'une ``recette`` et d'un ``commentaire``.
 
+### Workflow
+
+Le trigger doit vérifier qu'un seul des trois attribut `estAchat`, `estFournisseur` ou `estOrdrePreparation` ai sa valeur à `true`.
+
 ### Lot
 
 Le trigger doit vérifier que: Si ``produit est commestible``, ``datePéremption`` est définie dans le futur.
