@@ -1,6 +1,6 @@
 package view;
 
-import controler.DocumentController;
+import controller.DocumentController;
 import model.ClientSupplier;
 import model.Document;
 import model.DocumentTableModel;

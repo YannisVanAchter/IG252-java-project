@@ -1,13 +1,12 @@
 package view;
 
-import controler.*;
+import controller.*;
 import exception.*;
-import model.*;
-
-import javax.swing.*;
 import java.awt.*;
 import java.time.*;
 import java.util.Date;
+import javax.swing.*;
+import model.*;
 
 /**
  * ClientSupplierForm represents the form for creating and modifying a Client or Supplier.

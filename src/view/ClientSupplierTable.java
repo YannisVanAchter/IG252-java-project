@@ -1,14 +1,11 @@
 package view;
 
-import controler.*;
-import model.*;
-
+import controller.*;
 import exception.DataValidationException;
-
-
-import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import javax.swing.*;
+import model.*;
 
 public class ClientSupplierTable extends JPanel {
     private MainWindow mainWindow;
