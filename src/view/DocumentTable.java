@@ -1,9 +1,7 @@
 package view;
 
 import controler.DocumentController;
-import model.ClientSupplier;
 import model.Document;
-import model.DocumentTableModel;
 
 import javax.swing.*;
 import java.awt.*;
