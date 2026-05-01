@@ -14,18 +14,18 @@ import exception.DataValidationException;
 public class Address {
     private String streetName;
     private int streetNumber;
-    private Location location;
+    private Locality location;
 
-    public Address(String streetName, int streetNumber, Location location) throws DataValidationException {
+    public Address(String streetName, int streetNumber, Locality location) throws DataValidationException {
         setStreetName(streetName);
         setStreetNumber(streetNumber);
-        setLocation(location);
+        setLocality(location);
     }
 
     public Address(String streetName, int streetNumber, String locationName, int locationPostalCode) throws DataValidationException {
         setStreetName(streetName);
         setStreetNumber(streetNumber);
-        setLocation(new Location(locationName, locationPostalCode));
+        setLocality(new Locality(locationName, locationPostalCode));
     }
 
     public String getStreetName() { return streetName; }
@@ -44,9 +44,9 @@ public class Address {
         this.streetNumber = streetNumber;
     }
 
-    public Location getLocation() { return location; }
+    public Locality getLocality() { return location; }
 
-    private void setLocation(Location location) throws DataValidationException {
+    private void setLocality(Locality location) throws DataValidationException {
         if (location == null) {
             String message = "Location setting error, location is null when it shouldn't";
             throw new DataValidationException(message);
@@ -60,7 +60,7 @@ public class Address {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         Address other = (Address) obj;
-        return streetName.equals(other.getStreetName()) && streetNumber == other.getStreetNumber() && location.equals(other.getLocation());
+        return streetName.equals(other.getStreetName()) && streetNumber == other.getStreetNumber() && location.equals(other.getLocality());
     }
 
     @Override
