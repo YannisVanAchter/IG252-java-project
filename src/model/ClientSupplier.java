@@ -69,6 +69,24 @@ public class ClientSupplier {
         this.isUs = isUs;
     }
 
+    /**
+     * Returns a string representation of the type of the client/supplier based on the boolean fields isClient, isSupplier, and isUs.
+     * @return A string representing the type of the client/supplier, which can be "us", "client", "supplier", or "client and supplier" depending on the values of the boolean fields.
+     */
+    public String getType() {
+        if (getIsUs()) 
+            return "us";
+        StringBuilder type = new StringBuilder();
+        if (getIsClient()) 
+            type.append("client");
+        if (getIsSupplier()) {
+            if (type.length() > 0)
+                type.append(" and ");
+            type.append("supplier");
+        }
+        return type.toString();
+    }
+
     public String getName() { return name; }
 
     private void setName(String name) {
