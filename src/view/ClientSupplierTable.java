@@ -204,10 +204,24 @@ public class ClientSupplierTable extends JPanel {
     }
 
     public void onCreateClick(){
-        mainWindow.getDocumentForm().clearForm();
-        mainWindow.setPage("CLIENT_SUPPLIER_FORM");
+        mainWindow.openClientSupplierForm(null);
     }
 
+    /**
+     * Called when the user clicks on "Modify".
+     * Flow of the selected data:
+     * 1. Get the selected row from the table.
+     * 2. Retrieve the corresponding ClientSupplier object from displayClientSupplier.
+     * 3. Send this object to the MainWindow.
+     * @see MainWindow#openClientSupplierForm(ClientSupplier)
+     * 4. MainWindow forwards it to the ClientSupplierForm.
+     * 5. The form loads the data to allow editing.
+     *
+     * Important:
+     * - If no row is selected → show an error message.
+     * - If an object is passed → form is in EDIT mode.
+     * - If null was passed → form would be in CREATE mode.
+     */
     public void onModifyClick(){
         int selectedRow = table.getSelectedRow();
 
@@ -218,8 +232,7 @@ public class ClientSupplierTable extends JPanel {
 
         ClientSupplier cs = displayClientSupplier.get(selectedRow);
 
-        mainWindow.getClientSupplierForm().loadClientSupplier(cs);
-        mainWindow.setPage("CLIENT_SUPPLIER_FORM");
+        mainWindow.openClientSupplierForm(cs);
     }
 
     public void onDeleteClick() {

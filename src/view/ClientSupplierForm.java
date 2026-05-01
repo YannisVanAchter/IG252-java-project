@@ -128,14 +128,13 @@ public class ClientSupplierForm extends JPanel {
         rightPanel.add(labeled("Loyality cart ID", txtIdLoyalityCard));
 
         spnLoyalityPoint = new JSpinner(new SpinnerNumberModel(0, 0, 99999, 1));
-        spnLoyalityPoint.setEditor(new JSpinner.NumberEditor(spnStreetNumber, "#"));
-        rightPanel.add(labeled("Loyality Point", spnLoyalityPoint));
+        spnLoyalityPoint.setEditor(new JSpinner.NumberEditor(spnLoyalityPoint, "#"));        rightPanel.add(labeled("Loyality Point", spnLoyalityPoint));
 
         spnStreetNumber = new JSpinner(new SpinnerNumberModel(1, 0, 99999, 1));
         spnStreetNumber.setEditor(new JSpinner.NumberEditor(spnStreetNumber, "#"));
         rightPanel.add(labeled("Street number", spnStreetNumber));
         spnPostalCode = new JSpinner(new SpinnerNumberModel(1000, 0, 99999, 1));
-        spnPostalCode.setEditor(new JSpinner.NumberEditor(spnStreetNumber, "#"));
+        spnPostalCode.setEditor(new JSpinner.NumberEditor(spnPostalCode, "#"));
         rightPanel.add(labeled("Postal Code", spnPostalCode));
 
 
@@ -177,11 +176,10 @@ public class ClientSupplierForm extends JPanel {
             return;
         }
 
-        if (!chkIsClient.isEnabled() && !chkIsClient.isEnabled() && !chkIsMember.isEnabled()) {
+        if (!chkIsClient.isSelected() && !chkIsSupplier.isSelected() && !chkIsMember.isSelected()) {
             JOptionPane.showMessageDialog(this, "Status required");
             return;
         }
-
         String name = txtName.getText().trim();
         String firstName = txtFirstName.getText().trim();
         String mail = txtMail.getText().trim();

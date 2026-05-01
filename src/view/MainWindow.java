@@ -1,6 +1,7 @@
 package view;
 
-import exception.DataValidationException;
+import exception.*;
+import model.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,13 +39,12 @@ public class MainWindow extends JFrame {
         addPage(new MainPanel(), "MAIN");
 
         addPage(new DocumentTable(this), "DOCUMENT");
-        documentForm = new DocumentForm(this);
-        addPage(documentForm, "DOCUMENT_FORM");
+        addPage(new DocumentForm(this), "DOCUMENT_FORM");
 
         addPage(new ClientSupplierTable(this), "CLIENT_SUPPLIER");
-        clientSupplierForm = new ClientSupplierForm(this);
-        addPage(clientSupplierForm, "CLIENT_SUPPLIER_FORM");
+        addPage(new ClientSupplierForm(this), "CLIENT_SUPPLIER_FORM");
 
+        addPage(new ProductSearchTable(this), "PRODUCT");
         add(container);
         setVisible(true);
     }
@@ -80,11 +80,14 @@ public class MainWindow extends JFrame {
             cardLayout.show(container, previous);
         }
     }
-    public DocumentForm getDocumentForm() {
-        return documentForm;
+
+    public void openDocumentForm(Document doc) {
+        documentForm.loadDocument(doc);
+        setPage("DOCUMENT_FORM");
     }
 
-    public ClientSupplierForm getClientSupplierForm() {
-        return clientSupplierForm;
+    public void openClientSupplierForm(ClientSupplier cs) {
+        clientSupplierForm.loadClientSupplier(cs);
+        setPage("CLIENT_SUPPLIER_FORM");
     }
 }

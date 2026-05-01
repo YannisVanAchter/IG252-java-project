@@ -143,7 +143,7 @@ public class DocumentForm extends JPanel {
         spnStreetNumber.setEditor(new JSpinner.NumberEditor(spnStreetNumber, "#"));
         rightPanel.add(labeled("Street Number", spnStreetNumber));
         spnPostalCode = new JSpinner(new SpinnerNumberModel(1000, 0, 99999, 1));
-        spnPostalCode.setEditor(new JSpinner.NumberEditor(spnStreetNumber, "#"));
+        spnPostalCode.setEditor(new JSpinner.NumberEditor(spnPostalCode, "#"));
         rightPanel.add(labeled("Postal Code", spnPostalCode));
 
         txtStreet = new JTextField();

@@ -1,6 +1,7 @@
 package view;
 
 import controler.DocumentController;
+import model.ClientSupplier;
 import model.Document;
 import model.DocumentTableModel;
 
@@ -211,10 +212,25 @@ public class DocumentTable extends JPanel {
     }
 
     public void onCreateClick(){
-        mainWindow.getDocumentForm().clearForm();
-        mainWindow.setPage("DOCUMENT_FORM");
+        mainWindow.openDocumentForm(null);
     }
 
+    /**
+     * Called when the user clicks on "Modify".
+     *
+     * Flow of the selected data:
+     * 1. Get the selected row from the table.
+     * 2. Retrieve the corresponding Document object from displayDocuments.
+     * 3. Send this object to the MainWindow.
+     * @see MainWindow#openDocumentForm(model.Document)
+     * 4. MainWindow forwards it to DocumentForm.
+     * 5. The form loads the data to allow editing.
+     *
+     * Important:
+     * - If no row is selected → show an error message.
+     * - If an object is passed → form is in EDIT mode.
+     * - If null was passed → form would be in CREATE mode.
+     */
     public void onModifyClick(){
         int selectedRow = table.getSelectedRow();
 
@@ -225,9 +241,7 @@ public class DocumentTable extends JPanel {
 
         Document doc = displayDocuments.get(selectedRow);
 
-        mainWindow.getDocumentForm().loadDocument(doc);
-
-        mainWindow.setPage("DOCUMENT_FORM");
+        mainWindow.openDocumentForm(doc);
     }
     public void onDeleteClick() {
         int selectedRow = table.getSelectedRow();
