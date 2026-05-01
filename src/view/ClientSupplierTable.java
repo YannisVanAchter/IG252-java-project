@@ -1,54 +1,40 @@
 package view;
 
-import controler.DocumentController;
-import model.ClientSupplier;
-import model.Document;
-import model.DocumentTableModel;
+import controler.*;
+import model.*;
+
+import exception.DataValidationException;
+
 
 import javax.swing.*;
 import java.awt.*;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 
-
-/**
- * This view allows search and display documents
- *
- * This class extends {@link JPanel} and contains:
- * A search panel allowing you to filter documents according to several criteria
- * A table displaying the documents and filtered documents
- *
- * Possible actions on the table include:
- * Redirection to editing view
- * Deleting a document
- */
-public class DocumentTable extends JPanel {
+public class ClientSupplierTable extends JPanel {
     private MainWindow mainWindow;
-    private DocumentController controller;
-    private DocumentTableModel model;
-    private ArrayList<Document> documents;
-    private ArrayList<Document> displayDocuments;
+    private ClientSupplierController controller;
+    private ClientSupplierTableModel model;
+    private ArrayList<ClientSupplier> clientSuppliers;
+    private ArrayList<ClientSupplier> displayClientSupplier;
 
     private JPanel searchPanel, tablePanel;
-    private JTextField idDocument;
-    private JComboBox<String> comboTypeDocumentFilter;
-    private JSpinner startCreationDate;
-    private JSpinner endCreationDate;
-    private JCheckBox useStartDate;
-    private JCheckBox useEndDate;
+    private JTextField txtLoyalityCard;
+    private JTextField txtLastName;
+    private JTextField txtFirstName;
+    private JCheckBox chkIsClient;
+    private JCheckBox chkIsSupplier;
+    private JCheckBox chkIsMember;
 
     private JTable table;
 
-    public DocumentTable(MainWindow mainWindow) {
+    public ClientSupplierTable(MainWindow mainWindow) throws DataValidationException {
         this.mainWindow = mainWindow;
-        this.controller = new DocumentController();
+        this.controller = new ClientSupplierController();
 
         setLayout(new BorderLayout(0, 16));
 
-        documents = controller.getAllDocuments();
-        displayDocuments = new ArrayList<>(documents);
+        clientSuppliers = controller.getAllClientSupplier();
+        displayClientSupplier = new ArrayList<>(clientSuppliers);
 
         buildSearchPanel();
         add(searchPanel, BorderLayout.NORTH);
@@ -66,29 +52,24 @@ public class DocumentTable extends JPanel {
 
         JPanel fieldsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        idDocument = new JTextField(10);
-        fieldsPanel.add(labeled("Document ID", idDocument));
+        txtLoyalityCard = new JTextField(10);
+        fieldsPanel.add(labeled("Document ID", txtLoyalityCard));
 
-        comboTypeDocumentFilter = new JComboBox<>(new String[]{
-                "All", "Invoice", "Contract", "Purchase order", "Delivery note", "Quote"
-        });
-        fieldsPanel.add(labeled("Document type", comboTypeDocumentFilter));
+        txtLastName = new JTextField(10);
+        fieldsPanel.add(labeled("Last name", txtLastName));
 
-        useStartDate = new JCheckBox("Start date");
-        startCreationDate = new JSpinner(new SpinnerDateModel());
-        startCreationDate.setEditor(new JSpinner.DateEditor(startCreationDate, "dd/MM/yyyy"));
-        startCreationDate.setEnabled(false);
-        useStartDate.addActionListener(e ->
-                startCreationDate.setEnabled(useStartDate.isSelected()));
-        fieldsPanel.add(labeled(useStartDate, startCreationDate));
+        txtFirstName = new JTextField(10);
+        fieldsPanel.add(labeled("First name", txtFirstName));
 
-        useEndDate = new JCheckBox("End date");
-        endCreationDate = new JSpinner(new SpinnerDateModel());
-        endCreationDate.setEditor(new JSpinner.DateEditor(endCreationDate, "dd/MM/yyyy"));
-        endCreationDate.setEnabled(false);
-        useEndDate.addActionListener(e ->
-                endCreationDate.setEnabled(useEndDate.isSelected()));
-        fieldsPanel.add(labeled(useEndDate, endCreationDate));
+        chkIsClient = new JCheckBox("Client");
+        fieldsPanel.add(labeled("Client", chkIsClient));
+
+        chkIsSupplier = new JCheckBox("Supplier");
+        fieldsPanel.add(labeled("Client", chkIsSupplier));
+
+        chkIsMember = new JCheckBox("Membre du personnel");
+        fieldsPanel.add(labeled("Client", chkIsMember));
+
 
         searchPanel.add(fieldsPanel, BorderLayout.CENTER);
 
@@ -114,7 +95,7 @@ public class DocumentTable extends JPanel {
     private void buildTablePanel() {
         tablePanel = new JPanel(new BorderLayout());
 
-        model = new DocumentTableModel(displayDocuments);
+        model = new ClientSupplierTableModel(displayClientSupplier);
         table = new JTable(model);
 
         JScrollPane scrollPane = new JScrollPane(table);
@@ -124,10 +105,10 @@ public class DocumentTable extends JPanel {
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 int row = table.rowAtPoint(e.getPoint());
                 int col = table.columnAtPoint(e.getPoint());
-                if (col == 4) {
+                if (col == 7) {
                     onModifyClick();
                 };
-                if (col == 5) {
+                if (col == 8) {
                     onDeleteClick();
                 };
             }
@@ -158,13 +139,10 @@ public class DocumentTable extends JPanel {
         return p;
     }
 
-    private LocalDate toLocalDate(Date date) {
-            return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-    }
 
     /**
      * Method called when the search button is clicked.
-     * 
+     *
      * Apply the user to selected filters on the document list:
      * Filter by ID (partial search)
      * Filter by document type
@@ -174,56 +152,69 @@ public class DocumentTable extends JPanel {
      * Updates the table model with the filtered documents.
      */
     public void onFilterClick() {
-        String idText = idDocument.getText().trim();
-        String selectedType = (String) comboTypeDocumentFilter.getSelectedItem();
+        String idText = txtLoyalityCard.getText().trim();
+        String lastNameText = txtLastName.getText().trim().toLowerCase();
+        String firstNameText = txtFirstName.getText().trim().toLowerCase();
 
-        LocalDate startDate = useStartDate.isSelected() ? toLocalDate((Date) startCreationDate.getValue()) : null;
-        LocalDate endDate = useEndDate.isSelected() ? toLocalDate((Date) endCreationDate.getValue()) : null;
+        displayClientSupplier = new ArrayList<>();
 
-        displayDocuments = new ArrayList<>();
-
-        for (Document doc : documents) {
+        for (ClientSupplier cs : clientSuppliers) {
             boolean match = true;
 
-            if (!idText.isEmpty() && !doc.getId().toLowerCase().contains(idText.toLowerCase())) {
+            // ID / loyalty card
+            if (!idText.isEmpty() && !String.valueOf(cs.getId()).contains(idText)) {
                 match = false;
             }
 
-            if (selectedType != null && !selectedType.equals("All")
-                    && !doc.getType().equals(selectedType)) {
+            // Last name
+            if (!lastNameText.isEmpty()
+                    && !cs.getName().toLowerCase().contains(lastNameText)) {
                 match = false;
             }
 
-
-            if (startDate != null && doc.getCreationDate().isBefore(startDate)) {
+            // First name
+            if (!firstNameText.isEmpty()
+                    && !cs.getFirstname().toLowerCase().contains(firstNameText)) {
                 match = false;
             }
 
-            if (endDate != null && doc.getCreationDate().isAfter(endDate)) {
+            // Type filters
+            boolean typeMatch = false;
+
+            if (!chkIsClient.isSelected() &&
+                    !chkIsSupplier.isSelected() &&
+                    !chkIsMember.isSelected()) {
+                typeMatch = true; // aucun filtre => tout afficher
+            } else {
+                if (chkIsClient.isSelected() && cs.getIsClient()) typeMatch = true;
+                if (chkIsSupplier.isSelected() && cs.getIsSupplier()) typeMatch = true;
+                if (chkIsMember.isSelected() && cs.getIsUs()) typeMatch = true;
+            }
+
+            if (!typeMatch) {
                 match = false;
             }
 
             if (match) {
-                displayDocuments.add(doc);
+                displayClientSupplier.add(cs);
             }
         }
 
-        model.setDocuments(displayDocuments);
+        model.setClientSuppliers(displayClientSupplier);
     }
 
     public void onCreateClick(){
-        mainWindow.openDocumentForm(null);
+        mainWindow.openClientSupplierForm(null);
     }
 
     /**
      * Called when the user clicks on "Modify".
-     *
      * Flow of the selected data:
      * 1. Get the selected row from the table.
-     * 2. Retrieve the corresponding Document object from displayDocuments.
+     * 2. Retrieve the corresponding ClientSupplier object from displayClientSupplier.
      * 3. Send this object to the MainWindow.
-     * @see MainWindow#openDocumentForm(model.Document)
-     * 4. MainWindow forwards it to DocumentForm.
+     * @see MainWindow#openClientSupplierForm(ClientSupplier)
+     * 4. MainWindow forwards it to the ClientSupplierForm.
      * 5. The form loads the data to allow editing.
      *
      * Important:
@@ -235,38 +226,39 @@ public class DocumentTable extends JPanel {
         int selectedRow = table.getSelectedRow();
 
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a document to modify.");
+            JOptionPane.showMessageDialog(this, "Please select a client/supplier to modify.");
             return;
         }
 
-        Document doc = displayDocuments.get(selectedRow);
+        ClientSupplier cs = displayClientSupplier.get(selectedRow);
 
-        mainWindow.openDocumentForm(doc);
+        mainWindow.openClientSupplierForm(cs);
     }
+
     public void onDeleteClick() {
         int selectedRow = table.getSelectedRow();
 
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a document to delete.");
+            JOptionPane.showMessageDialog(this, "Please select a client/supplier to delete.");
             return;
         }
 
         int confirm = JOptionPane.showConfirmDialog(
                 this,
-                "Are you sure you want to delete this document?",
+                "Are you sure you want to delete this entry?",
                 "Confirm deletion",
                 JOptionPane.YES_NO_OPTION
         );
 
         if (confirm == JOptionPane.YES_OPTION) {
-            Document docToDelete = displayDocuments.get(selectedRow);
+            ClientSupplier csToDelete = displayClientSupplier.get(selectedRow);
 
-            controller.deleteDocument(docToDelete);
+            controller.deleteClientSupplier(csToDelete);
 
-            documents.remove(docToDelete);
-            displayDocuments.remove(selectedRow);
-            model.setDocuments(displayDocuments);
+            clientSuppliers.remove(csToDelete);
+            displayClientSupplier.remove(selectedRow);
+
+            model.setClientSuppliers(displayClientSupplier);
         }
     }
-
 }

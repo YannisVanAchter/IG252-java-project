@@ -1,22 +1,31 @@
 package view;
 
+import exception.*;
+import model.*;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.Stack;
 
+/**
+ * This class acts as the central frame of the application.
+ * <p>
+ * It uses a {@link CardLayout} to manage the different screens (views),
+ * and allowing simple navigation between different panels such as MAIN, DOCUMENT, and CLIENT.
+ * <p>
+ * It also contains the {@link JMenuBar} to display navigation buttons between views.
+ */
 public class MainWindow extends JFrame {
-    /**
-     * This class acts as the central frame of the application.
-     * <p>
-     * It uses a {@link CardLayout} to manage the different screens (views),
-     * and allowing simple navigation between different panels such as MAIN, DOCUMENT, and CLIENT.
-     * <p>
-     * It also contains the {@link JMenuBar} to display navigation buttons between views.
-     */
+    private Stack<String> history = new Stack<>();
+    private String currentPage;
+
+    private DocumentForm documentForm;
+    private ClientSupplierForm clientSupplierForm;
 
     private CardLayout cardLayout;
     private JPanel container;
 
-    public MainWindow() {
+    public MainWindow() throws DataValidationException {
         super("Magasin du Grand Bazard");
 
         setSize(800, 600);
@@ -28,9 +37,15 @@ public class MainWindow extends JFrame {
         container = new JPanel(cardLayout);
 
         addPage(new MainPanel(), "MAIN");
-        addPage(new DocumentTable(this), "DOCUMENT");
-        add(container);
 
+        addPage(new DocumentTable(this), "DOCUMENT");
+        addPage(new DocumentForm(this), "DOCUMENT_FORM");
+
+        addPage(new ClientSupplierTable(this), "CLIENT_SUPPLIER");
+        addPage(new ClientSupplierForm(this), "CLIENT_SUPPLIER_FORM");
+
+        addPage(new ProductSearchTable(this), "PRODUCT");
+        add(container);
         setVisible(true);
     }
 
@@ -51,7 +66,28 @@ public class MainWindow extends JFrame {
      * @see #addPage(JPanel, String)
      */
     public void setPage(String name) {
+        if (currentPage != null) {
+            history.push(currentPage);
+        }
+        currentPage = name;
         cardLayout.show(container, name);
     }
 
+    public void goBack() {
+        if (!history.isEmpty()) {
+            String previous = history.pop();
+            currentPage = previous;
+            cardLayout.show(container, previous);
+        }
+    }
+
+    public void openDocumentForm(Document doc) {
+        documentForm.loadDocument(doc);
+        setPage("DOCUMENT_FORM");
+    }
+
+    public void openClientSupplierForm(ClientSupplier cs) {
+        clientSupplierForm.loadClientSupplier(cs);
+        setPage("CLIENT_SUPPLIER_FORM");
+    }
 }

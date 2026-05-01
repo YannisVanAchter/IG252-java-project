@@ -20,6 +20,9 @@ public class MenuWindow extends JMenuBar {
         searchMenu = new JMenu("Search");
         searchMenu.setMnemonic('S');
         clientItem = new JMenuItem("Client");
+        clientItem.addActionListener(e -> {
+            window.setPage("CLIENT_SUPPLIER");
+        });
         searchMenu.add(clientItem);
         suplierItem = new JMenuItem("Supplier");
         searchMenu.add(suplierItem);
