@@ -1,0 +1,86 @@
+name: CI-CD
+
+on:
+  push:
+    branches:
+      - dev
+
+permissions:
+  contents: write
+  checks: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    outputs:
+      tests_passed: ${{ steps.test.outcome == 'success' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: true
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Run tests
+        id: test
+        run: |
+          ./mvnw test || exit 1
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-reports
+          path: target/surefire-reports/
+          retention-days: 7
+
+  deploy-main:
+    needs: test
+    if: ${{ needs.test.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: true
+          ref: main
+
+      - name: Merge or update main
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git fetch origin dev
+          git checkout main
+          git merge --no-ff origin/dev
+          git push origin main
+
+  report-failure:
+    needs: test
+    if: ${{ needs.test.result != 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source branch
+        uses: actions/checkout@v5
+
+      - name: Create report
+        run: |
+          {
+            echo "# test-repport"
+            echo ""
+            echo "Tests échoués sur la branche ${{ github.ref_name }}"
+            echo ""
+            echo "Consulte les rapports JUnit dans target/surefire-reports/"
+          } > test-repport.md
+
+      - name: Commit report on source branch
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add test-repport.md
+          git commit -m "Add test report" || exit 0
+          git push origin HEAD:${{ github.ref_name }}

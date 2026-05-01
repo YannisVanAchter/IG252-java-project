@@ -1,4 +1,4 @@
-package controler;
+package controller;
 
 import exception.DataValidationException;
 import model.Address;

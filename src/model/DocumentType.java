@@ -1,0 +1,33 @@
+package model;
+
+public class DocumentType {
+    private String name;
+
+    public DocumentType(String name) {
+        setName(name);
+    }
+
+    public String getName() { return name; }
+
+    private void setName(String name) {
+        if (name == null || name.isEmpty()) {
+            this.name = "Unknown";
+            return;
+        }
+        this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        DocumentType that = (DocumentType) obj;
+        return name.equals(that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+}

@@ -1,7 +1,6 @@
 package view;
 
-import controler.DocumentController;
-import model.Document;
+import controller.DocumentController;
 
 import javax.swing.*;
 import java.awt.*;

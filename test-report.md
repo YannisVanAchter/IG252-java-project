@@ -11,7 +11,7 @@ Thanks for using JUnit! Support its development at https://junit.org/sponsoring
 |   '-- comparisonNotEqualTest() [OK]
 '-- JUnit Vintage [OK]
 
-Test run finished after 651 ms
+Test run finished after 887 ms
 [         4 containers found      ]
 [         0 containers skipped    ]
 [         4 containers started    ]

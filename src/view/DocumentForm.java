@@ -1,6 +1,6 @@
 package view;
 
-import controler.DocumentController;
+import controller.DocumentController;
 import exception.DataValidationException;
 import model.ClientSupplier;
 import model.Document;

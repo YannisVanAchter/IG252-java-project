@@ -602,6 +602,10 @@ package model {
     Workflow "*" --> "1" Status
     Workflow "*" --> "1" WorkflowType
 
+    class DocumentType {
+        -name: String
+    }
+
     class Document {
         -id : int
         -date : Date
@@ -617,6 +621,7 @@ package model {
     Document "*" --> "1" Workflow
     Document "*" --> "1" ClientSupplier
     Document "*" --> "1" Address
+    Document "*" --> "1" DocumentType
 
     class ProductCategory {
         -name : String

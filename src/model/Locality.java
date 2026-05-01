@@ -2,12 +2,18 @@ package model;
 
 import exception.DataValidationException;
 
-public class Location {
+/**
+ * This class represents a Locality, which is a part of an address. 
+ * It contains the name of the Locality and its postal code. 
+ * The class also includes validation for the postal code \
+ * to ensure it is a positive integer and does not exceed a specified maximum value.
+ */
+public class Locality {
     private String name;
     private int postalCode;
     private final Integer MAX_POSTAL_CODE_VALUE = Integer.MAX_VALUE;
 
-    public Location(String name, int postalCode) throws DataValidationException {
+    public Locality(String name, int postalCode) throws DataValidationException {
         setName(name);
         setPostalCode(postalCode);
     }
@@ -37,7 +43,14 @@ public class Location {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
 
-        Location other = (Location) obj;
+        Locality other = (Locality) obj;
         return name.equals(other.getName()) && postalCode == other.getPostalCode();
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name.hashCode();
+        result = 31 * result + postalCode;
+        return result;
     }
 }
