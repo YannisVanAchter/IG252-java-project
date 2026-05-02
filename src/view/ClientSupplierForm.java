@@ -50,7 +50,7 @@ public class ClientSupplierForm extends JPanel {
     private JButton btnClear;
     private JButton btnNewClient;
 
-    public ClientSupplierForm(MainWindow mainWindow) throws DataValidationException {
+    public ClientSupplierForm(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         this.controller = new ClientSupplierController();
 

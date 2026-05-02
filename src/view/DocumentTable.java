@@ -87,7 +87,7 @@ public class DocumentTable extends JPanel {
         idDocument = eventListenrInput(idDocument);
         fieldsPanel.add(labeled("Document ID", idDocument));
 
-        comboTypeDocumentFilter = new JComboBox<>(controller.getAllWorkFlow());
+        comboTypeDocumentFilter = new JComboBox<>(controller.getAllDocumentType());
         comboTypeDocumentFilter.addActionListener(e -> onFilterClick());
         fieldsPanel.add(labeled("Document type", comboTypeDocumentFilter));
 
@@ -238,7 +238,7 @@ public class DocumentTable extends JPanel {
 
             if (selectedType != null
                     && !selectedType.equals("All")
-                    && !doc.getWorkflow().getWorkflowType().getName().equals(selectedType)) {
+                    && !doc.getDocumentType().getName().equals(selectedType)) {
                 match = false;
             }
 

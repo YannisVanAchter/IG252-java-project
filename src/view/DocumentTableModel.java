@@ -42,7 +42,7 @@ public class DocumentTableModel extends AbstractTableModel {
         Document doc = documents.get(rowIndex);
         return switch (columnIndex) {
             case 0 -> doc.getId();
-            case 1 -> doc.getWorkflow().getWorkflowType();
+            case 1 -> doc.getDocumentType().getName();
             case 2 -> doc.getDateOfCreation();
             case 3 -> doc.getActualSendDate() != null ? doc.getActualSendDate() : doc.getActualDateOfReceipt();
             case 4 -> "Edit";
