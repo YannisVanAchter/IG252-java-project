@@ -1,6 +1,6 @@
 package model;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import exception.DataValidationException;
 
@@ -21,9 +21,9 @@ public class ClientSupplier {
     private boolean isSupplier;
     private boolean isUs;
     private String VATNumber;
-    private Date becameClientDate;
+    private LocalDate becameClientDate;
 
-    public ClientSupplier(int id, String name, String firstname, String email, String phoneNumber, Address address, boolean isClient, boolean isSupplier, boolean isUs, String VATNumber, Date becameClientDate) throws DataValidationException {
+    public ClientSupplier(int id, String name, String firstname, String email, String phoneNumber, Address address, boolean isClient, boolean isSupplier, boolean isUs, String VATNumber, LocalDate becameClientDate) throws DataValidationException {
         setId(id);
         setIsClient(isClient);
         setIsSupplier(isSupplier);
@@ -143,9 +143,9 @@ public class ClientSupplier {
         this.VATNumber = VATNumber;
     }
 
-    public Date getBecameClientDate() { return becameClientDate; }
+    public LocalDate getBecameClientDate() { return becameClientDate; }
 
-    private void setBecameClientDate(Date becameClientDate) throws DataValidationException {
+    private void setBecameClientDate(LocalDate becameClientDate) throws DataValidationException {
         if (getIsClient() && becameClientDate == null) {
             String message = "Became client date setting error, became client date is null when it shouldn't";
             throw new DataValidationException(message);

@@ -3,11 +3,10 @@ package controller;
 import exception.DataValidationException;
 import model.Address;
 import model.ClientSupplier;
-import model.Location;
+import model.Locality;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class ClientSupplierController {
     public ArrayList<ClientSupplier> getAllClientSupplier() throws DataValidationException {
@@ -19,12 +18,12 @@ public class ClientSupplierController {
                 "Jean",
                 "jean.dupont@email.com",
                 "+32470000001",
-                new Address("Avenue Louise 10", 1050, new Location("Ixelles", 6000)),
+                new Address("Avenue Louise 10", 1050, new Locality("Ixelles", 6000)),
                 true,
                 false,
                 true,
                 "BE0123456789",
-                new Date()
+                LocalDate.now()
         ));
 
         clients.add(new ClientSupplier(
@@ -33,12 +32,12 @@ public class ClientSupplierController {
                 "Sophie",
                 "sophie.martin@email.com",
                 "+32470000002",
-                new Address("Avenue Louise 10", 1050, new Location("Ixelles", 6000)),
+                new Address("Avenue Louise 10", 1050, new Locality("Ixelles", 6000)),
                 true,
                 false,
                 false,
                 "BE0987654321",
-                new Date()
+                LocalDate.now()
         ));
 
         clients.add(new ClientSupplier(
@@ -47,12 +46,12 @@ public class ClientSupplierController {
                 "Linh",
                 "linh.nguyen@email.com",
                 "+32470000003",
-                new Address("Avenue Louise 10", 1050, new Location("Ixelles", 6000)),
+                new Address("Avenue Louise 10", 1050, new Locality("Ixelles", 6000)),
                 true,
                 false,
                 true,
                 "BE1122334455",
-                new Date()
+                LocalDate.now()
         ));
 
         clients.add(new ClientSupplier(
@@ -61,12 +60,12 @@ public class ClientSupplierController {
                 "Marc",
                 "marc.dubois@email.com",
                 "+32470000004",
-                new Address("Avenue Louise 10", 1050, new Location("Ixelles", 6000)),
+                new Address("Avenue Louise 10", 1050, new Locality("Ixelles", 6000)),
                 true,
                 false,
                 false,
                 "BE6677889900",
-                new Date()
+                LocalDate.now()
         ));
 
         clients.add(new ClientSupplier(
@@ -75,12 +74,12 @@ public class ClientSupplierController {
                 "Anna",
                 "anna.smith@email.com",
                 "+32470000005",
-                new Address("Avenue Louise 10", 1050, new Location("Ixelles", 6000)),
+                new Address("Avenue Louise 10", 1050, new Locality("Ixelles", 6000)),
                 true,
                 false,
                 true,
                 "BE5566778899",
-                new Date()
+                LocalDate.now()
         ));
 
         return clients;

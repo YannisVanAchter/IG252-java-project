@@ -1,5 +1,7 @@
 package model;
 
+import exception.DataValidationException;
+
 public class WorkFlow {
     private int id;
     private Status status;

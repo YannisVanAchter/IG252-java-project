@@ -1,7 +1,7 @@
 package model;
 
+import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import exception.DataValidationException;
@@ -11,21 +11,24 @@ public class Document {
         Arrays.asList(new DocumentType("Delivery"), new DocumentType("Command"));
 
     private int id;
-    private Date dateOfCreation;
+    private LocalDate dateOfCreation;
     private DocumentType documentType;
-    private Date plannedSenDate;
-    private Date actualSendDate;
-    private Date plannedDateOfReceipt;
-    private Date actualDateOfReceipt;
+    private boolean isChecked;
+    private LocalDate plannedSenDate;
+    private LocalDate actualSendDate;
+    private LocalDate plannedDateOfReceipt;
+    private LocalDate actualDateOfReceipt;
     private Integer paymentDelay;
     private WorkFlow workflow;
     private ClientSupplier clientSupplier;
     private Address address;
+    private String comment;
 
-    public Document(int id, Date dateOfCreation, DocumentType documentType, Date plannedSenDate, Date actualSendDate, Date plannedDateOfReceipt, Date actualDateOfReceipt, Integer paymentDelay, WorkFlow workflow, ClientSupplier clientSupplier, Address address) throws DataValidationException {
+    public Document(int id, LocalDate dateOfCreation, DocumentType documentType, boolean isChecked, LocalDate plannedSenDate, LocalDate actualSendDate, LocalDate plannedDateOfReceipt, LocalDate actualDateOfReceipt, Integer paymentDelay, WorkFlow workflow, ClientSupplier clientSupplier, Address address, String comment) throws DataValidationException {
         setId(id);
         setDateOfCreation(dateOfCreation);
         setDocumentType(documentType);
+        setIsChecked(isChecked);
         setPlannedSenDate(plannedSenDate);
         setActualSendDate(actualSendDate);
         setPlannedDateOfReceipt(plannedDateOfReceipt);
@@ -34,6 +37,7 @@ public class Document {
         setWorkflow(workflow);
         setClientSupplier(clientSupplier);
         setAddress(address);
+        setComment(comment);
     }
 
     public int getId() { return id; }
@@ -46,11 +50,11 @@ public class Document {
         this.id = id;
     }
 
-    public Date getDateOfCreation() { return dateOfCreation; }
+    public LocalDate getDateOfCreation() { return dateOfCreation; }
 
-    private void setDateOfCreation(Date dateOfCreation) {
+    private void setDateOfCreation(LocalDate dateOfCreation) {
         if (dateOfCreation == null)
-            this.dateOfCreation = new Date();
+            this.dateOfCreation = LocalDate.now();
         else 
             this.dateOfCreation = dateOfCreation;
     }
@@ -65,30 +69,36 @@ public class Document {
         this.documentType = documentType;
     }
 
-    public Date getPlannedSenDate() { return plannedSenDate; }
+    public boolean getIsChecked() { return isChecked; }
 
-    private void setPlannedSenDate(Date plannedSenDate) throws DataValidationException {
+    private void setIsChecked(boolean isChecked) {
+        this.isChecked = isChecked;
+    }
+
+    public LocalDate getPlannedSenDate() { return plannedSenDate; }
+
+    private void setPlannedSenDate(LocalDate plannedSenDate) throws DataValidationException {
         if (TYPES_REQUIRING_PLANNED_SEND_DATE.contains(getDocumentType()) && plannedSenDate == null) {
             throw new DataValidationException("Planned send date cannot be null for Delivery and Command document types.");
         }
         this.plannedSenDate = plannedSenDate;
     }
 
-    public Date getActualSendDate() { return actualSendDate; }
+    public LocalDate getActualSendDate() { return actualSendDate; }
 
-    private void setActualSendDate(Date actualSendDate) {
+    private void setActualSendDate(LocalDate actualSendDate) {
         this.actualSendDate = actualSendDate;
     }
 
-    public Date getPlannedDateOfReceipt() { return plannedDateOfReceipt; }
+    public LocalDate getPlannedDateOfReceipt() { return plannedDateOfReceipt; }
 
-    private void setPlannedDateOfReceipt(Date plannedDateOfReceipt) {
+    private void setPlannedDateOfReceipt(LocalDate plannedDateOfReceipt) {
         this.plannedDateOfReceipt = plannedDateOfReceipt;
     }
 
-    public Date getActualDateOfReceipt() { return actualDateOfReceipt; }
+    public LocalDate getActualDateOfReceipt() { return actualDateOfReceipt; }
 
-    private void setActualDateOfReceipt(Date actualDateOfReceipt) {
+    private void setActualDateOfReceipt(LocalDate actualDateOfReceipt) {
         this.actualDateOfReceipt = actualDateOfReceipt;
     }
 
@@ -120,6 +130,12 @@ public class Document {
         this.address = address;
     }
 
+    public String getComment() { return comment; }
+
+    private void setComment(String comment) {
+        this.comment = comment;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -127,11 +143,11 @@ public class Document {
 
         Document other = (Document) obj;
         return  id == other.getId() && dateOfCreation.equals(other.getDateOfCreation()) && 
-                documentType.equals(other.getDocumentType()) && plannedSenDate.equals(other.getPlannedSenDate()) && 
+                documentType.equals(other.getDocumentType()) && isChecked == other.getIsChecked() && plannedSenDate.equals(other.getPlannedSenDate()) && 
                 actualSendDate.equals(other.getActualSendDate()) && plannedDateOfReceipt.equals(other.getPlannedDateOfReceipt()) && 
                 actualDateOfReceipt.equals(other.getActualDateOfReceipt()) && paymentDelay.equals(other.getPaymentDelay()) && 
                 workflow.equals(other.getWorkflow()) && clientSupplier.equals(other.getClientSupplier()) && 
-                address.equals(other.getAddress());
+                address.equals(other.getAddress()) && comment.equals(other.getComment());
     }
 
     @Override
@@ -139,6 +155,7 @@ public class Document {
         int result = Integer.hashCode(id);
         result = 31 * result + dateOfCreation.hashCode();
         result = 31 * result + documentType.hashCode();
+        result = 31 * result + Boolean.hashCode(isChecked);
         result = 31 * result + plannedSenDate.hashCode();
         result = 31 * result + actualSendDate.hashCode();
         result = 31 * result + plannedDateOfReceipt.hashCode();
@@ -147,6 +164,7 @@ public class Document {
         result = 31 * result + workflow.hashCode();
         result = 31 * result + clientSupplier.hashCode();
         result = 31 * result + address.hashCode();
+        result = 31 * result + comment.hashCode();
         return result;
     }
 }
