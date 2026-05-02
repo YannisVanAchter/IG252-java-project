@@ -531,15 +531,15 @@ package model {
     Employee --> Address
     Employee "0..*" --> "0..1" Employee : manager
 
-    class Pointage {
+    class Pointing {
         -date : Date
         -startTime : Time
         -endTime : Time
     }
 
-    Pointage "*" --> "1" Employee
+    Pointing "*" --> "1" Employee
 
-    class Function {
+    class Role_ {
         -name : String
     }
 
@@ -547,7 +547,7 @@ package model {
     }
 
     Position "*" --> "*" Employee
-    Position "*" --> "1" Function
+    Position "*" --> "1" Role_
 
     class AbsenceType {
         -name : String
@@ -637,7 +637,7 @@ package model {
 
     Product "*" --> "1" ProductCategory
 
-    class Promotion {
+    class Discount {
         -requiredQuantity : int
         -discount : int
         -startDate : Date
@@ -645,31 +645,31 @@ package model {
         -name : String
     }
 
-    Promotion "*" --> "*" Product
+    Discount "*" --> "*" Product
 
-    class Location {
+    class LocationProduct {
         -shelf : String
         -floor : String
     }
 
-    class Quantity {
+    class QuantityProduct {
         -nbProduct : int
     }
 
-    Quantity "*" --> "1" Product
-    Quantity "*" --> "1" Location
+    QuantityProduct "*" --> "1" Product
+    QuantityProduct "*" --> "1" LocationProduct
 
     class Recipe {
         -name : String
         -explanation : String
     }
 
-    class Composition {
+    class RecipeComposition {
         -quantity : int
     }
 
-    Composition "*" --> "1" Recipe
-    Composition "*" --> "1" Product
+    RecipeComposition "*" --> "1" Recipe
+    RecipeComposition "*" --> "1" Product
 
     class Detail {
         -id : int

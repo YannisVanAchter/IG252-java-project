@@ -2,7 +2,7 @@
 
 USE `PROJET_JAVA`;
 
-SET FOREIGN_KEY_CHECKS = 0;  -- désactive les contraintes FK
+SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS Pointing;
 DROP TABLE IF EXISTS Batch;
@@ -10,12 +10,16 @@ DROP TABLE IF EXISTS Detail;
 DROP TABLE IF EXISTS RecipeComposition;
 DROP TABLE IF EXISTS Recipe;
 DROP TABLE IF EXISTS Discount;
+DROP TABLE IF EXISTS QuantityProduct;
+DROP TABLE IF EXISTS LocationProduct;
 DROP TABLE IF EXISTS Product;
 DROP TABLE IF EXISTS ProductCategory;
 DROP TABLE IF EXISTS Document_;
+DROP TABLE IF EXISTS DocumentType;
 DROP TABLE IF EXISTS WorkFlow;
 DROP TABLE IF EXISTS Status_;
 DROP TABLE IF EXISTS WorkFlowType;
+DROP TABLE IF EXISTS FidelityCard;
 DROP TABLE IF EXISTS Client_supplier;
 DROP TABLE IF EXISTS Position_;
 DROP TABLE IF EXISTS Role_;
@@ -25,7 +29,7 @@ DROP TABLE IF EXISTS Employee;
 DROP TABLE IF EXISTS Address_;
 DROP TABLE IF EXISTS Locality;
 
-SET FOREIGN_KEY_CHECKS = 1;  -- réactive les contraintes FK
+SET FOREIGN_KEY_CHECKS = 1;
 
 
 
@@ -89,6 +93,14 @@ CREATE TABLE Position_ (
     FOREIGN KEY (employeeId) REFERENCES Employee(id_)
 );
 
+CREATE TABLE FidelityCard (
+    id_ INT AUTO_INCREMENT PRIMARY KEY,
+    clientId INT NOT NULL,
+    points INT NOT NULL,
+    isValid BOOLEAN NOT NULL,
+    FOREIGN KEY (clientId) REFERENCES Client_supplier(id_)
+);
+
 CREATE TABLE Client_supplier (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
     name_ VARCHAR(255) NOT NULL,
@@ -104,24 +116,26 @@ CREATE TABLE Client_supplier (
 );
 
 CREATE TABLE WorkFlowType (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
-    name_ VARCHAR(255) NOT NULL UNIQUE,
+    name_ VARCHAR(255) PRIMARY KEY,
     isBuy BOOLEAN NOT NULL,
     isSupplier BOOLEAN NOT NULL,
     isInternal BOOLEAN NOT NULL
 );
 
 CREATE TABLE Status_ (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
-    name_ VARCHAR(255) NOT NULL UNIQUE
+    name_ VARCHAR(255) PRIMARY KEY
 );
 
 CREATE TABLE WorkFlow (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
-    workFlowTypeId INT NOT NULL,
-    statusId INT NOT NULL,
-    FOREIGN KEY (workFlowTypeId) REFERENCES WorkFlowType(id_),
-    FOREIGN KEY (statusId) REFERENCES Status_(id_)
+    workFlowTypeId VARCHAR(255) NOT NULL,
+    statusId VARCHAR(255) NOT NULL,
+    FOREIGN KEY (workFlowTypeId) REFERENCES WorkFlowType(name_),
+    FOREIGN KEY (statusId) REFERENCES Status_(name_)
+);
+
+CREATE TABLE DocumentType (
+    name_ VARCHAR(255) PRIMARY KEY
 );
 
 CREATE TABLE Document_ (
@@ -160,6 +174,22 @@ CREATE TABLE Product (
     FOREIGN KEY (categoryId) REFERENCES ProductCategory(id_)
 );
 
+CREATE TABLE LocationProduct (
+    shelf VARCHAR(255) NOT NULL,
+    floor_ INT NOT NULL,
+    PRIMARY KEY (shelf, floor_)
+);
+
+CREATE TABLE QuantityProduct (
+    shelf VARCHAR(255) NOT NULL,
+    floor_ INT NOT NULL,
+    productId INT NOT NULL,
+    quantity INT NOT NULL CHECK (quantity >= 0),
+    PRIMARY KEY (shelf, floor_, productId),
+    FOREIGN KEY (shelf, floor_) REFERENCES LocationProduct(shelf, floor_),
+    FOREIGN KEY (productId) REFERENCES Product(id_)
+);
+
 CREATE TABLE Discount (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
     productId INT NOT NULL,
@@ -191,8 +221,10 @@ CREATE TABLE RecipeComposition (
 
 CREATE TABLE Detail (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
+    productId INT NOT NULL,
     quantity INT NOT NULL CHECK (quantity > 0),
-    price DECIMAL(10,2) NOT NULL
+    price DECIMAL(10,2) NOT NULL CHECK (price > 0),
+    FOREIGN KEY (productId) REFERENCES Product(id_)
 );
 
 CREATE TABLE Batch (
@@ -206,9 +238,9 @@ CREATE TABLE Batch (
 );
 
 CREATE TABLE Pointing (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
     date_ DATE NOT NULL DEFAULT (CURRENT_DATE),
     employeeId INT NOT NULL,
+    PRIMARY KEY (date_, employeeId),
     startTime TIME NOT NULL DEFAULT (CURRENT_TIME),
     endTime TIME,
     FOREIGN KEY (employeeId) REFERENCES Employee(id_),
