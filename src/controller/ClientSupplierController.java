@@ -88,10 +88,10 @@ public class ClientSupplierController {
     public void deleteClientSupplier(ClientSupplier csToDelete) {
     }
 
-    public void createClientSupplier(String name, String firstName, String mail, String vatNumber, LocalDate becomeClient, String loyaltyCardId, int loyaltyPoints, boolean isClient, boolean isSupplier, boolean isMember, int streetNumber, int postalCode, String street, String city, String country) {
+    public void createClientSupplier(String name, String firstName, String mail, String phoneNumber, String vatNumber, LocalDate becomeClient, String loyaltyCardId, int loyaltyPoints, boolean isClient, boolean isSupplier, boolean isMember, int streetNumber, int postalCode, String street, String city, String country) {
     }
 
-    public void updateClientSupplier(int id, String name, String firstName, String mail, String vatNumber, LocalDate becomeClient, String loyaltyCardId, int loyaltyPoints, boolean isClient, boolean isSupplier, boolean isMember, int streetNumber, int postalCode, String street, String city, String country) {
+    public void updateClientSupplier(int id, String name, String firstName, String mail, String phoneNumber, String vatNumber, LocalDate becomeClient, String loyaltyCardId, int loyaltyPoints, boolean isClient, boolean isSupplier, boolean isMember, int streetNumber, int postalCode, String street, String city, String country) {
 
     }
 }

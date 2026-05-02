@@ -7,7 +7,7 @@ import java.time.*;
 import java.util.Date;
 import javax.swing.*;
 import model.*;
-
+// Todo : uncomment loyalty & Country in loadDocument when available
 /**
  * ClientSupplierForm represents the form for creating and modifying a Client or Supplier.
  * <p>
@@ -27,12 +27,13 @@ public class ClientSupplierForm extends JPanel {
     private JTextField txtName;
     private JTextField txtFirstName;
     private JTextField txtMail;
+    private JTextField txtPhoneNumber;
     private JTextField txtVATNumber;
 
     private JSpinner becameClientDate;
 
-    private JTextField txtIdLoyalityCard;
-    private JSpinner spnLoyalityPoint;
+    private JTextField txtIdLoyaltyCard;
+    private JSpinner spnLoyaltyPoint;
 
     private JCheckBox chkIsClient;
     private JCheckBox chkIsSupplier;
@@ -120,14 +121,17 @@ public class ClientSupplierForm extends JPanel {
         txtFirstName = new JTextField(10);
         rightPanel.add(labeled("FirstName", txtFirstName));
 
+        txtPhoneNumber = new JTextField(10);
+        rightPanel.add(labeled("Phone Number", txtPhoneNumber));
+
         txtVATNumber = new JTextField(10);
         rightPanel.add(labeled("VAT Number", txtVATNumber));
 
-        txtIdLoyalityCard = new JTextField(10);
-        rightPanel.add(labeled("Loyality cart ID", txtIdLoyalityCard));
+        txtIdLoyaltyCard = new JTextField(10);
+        rightPanel.add(labeled("Loyality cart ID", txtIdLoyaltyCard));
 
-        spnLoyalityPoint = new JSpinner(new SpinnerNumberModel(0, 0, 99999, 1));
-        spnLoyalityPoint.setEditor(new JSpinner.NumberEditor(spnLoyalityPoint, "#"));        rightPanel.add(labeled("Loyality Point", spnLoyalityPoint));
+        spnLoyaltyPoint = new JSpinner(new SpinnerNumberModel(0, 0, 99999, 1));
+        spnLoyaltyPoint.setEditor(new JSpinner.NumberEditor(spnLoyaltyPoint, "#"));        rightPanel.add(labeled("Loyality Point", spnLoyaltyPoint));
 
         spnStreetNumber = new JSpinner(new SpinnerNumberModel(1, 0, 99999, 1));
         spnStreetNumber.setEditor(new JSpinner.NumberEditor(spnStreetNumber, "#"));
@@ -182,12 +186,13 @@ public class ClientSupplierForm extends JPanel {
         String name = txtName.getText().trim();
         String firstName = txtFirstName.getText().trim();
         String mail = txtMail.getText().trim();
+        String phoneNumber = txtPhoneNumber.getText().trim();
         String vatNumber = txtVATNumber.getText().trim();
 
         LocalDate becameClient = getDate(becameClientDate);
 
-        String loyaltyCardId = txtIdLoyalityCard.getText().trim();
-        int loyaltyPoints = (int) spnLoyalityPoint.getValue();
+        String loyaltyCardId = txtIdLoyaltyCard.getText().trim();
+        int loyaltyPoints = (int) spnLoyaltyPoint.getValue();
 
         boolean isClient = chkIsClient.isSelected();
         boolean isSupplier = chkIsSupplier.isSelected();
@@ -203,7 +208,7 @@ public class ClientSupplierForm extends JPanel {
         try {
             if (currentClientSupplier == null) {
                 controller.createClientSupplier(
-                        name, firstName, mail, vatNumber,
+                        name, firstName, mail, phoneNumber, vatNumber,
                         becameClient,
                         loyaltyCardId, loyaltyPoints,
                         isClient, isSupplier, isMember,
@@ -213,7 +218,7 @@ public class ClientSupplierForm extends JPanel {
             } else {
                 controller.updateClientSupplier(
                         currentClientSupplier.getId(),
-                        name, firstName, mail, vatNumber,
+                        name, firstName, mail, phoneNumber, vatNumber,
                         becameClient,
                         loyaltyCardId, loyaltyPoints,
                         isClient, isSupplier, isMember,
@@ -240,12 +245,13 @@ public class ClientSupplierForm extends JPanel {
         txtName.setText("");
         txtFirstName.setText("");
         txtMail.setText("");
+        txtPhoneNumber.setText("");
         txtVATNumber.setText("");
 
         becameClientDate.setValue(new Date());
 
-        txtIdLoyalityCard.setText("");
-        spnLoyalityPoint.setValue(0);
+        txtIdLoyaltyCard.setText("");
+        spnLoyaltyPoint.setValue(0);
 
         chkIsClient.setSelected(false);
         chkIsSupplier.setSelected(false);
@@ -310,7 +316,6 @@ public class ClientSupplierForm extends JPanel {
 
     /**
      * Loads data from a Client/Supplier into the form.
-     *
      * @param cs document to display
      * If cs is null:
      * - the form is in create mode
@@ -331,11 +336,11 @@ public class ClientSupplierForm extends JPanel {
         txtVATNumber.setText(cs.getVATNumber());
 
         if (cs.getBecameClientDate() != null) {
-            becameClientDate.setValue(cs.getBecameClientDate());
+            becameClientDate.setValue(toDate(cs.getBecameClientDate()));
         }
 
-        //txtIdLoyalityCard.setText(cs.getLoyaltyCard.getId());
-        //spnLoyalityPoint.setValue(cs.getLoyaltyCard.getPoints());
+        //txtIdLoyaltyCard.setText(cs.getLoyaltyCard.getId());
+        //spnLoyaltyPoint.setValue(cs.getLoyaltyCard.getPoints());
 
         chkIsClient.setSelected(cs.getIsClient());
         chkIsSupplier.setSelected(cs.getIsSupplier());
