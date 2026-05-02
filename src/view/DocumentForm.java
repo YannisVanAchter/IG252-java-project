@@ -28,7 +28,7 @@ public class DocumentForm extends JPanel {
 
     private JPanel appPanel, panelContent, leftPanel, rightPanel;
 
-    private JTextField id;
+    private JSpinner id;
     private JTextArea commentary;
     private JCheckBox checkIsChecked;
 
@@ -91,7 +91,8 @@ public class DocumentForm extends JPanel {
     private void buildLeftPanel() {
         leftPanel = createColumnPanel();
 
-        id = new JTextField(10);
+        id = new JSpinner(new SpinnerNumberModel(1, 1, Integer.MAX_VALUE, 1));
+        id.setEditor(new JSpinner.NumberEditor(id, "#"));
         leftPanel.add(labeled("ID du document", id));
 
         commentary = new JTextArea(4, 20);
@@ -116,16 +117,15 @@ public class DocumentForm extends JPanel {
         leftPanel.add(checkIsChecked);
     }
 
-    private void buildRightPanel() {
+    private void buildRightPanel() throws DataValidationException {
         rightPanel = createColumnPanel();
 
-        comboWorkflow = new JComboBox<>(new String[]{
-                "Invoice", "Contract", "Purchase order", "Delivery note", "Quote"
-        });
+
+        comboWorkflow = new JComboBox<>(controller.getAllWorkFlow());
         comboWorkflow.setEditable(true);
         rightPanel.add(labeled("Workflow", comboWorkflow));
 
-        comboClientSupplier = new JComboBox<>();
+        comboClientSupplier = new JComboBox<>(controller.getAllClientNames());
         setClientSuppliers(allClients);
         comboClientSupplier.setEditable(true);
 
@@ -184,7 +184,7 @@ public class DocumentForm extends JPanel {
      */
     private void saveEditForm() {
 
-        if (id.getText().trim().isEmpty()) {
+        if (id.getValue() == null) {
             JOptionPane.showMessageDialog(this, "ID required");
             return;
         }
@@ -199,7 +199,7 @@ public class DocumentForm extends JPanel {
             return;
         }
 
-        String documentId = id.getText().trim();
+        String documentId = String.valueOf(id.getValue());
         String commentaryText = commentary.getText();
 
         LocalDate plannedSend = getDate(pickerPlannedSendDate);
@@ -256,7 +256,7 @@ public class DocumentForm extends JPanel {
      * Resets all input fields in the form to their default values.
      */
     public void clearForm() {
-        id.setText("");
+        id.setValue(0);
         commentary.setText("");
 
         pickerPlannedSendDate.setValue(new Date());
@@ -341,7 +341,6 @@ public class DocumentForm extends JPanel {
     }
 
     /**
-
      * Loads data from a Document into the form.
      * @param doc document to display
      * If doc is null:
@@ -356,36 +355,36 @@ public class DocumentForm extends JPanel {
 
         currentDocument = doc;
 
-        id.setText(doc.getId());
-        commentary.setText(doc.getCommentary());
+        id.setValue(doc.getId());
+        //commentary.setText(doc.getCommentary());
 
-        if (doc.getPlannedSend() != null)
-            pickerPlannedSendDate.setValue(toDate(doc.getPlannedSend()));
+        if (doc.getPlannedSenDate() != null)
+            pickerPlannedSendDate.setValue(toDate(doc.getPlannedSenDate()));
 
-        if (doc.getPlannedReception() != null)
-            pickerPlannedReceptionDate.setValue(toDate(doc.getPlannedReception()));
+        if (doc.getPlannedDateOfReceipt() != null)
+            pickerPlannedReceptionDate.setValue(toDate(doc.getPlannedDateOfReceipt()));
 
-        if (doc.getEffectiveSend() != null)
-            pickerEffectiveSendDate.setValue(toDate(doc.getEffectiveSend()));
+        if (doc.getActualSendDate() != null)
+            pickerEffectiveSendDate.setValue(toDate(doc.getActualSendDate()));
 
-        if (doc.getEffectiveReception() != null)
-            pickerEffectiveReceptionDate.setValue(toDate(doc.getEffectiveReception()));
+        if (doc.getActualDateOfReceipt() != null)
+            pickerEffectiveReceptionDate.setValue(toDate(doc.getActualDateOfReceipt()));
 
         txtPaymentDelay.setText(
                 doc.getPaymentDelay() == -1 ? "" : String.valueOf(doc.getPaymentDelay())
         );
 
-        comboWorkflow.setSelectedItem(doc.getWorkflow());
+        comboWorkflow.setSelectedItem(doc.getWorkflow().getWorkflowType());
 
         comboClientSupplier.setSelectedItem(doc.getClientSupplier());
 
-        spnStreetNumber.setValue(doc.getStreetNumber());
-        spnPostalCode.setValue(doc.getPostalCode());
+        spnStreetNumber.setValue(doc.getAddress().getStreetNumber());
+        spnPostalCode.setValue(doc.getAddress().getLocality().getPostalCode());
 
-        txtStreet.setText(doc.getStreet());
-        txtCity.setText(doc.getCity());
-        txtCountry.setText(doc.getCountry());
+        txtStreet.setText(doc.getAddress().getStreetName());
+        txtCity.setText(doc.getAddress().getLocality().getName());
+        //txtCountry.setText(doc.getAddress().getLocality().getCountry();
 
-        checkIsChecked.setSelected(doc.isChecked());
+        //checkIsChecked.setSelected(doc.getIsChecked());
     }
 }

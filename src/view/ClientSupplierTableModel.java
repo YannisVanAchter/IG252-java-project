@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class ClientSupplierTableModel extends AbstractTableModel {
     private static final String[] COLUMNS = {
-            "", "Name", "First Name", "Email", "TVA", "Type", "Loyality", "Edit", "Delete"
+            "id", "Name", "First Name", "Email", "TVA", "Type", "Loyality", "Edit", "Delete"
     };
 
     private ArrayList<ClientSupplier> clientSuppliers;
@@ -41,7 +41,7 @@ public class ClientSupplierTableModel extends AbstractTableModel {
         ClientSupplier cs = clientSuppliers.get(rowIndex);
 
         return switch (columnIndex) {
-            case 0 -> "";
+            case 0 -> cs.getId();
             case 1 -> cs.getName();
             case 2 -> cs.getFirstname();
             case 3 -> cs.getEmail();
