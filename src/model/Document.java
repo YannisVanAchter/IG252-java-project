@@ -13,6 +13,7 @@ public class Document {
     private int id;
     private Date dateOfCreation;
     private DocumentType documentType;
+    private boolean isChecked;
     private Date plannedSenDate;
     private Date actualSendDate;
     private Date plannedDateOfReceipt;
@@ -21,11 +22,13 @@ public class Document {
     private WorkFlow workflow;
     private ClientSupplier clientSupplier;
     private Address address;
+    private String comment;
 
-    public Document(int id, Date dateOfCreation, DocumentType documentType, Date plannedSenDate, Date actualSendDate, Date plannedDateOfReceipt, Date actualDateOfReceipt, Integer paymentDelay, WorkFlow workflow, ClientSupplier clientSupplier, Address address) throws DataValidationException {
+    public Document(int id, Date dateOfCreation, DocumentType documentType, boolean isChecked, Date plannedSenDate, Date actualSendDate, Date plannedDateOfReceipt, Date actualDateOfReceipt, Integer paymentDelay, WorkFlow workflow, ClientSupplier clientSupplier, Address address, String comment) throws DataValidationException {
         setId(id);
         setDateOfCreation(dateOfCreation);
         setDocumentType(documentType);
+        setIsChecked(isChecked);
         setPlannedSenDate(plannedSenDate);
         setActualSendDate(actualSendDate);
         setPlannedDateOfReceipt(plannedDateOfReceipt);
@@ -34,6 +37,7 @@ public class Document {
         setWorkflow(workflow);
         setClientSupplier(clientSupplier);
         setAddress(address);
+        setComment(comment);
     }
 
     public int getId() { return id; }
@@ -63,6 +67,12 @@ public class Document {
             return;
         }
         this.documentType = documentType;
+    }
+
+    public boolean getIsChecked() { return isChecked; }
+
+    private void setIsChecked(boolean isChecked) {
+        this.isChecked = isChecked;
     }
 
     public Date getPlannedSenDate() { return plannedSenDate; }
@@ -120,6 +130,12 @@ public class Document {
         this.address = address;
     }
 
+    public String getComment() { return comment; }
+
+    private void setComment(String comment) {
+        this.comment = comment;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -127,11 +143,11 @@ public class Document {
 
         Document other = (Document) obj;
         return  id == other.getId() && dateOfCreation.equals(other.getDateOfCreation()) && 
-                documentType.equals(other.getDocumentType()) && plannedSenDate.equals(other.getPlannedSenDate()) && 
+                documentType.equals(other.getDocumentType()) && isChecked == other.getIsChecked() && plannedSenDate.equals(other.getPlannedSenDate()) && 
                 actualSendDate.equals(other.getActualSendDate()) && plannedDateOfReceipt.equals(other.getPlannedDateOfReceipt()) && 
                 actualDateOfReceipt.equals(other.getActualDateOfReceipt()) && paymentDelay.equals(other.getPaymentDelay()) && 
                 workflow.equals(other.getWorkflow()) && clientSupplier.equals(other.getClientSupplier()) && 
-                address.equals(other.getAddress());
+                address.equals(other.getAddress()) && comment.equals(other.getComment());
     }
 
     @Override
@@ -139,6 +155,7 @@ public class Document {
         int result = Integer.hashCode(id);
         result = 31 * result + dateOfCreation.hashCode();
         result = 31 * result + documentType.hashCode();
+        result = 31 * result + Boolean.hashCode(isChecked);
         result = 31 * result + plannedSenDate.hashCode();
         result = 31 * result + actualSendDate.hashCode();
         result = 31 * result + plannedDateOfReceipt.hashCode();
@@ -147,6 +164,7 @@ public class Document {
         result = 31 * result + workflow.hashCode();
         result = 31 * result + clientSupplier.hashCode();
         result = 31 * result + address.hashCode();
+        result = 31 * result + comment.hashCode();
         return result;
     }
 }
