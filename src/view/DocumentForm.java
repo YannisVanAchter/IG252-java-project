@@ -28,7 +28,7 @@ public class DocumentForm extends JPanel {
 
     private JPanel appPanel, panelContent, leftPanel, rightPanel;
 
-    private JSpinner id;
+    private JTextField id;
     private JTextArea commentary;
     private JCheckBox checkIsChecked;
 
@@ -91,8 +91,7 @@ public class DocumentForm extends JPanel {
     private void buildLeftPanel() {
         leftPanel = createColumnPanel();
 
-        id = new JSpinner(new SpinnerNumberModel(1, 1, Integer.MAX_VALUE, 1));
-        id.setEditor(new JSpinner.NumberEditor(id, "#"));
+        id = new JTextField();
         leftPanel.add(labeled("ID du document", id));
 
         commentary = new JTextArea(4, 20);
@@ -184,7 +183,7 @@ public class DocumentForm extends JPanel {
      */
     private void saveEditForm() {
 
-        if (id.getValue() == null) {
+        if (id.getText() == null) {
             JOptionPane.showMessageDialog(this, "ID required");
             return;
         }
@@ -199,7 +198,19 @@ public class DocumentForm extends JPanel {
             return;
         }
 
-        String documentId = String.valueOf(id.getValue());
+        int documentId;
+
+        if (id.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "ID required");
+            return;
+        }
+
+        try {
+            documentId = Integer.parseInt(id.getText().trim());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "ID must be a number");
+            return;
+        }
         String commentaryText = commentary.getText();
 
         LocalDate plannedSend = getDate(pickerPlannedSendDate);
@@ -256,7 +267,7 @@ public class DocumentForm extends JPanel {
      * Resets all input fields in the form to their default values.
      */
     public void clearForm() {
-        id.setValue(0);
+        id.setText("");
         commentary.setText("");
 
         pickerPlannedSendDate.setValue(new Date());
@@ -355,7 +366,7 @@ public class DocumentForm extends JPanel {
 
         currentDocument = doc;
 
-        id.setValue(doc.getId());
+        id.setText(String.valueOf(doc.getId()));
         //commentary.setText(doc.getCommentary());
 
         if (doc.getPlannedSenDate() != null)

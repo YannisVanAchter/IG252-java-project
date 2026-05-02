@@ -63,6 +63,14 @@ public class ClientSupplierTable extends JPanel {
 
         txtLoyalityCard = new JTextField(10);
         txtLoyalityCard = eventListenrInput(txtLoyalityCard);
+        txtLoyalityCard.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                char c = evt.getKeyChar();
+                if (!Character.isDigit(c)) {
+                    evt.consume();
+                }
+            }
+        });
         fieldsPanel.add(labeled("Client ID", txtLoyalityCard));
 
         txtLastName = new JTextField(10);
@@ -175,24 +183,20 @@ public class ClientSupplierTable extends JPanel {
         for (ClientSupplier cs : clientSuppliers) {
             boolean match = true;
 
-            // ID / loyalty card
             if (!idText.isEmpty() && !String.valueOf(cs.getId()).contains(idText)) {
                 match = false;
             }
 
-            // Last name
             if (!lastNameText.isEmpty()
                     && !cs.getName().toLowerCase().contains(lastNameText)) {
                 match = false;
             }
 
-            // First name
             if (!firstNameText.isEmpty()
                     && !cs.getFirstname().toLowerCase().contains(firstNameText)) {
                 match = false;
             }
 
-            // Type filters
             boolean typeMatch = false;
 
             if (!chkIsClient.isSelected() &&

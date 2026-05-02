@@ -5,6 +5,8 @@ import exception.DataValidationException;
 import model.Document;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -31,7 +33,7 @@ public class DocumentTable extends JPanel {
     private ArrayList<Document> displayDocuments;
 
     private JPanel searchPanel, tablePanel;
-    private JSpinner idDocument;
+    private JTextField idDocument;
     private JComboBox<String> comboTypeDocumentFilter;
     private JSpinner startCreationDate;
     private JSpinner endCreationDate;
@@ -73,27 +75,42 @@ public class DocumentTable extends JPanel {
 
         JPanel fieldsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        idDocument = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1));
-        idDocument.setEditor(new JSpinner.NumberEditor(idDocument, "#"));
+        idDocument = new JTextField(10);
+        idDocument.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                char c = evt.getKeyChar();
+                if (!Character.isDigit(c)) {
+                    evt.consume();
+                }
+            }
+        });
+        idDocument = eventListenrInput(idDocument);
         fieldsPanel.add(labeled("Document ID", idDocument));
 
         comboTypeDocumentFilter = new JComboBox<>(controller.getAllWorkFlow());
+        comboTypeDocumentFilter.addActionListener(e -> onFilterClick());
         fieldsPanel.add(labeled("Document type", comboTypeDocumentFilter));
 
         useStartDate = new JCheckBox("Start date");
         startCreationDate = new JSpinner(new SpinnerDateModel());
         startCreationDate.setEditor(new JSpinner.DateEditor(startCreationDate, "dd/MM/yyyy"));
+        startCreationDate.addChangeListener(e -> onFilterClick());
         startCreationDate.setEnabled(false);
-        useStartDate.addActionListener(e ->
-                startCreationDate.setEnabled(useStartDate.isSelected()));
+        useStartDate.addActionListener(e -> {
+            startCreationDate.setEnabled(useStartDate.isSelected());
+            onFilterClick();
+        });
         fieldsPanel.add(labeled(useStartDate, startCreationDate));
 
         useEndDate = new JCheckBox("End date");
         endCreationDate = new JSpinner(new SpinnerDateModel());
         endCreationDate.setEditor(new JSpinner.DateEditor(endCreationDate, "dd/MM/yyyy"));
+        endCreationDate.addChangeListener(e -> onFilterClick());
         endCreationDate.setEnabled(false);
-        useEndDate.addActionListener(e ->
-                endCreationDate.setEnabled(useEndDate.isSelected()));
+        useEndDate.addActionListener(e -> {
+            endCreationDate.setEnabled(useEndDate.isSelected());
+            onFilterClick();
+        });
         fieldsPanel.add(labeled(useEndDate, endCreationDate));
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -168,6 +185,14 @@ public class DocumentTable extends JPanel {
             return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
+    private JTextField eventListenrInput(JTextField textField){
+        textField.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { onFilterClick(); }
+            public void removeUpdate(DocumentEvent e) { onFilterClick(); }
+            public void changedUpdate(DocumentEvent e) { onFilterClick(); }
+        });
+        return textField;
+    }
     /**
      * Method called when the search button is clicked.
      * 
@@ -181,8 +206,17 @@ public class DocumentTable extends JPanel {
      */
     public void onFilterClick() {
 
-        Integer idValue = (Integer) idDocument.getValue();
-        String selectedType = (String) comboTypeDocumentFilter.getSelectedItem();
+        Integer idValue = null;
+
+        String idText = idDocument.getText().trim();
+
+        if (!idText.isEmpty()) {
+            try {
+                idValue = Integer.parseInt(idText);
+            } catch (NumberFormatException e) {
+                return;
+            }
+        }        String selectedType = (String) comboTypeDocumentFilter.getSelectedItem();
 
         LocalDate startDate = useStartDate.isSelected()
                 ? toLocalDate((Date) startCreationDate.getValue())
@@ -204,7 +238,7 @@ public class DocumentTable extends JPanel {
 
             if (selectedType != null
                     && !selectedType.equals("All")
-                    && !doc.getDocumentType().getName().equals(selectedType)) {
+                    && !doc.getWorkflow().getWorkflowType().getName().equals(selectedType)) {
                 match = false;
             }
 
