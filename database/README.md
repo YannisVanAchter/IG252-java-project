@@ -20,7 +20,7 @@ Le trigger doit vérifier la présence de l'``addresse de livraison`` et du ``co
 
 #### Ordre de préparation
 
-Le trigger doit vérifier la présence d'une ``recette`` et d'un ``commentaire``.
+Le trigger doit vérifier la présence d'un ``commentaire``.
 
 ### Workflow
 
