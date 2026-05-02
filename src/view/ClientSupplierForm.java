@@ -342,10 +342,10 @@ public class ClientSupplierForm extends JPanel {
         chkIsMember.setSelected(cs.getIsUs());
 
         spnStreetNumber.setValue(cs.getAddress().getStreetNumber());
-        spnPostalCode.setValue(cs.getAddress().getLocation().getPostalCode());
+        spnPostalCode.setValue(cs.getAddress().getLocality().getPostalCode());
 
         txtStreet.setText(cs.getAddress().getStreetName());
-        txtCity.setText(cs.getAddress().getLocation().getName());
+        txtCity.setText(cs.getAddress().getLocality().getName());
         //txtCountry.setText(cs.getAddress().getLocation().getCountry);
 
         btnSave.setText("Edit");

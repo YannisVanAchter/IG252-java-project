@@ -5,6 +5,9 @@ import exception.DataValidationException;
 import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
 import model.*;
 
 public class ClientSupplierTable extends JPanel {
@@ -33,12 +36,21 @@ public class ClientSupplierTable extends JPanel {
         clientSuppliers = controller.getAllClientSupplier();
         displayClientSupplier = new ArrayList<>(clientSuppliers);
 
+        add(buildHeader(), BorderLayout.NORTH);
         buildSearchPanel();
         add(searchPanel, BorderLayout.NORTH);
         buildTablePanel();
         add(tablePanel, BorderLayout.CENTER);
     }
 
+    private JPanel buildHeader() {
+        JLabel title = new JLabel("Client or Supplier Search");
+        title.setFont(new Font("Inter", Font.BOLD, 20));
+
+        JPanel header = new JPanel(new BorderLayout(0, 8));
+        header.add(title, BorderLayout.NORTH);
+        return header;
+    }
     /**
      * Builds the search panel containing the filter fields and action buttons.
      * Each field is encapsulated in a smaller JPanel for better display management.
@@ -50,22 +62,28 @@ public class ClientSupplierTable extends JPanel {
         JPanel fieldsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         txtLoyalityCard = new JTextField(10);
-        fieldsPanel.add(labeled("Document ID", txtLoyalityCard));
+        txtLoyalityCard = eventListenrInput(txtLoyalityCard);
+        fieldsPanel.add(labeled("Client ID", txtLoyalityCard));
 
         txtLastName = new JTextField(10);
+        txtLastName = eventListenrInput(txtLastName);
         fieldsPanel.add(labeled("Last name", txtLastName));
 
         txtFirstName = new JTextField(10);
+        txtFirstName = eventListenrInput(txtFirstName);
         fieldsPanel.add(labeled("First name", txtFirstName));
 
         chkIsClient = new JCheckBox("Client");
-        fieldsPanel.add(labeled("Client", chkIsClient));
+        chkIsClient.addActionListener(e -> onFilterClick());
+        fieldsPanel.add(labeled("", chkIsClient));
 
         chkIsSupplier = new JCheckBox("Supplier");
-        fieldsPanel.add(labeled("Client", chkIsSupplier));
+        chkIsSupplier.addActionListener(e -> onFilterClick());
+        fieldsPanel.add(labeled("", chkIsSupplier));
 
-        chkIsMember = new JCheckBox("Membre du personnel");
-        fieldsPanel.add(labeled("Client", chkIsMember));
+        chkIsMember = new JCheckBox("Satff member");
+        chkIsMember.addActionListener(e -> onFilterClick());
+        fieldsPanel.add(labeled("", chkIsMember));
 
 
         searchPanel.add(fieldsPanel, BorderLayout.CENTER);
@@ -127,15 +145,14 @@ public class ClientSupplierTable extends JPanel {
         return p;
     }
 
-    private JPanel labeled(JCheckBox checkBox, JComponent comp) {
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.add(checkBox);
-        p.add(Box.createVerticalStrut(4));
-        p.add(comp);
-        return p;
+    private JTextField eventListenrInput(JTextField textField){
+        textField.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { onFilterClick(); }
+            public void removeUpdate(DocumentEvent e) { onFilterClick(); }
+            public void changedUpdate(DocumentEvent e) { onFilterClick(); }
+        });
+        return textField;
     }
-
 
     /**
      * Method called when the search button is clicked.

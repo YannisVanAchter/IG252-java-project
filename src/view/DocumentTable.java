@@ -1,6 +1,8 @@
 package view;
 
 import controller.DocumentController;
+import exception.DataValidationException;
+import model.Document;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,7 +31,7 @@ public class DocumentTable extends JPanel {
     private ArrayList<Document> displayDocuments;
 
     private JPanel searchPanel, tablePanel;
-    private JTextField idDocument;
+    private JSpinner idDocument;
     private JComboBox<String> comboTypeDocumentFilter;
     private JSpinner startCreationDate;
     private JSpinner endCreationDate;
@@ -38,7 +40,7 @@ public class DocumentTable extends JPanel {
 
     private JTable table;
 
-    public DocumentTable(MainWindow mainWindow) {
+    public DocumentTable(MainWindow mainWindow) throws DataValidationException {
         this.mainWindow = mainWindow;
         this.controller = new DocumentController();
 
@@ -52,23 +54,30 @@ public class DocumentTable extends JPanel {
         buildTablePanel();
         add(tablePanel, BorderLayout.CENTER);
     }
+    private JPanel buildHeader() {
+        JLabel title = new JLabel("Document Search");
+        title.setFont(new Font("Inter", Font.BOLD, 20));
+
+        JPanel header = new JPanel(new BorderLayout(0, 8));
+        header.add(title, BorderLayout.NORTH);
+        return header;
+    }
 
     /**
      * Builds the search panel containing the filter fields and action buttons.
      * Each field is encapsulated in a smaller JPanel for better display management.
      * @see #labeled(String, JComponent)
      */
-    private void buildSearchPanel() {
+    private void buildSearchPanel() throws DataValidationException {
         searchPanel = new JPanel(new BorderLayout());
 
         JPanel fieldsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        idDocument = new JTextField(10);
+        idDocument = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1));
+        idDocument.setEditor(new JSpinner.NumberEditor(idDocument, "#"));
         fieldsPanel.add(labeled("Document ID", idDocument));
 
-        comboTypeDocumentFilter = new JComboBox<>(new String[]{
-                "All", "Invoice", "Contract", "Purchase order", "Delivery note", "Quote"
-        });
+        comboTypeDocumentFilter = new JComboBox<>(controller.getAllWorkFlow());
         fieldsPanel.add(labeled("Document type", comboTypeDocumentFilter));
 
         useStartDate = new JCheckBox("Start date");
@@ -87,8 +96,6 @@ public class DocumentTable extends JPanel {
                 endCreationDate.setEnabled(useEndDate.isSelected()));
         fieldsPanel.add(labeled(useEndDate, endCreationDate));
 
-        searchPanel.add(fieldsPanel, BorderLayout.CENTER);
-
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
         JButton btnSearch = new JButton("Search");
@@ -101,6 +108,8 @@ public class DocumentTable extends JPanel {
         buttonPanel.add(btnSearch);
         buttonPanel.add(btnCreate);
 
+        searchPanel.add(buildHeader(), BorderLayout.NORTH);
+        searchPanel.add(fieldsPanel, BorderLayout.CENTER);
         searchPanel.add(buttonPanel, BorderLayout.SOUTH);
     }
 
@@ -171,32 +180,39 @@ public class DocumentTable extends JPanel {
      * Updates the table model with the filtered documents.
      */
     public void onFilterClick() {
-        String idText = idDocument.getText().trim();
+
+        Integer idValue = (Integer) idDocument.getValue();
         String selectedType = (String) comboTypeDocumentFilter.getSelectedItem();
 
-        LocalDate startDate = useStartDate.isSelected() ? toLocalDate((Date) startCreationDate.getValue()) : null;
-        LocalDate endDate = useEndDate.isSelected() ? toLocalDate((Date) endCreationDate.getValue()) : null;
+        LocalDate startDate = useStartDate.isSelected()
+                ? toLocalDate((Date) startCreationDate.getValue())
+                : null;
+
+        LocalDate endDate = useEndDate.isSelected()
+                ? toLocalDate((Date) endCreationDate.getValue())
+                : null;
 
         displayDocuments = new ArrayList<>();
 
         for (Document doc : documents) {
+
             boolean match = true;
 
-            if (!idText.isEmpty() && !doc.getId().toLowerCase().contains(idText.toLowerCase())) {
+            if (idValue != null && idValue > 0 && doc.getId() != idValue) {
                 match = false;
             }
 
-            if (selectedType != null && !selectedType.equals("All")
-                    && !doc.getType().equals(selectedType)) {
+            if (selectedType != null
+                    && !selectedType.equals("All")
+                    && !doc.getDocumentType().getName().equals(selectedType)) {
                 match = false;
             }
 
-
-            if (startDate != null && doc.getCreationDate().isBefore(startDate)) {
+            if (startDate != null && doc.getDateOfCreation().isBefore(startDate)) {
                 match = false;
             }
 
-            if (endDate != null && doc.getCreationDate().isAfter(endDate)) {
+            if (endDate != null && doc.getDateOfCreation().isAfter(endDate)) {
                 match = false;
             }
 
@@ -207,7 +223,6 @@ public class DocumentTable extends JPanel {
 
         model.setDocuments(displayDocuments);
     }
-
     public void onCreateClick(){
         mainWindow.openDocumentForm(null);
     }

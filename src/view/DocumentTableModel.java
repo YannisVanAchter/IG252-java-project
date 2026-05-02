@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class DocumentTableModel extends AbstractTableModel {
 
     private static final String[] COLUMNS = {
-            "", "ID", "Type", "Creation date", "Edit", "Delete"
+            "ID", "Workflow", "Creation date", "Send/Receipt date", "Edit", "Delete"
     };
 
     private ArrayList<Document> documents;
@@ -41,10 +41,10 @@ public class DocumentTableModel extends AbstractTableModel {
     public Object getValueAt(int rowIndex, int columnIndex) {
         Document doc = documents.get(rowIndex);
         return switch (columnIndex) {
-            case 0 -> "";
-            case 1 -> doc.getId();
-            case 2 -> doc.getType();
-            case 3 -> doc.getCreationDate();
+            case 0 -> doc.getId();
+            case 1 -> doc.getWorkflow().getWorkflowType();
+            case 2 -> doc.getDateOfCreation();
+            case 3 -> doc.getActualSendDate() != null ? doc.getActualSendDate() : doc.getActualDateOfReceipt();
             case 4 -> "Edit";
             case 5 -> "Delete";
             default -> null;
