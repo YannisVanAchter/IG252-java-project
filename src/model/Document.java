@@ -6,7 +6,13 @@ import java.util.List;
 
 import exception.DataValidationException;
 
+/**
+ * This class represents a document, which can be of various types (e.g., delivery, command, etc.).
+ * It contains certains compulsory fields like id, date of creation, document type and is checked. 
+ * Regarding the optional fields, they become compulsory depending on the document type.
+ */
 public class Document {
+    // TODO: discus how do we plan to name the differents document types, and if we want to use an enum for that
     private static final List<DocumentType> TYPES_REQUIRING_PLANNED_SEND_DATE =
         Arrays.asList(new DocumentType("Delivery"), new DocumentType("Command"));
 
@@ -14,7 +20,7 @@ public class Document {
     private LocalDate dateOfCreation;
     private DocumentType documentType;
     private boolean isChecked;
-    private LocalDate plannedSenDate;
+    private LocalDate plannedSendDate;
     private LocalDate actualSendDate;
     private LocalDate plannedDateOfReceipt;
     private LocalDate actualDateOfReceipt;
@@ -24,12 +30,12 @@ public class Document {
     private Address address;
     private String comment;
 
-    public Document(int id, LocalDate dateOfCreation, DocumentType documentType, boolean isChecked, LocalDate plannedSenDate, LocalDate actualSendDate, LocalDate plannedDateOfReceipt, LocalDate actualDateOfReceipt, Integer paymentDelay, WorkFlow workflow, ClientSupplier clientSupplier, Address address, String comment) throws DataValidationException {
+    public Document(int id, LocalDate dateOfCreation, DocumentType documentType, boolean isChecked, LocalDate plannedSendDate, LocalDate actualSendDate, LocalDate plannedDateOfReceipt, LocalDate actualDateOfReceipt, Integer paymentDelay, WorkFlow workflow, ClientSupplier clientSupplier, Address address, String comment) throws DataValidationException {
         setId(id);
         setDateOfCreation(dateOfCreation);
         setDocumentType(documentType);
         setIsChecked(isChecked);
-        setPlannedSenDate(plannedSenDate);
+        setPlannedSendDate(plannedSendDate);
         setActualSendDate(actualSendDate);
         setPlannedDateOfReceipt(plannedDateOfReceipt);
         setActualDateOfReceipt(actualDateOfReceipt);
@@ -43,7 +49,7 @@ public class Document {
     public int getId() { return id; }
 
     private void setId(int id) throws DataValidationException {
-        if (id <= 0) {
+        if (id < 0) {
             String message = "ID setting error, ID is lower or equal to 0 (zero) when it shouldn't (current value: " + id + ")";
             throw new DataValidationException(message);
         }
@@ -75,13 +81,13 @@ public class Document {
         this.isChecked = isChecked;
     }
 
-    public LocalDate getPlannedSenDate() { return plannedSenDate; }
+    public LocalDate getPlannedSendDate() { return plannedSendDate; }
 
-    private void setPlannedSenDate(LocalDate plannedSenDate) throws DataValidationException {
-        if (TYPES_REQUIRING_PLANNED_SEND_DATE.contains(getDocumentType()) && plannedSenDate == null) {
+    private void setPlannedSendDate(LocalDate plannedSendDate) throws DataValidationException {
+        if (TYPES_REQUIRING_PLANNED_SEND_DATE.contains(getDocumentType()) && plannedSendDate == null) {
             throw new DataValidationException("Planned send date cannot be null for Delivery and Command document types.");
         }
-        this.plannedSenDate = plannedSenDate;
+        this.plannedSendDate = plannedSendDate;
     }
 
     public LocalDate getActualSendDate() { return actualSendDate; }
@@ -137,13 +143,21 @@ public class Document {
     }
 
     @Override
+    public String toString() {
+        return "Document{id=" + id + ", dateOfCreation=" + dateOfCreation + ", documentType=" + documentType + ", isChecked=" + isChecked + 
+                ", plannedSendDate=" + plannedSendDate + ", actualSendDate=" + actualSendDate + ", plannedDateOfReceipt=" + plannedDateOfReceipt + 
+                ", actualDateOfReceipt=" + actualDateOfReceipt + ", paymentDelay=" + paymentDelay + ", workflow=" + workflow + 
+                ", clientSupplier=" + clientSupplier + ", address=" + address + ", comment='" + comment + "'}";
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
 
         Document other = (Document) obj;
         return  id == other.getId() && dateOfCreation.equals(other.getDateOfCreation()) && 
-                documentType.equals(other.getDocumentType()) && isChecked == other.getIsChecked() && plannedSenDate.equals(other.getPlannedSenDate()) && 
+                documentType.equals(other.getDocumentType()) && isChecked == other.getIsChecked() && plannedSendDate.equals(other.getPlannedSendDate()) && 
                 actualSendDate.equals(other.getActualSendDate()) && plannedDateOfReceipt.equals(other.getPlannedDateOfReceipt()) && 
                 actualDateOfReceipt.equals(other.getActualDateOfReceipt()) && paymentDelay.equals(other.getPaymentDelay()) && 
                 workflow.equals(other.getWorkflow()) && clientSupplier.equals(other.getClientSupplier()) && 
@@ -156,7 +170,7 @@ public class Document {
         result = 31 * result + dateOfCreation.hashCode();
         result = 31 * result + documentType.hashCode();
         result = 31 * result + Boolean.hashCode(isChecked);
-        result = 31 * result + plannedSenDate.hashCode();
+        result = 31 * result + plannedSendDate.hashCode();
         result = 31 * result + actualSendDate.hashCode();
         result = 31 * result + plannedDateOfReceipt.hashCode();
         result = 31 * result + actualDateOfReceipt.hashCode();

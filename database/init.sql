@@ -47,6 +47,7 @@ CREATE TABLE Address_ (
     FOREIGN KEY (postalId) REFERENCES Locality(postalId)
 );
 
+-- TODO: Add manager relation between two employees
 CREATE TABLE Employee (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
     firstname VARCHAR(255) NOT NULL,
@@ -59,7 +60,7 @@ CREATE TABLE Employee (
     hiringDate DATE NOT NULL,
     nbPaidDaysHalfDay INT NOT NULL,
     pwd VARCHAR(255) NOT NULL,
-    addressId INT,
+    addressId INT NOT NULL,
     FOREIGN KEY (addressId) REFERENCES Address_(id_)
 );
 
@@ -68,6 +69,7 @@ CREATE TABLE Absence_type (
     name_ VARCHAR(255) NOT NULL UNIQUE
 );
 
+-- TODO: Add 'UNIQUE' constraint because we replace the composed PK with a Technical PK
 CREATE TABLE Absence (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
     employeeId INT NOT NULL,
@@ -109,6 +111,7 @@ CREATE TABLE Client_supplier (
     phoneNumber VARCHAR(20),
     isClient BOOLEAN NOT NULL,
     isSupplier BOOLEAN NOT NULL,
+    isUs BOOLEAN NOT NULL,
     VATNumber VARCHAR(50),
     dateBecameClient DATE,
     addressId INT,
@@ -128,20 +131,16 @@ CREATE TABLE Status_ (
 
 CREATE TABLE WorkFlow (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
-    workFlowTypeId VARCHAR(255) NOT NULL,
-    statusId VARCHAR(255) NOT NULL,
-    FOREIGN KEY (workFlowTypeId) REFERENCES WorkFlowType(name_),
-    FOREIGN KEY (statusId) REFERENCES Status_(name_)
-);
-
-CREATE TABLE DocumentType (
-    name_ VARCHAR(255) PRIMARY KEY
+    workFlowTypeId INT NOT NULL,
+    statusId INT NOT NULL,
+    FOREIGN KEY (workFlowTypeId) REFERENCES WorkFlowType(id_),
+    FOREIGN KEY (statusId) REFERENCES Status_(id_)
 );
 
 CREATE TABLE Document_ (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
-    clientSupplierId INT NOT NULL,
     workflowId INT NOT NULL,
+    documentTypeId INT NOT NULL,
     addressId INT,
     date_ DATE NOT NULL DEFAULT (CURRENT_DATE),
     plannedSendingDate DATE,
@@ -151,7 +150,7 @@ CREATE TABLE Document_ (
     paymentDelay INT NOT NULL,
     commentary VARCHAR(255),
     isChecked BOOLEAN NOT NULL,
-    FOREIGN KEY (clientSupplierId) REFERENCES Client_supplier(id_),
+    FOREIGN KEY (documentTypeId) REFERENCES DocumentType(id_),
     FOREIGN KEY (workflowId) REFERENCES WorkFlow(id_),
     FOREIGN KEY (addressId) REFERENCES Address_(id_)
 );
@@ -169,7 +168,6 @@ CREATE TABLE Product (
     loyaltyPoints INT NOT NULL,
     isEdible BOOLEAN NOT NULL,
     minStockQuantity INT NOT NULL CHECK (minStockQuantity >= 0),
-    minDiscountQuantity INT NOT NULL CHECK (minDiscountQuantity >= 0),
     categoryId INT NOT NULL,
     FOREIGN KEY (categoryId) REFERENCES ProductCategory(id_)
 );
@@ -190,6 +188,7 @@ CREATE TABLE QuantityProduct (
     FOREIGN KEY (productId) REFERENCES Product(id_)
 );
 
+-- TODO: Add 'UNIQUE' constraint on (productId, startDate) to avoid multiple overlapping discounts for the same product
 CREATE TABLE Discount (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
     productId INT NOT NULL,
@@ -219,12 +218,19 @@ CREATE TABLE RecipeComposition (
     FOREIGN KEY (productId) REFERENCES Product(id_)
 );
 
+CREATE TABLE PreparationOrder (
+    id_ INT AUTO_INCREMENT PRIMARY KEY,
+    documentId INT NOT NULL,
+    recipeId INT NOT NULL,
+    FOREIGN KEY (documentId) REFERENCES Document_(id_),
+    FOREIGN KEY (recipeId) REFERENCES Recipe(id_)
+);
+
 CREATE TABLE Detail (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
     productId INT NOT NULL,
     quantity INT NOT NULL CHECK (quantity > 0),
-    price DECIMAL(10,2) NOT NULL CHECK (price > 0),
-    FOREIGN KEY (productId) REFERENCES Product(id_)
+    price DECIMAL(10,2) NOT NULL
 );
 
 CREATE TABLE Batch (
@@ -246,3 +252,115 @@ CREATE TABLE Pointing (
     FOREIGN KEY (employeeId) REFERENCES Employee(id_),
     CHECK (endTime IS NULL OR endTime > startTime)
 );
+
+-- Triggers --
+
+/**
+ * Trigger notation: 
+ * tgr_{CRUD}_{Target table}_{Trigger name or purpose}
+*/
+
+/**
+ * This trigger ensures that all document created respect there respective 
+ * requirements regarding optional fields. 
+*/
+CREATE TRIGGER tgr_C_Document_IntegrityCheck
+BEFORE INSERT ON Document_
+FOR EACH ROW
+BEGIN
+    -- TODO: Check DocumenttType table when implemented
+    DECLARE documentTypeName VARCHAR(255);
+    SELECT name_ INTO documentTypeName
+        FROM DocumentType 
+        WHERE id_ = NEW.documentTypeId;
+    
+    IF      documentTypeName = 'Purchase Order'
+            AND new.plannedSendingDate >= CURRENT_DATE 
+            AND new.plannedReceiveDate >= new.plannedSendingDate
+            AND new.paymentDelay >= 0
+            THEN
+        RAISE SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid planned dates or payment delay for Purchase workflow';
+    
+    ELSEIF  new.documentTypeName = 'Delivery Note'
+            AND new.commentary IS NOT NULL
+            AND new.addressId IS NOT NULL
+            THEN
+        RAISE SQLSTATE '45000' SET MESSAGE_TEXT = 'Delivery Note should not have commentary or address';
+    
+    ELSEIF  documentTupeName = 'Preparation Order'
+            AND new.commentary IS NOT NULL
+            THEN
+        RAISE SQLSTATE '45000' SET MESSAGE_TEXT = 'Preparation Order should have commentary';
+    END IF;
+END;
+
+/**
+ * This trigger ensure that the expiration date of a batch is fullfilled
+ * when it concerns an edible product.
+*/
+CREATE TRIGGER tgr_CU_Batch_CheckExpirationDateRequirement
+BEFORE INSERT, UPDATE ON Batch
+FOR EACH ROW
+BEGIN
+    DECLARE isEdible BOOLEAN;
+    SELECT isEdible INTO isEdible FROM Product WHERE id_ = NEW.productId;
+    
+    IF  isEdible 
+        AND NEW.expirationDate IS NOT NULL 
+        AND NEW.expirationDate <= CURRENT_DATE 
+        THEN
+        RAISE SQLSTATE '45000' SET MESSAGE_TEXT = 'Expiration date must be in the future for edible products';
+    END IF;
+END;
+
+/**
+ * This trigger ensures that a client or supplier cannot be us.
+*/
+CREATE TRIGGER tgr_CU_ClientSupplier_CheckIsClientIsSupplier
+BEFORE INSERT, UPDATE ON Client_supplier
+FOR EACH ROW
+BEGIN
+    IF      NEW.isUs = TRUE
+            AND (NEW.isClient = TRUE OR NEW.isSupplier = TRUE)
+            THEN
+        RAISE SQLSTATE '45000' SET MESSAGE_TEXT = 'US can not be a client nor a supplier';
+    
+    ELSEIF  NEW.isClient = FALSE 
+            AND NEW.isSupplier = FALSE 
+            THEN
+        RAISE SQLSTATE '45000' SET MESSAGE_TEXT = 'A client/supplier must be either a client or a supplier';
+    
+    END IF;
+END;
+
+
+-- STORED INDEXES --
+
+/**
+ * Stored index notation:
+ * idx_{Target table}_{Indexed column(s)}_{Purpose}
+*/
+
+-- TODO: Check if it create a specific sorted table or a reference to all row ids of the target table. 
+/**
+ * Easily find a supplier
+*/
+CREATE INDEX idx_ClientSupplier_isSupplier ON Client_supplier(isSupplier);
+
+-- VIEWS --
+
+/**
+ * View notation:
+ * vw_{Purpose}_{Joined target table(s)}
+*/
+
+/**
+ * Easy link between a product and it's suppliers
+*/
+CREATE VIEW vw_ProductSuppliers AS
+SELECT p.id_ AS productId, p.label_ AS productLabel, cs.id_ AS supplierId, cs.name_ AS supplierName
+FROM Product p, idx_ClientSupplier_isSupplier s, Document_ d, WorkFlow w, Detail dt
+WHERE p.id_ = dt.productId
+AND dt.documentId = d.id_
+AND d.workflowId = w.id_
+AND w.otherId = s.id_;

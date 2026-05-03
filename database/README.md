@@ -12,7 +12,7 @@ Il existe plusieurs type de document. Certains types de document demande certain
 
 #### Bon de commande
 
-Le trigger doit vérifier la présence des attributs: ``dateEnvoiPréue``, ``dateReceptionEffective``, ``dateRéceptionPrévue``, ``dateRéceptionEffective``, ``délaiPaiement``.
+Le trigger doit vérifier la présence des attributs: ``dateEnvoiPréue``, ``dateEnvoiEffective``, ``dateRéceptionPrévue``, ``dateRéceptionEffective``, ``délaiPaiement``.
 
 #### Bon de livraison
 
@@ -23,6 +23,10 @@ Le trigger doit vérifier la présence de l'``addresse de livraison`` et du ``co
 Le trigger doit vérifier la présence d'un ``commentaire``.
 
 ### Workflow
+
+On doit vérifier que l'attribut us référence à un ClientSupplier qui est bien nous, et que l'autre est une autre entité de la table.
+
+### WorkflowType
 
 Le trigger doit vérifier qu'un seul des trois attribut `estAchat`, `estFournisseur` ou `estOrdrePreparation` ai sa valeur à `true`.
 
