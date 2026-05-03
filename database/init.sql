@@ -1,5 +1,6 @@
 
 
+DATABASE IF NOT EXISTS `PROJET_JAVA`;
 USE `PROJET_JAVA`;
 
 SET FOREIGN_KEY_CHECKS = 0;  -- désactive les contraintes FK
