@@ -55,6 +55,11 @@ public class Address {
     }
 
     @Override
+    public String toString() {
+        return "Address{streetName='" + streetName + "', streetNumber=" + streetNumber + ", locality=" + locality.toString() + "}";
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;

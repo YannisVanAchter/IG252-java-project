@@ -18,12 +18,17 @@ public class DocumentType {
     }
 
     @Override
+    public String toString() {
+        return "DocumentType{name='" + name + "'}";
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
 
         DocumentType that = (DocumentType) obj;
-        return name.equals(that.name);
+        return name.equals(that.getName());
     }
 
     @Override

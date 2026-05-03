@@ -10,6 +10,11 @@ public class Status {
     public String getName() { return name; }
 
     @Override
+    public String toString() {
+        return "Status{name='" + name + "'}";
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
 

@@ -47,6 +47,11 @@ public class WorkFlow {
     }
 
     @Override
+    public String toString() {
+        return "WorkFlow{id=" + id + ", status=" + status + ", workflowType=" + workflowType + "}";
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;

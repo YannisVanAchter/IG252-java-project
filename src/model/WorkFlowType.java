@@ -59,6 +59,11 @@ public class WorkFlowType {
     }
 
     @Override
+    public String toString() {
+        return "WorkFlowType{name='" + name + "', isBuy=" + isBuy + ", isSell=" + isSell + ", isInternal=" + isInternal + "}";
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;

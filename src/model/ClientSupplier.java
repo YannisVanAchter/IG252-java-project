@@ -154,6 +154,11 @@ public class ClientSupplier {
     }
 
     @Override
+    public String toString() {
+        return "ClientSupplier{id=" + id + ", name='" + name + "', firstname='" + firstname + "', email='" + email + "', phoneNumber='" + phoneNumber + "', address=" + (address != null ? address.toString() : "null") + ", isClient=" + isClient + ", isSupplier=" + isSupplier + ", isUs=" + isUs + ", VATNumber='" + VATNumber + "', becameClientDate=" + becameClientDate + "}";
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
