@@ -152,7 +152,7 @@ public class DocumentForm extends JPanel {
         comboClientSupplier.setEditable(true);
 
         btnNewClient = new JButton("New");
-
+        btnNewClient.addActionListener(e -> onNewClientcliked());
         JPanel clientPanel = new JPanel();
         clientPanel.setLayout(new BoxLayout(clientPanel, BoxLayout.X_AXIS));
         clientPanel.add(comboClientSupplier);
@@ -430,5 +430,42 @@ public class DocumentForm extends JPanel {
         //txtCountry.setText(doc.getAddress().getLocality().getCountry();
 
         checkIsChecked.setSelected(doc.getIsChecked());
+    }
+
+    /**
+     * This method opens a modal to create a new client/supplier.
+     * If a new client or supplier is successfully created, it is added to the
+     * ClientSuplier Comboboxlist.
+     * @see ClientSupplierForm
+     */
+    public void onNewClientcliked(){
+        ClientSupplier newClient = openDialog();
+
+        if(newClient != null){
+            allClients.add(newClient);
+            comboClientSupplier.addItem(newClient.getName());
+            comboClientSupplier.setSelectedItem(newClient.getName());
+        } else {
+            System.out.println("pas ok");
+        }
+    }
+
+    /**
+     * Opens a modal dialog for creating or selecting a client/supplier.
+     * @return The new created {@code ClientSupplier} from the dialog,
+     *         or {@code null} if the dialog is closed before saving.
+     */
+    public ClientSupplier openDialog(){
+        JDialog dialog = new JDialog(mainWindow, "Add new Client", true);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+        ClientSupplierForm form = new ClientSupplierForm(mainWindow, true);
+        dialog.setContentPane(form);
+
+        dialog.pack();
+        dialog.setLocationRelativeTo(mainWindow);
+        dialog.setVisible(true);
+
+        return form.getCurrentClientSupplier();
     }
 }

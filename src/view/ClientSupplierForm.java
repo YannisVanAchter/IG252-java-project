@@ -1,7 +1,7 @@
 package view;
 
 import controller.*;
-import exception.*;
+
 import java.awt.*;
 import java.time.*;
 import java.util.Date;
@@ -10,15 +10,18 @@ import model.*;
 // Todo : uncomment loyalty & Country in loadDocument when available
 /**
  * ClientSupplierForm represents the form for creating and modifying a Client or Supplier.
- * <p>
+ *
  * This form allows the user to enter all required information related to a Client/Supplier
  * (name, fistname, type, address, etc.).
- * <p>
+ *
+ * This view can be open with {@link CardLayout} in JPanel via {@link ClientSupplierTable}
+ * This view can be open with {@link JDialog} in modal via {@link DocumentForm}
+ *
  * The form communicates with {@link ClientSupplierController} to perform creation and update operations.
- * The table is created with the model {@link ClientSupplierTableModel} to set collumns and row
  */
 public class ClientSupplierForm extends JPanel {
     private MainWindow mainWindow;
+    private Boolean isOpenInModal;
     private ClientSupplierController controller;
     private ClientSupplier currentClientSupplier;
 
@@ -50,8 +53,15 @@ public class ClientSupplierForm extends JPanel {
     private JButton btnClear;
     private JButton btnNewClient;
 
-    public ClientSupplierForm(MainWindow mainWindow) {
+    /**
+     * Constructs a new instance of the ClientSupplierForm.
+     *
+     * @param mainWindow the main application window associated with this form.
+     * @param isOpenInModal a flag indicating if the form is open in a modal window.
+     */
+    public ClientSupplierForm(MainWindow mainWindow, Boolean isOpenInModal) {
         this.mainWindow = mainWindow;
+        this.isOpenInModal = isOpenInModal;
         this.controller = new ClientSupplierController();
 
         setLayout(new BorderLayout(10, 10));
@@ -62,8 +72,13 @@ public class ClientSupplierForm extends JPanel {
         JPanel topBar = new JPanel(new BorderLayout());
 
         JButton btnBack = new JButton("←");
-        btnBack.addActionListener(e -> mainWindow.goBack());
-
+        btnBack.addActionListener(e -> {
+                    if (isOpenInModal != null && isOpenInModal) {
+                        SwingUtilities.getWindowAncestor(this).dispose();
+                    } else {
+                        mainWindow.goBack();
+                    }
+                });
         topBar.add(btnBack, BorderLayout.WEST);
         topBar.add(title, BorderLayout.CENTER);
 
@@ -82,7 +97,15 @@ public class ClientSupplierForm extends JPanel {
         add(appPanel, BorderLayout.CENTER);
     }
 
-    private void buildLeftPanel() {
+    /**
+     * The main Constructor for a new instance of the ClientSupplierForm.
+     * @param mainWindow the main application window associated with this form.
+     */
+    public ClientSupplierForm(MainWindow mainWindow) {
+        this(mainWindow, false);
+    }
+
+        private void buildLeftPanel() {
         leftPanel = createColumnPanel();
 
         txtName = new JTextField(10);
@@ -163,9 +186,12 @@ public class ClientSupplierForm extends JPanel {
     /**
      * Validates user input and sends the document data to {@link ClientSupplierController}
      * for creation.
-     * <p>
+     *
      * If required fields are missing, a dialog is displayed and the process
      * is stopped.
+     *
+     * If {@code openingInModal} is true. The modal closes and DocumentForm
+     * can get the new ClientSupplier.
      */
     private void saveEditForm() {
 
@@ -207,7 +233,7 @@ public class ClientSupplierForm extends JPanel {
 
         try {
             if (currentClientSupplier == null) {
-                controller.createClientSupplier(
+                currentClientSupplier = controller.createClientSupplier(
                         name, firstName, mail, phoneNumber, vatNumber,
                         becameClient,
                         loyaltyCardId, loyaltyPoints,
@@ -216,7 +242,7 @@ public class ClientSupplierForm extends JPanel {
                         street, city, country
                 );
             } else {
-                controller.updateClientSupplier(
+                currentClientSupplier = controller.updateClientSupplier(
                         currentClientSupplier.getId(),
                         name, firstName, mail, phoneNumber, vatNumber,
                         becameClient,
@@ -228,12 +254,14 @@ public class ClientSupplierForm extends JPanel {
             }
 
             JOptionPane.showMessageDialog(this, "Client/Supplier saved!");
-            clearForm();
-            mainWindow.goBack();
 
+            if (isOpenInModal != null && isOpenInModal){
+                SwingUtilities.getWindowAncestor(this).dispose();
+            } else {
+                mainWindow.goBack();
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
-            ex.printStackTrace();
         }
     }
 
@@ -265,6 +293,7 @@ public class ClientSupplierForm extends JPanel {
         txtCountry.setText("");
 
         currentClientSupplier = null;
+        isOpenInModal = false;
     }
 
     private JPanel createColumnPanel() {
@@ -354,5 +383,9 @@ public class ClientSupplierForm extends JPanel {
         //txtCountry.setText(cs.getAddress().getLocation().getCountry);
 
         btnSave.setText("Edit");
+    }
+
+    public ClientSupplier getCurrentClientSupplier() {
+        return currentClientSupplier;
     }
 }
