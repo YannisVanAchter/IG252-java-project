@@ -4,6 +4,8 @@ import controller.DocumentController;
 import exception.DataValidationException;
 import model.ClientSupplier;
 import model.Document;
+import model.DocumentType;
+import model.Status;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,6 +13,7 @@ import java.time.*;
 import java.util.ArrayList;
 import java.util.Date;
 //Todo : uncomment country in loadDocument when available
+
 /**
  * DocumentCreationForm represents the Form panel for creating a new document.
  * <p>
@@ -25,6 +28,8 @@ public class DocumentForm extends JPanel {
     private Document currentDocument;
 
     private ArrayList<ClientSupplier> allClients;
+    private ArrayList<DocumentType> allDocumentTypes;
+    private ArrayList<Status> allWorkflowStatuses;
 
     private JPanel appPanel, panelContent, leftPanel, rightPanel;
 
@@ -37,14 +42,13 @@ public class DocumentForm extends JPanel {
     private JSpinner pickerEffectiveReceptionDate;
     private JSpinner spnPaymentDelay;
 
+    private JComboBox<ComboBoxItem<DocumentType>> comboDocumentType;
+    private JComboBox<ComboBoxItem<ClientSupplier>> comboClientSupplier;
+    private JComboBox<ComboBoxItem<Status>> comboWorkflowStatus;
 
-    private JComboBox<String> comboDocumentType;
-    private JComboBox<String> comboClientSupplier;
-    private JComboBox<String> comboWorkflowStatus;
-
-    private JRadioButton rbBuy;
-    private JRadioButton rbSell;
-    private JRadioButton rbInternal;
+    private JRadioButton isBuy;
+    private JRadioButton isSell;
+    private JRadioButton isInternal;
     private ButtonGroup workflowGroup;
 
     private JSpinner spnStreetNumber;
@@ -96,8 +100,8 @@ public class DocumentForm extends JPanel {
     private void buildLeftPanel() throws DataValidationException {
         leftPanel = ViewUtils.createColumnPanel();
 
-        comboDocumentType = new JComboBox<>(controller.getAllDocumentType());
-        comboDocumentType.setEditable(true);
+        comboDocumentType = new JComboBox<>();
+        setDocumentTypes(controller.getAllDocumentType());
         leftPanel.add(ViewUtils.labeled("Document Type", comboDocumentType));
 
         commentary = new JTextArea(4, 20);
@@ -125,28 +129,28 @@ public class DocumentForm extends JPanel {
     private void buildRightPanel() throws DataValidationException {
         rightPanel = ViewUtils.createColumnPanel();
 
-        comboWorkflowStatus = new JComboBox<>(controller.getAllWorkflowStatus());
-        comboWorkflowStatus.setEditable(true);
+        comboWorkflowStatus = new JComboBox<>();
+        setWorkflowStatus(controller.getAllWorkflowStatus());
         rightPanel.add(ViewUtils.labeled("Workflow Status", comboWorkflowStatus));
 
-        rbBuy = new JRadioButton("Buy");
-        rbSell = new JRadioButton("Sell");
-        rbInternal = new JRadioButton("Internal");
+        isBuy = new JRadioButton("Buy");
+        isSell = new JRadioButton("Sell");
+        isInternal = new JRadioButton("Internal");
 
         workflowGroup = new ButtonGroup();
-        workflowGroup.add(rbBuy);
-        workflowGroup.add(rbSell);
-        workflowGroup.add(rbInternal);
+        workflowGroup.add(isBuy);
+        workflowGroup.add(isSell);
+        workflowGroup.add(isInternal);
 
         JPanel radioPanel = new JPanel();
         radioPanel.setLayout(new BoxLayout(radioPanel, BoxLayout.X_AXIS));
-        radioPanel.add(rbBuy);
-        radioPanel.add(rbSell);
-        radioPanel.add(rbInternal);
+        radioPanel.add(isBuy);
+        radioPanel.add(isSell);
+        radioPanel.add(isInternal);
 
         rightPanel.add(ViewUtils.labeled("WorkflowType", radioPanel));
 
-        comboClientSupplier = new JComboBox<>(controller.getAllClientNames());
+        comboClientSupplier = new JComboBox<>();
         setClientSuppliers(allClients);
         comboClientSupplier.setEditable(true);
 
@@ -217,7 +221,7 @@ public class DocumentForm extends JPanel {
             return;
         }
 
-        if (!rbBuy.isSelected() && !rbSell.isSelected() && !rbInternal.isSelected()) {
+        if (!isBuy.isSelected() && !isSell.isSelected() && !isInternal.isSelected()) {
             JOptionPane.showMessageDialog(this, "Workflow type (Buy/Sell/Internal) required");
             return;
         }
@@ -231,13 +235,18 @@ public class DocumentForm extends JPanel {
 
         int paymentDelay = (int) spnPaymentDelay.getValue();
 
-        String workflowStatus = comboWorkflowStatus.getSelectedItem().toString().trim();
-        String documentType = comboDocumentType.getSelectedItem().toString().trim();
-        String clientSupplier = comboClientSupplier.getSelectedItem().toString().trim();
+        ComboBoxItem<Status> workflowStatusItem = (ComboBoxItem<Status>) comboWorkflowStatus.getSelectedItem();
+        Status workflowStatus = workflowStatusItem.getObject();
 
-        boolean isBuy = rbBuy.isSelected();
-        boolean isSell = rbSell.isSelected();
-        boolean isInternal = rbInternal.isSelected();
+        ComboBoxItem<DocumentType> documentTypeItem = (ComboBoxItem<DocumentType>) comboDocumentType.getSelectedItem();
+        DocumentType documentType = documentTypeItem.getObject();
+
+        ComboBoxItem<ClientSupplier> clientItem = (ComboBoxItem<ClientSupplier>) comboClientSupplier.getSelectedItem();
+        ClientSupplier clientSupplier = clientItem.getObject();
+
+        boolean isBuy = this.isBuy.isSelected();
+        boolean isSell = this.isSell.isSelected();
+        boolean isInternal = this.isInternal.isSelected();
 
         int streetNumber = (int) spnStreetNumber.getValue();
         int postalCode = (int) spnPostalCode.getValue();
@@ -285,6 +294,7 @@ public class DocumentForm extends JPanel {
             ex.printStackTrace();
         }
     }
+
     /**
      * Resets all input fields in the form to their default values.
      */
@@ -323,23 +333,10 @@ public class DocumentForm extends JPanel {
     }
 
     /**
-     * Updates the client/supplier dropdown list with available entries.
-     *
-     * @param clientSupplier list of available clients or suppliers
-     */
-    public void setClientSuppliers(ArrayList<ClientSupplier> clientSupplier) {
-        comboClientSupplier.removeAllItems();
-
-        for (ClientSupplier client : clientSupplier) {
-            comboClientSupplier.addItem(client.getName());
-        }
-    }
-
-    /**
      * Loads data from a Document into the form.
+     *
      * @param doc document to display
-     * If doc is null:
-     * - the form is in create mode
+     * If doc is null the form is in create mode
      */
     public void loadDocument(Document doc) {
         if (doc == null) {
@@ -366,12 +363,13 @@ public class DocumentForm extends JPanel {
 
         spnPaymentDelay.setValue(doc.getPaymentDelay());
 
-        comboWorkflowStatus.setSelectedItem(doc.getWorkflow().getStatus());
+        isBuy.setSelected(doc.getWorkflow().getWorkflowType().getIsBuy());
+        isSell.setSelected(doc.getWorkflow().getWorkflowType().getIsSell());
+        isInternal.setSelected(doc.getWorkflow().getWorkflowType().getIsInternal());
 
-        rbBuy.setSelected(doc.getWorkflow().getWorkflowType().getIsBuy());
-        rbSell.setSelected(doc.getWorkflow().getWorkflowType().getIsSell());
-        rbInternal.setSelected(doc.getWorkflow().getWorkflowType().getIsInternal());
-        comboClientSupplier.setSelectedItem(doc.getClientSupplier());
+        ComboBoxItem.selectComboItem(comboWorkflowStatus, doc.getWorkflow().getStatus());
+        ComboBoxItem.selectComboItem(comboDocumentType, doc.getDocumentType());
+        ComboBoxItem.selectComboItem(comboClientSupplier, doc.getClientSupplier());
 
         spnStreetNumber.setValue(doc.getAddress().getStreetNumber());
         spnPostalCode.setValue(doc.getAddress().getLocality().getPostalCode());
@@ -384,29 +382,68 @@ public class DocumentForm extends JPanel {
     }
 
     /**
+     * Updates the client/supplier JComboBox list with available entries.
+     *
+     * @param clientSupplier list of available clients or suppliers
+     */
+    public void setClientSuppliers(ArrayList<ClientSupplier> clientSupplier) {
+        comboClientSupplier.removeAllItems();
+
+        for (ClientSupplier cs : clientSupplier) {
+            String string = cs.getName() + " " + (cs.getFirstname() != null ? cs.getFirstname() : "");
+            comboClientSupplier.addItem(new ComboBoxItem<>(cs,string));
+        }
+    }
+
+    /**
+     * Updates the document type JComboBox list with available entries.
+     *
+     * @param types list of available document types
+     */
+    public void setDocumentTypes(ArrayList<DocumentType> types) {
+        comboDocumentType.removeAllItems();
+        for (DocumentType dt : types) {
+            comboDocumentType.addItem(new ComboBoxItem<>(dt, dt.getName()));
+        }
+    }
+
+    /**
+     * Updates the workflow status JComboBox list with available entries.
+     *
+     * @param statuses list of available workflow statuses
+     */
+    public void setWorkflowStatus(ArrayList<Status> statuses) {
+        comboWorkflowStatus.removeAllItems();
+        for (Status s : statuses) {
+            comboWorkflowStatus.addItem(new ComboBoxItem<>(s, s.getName()));
+        }
+    }
+
+    /**
      * This method opens a modal to create a new client/supplier.
      * If a new client or supplier is successfully created, it is added to the
      * ClientSuplier Comboboxlist.
+     *
      * @see ClientSupplierForm
      */
-    public void onNewClientcliked(){
+    public void onNewClientcliked() {
         ClientSupplier newClient = openDialog();
 
-        if(newClient != null){
+        if (newClient != null) {
             allClients.add(newClient);
-            comboClientSupplier.addItem(newClient.getName());
-            comboClientSupplier.setSelectedItem(newClient.getName());
-        } else {
-            System.out.println("pas ok");
+            setClientSuppliers(allClients);
+            ComboBoxItem<ClientSupplier> newItem = comboClientSupplier.getItemAt(comboClientSupplier.getItemCount() - 1);
+            comboClientSupplier.setSelectedItem(newItem);
         }
     }
 
     /**
      * Opens a modal dialog for creating or selecting a client/supplier.
+     *
      * @return The new created {@code ClientSupplier} from the dialog,
-     *         or {@code null} if the dialog is closed before saving.
+     * or {@code null} if the dialog is closed before saving.
      */
-    public ClientSupplier openDialog(){
+    public ClientSupplier openDialog() {
         JDialog dialog = new JDialog(mainWindow, "Add new Client", true);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 

@@ -1,5 +1,7 @@
 package view;
 
+import model.DocumentType;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -138,7 +140,7 @@ public class ViewUtils {
         return checkBox;
     }
 
-    public static JComboBox<String> addFilterListener(JComboBox<String> combo, Runnable onFilter) {
+    public static <T> JComboBox<T> addFilterListener(JComboBox<T> combo, Runnable onFilter) {
         combo.addActionListener(e -> onFilter.run());
         return combo;
     }

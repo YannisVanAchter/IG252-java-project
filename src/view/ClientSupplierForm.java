@@ -6,17 +6,19 @@ import java.awt.*;
 import java.time.*;
 import java.util.Date;
 import javax.swing.*;
+
 import model.*;
 // Todo : uncomment loyalty & Country in loadDocument when available
+
 /**
  * ClientSupplierForm represents the form for creating and modifying a Client or Supplier.
- *
+ * <p>
  * This form allows the user to enter all required information related to a Client/Supplier
  * (name, fistname, type, address, etc.).
- *
+ * <p>
  * This view can be open with {@link CardLayout} in JPanel via {@link ClientSupplierTable}
  * This view can be open with {@link JDialog} in modal via {@link DocumentForm}
- *
+ * <p>
  * The form communicates with {@link ClientSupplierController} to perform creation and update operations.
  */
 public class ClientSupplierForm extends JPanel {
@@ -56,7 +58,7 @@ public class ClientSupplierForm extends JPanel {
     /**
      * Constructs a new instance of the ClientSupplierForm.
      *
-     * @param mainWindow the main application window associated with this form.
+     * @param mainWindow    the main application window associated with this form.
      * @param isOpenInModal a flag indicating if the form is open in a modal window.
      */
     public ClientSupplierForm(MainWindow mainWindow, Boolean isOpenInModal) {
@@ -73,12 +75,12 @@ public class ClientSupplierForm extends JPanel {
 
         JButton btnBack = new JButton("←");
         btnBack.addActionListener(e -> {
-                    if (isOpenInModal != null && isOpenInModal) {
-                        SwingUtilities.getWindowAncestor(this).dispose();
-                    } else {
-                        mainWindow.goBack();
-                    }
-                });
+            if (isOpenInModal != null && isOpenInModal) {
+                SwingUtilities.getWindowAncestor(this).dispose();
+            } else {
+                mainWindow.goBack();
+            }
+        });
         topBar.add(btnBack, BorderLayout.WEST);
         topBar.add(title, BorderLayout.CENTER);
 
@@ -99,13 +101,14 @@ public class ClientSupplierForm extends JPanel {
 
     /**
      * The main Constructor for a new instance of the ClientSupplierForm.
+     *
      * @param mainWindow the main application window associated with this form.
      */
     public ClientSupplierForm(MainWindow mainWindow) {
         this(mainWindow, false);
     }
 
-        private void buildLeftPanel() {
+    private void buildLeftPanel() {
         leftPanel = ViewUtils.createColumnPanel();
 
         txtName = new JTextField(10);
@@ -154,7 +157,8 @@ public class ClientSupplierForm extends JPanel {
         rightPanel.add(ViewUtils.labeled("Loyality cart ID", txtIdLoyaltyCard));
 
         spnLoyaltyPoint = new JSpinner(new SpinnerNumberModel(0, 0, 99999, 1));
-        spnLoyaltyPoint.setEditor(new JSpinner.NumberEditor(spnLoyaltyPoint, "#"));        rightPanel.add(ViewUtils.labeled("Loyality Point", spnLoyaltyPoint));
+        spnLoyaltyPoint.setEditor(new JSpinner.NumberEditor(spnLoyaltyPoint, "#"));
+        rightPanel.add(ViewUtils.labeled("Loyality Point", spnLoyaltyPoint));
 
         spnStreetNumber = new JSpinner(new SpinnerNumberModel(1, 0, 99999, 1));
         spnStreetNumber.setEditor(new JSpinner.NumberEditor(spnStreetNumber, "#"));
@@ -186,10 +190,10 @@ public class ClientSupplierForm extends JPanel {
     /**
      * Validates user input and sends the document data to {@link ClientSupplierController}
      * for creation.
-     *
+     * <p>
      * If required fields are missing, a dialog is displayed and the process
      * is stopped.
-     *
+     * <p>
      * If {@code openingInModal} is true. The modal closes and DocumentForm
      * can get the new ClientSupplier.
      */
@@ -255,7 +259,7 @@ public class ClientSupplierForm extends JPanel {
 
             JOptionPane.showMessageDialog(this, "Client/Supplier saved!");
 
-            if (isOpenInModal != null && isOpenInModal){
+            if (isOpenInModal != null && isOpenInModal) {
                 SwingUtilities.getWindowAncestor(this).dispose();
             } else {
                 mainWindow.goBack();
@@ -295,12 +299,12 @@ public class ClientSupplierForm extends JPanel {
         currentClientSupplier = null;
         isOpenInModal = false;
     }
-    
+
     /**
      * Loads data from a Client/Supplier into the form.
+     *
      * @param cs document to display
-     * If cs is null:
-     * - the form is in create mode
+     * If cs is null the form is in create mode
      */
     public void loadClientSupplier(ClientSupplier cs) {
 
