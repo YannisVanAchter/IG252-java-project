@@ -401,8 +401,8 @@ public class DocumentForm extends JPanel {
 
         commentary.setText(doc.getComment());
 
-        if (doc.getPlannedSenDate() != null)
-            pickerPlannedSendDate.setValue(toDate(doc.getPlannedSenDate()));
+        if (doc.getPlannedSendDate() != null)
+            pickerPlannedSendDate.setValue(toDate(doc.getPlannedSendDate()));
 
         if (doc.getPlannedDateOfReceipt() != null)
             pickerPlannedReceptionDate.setValue(toDate(doc.getPlannedDateOfReceipt()));
