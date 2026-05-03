@@ -102,30 +102,36 @@ public class DocumentForm extends JPanel {
         leftPanel = ViewUtils.createColumnPanel();
 
         comboDocumentType = new JComboBox<>();
+        comboDocumentType.setToolTipText("Select the type of document");
         setDocumentTypes(controller.getAllDocumentType());
         leftPanel.add(ViewUtils.labeledRequired("Document Type", comboDocumentType));
 
         commentary = new JTextArea(4, 20);
-        leftPanel.add(ViewUtils.labeled("Commentaire", new JScrollPane(commentary))); // FIX important
+        commentary.setToolTipText("Optional comment about the document");
+        leftPanel.add(ViewUtils.labeled("Commentaire", new JScrollPane(commentary)));
 
         chkPlannedSendDate = new JCheckBox();
         pickerPlannedSendDate = ViewUtils.createDateSpinner();
+        chkPlannedSendDate.setToolTipText("Required for Delivery and Command types");
         leftPanel.add(ViewUtils.labeledToggleDate("Planned Send Date", pickerPlannedSendDate, chkPlannedSendDate));
-
 
         chkPlannedReceptionDate = new JCheckBox();
         pickerPlannedReceptionDate = ViewUtils.createDateSpinner();
+        chkPlannedReceptionDate.setToolTipText("Check to set a planned reception date");
         leftPanel.add(ViewUtils.labeledToggleDate("Planned Reception Date", pickerPlannedReceptionDate, chkPlannedReceptionDate));
 
         chkEffectiveSendDate = new JCheckBox();
         pickerEffectiveSendDate = ViewUtils.createDateSpinner();
+        chkEffectiveSendDate.setToolTipText("Check to set the effective send date");
         leftPanel.add(ViewUtils.labeledToggleDate("Effective Send Date", pickerEffectiveSendDate, chkEffectiveSendDate));
 
         chkEffectiveReceptionDate = new JCheckBox();
         pickerEffectiveReceptionDate = ViewUtils.createDateSpinner();
+        chkEffectiveReceptionDate.setToolTipText("Check to set the effective reception date");
         leftPanel.add(ViewUtils.labeledToggleDate("Effective Reception Date", pickerEffectiveReceptionDate, chkEffectiveReceptionDate));
 
         spnPaymentDelay = ViewUtils.createNumberSpinner(0, -1, 3650, 1);
+        spnPaymentDelay.setToolTipText("Number of days allowed for payment, minimum 0");
         leftPanel.add(ViewUtils.labeled("Payment delay", spnPaymentDelay));
 
         checkIsChecked = new JCheckBox("Document is checked");
@@ -137,11 +143,15 @@ public class DocumentForm extends JPanel {
 
         comboWorkflowStatus = new JComboBox<>();
         setWorkflowStatus(controller.getAllWorkflowStatus());
+        comboWorkflowStatus.setToolTipText("Current status of the workflow");
         rightPanel.add(ViewUtils.labeledRequired("Workflow Status", comboWorkflowStatus));
 
         isBuy = new JRadioButton("Buy");
+        isBuy.setToolTipText("Document relates to a purchase");
         isSell = new JRadioButton("Sell");
+        isSell.setToolTipText("Document relates to a sale");
         isInternal = new JRadioButton("Internal");
+        isInternal.setToolTipText("Document is internal to the company");
 
         workflowGroup = new ButtonGroup();
         workflowGroup.add(isBuy);
@@ -176,13 +186,15 @@ public class DocumentForm extends JPanel {
         rightPanel.add(ViewUtils.labeled("Postal Code", spnPostalCode));
 
         txtStreet = new JTextField();
+        txtStreet.setToolTipText("Ex: Avenue Louise");
         rightPanel.add(ViewUtils.labeled("Street", txtStreet));
 
         txtCity = new JTextField();
+        txtCity.setToolTipText("Ex: Bruxelles");
         rightPanel.add(ViewUtils.labeled("City", txtCity));
 
         txtCountry = new JTextField();
-        txtCountry.setEditable(true);
+        txtCountry.setToolTipText("Ex: Belgium");
         rightPanel.add(ViewUtils.labeled("Country", txtCountry));
 
         if (currentDocument == null) {
