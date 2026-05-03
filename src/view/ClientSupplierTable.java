@@ -62,55 +62,43 @@ public class ClientSupplierTable extends JPanel {
         JPanel fieldsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         txtLoyalityCard = new JTextField(10);
-        txtLoyalityCard = eventListenrInput(txtLoyalityCard);
-        txtLoyalityCard.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                char c = evt.getKeyChar();
-                if (!Character.isDigit(c)) {
-                    evt.consume();
-                }
-            }
-        });
+        txtLoyalityCard = ViewUtils.addFilterListener(txtLoyalityCard, this::onFilterClick); 
+        txtLoyalityCard = ViewUtils.digitsOnly(txtLoyalityCard);
         fieldsPanel.add(labeled("Client ID", txtLoyalityCard));
 
         txtLastName = new JTextField(10);
-        txtLastName = eventListenrInput(txtLastName);
+        txtLastName = ViewUtils.addFilterListener(txtLastName, this::onFilterClick); 
         fieldsPanel.add(labeled("Last name", txtLastName));
 
         txtFirstName = new JTextField(10);
-        txtFirstName = eventListenrInput(txtFirstName);
+        txtFirstName = ViewUtils.addFilterListener(txtFirstName, this::onFilterClick); 
         fieldsPanel.add(labeled("First name", txtFirstName));
 
         chkIsClient = new JCheckBox("Client");
-        chkIsClient.addActionListener(e -> onFilterClick());
-        fieldsPanel.add(labeled("", chkIsClient));
-
+        chkIsClient = ViewUtils.addFilterListener(chkIsClient, this::onFilterClick);
         chkIsSupplier = new JCheckBox("Supplier");
-        chkIsSupplier.addActionListener(e -> onFilterClick());
-        fieldsPanel.add(labeled("", chkIsSupplier));
+        chkIsSupplier = ViewUtils.addFilterListener(chkIsSupplier, this::onFilterClick);
+        chkIsMember = new JCheckBox("Staff member");
+        chkIsMember = ViewUtils.addFilterListener(chkIsMember, this::onFilterClick);
 
-        chkIsMember = new JCheckBox("Satff member");
-        chkIsMember.addActionListener(e -> onFilterClick());
-        fieldsPanel.add(labeled("", chkIsMember));
-
+        fieldsPanel.add(ViewUtils.labeled(chkIsClient, chkIsClient));
+        fieldsPanel.add(ViewUtils.labeled(chkIsSupplier, chkIsSupplier));
+        fieldsPanel.add(ViewUtils.labeled(chkIsMember, chkIsMember));
 
         searchPanel.add(fieldsPanel, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
         JButton btnSearch = new JButton("Search");
-        btnSearch.addActionListener(e -> onFilterClick());
-
+        btnSearch.addActionListener(e -> onCreateClick());
         JButton btnCreate = new JButton("Create");
         btnCreate.addActionListener(e -> onCreateClick());
-
 
         buttonPanel.add(btnSearch);
         buttonPanel.add(btnCreate);
 
         searchPanel.add(buttonPanel, BorderLayout.SOUTH);
     }
-
     /**
      * Construct the panel containing the document table.
      * The table uses {@link DocumentTableModel} as its data model.
@@ -153,15 +141,6 @@ public class ClientSupplierTable extends JPanel {
         return p;
     }
 
-    private JTextField eventListenrInput(JTextField textField){
-        textField.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) { onFilterClick(); }
-            public void removeUpdate(DocumentEvent e) { onFilterClick(); }
-            public void changedUpdate(DocumentEvent e) { onFilterClick(); }
-        });
-        return textField;
-    }
-
     /**
      * Method called when the search button is clicked.
      *
@@ -202,7 +181,7 @@ public class ClientSupplierTable extends JPanel {
             if (!chkIsClient.isSelected() &&
                     !chkIsSupplier.isSelected() &&
                     !chkIsMember.isSelected()) {
-                typeMatch = true; // aucun filtre => tout afficher
+                typeMatch = true;
             } else {
                 if (chkIsClient.isSelected() && cs.getIsClient()) typeMatch = true;
                 if (chkIsSupplier.isSelected() && cs.getIsSupplier()) typeMatch = true;

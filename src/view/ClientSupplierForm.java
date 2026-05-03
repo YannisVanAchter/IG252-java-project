@@ -106,16 +106,16 @@ public class ClientSupplierForm extends JPanel {
     }
 
         private void buildLeftPanel() {
-        leftPanel = createColumnPanel();
+        leftPanel = ViewUtils.createColumnPanel();
 
         txtName = new JTextField(10);
-        leftPanel.add(labeled("Name", txtName));
+        leftPanel.add(ViewUtils.labeled("Name", txtName));
 
         txtMail = new JTextField(10);
-        leftPanel.add(labeled("Mail", txtMail));
+        leftPanel.add(ViewUtils.labeled("Mail", txtMail));
 
-        becameClientDate = createDateSpinner();
-        leftPanel.add(labeled("Become client date", becameClientDate));
+        becameClientDate = ViewUtils.createDateSpinner();
+        leftPanel.add(ViewUtils.labeled("Become client date", becameClientDate));
 
         JPanel statusPanel = new JPanel();
         statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.X_AXIS));
@@ -131,37 +131,37 @@ public class ClientSupplierForm extends JPanel {
         leftPanel.add(statusPanel);
 
         txtStreet = new JTextField(10);
-        leftPanel.add(labeled("Street", txtStreet));
+        leftPanel.add(ViewUtils.labeled("Street", txtStreet));
         txtCity = new JTextField(10);
-        leftPanel.add(labeled("City", txtCity));
+        leftPanel.add(ViewUtils.labeled("City", txtCity));
         txtCountry = new JTextField(10);
-        leftPanel.add(labeled("Country", txtCountry));
+        leftPanel.add(ViewUtils.labeled("Country", txtCountry));
     }
 
     private void buildRightPanel() {
-        rightPanel = createColumnPanel();
+        rightPanel = ViewUtils.createColumnPanel();
 
         txtFirstName = new JTextField(10);
-        rightPanel.add(labeled("FirstName", txtFirstName));
+        rightPanel.add(ViewUtils.labeled("FirstName", txtFirstName));
 
         txtPhoneNumber = new JTextField(10);
-        rightPanel.add(labeled("Phone Number", txtPhoneNumber));
+        rightPanel.add(ViewUtils.labeled("Phone Number", txtPhoneNumber));
 
         txtVATNumber = new JTextField(10);
-        rightPanel.add(labeled("VAT Number", txtVATNumber));
+        rightPanel.add(ViewUtils.labeled("VAT Number", txtVATNumber));
 
         txtIdLoyaltyCard = new JTextField(10);
-        rightPanel.add(labeled("Loyality cart ID", txtIdLoyaltyCard));
+        rightPanel.add(ViewUtils.labeled("Loyality cart ID", txtIdLoyaltyCard));
 
         spnLoyaltyPoint = new JSpinner(new SpinnerNumberModel(0, 0, 99999, 1));
-        spnLoyaltyPoint.setEditor(new JSpinner.NumberEditor(spnLoyaltyPoint, "#"));        rightPanel.add(labeled("Loyality Point", spnLoyaltyPoint));
+        spnLoyaltyPoint.setEditor(new JSpinner.NumberEditor(spnLoyaltyPoint, "#"));        rightPanel.add(ViewUtils.labeled("Loyality Point", spnLoyaltyPoint));
 
         spnStreetNumber = new JSpinner(new SpinnerNumberModel(1, 0, 99999, 1));
         spnStreetNumber.setEditor(new JSpinner.NumberEditor(spnStreetNumber, "#"));
-        rightPanel.add(labeled("Street number", spnStreetNumber));
+        rightPanel.add(ViewUtils.labeled("Street number", spnStreetNumber));
         spnPostalCode = new JSpinner(new SpinnerNumberModel(1000, 0, 99999, 1));
         spnPostalCode.setEditor(new JSpinner.NumberEditor(spnPostalCode, "#"));
-        rightPanel.add(labeled("Postal Code", spnPostalCode));
+        rightPanel.add(ViewUtils.labeled("Postal Code", spnPostalCode));
 
 
         btnSave = new JButton("Save");
@@ -215,7 +215,7 @@ public class ClientSupplierForm extends JPanel {
         String phoneNumber = txtPhoneNumber.getText().trim();
         String vatNumber = txtVATNumber.getText().trim();
 
-        LocalDate becameClient = getDate(becameClientDate);
+        LocalDate becameClient = ViewUtils.getDate(becameClientDate);
 
         String loyaltyCardId = txtIdLoyaltyCard.getText().trim();
         int loyaltyPoints = (int) spnLoyaltyPoint.getValue();
@@ -295,54 +295,7 @@ public class ClientSupplierForm extends JPanel {
         currentClientSupplier = null;
         isOpenInModal = false;
     }
-
-    private JPanel createColumnPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        return panel;
-    }
-
-    private JSpinner createDateSpinner() {
-        JSpinner spinner = new JSpinner(new SpinnerDateModel());
-        spinner.setEditor(new JSpinner.DateEditor(spinner, "dd/MM/yyyy"));
-        return spinner;
-    }
-
-    private JPanel labeled(String text, JComponent comp) {
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.add(new JLabel(text));
-        p.add(Box.createVerticalStrut(4));
-        //comp.setMaximumSize(new Dimension(Integer.MAX_VALUE, comp.getPreferredSize().height));
-        p.add(comp);
-        return p;
-    }
-
-    /**
-     * Converts a JSpinner containing a Date to a LocalDate.
-     * @param spinner component containing a Date
-     * @return LocalDate corresponding to the spinner's value
-     */
-    private LocalDate getDate(JSpinner spinner) {
-        return ((Date) spinner.getValue())
-                .toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-    }
-
-    /**
-     * Converts a LocalDate to Date.
-     * @param localDate date to convert
-     * @return Date usable by JSpinners
-     */
-    private Date toDate(LocalDate localDate) {
-        if (localDate == null) return null;
-
-        return Date.from(
-                localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
-        );
-    }
-
+    
     /**
      * Loads data from a Client/Supplier into the form.
      * @param cs document to display
@@ -365,7 +318,7 @@ public class ClientSupplierForm extends JPanel {
         txtVATNumber.setText(cs.getVATNumber());
 
         if (cs.getBecameClientDate() != null) {
-            becameClientDate.setValue(toDate(cs.getBecameClientDate()));
+            becameClientDate.setValue(ViewUtils.toDate(cs.getBecameClientDate()));
         }
 
         //txtIdLoyaltyCard.setText(cs.getLoyaltyCard.getId());

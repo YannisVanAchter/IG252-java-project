@@ -94,41 +94,40 @@ public class DocumentForm extends JPanel {
     }
 
     private void buildLeftPanel() throws DataValidationException {
-        leftPanel = createColumnPanel();
+        leftPanel = ViewUtils.createColumnPanel();
 
         comboDocumentType = new JComboBox<>(controller.getAllDocumentType());
         comboDocumentType.setEditable(true);
-        leftPanel.add(labeled("Document Type", comboDocumentType));
+        leftPanel.add(ViewUtils.labeled("Document Type", comboDocumentType));
 
         commentary = new JTextArea(4, 20);
-        leftPanel.add(labeled("Commentaire", new JScrollPane(commentary))); // FIX important
+        leftPanel.add(ViewUtils.labeled("Commentaire", new JScrollPane(commentary))); // FIX important
 
-        pickerPlannedSendDate = createDateSpinner();
-        leftPanel.add(labeled("Planned Send Date", pickerPlannedSendDate));
+        pickerPlannedSendDate = ViewUtils.createDateSpinner();
+        leftPanel.add(ViewUtils.labeled("Planned Send Date", pickerPlannedSendDate));
 
-        pickerPlannedReceptionDate = createDateSpinner();
-        leftPanel.add(labeled("Planned Reception Date", pickerPlannedReceptionDate));
+        pickerPlannedReceptionDate = ViewUtils.createDateSpinner();
+        leftPanel.add(ViewUtils.labeled("Planned Reception Date", pickerPlannedReceptionDate));
 
-        pickerEffectiveSendDate = createDateSpinner();
-        leftPanel.add(labeled("Effective Send Date", pickerEffectiveSendDate));
+        pickerEffectiveSendDate = ViewUtils.createDateSpinner();
+        leftPanel.add(ViewUtils.labeled("Effective Send Date", pickerEffectiveSendDate));
 
-        pickerEffectiveReceptionDate = createDateSpinner();
-        leftPanel.add(labeled("Effective Reception Date", pickerEffectiveReceptionDate)); // FIX bug
+        pickerEffectiveReceptionDate = ViewUtils.createDateSpinner();
+        leftPanel.add(ViewUtils.labeled("Effective Reception Date", pickerEffectiveReceptionDate)); // FIX bug
 
-        spnPaymentDelay = new JSpinner(new SpinnerNumberModel(0, -1, 3650, 1));
-        spnPaymentDelay.setEditor(new JSpinner.NumberEditor(spnPaymentDelay, "#"));
-        leftPanel.add(labeled("Payment delay", spnPaymentDelay));
+        spnPaymentDelay = ViewUtils.createNumberSpinner(0, -1, 3650, 1);
+        leftPanel.add(ViewUtils.labeled("Payment delay", spnPaymentDelay));
 
         checkIsChecked = new JCheckBox("Document is checked");
         leftPanel.add(checkIsChecked);
     }
 
     private void buildRightPanel() throws DataValidationException {
-        rightPanel = createColumnPanel();
+        rightPanel = ViewUtils.createColumnPanel();
 
         comboWorkflowStatus = new JComboBox<>(controller.getAllWorkflowStatus());
         comboWorkflowStatus.setEditable(true);
-        rightPanel.add(labeled("Workflow Status", comboWorkflowStatus));
+        rightPanel.add(ViewUtils.labeled("Workflow Status", comboWorkflowStatus));
 
         rbBuy = new JRadioButton("Buy");
         rbSell = new JRadioButton("Sell");
@@ -145,7 +144,7 @@ public class DocumentForm extends JPanel {
         radioPanel.add(rbSell);
         radioPanel.add(rbInternal);
 
-        rightPanel.add(labeled("WorkflowType", radioPanel));
+        rightPanel.add(ViewUtils.labeled("WorkflowType", radioPanel));
 
         comboClientSupplier = new JComboBox<>(controller.getAllClientNames());
         setClientSuppliers(allClients);
@@ -159,24 +158,22 @@ public class DocumentForm extends JPanel {
         clientPanel.add(Box.createHorizontalStrut(10));
         clientPanel.add(btnNewClient);
 
-        rightPanel.add(labeled("Client / Supplier", clientPanel));
+        rightPanel.add(ViewUtils.labeled("Client / Supplier", clientPanel));
 
-        spnStreetNumber = new JSpinner(new SpinnerNumberModel(1, 0, 10000, 1));
-        spnStreetNumber.setEditor(new JSpinner.NumberEditor(spnStreetNumber, "#"));
-        rightPanel.add(labeled("Street Number", spnStreetNumber));
-        spnPostalCode = new JSpinner(new SpinnerNumberModel(1000, 0, 99999, 1));
-        spnPostalCode.setEditor(new JSpinner.NumberEditor(spnPostalCode, "#"));
-        rightPanel.add(labeled("Postal Code", spnPostalCode));
+        spnStreetNumber = ViewUtils.createNumberSpinner(1, 1, 10000, 1);
+        rightPanel.add(ViewUtils.labeled("Street Number", spnStreetNumber));
+        spnPostalCode = ViewUtils.createNumberSpinner(1000, 1, 99999, 1);
+        rightPanel.add(ViewUtils.labeled("Postal Code", spnPostalCode));
 
         txtStreet = new JTextField();
-        rightPanel.add(labeled("Street", txtStreet));
+        rightPanel.add(ViewUtils.labeled("Street", txtStreet));
 
         txtCity = new JTextField();
-        rightPanel.add(labeled("City", txtCity));
+        rightPanel.add(ViewUtils.labeled("City", txtCity));
 
         txtCountry = new JTextField();
         txtCountry.setEditable(true);
-        rightPanel.add(labeled("Country", txtCountry));
+        rightPanel.add(ViewUtils.labeled("Country", txtCountry));
 
         if (currentDocument != null) {
             btnSave = new JButton("Save");
@@ -227,10 +224,10 @@ public class DocumentForm extends JPanel {
 
         String commentaryText = commentary.getText();
 
-        LocalDate plannedSend = getDate(pickerPlannedSendDate);
-        LocalDate plannedReception = getDate(pickerPlannedReceptionDate);
-        LocalDate effectiveSend = getDate(pickerEffectiveSendDate);
-        LocalDate effectiveReception = getDate(pickerEffectiveReceptionDate);
+        LocalDate plannedSend = ViewUtils.getDate(pickerPlannedSendDate);
+        LocalDate plannedReception = ViewUtils.getDate(pickerPlannedReceptionDate);
+        LocalDate effectiveSend = ViewUtils.getDate(pickerEffectiveSendDate);
+        LocalDate effectiveReception = ViewUtils.getDate(pickerEffectiveReceptionDate);
 
         int paymentDelay = (int) spnPaymentDelay.getValue();
 
@@ -325,52 +322,6 @@ public class DocumentForm extends JPanel {
         }
     }
 
-    private JPanel createColumnPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        return panel;
-    }
-
-    private JSpinner createDateSpinner() {
-        JSpinner spinner = new JSpinner(new SpinnerDateModel());
-        spinner.setEditor(new JSpinner.DateEditor(spinner, "dd/MM/yyyy"));
-        return spinner;
-    }
-
-    private JPanel labeled(String text, JComponent comp) {
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.add(new JLabel(text));
-        p.add(Box.createVerticalStrut(4));
-        p.add(comp);
-        return p;
-    }
-
-    /**
-     * Converts a JSpinner containing a Date to a LocalDate.
-     * @param spinner component containing a Date
-     * @return LocalDate corresponding to the spinner's value
-     */
-    private LocalDate getDate(JSpinner spinner) {
-        return ((Date) spinner.getValue())
-                .toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-    }
-
-    /**
-     * Converts a LocalDate to Date.
-     * @param localDate date to convert
-     * @return Date usable by JSpinners
-     */
-    private Date toDate(LocalDate localDate) {
-        if (localDate == null) return null;
-
-        return Date.from(
-                localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
-        );
-    }
-
     /**
      * Updates the client/supplier dropdown list with available entries.
      *
@@ -402,16 +353,16 @@ public class DocumentForm extends JPanel {
         commentary.setText(doc.getComment());
 
         if (doc.getPlannedSendDate() != null)
-            pickerPlannedSendDate.setValue(toDate(doc.getPlannedSendDate()));
+            pickerPlannedSendDate.setValue(ViewUtils.toDate(doc.getPlannedSendDate()));
 
         if (doc.getPlannedDateOfReceipt() != null)
-            pickerPlannedReceptionDate.setValue(toDate(doc.getPlannedDateOfReceipt()));
+            pickerPlannedReceptionDate.setValue(ViewUtils.toDate(doc.getPlannedDateOfReceipt()));
 
         if (doc.getActualSendDate() != null)
-            pickerEffectiveSendDate.setValue(toDate(doc.getActualSendDate()));
+            pickerEffectiveSendDate.setValue(ViewUtils.toDate(doc.getActualSendDate()));
 
         if (doc.getActualDateOfReceipt() != null)
-            pickerEffectiveReceptionDate.setValue(toDate(doc.getActualDateOfReceipt()));
+            pickerEffectiveReceptionDate.setValue(ViewUtils.toDate(doc.getActualDateOfReceipt()));
 
         spnPaymentDelay.setValue(doc.getPaymentDelay());
 

@@ -72,55 +72,41 @@ public class DocumentTable extends JPanel {
      */
     private void buildSearchPanel() throws DataValidationException {
         searchPanel = new JPanel(new BorderLayout());
-
         JPanel fieldsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        idDocument = new JTextField(10);
-        idDocument.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                char c = evt.getKeyChar();
-                if (!Character.isDigit(c)) {
-                    evt.consume();
-                }
-            }
-        });
-        idDocument = eventListenrInput(idDocument);
-        fieldsPanel.add(labeled("Document ID", idDocument));
+        idDocument = ViewUtils.digitsOnly(new JTextField(10));
+        idDocument = ViewUtils.addFilterListener(idDocument, this::onFilterClick);
+        fieldsPanel.add(ViewUtils.labeled("Document ID", idDocument));
 
         comboTypeDocumentFilter = new JComboBox<>(controller.getAllDocumentType());
-        comboTypeDocumentFilter.addActionListener(e -> onFilterClick());
-        fieldsPanel.add(labeled("Document type", comboTypeDocumentFilter));
+        comboTypeDocumentFilter = ViewUtils.addFilterListener(comboTypeDocumentFilter, this::onFilterClick); 
+        fieldsPanel.add(ViewUtils.labeled("Document type", comboTypeDocumentFilter));
 
         useStartDate = new JCheckBox("Start date");
-        startCreationDate = new JSpinner(new SpinnerDateModel());
-        startCreationDate.setEditor(new JSpinner.DateEditor(startCreationDate, "dd/MM/yyyy"));
+        startCreationDate = ViewUtils.createDateSpinner();
         startCreationDate.addChangeListener(e -> onFilterClick());
         startCreationDate.setEnabled(false);
-        useStartDate.addActionListener(e -> {
+        useStartDate.addActionListener(e -> {                          
             startCreationDate.setEnabled(useStartDate.isSelected());
             onFilterClick();
         });
-        fieldsPanel.add(labeled(useStartDate, startCreationDate));
+        fieldsPanel.add(ViewUtils.labeled(useStartDate, startCreationDate));
 
         useEndDate = new JCheckBox("End date");
-        endCreationDate = new JSpinner(new SpinnerDateModel());
-        endCreationDate.setEditor(new JSpinner.DateEditor(endCreationDate, "dd/MM/yyyy"));
+        endCreationDate = ViewUtils.createDateSpinner();
         endCreationDate.addChangeListener(e -> onFilterClick());
         endCreationDate.setEnabled(false);
-        useEndDate.addActionListener(e -> {
+        useEndDate.addActionListener(e -> {                            
             endCreationDate.setEnabled(useEndDate.isSelected());
             onFilterClick();
         });
-        fieldsPanel.add(labeled(useEndDate, endCreationDate));
+        fieldsPanel.add(ViewUtils.labeled(useEndDate, endCreationDate));
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-
         JButton btnSearch = new JButton("Search");
         btnSearch.addActionListener(e -> onFilterClick());
-
         JButton btnCreate = new JButton("Create");
         btnCreate.addActionListener(e -> onCreateClick());
-
 
         buttonPanel.add(btnSearch);
         buttonPanel.add(btnCreate);

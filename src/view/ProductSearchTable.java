@@ -53,31 +53,25 @@ public class ProductSearchTable extends JPanel {
     private JPanel buildSearchPanel() {
         JPanel fieldsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        txtProductName = new JTextField(10);
-        txtProductName.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) { onFilterClick(); }
-            public void removeUpdate(DocumentEvent e) { onFilterClick(); }
-            public void changedUpdate(DocumentEvent e) { onFilterClick(); }
-        });
-        fieldsPanel.add(labeled("Product name", txtProductName));
+        txtProductName = ViewUtils.addFilterListener(new JTextField(10), this::onFilterClick); 
+        fieldsPanel.add(ViewUtils.labeled("Product name", txtProductName));
 
         comboCategory = new JComboBox<>(controller.getCategoryNames());
-        comboCategory.addActionListener(e -> onFilterClick());
-        fieldsPanel.add(labeled("Category", comboCategory));
+        comboCategory = ViewUtils.addFilterListener(comboCategory, this::onFilterClick); 
+        fieldsPanel.add(ViewUtils.labeled("Category", comboCategory));
 
-        chkPromotion = new JCheckBox("Promotion only");
-        chkPromotion.addActionListener(e -> onFilterClick());
-        fieldsPanel.add(labeled("", chkPromotion));
+        chkPromotion = ViewUtils.addFilterListener(new JCheckBox("Promotion only"), this::onFilterClick); 
+        fieldsPanel.add(ViewUtils.labeled("", chkPromotion));
 
         btnSearch = new JButton("Search");
         btnSearch.addActionListener(e -> onFilterClick());
+        fieldsPanel.add(btnSearch);
         fieldsPanel.add(btnSearch);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(fieldsPanel, BorderLayout.CENTER);
         return panel;
     }
-
 
     private JPanel buildTablePanel() {
         model = new ProductTableModel(displayProducts);
