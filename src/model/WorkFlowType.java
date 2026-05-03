@@ -2,6 +2,10 @@ package model;
 
 import exception.DataValidationException;
 
+/**
+ * A workflow type define if the linked workflow is a buy, sell or internal workflow.
+ * It can not be two or more of these at the same time.
+ */
 public class WorkFlowType {
     private String name;
     private boolean isBuy = false;
@@ -9,7 +13,7 @@ public class WorkFlowType {
     private boolean isInternal = false;
 
     public WorkFlowType(String name, boolean isBuy, boolean isSell, boolean isInternal) throws DataValidationException {
-        this.name = name;
+        setName(name);
         setIsBuy(isBuy);
         setIsSell(isSell);
         setIsInternal(isInternal);
@@ -31,9 +35,16 @@ public class WorkFlowType {
 
     public String getName() { return name; }
 
+    private void setName(String name) throws DataValidationException {
+        if (name == null || name.trim().isEmpty()) {
+            throw new DataValidationException("Workflow type name cannot be null or empty.");
+        }
+        this.name = name;
+    }
+
     public boolean getIsBuy() { return isBuy; }
 
-    public final void setIsBuy(boolean isBuy) throws DataValidationException {
+    private void setIsBuy(boolean isBuy) throws DataValidationException {
         if (getIsSell() || getIsInternal()) {
             throw new DataValidationException("Cannot set isBuy to true when isSell or isInternal is already true.");
         }
@@ -42,7 +53,7 @@ public class WorkFlowType {
 
     public boolean getIsSell() { return isSell; }
 
-    public final void setIsSell(boolean isSell) throws DataValidationException {
+    private void setIsSell(boolean isSell) throws DataValidationException {
         if (getIsBuy() || getIsInternal()) {
             throw new DataValidationException("Cannot set isSell to true when isBuy or isInternal is already true.");
         }
@@ -51,7 +62,7 @@ public class WorkFlowType {
 
     public boolean getIsInternal() { return isInternal; }
 
-    public final void setIsInternal(boolean isInternal) throws DataValidationException {
+    private void setIsInternal(boolean isInternal) throws DataValidationException {
         if (getIsBuy() || getIsSell()) {
             throw new DataValidationException("Cannot set isInternal to true when isBuy or isSell is already true.");
         }

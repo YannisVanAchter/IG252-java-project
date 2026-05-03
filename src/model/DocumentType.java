@@ -1,5 +1,8 @@
 package model;
 
+/**
+ * A document type with a name.
+ */
 public class DocumentType {
     private String name;
 

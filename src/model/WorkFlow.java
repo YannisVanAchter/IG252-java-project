@@ -2,6 +2,9 @@ package model;
 
 import exception.DataValidationException;
 
+/**
+ * A workfow as an id, a status and a workflow type.
+ */
 public class WorkFlow {
     private int id;
     private Status status;
@@ -17,7 +20,7 @@ public class WorkFlow {
         return id;
     }
 
-    private final void setId(int id) throws DataValidationException {
+    private void setId(int id) throws DataValidationException {
         if (id < 0) {
             throw new DataValidationException("ID cannot be negative.");
         }
@@ -28,7 +31,7 @@ public class WorkFlow {
         return status;
     }
 
-    private final void setStatus(Status status) throws DataValidationException {
+    private void setStatus(Status status) throws DataValidationException {
         if (status == null) {
             throw new DataValidationException("Status cannot be null.");
         }
@@ -39,7 +42,7 @@ public class WorkFlow {
         return workflowType;
     }
 
-    private final void setWorkflowType(WorkFlowType workflowType) throws DataValidationException {
+    private void setWorkflowType(WorkFlowType workflowType) throws DataValidationException {
         if (workflowType == null) {
             throw new DataValidationException("Workflow type cannot be null.");
         }

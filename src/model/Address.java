@@ -30,7 +30,11 @@ public class Address {
 
     public String getStreetName() { return streetName; }
 
-    private void setStreetName(String streetName) {
+    private void setStreetName(String streetName) throws DataValidationException {
+        if (streetName == null || streetName.isEmpty()) {
+            String message = "Street name setting error, street name is null or empty when it shouldn't (current value: " + streetName + ")";
+            throw new DataValidationException(message);
+        }
         this.streetName = streetName;
     }
 

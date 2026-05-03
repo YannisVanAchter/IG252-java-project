@@ -6,7 +6,13 @@ import java.util.List;
 
 import exception.DataValidationException;
 
+/**
+ * This class represents a document, which can be of various types (e.g., delivery, command, etc.).
+ * It contains certains compulsory fields like id, date of creation, document type and is checked. 
+ * Regarding the optional fields, they become compulsory depending on the document type.
+ */
 public class Document {
+    // TODO: discus how do we plan to name the differents document types, and if we want to use an enum for that
     private static final List<DocumentType> TYPES_REQUIRING_PLANNED_SEND_DATE =
         Arrays.asList(new DocumentType("Delivery"), new DocumentType("Command"));
 
@@ -43,7 +49,7 @@ public class Document {
     public int getId() { return id; }
 
     private void setId(int id) throws DataValidationException {
-        if (id <= 0) {
+        if (id < 0) {
             String message = "ID setting error, ID is lower or equal to 0 (zero) when it shouldn't (current value: " + id + ")";
             throw new DataValidationException(message);
         }

@@ -40,7 +40,7 @@ public class ClientSupplier {
     public int getId() { return id; }
 
     private void setId(int id) throws DataValidationException {
-        if (id <= 0) {
+        if (id < 0) {
             String message = "ID setting error, ID is lower or equal to 0 (zero) when it shouldn't (current value: " + id + ")";
             throw new DataValidationException(message);
         }
@@ -89,13 +89,21 @@ public class ClientSupplier {
 
     public String getName() { return name; }
 
-    private void setName(String name) {
+    private void setName(String name) throws DataValidationException {
+        if (name == null || name.isEmpty()) {
+            String message = "Name setting error, name is null or empty when it shouldn't (current value: " + name + ")";
+            throw new DataValidationException(message);
+        }
         this.name = name;
     }
 
     public String getFirstname() { return firstname; }
 
-    private void setFirstname(String firstname) {
+    private void setFirstname(String firstname) throws DataValidationException {
+        if (getIsClient() && (firstname == null || firstname.isEmpty())) {
+            String message = "Firstname setting error, firstname is null or empty when it shouldn't (current value: " + firstname + ")";
+            throw new DataValidationException(message);
+        }
         this.firstname = firstname;
     }
 
@@ -120,6 +128,10 @@ public class ClientSupplier {
             String message = "Phone number setting error, phone number is null or empty when it shouldn't (current value: " + phoneNumber + ")";
             throw new DataValidationException(message);
         }
+        if (!phoneNumber.matches("^[0-9]+$")) {
+            String message = "Phone number setting error, phone number contains non-digit characters when it shouldn't (current value: " + phoneNumber + ")";
+            throw new DataValidationException(message);
+        }
         this.phoneNumber = phoneNumber;
     }
 
@@ -138,6 +150,10 @@ public class ClientSupplier {
     private void setVATNumber(String VATNumber) throws DataValidationException {
         if (getIsSupplier() && (VATNumber == null || VATNumber.isEmpty())) {
             String message = "VAT number setting error, VAT number is null or empty when it shouldn't (current value: " + VATNumber + ")";
+            throw new DataValidationException(message);
+        }
+        if (getIsSupplier() && !VATNumber.matches("^[A-Z]{2}[0-9A-Z]+$")) {
+            String message = "VAT number setting error, VAT number does not match the required format (current value: " + VATNumber + ")";
             throw new DataValidationException(message);
         }
         this.VATNumber = VATNumber;

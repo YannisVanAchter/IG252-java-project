@@ -11,7 +11,7 @@ import exception.DataValidationException;
 public class Locality {
     private String name;
     private int postalCode;
-    private final Integer MAX_POSTAL_CODE_VALUE = Integer.MAX_VALUE;
+    public static final Integer MAX_POSTAL_CODE_VALUE = Integer.MAX_VALUE;
 
     public Locality(String name, int postalCode) throws DataValidationException {
         setName(name);
@@ -20,7 +20,11 @@ public class Locality {
 
     public String getName() { return name; }
 
-    private void setName(String name) {
+    private void setName(String name) throws DataValidationException {
+        if (name == null || name.isEmpty()) {
+            String message = "Name setting error, name is null or empty when it shouldn't (current value: " + name + ")";
+            throw new DataValidationException(message);
+        }
         this.name = name;
     }
 
