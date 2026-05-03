@@ -112,16 +112,21 @@ public class ClientSupplierForm extends JPanel {
         leftPanel = ViewUtils.createColumnPanel();
 
         txtName = new JTextField(10);
-        leftPanel.add(ViewUtils.labeled("Name", txtName));
+        txtName.setToolTipText("Ex: Dupont");
+        leftPanel.add(ViewUtils.labeledRequired("Name", txtName));
 
         txtMail = new JTextField(10);
-        leftPanel.add(ViewUtils.labeled("Mail", txtMail));
+        txtMail.setToolTipText("Ex: jean.dupont@email.com");
+        leftPanel.add(ViewUtils.labeledRequired("Mail", txtMail));
 
         becameClientDate = ViewUtils.createDateSpinner();
         leftPanel.add(ViewUtils.labeled("Become client date", becameClientDate));
 
         JPanel statusPanel = new JPanel();
         statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.X_AXIS));
+        JLabel lblType = new JLabel("Type* : ");
+        statusPanel.setToolTipText("At least one type must be selected");
+        statusPanel.add(lblType);
         chkIsClient = new JCheckBox("Client");
         chkIsSupplier = new JCheckBox("Supplier");
         chkIsMember = new JCheckBox("Staff member");
@@ -134,24 +139,30 @@ public class ClientSupplierForm extends JPanel {
         leftPanel.add(statusPanel);
 
         txtStreet = new JTextField(10);
-        leftPanel.add(ViewUtils.labeled("Street", txtStreet));
+        txtStreet.setToolTipText("Ex: Avenue Louise");
+        leftPanel.add(ViewUtils.labeledRequired("Street", txtStreet));
         txtCity = new JTextField(10);
-        leftPanel.add(ViewUtils.labeled("City", txtCity));
+        txtStreet.setToolTipText("Ex: Bruxelles");
+        leftPanel.add(ViewUtils.labeledRequired("City", txtCity));
         txtCountry = new JTextField(10);
-        leftPanel.add(ViewUtils.labeled("Country", txtCountry));
+        txtCountry.setToolTipText("Ex: Bruxelles");
+        leftPanel.add(ViewUtils.labeledRequired("Country", txtCountry));
     }
 
     private void buildRightPanel() {
         rightPanel = ViewUtils.createColumnPanel();
 
         txtFirstName = new JTextField(10);
-        rightPanel.add(ViewUtils.labeled("FirstName", txtFirstName));
+        rightPanel.add(ViewUtils.labeledRequired("FirstName", txtFirstName));
 
         txtPhoneNumber = new JTextField(10);
-        rightPanel.add(ViewUtils.labeled("Phone Number", txtPhoneNumber));
+        txtPhoneNumber.setToolTipText("ex: 0032123456");
+        txtPhoneNumber= ViewUtils.digitsOnly(txtPhoneNumber);
+        rightPanel.add(ViewUtils.labeledRequired("Phone Number", txtPhoneNumber));
 
         txtVATNumber = new JTextField(10);
-        rightPanel.add(ViewUtils.labeled("VAT Number", txtVATNumber));
+        txtVATNumber.setToolTipText("BE + 10 digits");
+        rightPanel.add(ViewUtils.labeledRequired("VAT Number", txtVATNumber));
 
         txtIdLoyaltyCard = new JTextField(10);
         rightPanel.add(ViewUtils.labeled("Loyality cart ID", txtIdLoyaltyCard));
@@ -162,10 +173,10 @@ public class ClientSupplierForm extends JPanel {
 
         spnStreetNumber = new JSpinner(new SpinnerNumberModel(1, 0, 99999, 1));
         spnStreetNumber.setEditor(new JSpinner.NumberEditor(spnStreetNumber, "#"));
-        rightPanel.add(ViewUtils.labeled("Street number", spnStreetNumber));
+        rightPanel.add(ViewUtils.labeledRequired("Street number", spnStreetNumber));
         spnPostalCode = new JSpinner(new SpinnerNumberModel(1000, 0, 99999, 1));
         spnPostalCode.setEditor(new JSpinner.NumberEditor(spnPostalCode, "#"));
-        rightPanel.add(ViewUtils.labeled("Postal Code", spnPostalCode));
+        rightPanel.add(ViewUtils.labeledRequired("Postal Code", spnPostalCode));
 
 
         btnSave = new JButton("Save");
@@ -188,31 +199,58 @@ public class ClientSupplierForm extends JPanel {
     }
 
     /**
-     * Validates user input and sends the document data to {@link ClientSupplierController}
-     * for creation.
-     * <p>
-     * If required fields are missing, a dialog is displayed and the process
-     * is stopped.
-     * <p>
-     * If {@code openingInModal} is true. The modal closes and DocumentForm
-     * can get the new ClientSupplier.
+     * Validates all required fields in the document form.
+     *
+     * @return true if all required fields are valid, false otherwise
+     */
+    private Boolean validateForm() {
+        if (txtName.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Name is required.", "Validation", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        if (txtFirstName.getText().trim().isEmpty()) {
+            if (chkIsMember.isSelected() || chkIsClient.isSelected()) {
+                JOptionPane.showMessageDialog(this, "First name is required. \n Not required for supplier.", "Validation", JOptionPane.WARNING_MESSAGE);
+                return false;
+            }
+        }
+        if (txtMail.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Mail is required.", "Validation", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        if (txtPhoneNumber.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Phone number is required.", "Validation", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        if (txtVATNumber.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "VAT number is required.", "Validation", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        if (!chkIsClient.isSelected() && !chkIsSupplier.isSelected() && !chkIsMember.isSelected()) {
+            JOptionPane.showMessageDialog(this, "At least one type must be selected (Client, Supplier or Staff).", "Validation", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        if (txtStreet.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Street is required.", "Validation", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        if (txtCity.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "City is required.", "Validation", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+//        if (txtCountry.getText().trim().isEmpty()) {
+//            JOptionPane.showMessageDialog(this, "Country is required.", "Validation", JOptionPane.WARNING_MESSAGE);
+//            return false;
+//        }
+        return true;
+    }
+    /**
+     * Validates user input and sends the document data to {@link DocumentController}
+     * for creation or update.
      */
     private void saveEditForm() {
+        if (!validateForm()) return;
 
-        if (txtName.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Name required");
-            return;
-        }
-
-        if (txtMail.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Mail required");
-            return;
-        }
-
-        if (!chkIsClient.isSelected() && !chkIsSupplier.isSelected() && !chkIsMember.isSelected()) {
-            JOptionPane.showMessageDialog(this, "Status required");
-            return;
-        }
         String name = txtName.getText().trim();
         String firstName = txtFirstName.getText().trim();
         String mail = txtMail.getText().trim();
@@ -257,7 +295,7 @@ public class ClientSupplierForm extends JPanel {
                 );
             }
 
-            JOptionPane.showMessageDialog(this, "Client/Supplier saved!");
+            JOptionPane.showMessageDialog(this, "Client/Supplier saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
 
             if (isOpenInModal != null && isOpenInModal) {
                 SwingUtilities.getWindowAncestor(this).dispose();
@@ -265,10 +303,9 @@ public class ClientSupplierForm extends JPanel {
                 mainWindow.goBack();
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Unexpected error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
     /**
      * Resets all input fields in the form to their default values.
      */
@@ -304,7 +341,7 @@ public class ClientSupplierForm extends JPanel {
      * Loads data from a Client/Supplier into the form.
      *
      * @param cs document to display
-     * If cs is null the form is in create mode
+     *           If cs is null the form is in create mode
      */
     public void loadClientSupplier(ClientSupplier cs) {
 

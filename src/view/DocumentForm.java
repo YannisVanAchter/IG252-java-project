@@ -2,16 +2,12 @@ package view;
 
 import controller.DocumentController;
 import exception.DataValidationException;
-import model.ClientSupplier;
-import model.Document;
-import model.DocumentType;
-import model.Status;
+import model.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.time.*;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
 //Todo : uncomment country in loadDocument when available
 
 /**
@@ -41,6 +37,11 @@ public class DocumentForm extends JPanel {
     private JSpinner pickerEffectiveSendDate;
     private JSpinner pickerEffectiveReceptionDate;
     private JSpinner spnPaymentDelay;
+
+    private JCheckBox chkPlannedSendDate;
+    private JCheckBox chkPlannedReceptionDate;
+    private JCheckBox chkEffectiveSendDate;
+    private JCheckBox chkEffectiveReceptionDate;
 
     private JComboBox<ComboBoxItem<DocumentType>> comboDocumentType;
     private JComboBox<ComboBoxItem<ClientSupplier>> comboClientSupplier;
@@ -102,22 +103,27 @@ public class DocumentForm extends JPanel {
 
         comboDocumentType = new JComboBox<>();
         setDocumentTypes(controller.getAllDocumentType());
-        leftPanel.add(ViewUtils.labeled("Document Type", comboDocumentType));
+        leftPanel.add(ViewUtils.labeledRequired("Document Type", comboDocumentType));
 
         commentary = new JTextArea(4, 20);
         leftPanel.add(ViewUtils.labeled("Commentaire", new JScrollPane(commentary))); // FIX important
 
+        chkPlannedSendDate = new JCheckBox();
         pickerPlannedSendDate = ViewUtils.createDateSpinner();
-        leftPanel.add(ViewUtils.labeled("Planned Send Date", pickerPlannedSendDate));
+        leftPanel.add(ViewUtils.labeledToggleDate("Planned Send Date", pickerPlannedSendDate, chkPlannedSendDate));
 
+
+        chkPlannedReceptionDate = new JCheckBox();
         pickerPlannedReceptionDate = ViewUtils.createDateSpinner();
-        leftPanel.add(ViewUtils.labeled("Planned Reception Date", pickerPlannedReceptionDate));
+        leftPanel.add(ViewUtils.labeledToggleDate("Planned Reception Date", pickerPlannedReceptionDate, chkPlannedReceptionDate));
 
+        chkEffectiveSendDate = new JCheckBox();
         pickerEffectiveSendDate = ViewUtils.createDateSpinner();
-        leftPanel.add(ViewUtils.labeled("Effective Send Date", pickerEffectiveSendDate));
+        leftPanel.add(ViewUtils.labeledToggleDate("Effective Send Date", pickerEffectiveSendDate, chkEffectiveSendDate));
 
+        chkEffectiveReceptionDate = new JCheckBox();
         pickerEffectiveReceptionDate = ViewUtils.createDateSpinner();
-        leftPanel.add(ViewUtils.labeled("Effective Reception Date", pickerEffectiveReceptionDate)); // FIX bug
+        leftPanel.add(ViewUtils.labeledToggleDate("Effective Reception Date", pickerEffectiveReceptionDate, chkEffectiveReceptionDate));
 
         spnPaymentDelay = ViewUtils.createNumberSpinner(0, -1, 3650, 1);
         leftPanel.add(ViewUtils.labeled("Payment delay", spnPaymentDelay));
@@ -131,7 +137,7 @@ public class DocumentForm extends JPanel {
 
         comboWorkflowStatus = new JComboBox<>();
         setWorkflowStatus(controller.getAllWorkflowStatus());
-        rightPanel.add(ViewUtils.labeled("Workflow Status", comboWorkflowStatus));
+        rightPanel.add(ViewUtils.labeledRequired("Workflow Status", comboWorkflowStatus));
 
         isBuy = new JRadioButton("Buy");
         isSell = new JRadioButton("Sell");
@@ -148,7 +154,7 @@ public class DocumentForm extends JPanel {
         radioPanel.add(isSell);
         radioPanel.add(isInternal);
 
-        rightPanel.add(ViewUtils.labeled("WorkflowType", radioPanel));
+        rightPanel.add(ViewUtils.labeledRequired("WorkflowType", radioPanel));
 
         comboClientSupplier = new JComboBox<>();
         setClientSuppliers(allClients);
@@ -179,7 +185,7 @@ public class DocumentForm extends JPanel {
         txtCountry.setEditable(true);
         rightPanel.add(ViewUtils.labeled("Country", txtCountry));
 
-        if (currentDocument != null) {
+        if (currentDocument == null) {
             btnSave = new JButton("Save");
 
         } else {
@@ -198,40 +204,50 @@ public class DocumentForm extends JPanel {
     }
 
     /**
-     * Validates user input and sends the document data to the controller
-     * for creation.
-     * <p>
-     * If required fields are missing, a dialog is displayed and the process
-     * is stopped.
+     * Validates all required fields in the document form.
+     *
+     * @return true if all required fields are valid, false otherwise
+     */
+    private boolean validateForm() {
+        if (comboDocumentType.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(this, "Document type is required.", "Validation", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        if (comboWorkflowStatus.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(this, "Workflow status is required.", "Validation", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        if (!isBuy.isSelected() && !isSell.isSelected() && !isInternal.isSelected()) {
+            JOptionPane.showMessageDialog(this, "Workflow type (Buy/Sell/Internal) is required.", "Validation", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        if (!(comboClientSupplier.getSelectedItem() instanceof ComboBoxItem)) {
+            JOptionPane.showMessageDialog(this, "Client/Supplier is required.", "Validation", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+
+        ComboBoxItem<DocumentType> typeItem = (ComboBoxItem<DocumentType>) comboDocumentType.getSelectedItem();
+        String typeName = typeItem.getObject().getName();
+        if ((typeName.equals("Delivery") || typeName.equals("Command")) && !chkPlannedSendDate.isSelected()) {
+            JOptionPane.showMessageDialog(this, "Planned send date is required for Delivery and Command types.", "Validation", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Validates user input and sends the document data to {@link DocumentController}
+     * for creation or update.
      */
     private void saveEditForm() {
+        if (!validateForm()) return;
 
-        if (comboDocumentType.getSelectedItem() == null || comboDocumentType.getSelectedItem().toString().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Document type required");
-            return;
-        }
+        String commentaryText = commentary.getText().trim();
 
-        if (comboWorkflowStatus.getSelectedItem() == null) {
-            JOptionPane.showMessageDialog(this, "Workflow status required");
-            return;
-        }
-
-        if (comboClientSupplier.getSelectedItem() == null) {
-            JOptionPane.showMessageDialog(this, "Client/Supplier required");
-            return;
-        }
-
-        if (!isBuy.isSelected() && !isSell.isSelected() && !isInternal.isSelected()) {
-            JOptionPane.showMessageDialog(this, "Workflow type (Buy/Sell/Internal) required");
-            return;
-        }
-
-        String commentaryText = commentary.getText();
-
-        LocalDate plannedSend = ViewUtils.getDate(pickerPlannedSendDate);
-        LocalDate plannedReception = ViewUtils.getDate(pickerPlannedReceptionDate);
-        LocalDate effectiveSend = ViewUtils.getDate(pickerEffectiveSendDate);
-        LocalDate effectiveReception = ViewUtils.getDate(pickerEffectiveReceptionDate);
+        LocalDate plannedSend = chkPlannedSendDate.isSelected() ? ViewUtils.getDate(pickerPlannedSendDate) : null;
+        LocalDate plannedReception = chkPlannedReceptionDate.isSelected() ? ViewUtils.getDate(pickerPlannedReceptionDate) : null;
+        LocalDate effectiveSend = chkEffectiveSendDate.isSelected() ? ViewUtils.getDate(pickerEffectiveSendDate) : null;
+        LocalDate effectiveReception = chkEffectiveReceptionDate.isSelected() ? ViewUtils.getDate(pickerEffectiveReceptionDate) : null;
 
         int paymentDelay = (int) spnPaymentDelay.getValue();
 
@@ -244,16 +260,16 @@ public class DocumentForm extends JPanel {
         ComboBoxItem<ClientSupplier> clientItem = (ComboBoxItem<ClientSupplier>) comboClientSupplier.getSelectedItem();
         ClientSupplier clientSupplier = clientItem.getObject();
 
-        boolean isBuy = this.isBuy.isSelected();
-        boolean isSell = this.isSell.isSelected();
-        boolean isInternal = this.isInternal.isSelected();
+        boolean isBuySelected = isBuy.isSelected();
+        boolean isSellSelected = isSell.isSelected();
+        boolean isInternalSelected = isInternal.isSelected();
 
         int streetNumber = (int) spnStreetNumber.getValue();
         int postalCode = (int) spnPostalCode.getValue();
 
-        String street = txtStreet.getText();
-        String city = txtCity.getText();
-        String country = txtCountry.getText();
+        String street = txtStreet.getText().trim();
+        String city = txtCity.getText().trim();
+        String country = txtCountry.getText().trim();
 
         boolean isChecked = checkIsChecked.isSelected();
 
@@ -263,9 +279,8 @@ public class DocumentForm extends JPanel {
                         documentType, commentaryText,
                         plannedSend, plannedReception,
                         effectiveSend, effectiveReception,
-                        paymentDelay,
-                        workflowStatus,
-                        isBuy, isSell, isInternal,
+                        paymentDelay, workflowStatus,
+                        isBuySelected, isSellSelected, isInternalSelected,
                         clientSupplier,
                         streetNumber, postalCode,
                         street, city, country,
@@ -277,7 +292,7 @@ public class DocumentForm extends JPanel {
                         plannedSend, plannedReception,
                         effectiveSend, effectiveReception,
                         paymentDelay, workflowStatus,
-                        isBuy, isSell, isInternal,
+                        isBuySelected, isSellSelected, isInternalSelected,
                         clientSupplier,
                         streetNumber, postalCode,
                         street, city, country,
@@ -285,13 +300,14 @@ public class DocumentForm extends JPanel {
                 );
             }
 
-            JOptionPane.showMessageDialog(this, "Document saved !");
+            JOptionPane.showMessageDialog(this, "Document saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             clearForm();
             mainWindow.goBack();
 
+        } catch (DataValidationException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Validation", JOptionPane.WARNING_MESSAGE);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
-            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Unexpected error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -302,6 +318,11 @@ public class DocumentForm extends JPanel {
         commentary.setText("");
 
         Date now = new Date();
+
+        chkPlannedSendDate.setSelected(false);
+        chkPlannedReceptionDate.setSelected(false);
+        chkEffectiveSendDate.setSelected(false);
+        chkEffectiveReceptionDate.setSelected(false);
 
         pickerPlannedSendDate.setValue(now);
         pickerPlannedReceptionDate.setValue(now);
@@ -333,10 +354,10 @@ public class DocumentForm extends JPanel {
     }
 
     /**
-     * Loads data from a Document into the form.
+     * Loads data from a Document into the form.a
      *
      * @param doc document to display
-     * If doc is null the form is in create mode
+     *            If doc is null, the form is in create mode
      */
     public void loadDocument(Document doc) {
         if (doc == null) {
@@ -349,17 +370,27 @@ public class DocumentForm extends JPanel {
 
         commentary.setText(doc.getComment());
 
-        if (doc.getPlannedSendDate() != null)
+        if (doc.getPlannedSendDate() != null) {
+            chkPlannedSendDate.setSelected(true);
+            pickerPlannedSendDate.setEnabled(true);
             pickerPlannedSendDate.setValue(ViewUtils.toDate(doc.getPlannedSendDate()));
-
-        if (doc.getPlannedDateOfReceipt() != null)
+        }
+        if (doc.getPlannedDateOfReceipt() != null) {
+            chkPlannedReceptionDate.setSelected(true);
+            pickerPlannedReceptionDate.setEnabled(true);
             pickerPlannedReceptionDate.setValue(ViewUtils.toDate(doc.getPlannedDateOfReceipt()));
-
-        if (doc.getActualSendDate() != null)
+        }
+        if (doc.getActualSendDate() != null) {
+            chkEffectiveSendDate.setSelected(true);
+            pickerEffectiveSendDate.setEnabled(true);
             pickerEffectiveSendDate.setValue(ViewUtils.toDate(doc.getActualSendDate()));
-
-        if (doc.getActualDateOfReceipt() != null)
+        }
+        if (doc.getActualDateOfReceipt() != null) {
+            chkEffectiveReceptionDate.setSelected(true);
+            pickerEffectiveReceptionDate.setEnabled(true);
             pickerEffectiveReceptionDate.setValue(ViewUtils.toDate(doc.getActualDateOfReceipt()));
+        }
+
 
         spnPaymentDelay.setValue(doc.getPaymentDelay());
 
@@ -391,7 +422,7 @@ public class DocumentForm extends JPanel {
 
         for (ClientSupplier cs : clientSupplier) {
             String string = cs.getName() + " " + (cs.getFirstname() != null ? cs.getFirstname() : "");
-            comboClientSupplier.addItem(new ComboBoxItem<>(cs,string));
+            comboClientSupplier.addItem(new ComboBoxItem<>(cs, string));
         }
     }
 

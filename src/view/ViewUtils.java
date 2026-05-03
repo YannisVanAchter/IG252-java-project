@@ -3,8 +3,8 @@ package view;
 import model.DocumentType;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.event.*;
+import java.awt.*;
 import java.time.*;
 import java.util.Date;
 
@@ -24,7 +24,6 @@ public class ViewUtils {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         return panel;
     }
-
 
     /**
      * Creates a JPanel containing a JLabel with the specified text and a JComponent.
@@ -53,6 +52,9 @@ public class ViewUtils {
         return p;
     }
 
+    public static JPanel labeledRequired(String labelText, JComponent comp) {
+        return labeled(labelText + "*", comp);
+    }
     /**
      * Creates and returns a date spinner component pre-configured to display dates
      * in the "dd/MM/yyyy" format.
@@ -65,7 +67,27 @@ public class ViewUtils {
         return spinner;
     }
 
+    /**
+     * Creates a JPanel containing a JLabel
+     * and a right-aligned panel with a JCheckBox and a JSpinner.
+     * The JCheckBox toggles the enabled state of the JSpinner.
+     *
+     * @param label the text to display in the JLabel
+     * @param spinner the JSpinner to be displayed and toggled by the JCheckBox
+     * @param chk the JCheckBox used to enable or disable the JSpinner
+     * @return a structured JPanel containing the JLabel, JCheckBox, and JSpinner
+     */
+    public static JPanel labeledToggleDate(String label, JSpinner spinner, JCheckBox chk) {
+        spinner.setEnabled(false);
 
+        chk.addActionListener(e -> spinner.setEnabled(chk.isSelected()));
+
+        JPanel right = new JPanel(new BorderLayout(8, 0));
+        right.add(chk, BorderLayout.WEST);
+        right.add(spinner, BorderLayout.CENTER);
+
+        return labeled(label, right);
+    }
     /**
      * Creates a JSpinner configured for integer input.
      *
@@ -93,7 +115,6 @@ public class ViewUtils {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
     }
-
 
     /**
      * Converts a LocalDate to a Date for use in JSpinners.
