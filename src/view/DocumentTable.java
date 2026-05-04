@@ -3,8 +3,11 @@ package view;
 import controller.DocumentController;
 import exception.DataValidationException;
 import model.Document;
+import model.DocumentType;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -31,8 +34,8 @@ public class DocumentTable extends JPanel {
     private ArrayList<Document> displayDocuments;
 
     private JPanel searchPanel, tablePanel;
-    private JSpinner idDocument;
-    private JComboBox<String> comboTypeDocumentFilter;
+    private JTextField idDocument;
+    private JComboBox<ComboBoxItem<DocumentType>> comboTypeDocumentFilter;
     private JSpinner startCreationDate;
     private JSpinner endCreationDate;
     private JCheckBox useStartDate;
@@ -66,44 +69,46 @@ public class DocumentTable extends JPanel {
     /**
      * Builds the search panel containing the filter fields and action buttons.
      * Each field is encapsulated in a smaller JPanel for better display management.
-     * @see #labeled(String, JComponent)
+     * {@link ViewUtils#labeled(JCheckBox, JComponent)}
      */
     private void buildSearchPanel() throws DataValidationException {
         searchPanel = new JPanel(new BorderLayout());
-
         JPanel fieldsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        idDocument = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1));
-        idDocument.setEditor(new JSpinner.NumberEditor(idDocument, "#"));
-        fieldsPanel.add(labeled("Document ID", idDocument));
+        idDocument = ViewUtils.digitsOnly(new JTextField(10));
+        idDocument = ViewUtils.addFilterListener(idDocument, this::onFilterClick);
+        fieldsPanel.add(ViewUtils.labeled("Document ID", idDocument));
 
-        comboTypeDocumentFilter = new JComboBox<>(controller.getAllWorkFlow());
-        fieldsPanel.add(labeled("Document type", comboTypeDocumentFilter));
+        comboTypeDocumentFilter = new JComboBox<>();
+        setDocumentTypes(controller.getAllDocumentType());
+        comboTypeDocumentFilter = ViewUtils.addFilterListener(comboTypeDocumentFilter, this::onFilterClick);
+        fieldsPanel.add(ViewUtils.labeled("Document Type", comboTypeDocumentFilter));
 
         useStartDate = new JCheckBox("Start date");
-        startCreationDate = new JSpinner(new SpinnerDateModel());
-        startCreationDate.setEditor(new JSpinner.DateEditor(startCreationDate, "dd/MM/yyyy"));
+        startCreationDate = ViewUtils.createDateSpinner();
+        startCreationDate.addChangeListener(e -> onFilterClick());
         startCreationDate.setEnabled(false);
-        useStartDate.addActionListener(e ->
-                startCreationDate.setEnabled(useStartDate.isSelected()));
-        fieldsPanel.add(labeled(useStartDate, startCreationDate));
+        useStartDate.addActionListener(e -> {                          
+            startCreationDate.setEnabled(useStartDate.isSelected());
+            onFilterClick();
+        });
+        fieldsPanel.add(ViewUtils.labeled(useStartDate, startCreationDate));
 
         useEndDate = new JCheckBox("End date");
-        endCreationDate = new JSpinner(new SpinnerDateModel());
-        endCreationDate.setEditor(new JSpinner.DateEditor(endCreationDate, "dd/MM/yyyy"));
+        endCreationDate = ViewUtils.createDateSpinner();
+        endCreationDate.addChangeListener(e -> onFilterClick());
         endCreationDate.setEnabled(false);
-        useEndDate.addActionListener(e ->
-                endCreationDate.setEnabled(useEndDate.isSelected()));
-        fieldsPanel.add(labeled(useEndDate, endCreationDate));
+        useEndDate.addActionListener(e -> {                            
+            endCreationDate.setEnabled(useEndDate.isSelected());
+            onFilterClick();
+        });
+        fieldsPanel.add(ViewUtils.labeled(useEndDate, endCreationDate));
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-
         JButton btnSearch = new JButton("Search");
         btnSearch.addActionListener(e -> onFilterClick());
-
         JButton btnCreate = new JButton("Create");
         btnCreate.addActionListener(e -> onCreateClick());
-
 
         buttonPanel.add(btnSearch);
         buttonPanel.add(btnCreate);
@@ -131,41 +136,13 @@ public class DocumentTable extends JPanel {
                 int row = table.rowAtPoint(e.getPoint());
                 int col = table.columnAtPoint(e.getPoint());
                 if (col == 4) {
-                    onModifyClick();
+                    onUpdateClick();
                 };
                 if (col == 5) {
                     onDeleteClick();
                 };
             }
         });
-    }
-
-    /**
-     * Creates a panel containing a label and a component.
-     * @param text the label text to display
-     * @param comp the associated component
-     * @return a JPanel containing the label and the component
-     */
-    private JPanel labeled(String text, JComponent comp) {
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.add(new JLabel(text));
-        p.add(Box.createVerticalStrut(4));
-        p.add(comp);
-        return p;
-    }
-
-    private JPanel labeled(JCheckBox checkBox, JComponent comp) {
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.add(checkBox);
-        p.add(Box.createVerticalStrut(4));
-        p.add(comp);
-        return p;
-    }
-
-    private LocalDate toLocalDate(Date date) {
-            return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
     /**
@@ -181,15 +158,26 @@ public class DocumentTable extends JPanel {
      */
     public void onFilterClick() {
 
-        Integer idValue = (Integer) idDocument.getValue();
-        String selectedType = (String) comboTypeDocumentFilter.getSelectedItem();
+        Integer idValue = null;
+
+        String idText = idDocument.getText().trim();
+
+        if (!idText.isEmpty()) {
+            try {
+                idValue = Integer.parseInt(idText);
+            } catch (NumberFormatException e) {
+                return;
+            }
+        }
+
+        ComboBoxItem<DocumentType> selectedItem = (ComboBoxItem<DocumentType>) comboTypeDocumentFilter.getSelectedItem();
 
         LocalDate startDate = useStartDate.isSelected()
-                ? toLocalDate((Date) startCreationDate.getValue())
+                ? ViewUtils.toLocalDate((Date) startCreationDate.getValue())
                 : null;
 
         LocalDate endDate = useEndDate.isSelected()
-                ? toLocalDate((Date) endCreationDate.getValue())
+                ? ViewUtils.toLocalDate((Date) endCreationDate.getValue())
                 : null;
 
         displayDocuments = new ArrayList<>();
@@ -202,9 +190,7 @@ public class DocumentTable extends JPanel {
                 match = false;
             }
 
-            if (selectedType != null
-                    && !selectedType.equals("All")
-                    && !doc.getDocumentType().getName().equals(selectedType)) {
+            if (selectedItem != null && selectedItem.getObject() != null && !doc.getDocumentType().equals(selectedItem.getObject())) {
                 match = false;
             }
 
@@ -223,6 +209,7 @@ public class DocumentTable extends JPanel {
 
         model.setDocuments(displayDocuments);
     }
+
     public void onCreateClick(){
         mainWindow.openDocumentForm(null);
     }
@@ -243,7 +230,7 @@ public class DocumentTable extends JPanel {
      * - If an object is passed → form is in EDIT mode.
      * - If null was passed → form would be in CREATE mode.
      */
-    public void onModifyClick(){
+    public void onUpdateClick(){
         int selectedRow = table.getSelectedRow();
 
         if (selectedRow == -1) {
@@ -255,6 +242,7 @@ public class DocumentTable extends JPanel {
 
         mainWindow.openDocumentForm(doc);
     }
+
     public void onDeleteClick() {
         int selectedRow = table.getSelectedRow();
 
@@ -281,4 +269,17 @@ public class DocumentTable extends JPanel {
         }
     }
 
+    /**
+     * Updates the document type filter ComboBox with the available document types.
+     * An "All" option is added first to allow unfiltered display.
+     *
+     * @param types list of available document types
+     */
+    public void setDocumentTypes(ArrayList<DocumentType> types) {
+        comboTypeDocumentFilter.removeAllItems();
+        comboTypeDocumentFilter.addItem(new ComboBoxItem<>(null, "All"));
+        for (DocumentType documentType : types) {
+            comboTypeDocumentFilter.addItem(new ComboBoxItem<>(documentType, documentType.getName()));
+        }
+    }
 }

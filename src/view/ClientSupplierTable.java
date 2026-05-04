@@ -62,47 +62,43 @@ public class ClientSupplierTable extends JPanel {
         JPanel fieldsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         txtLoyalityCard = new JTextField(10);
-        txtLoyalityCard = eventListenrInput(txtLoyalityCard);
-        fieldsPanel.add(labeled("Client ID", txtLoyalityCard));
+        txtLoyalityCard = ViewUtils.addFilterListener(txtLoyalityCard, this::onFilterClick); 
+        txtLoyalityCard = ViewUtils.digitsOnly(txtLoyalityCard);
+        fieldsPanel.add(ViewUtils.labeled("Client ID", txtLoyalityCard));
 
         txtLastName = new JTextField(10);
-        txtLastName = eventListenrInput(txtLastName);
-        fieldsPanel.add(labeled("Last name", txtLastName));
+        txtLastName = ViewUtils.addFilterListener(txtLastName, this::onFilterClick); 
+        fieldsPanel.add(ViewUtils.labeled("Last name", txtLastName));
 
         txtFirstName = new JTextField(10);
-        txtFirstName = eventListenrInput(txtFirstName);
-        fieldsPanel.add(labeled("First name", txtFirstName));
+        txtFirstName = ViewUtils.addFilterListener(txtFirstName, this::onFilterClick); 
+        fieldsPanel.add(ViewUtils.labeled("First name", txtFirstName));
 
         chkIsClient = new JCheckBox("Client");
-        chkIsClient.addActionListener(e -> onFilterClick());
-        fieldsPanel.add(labeled("", chkIsClient));
-
+        chkIsClient = ViewUtils.addFilterListener(chkIsClient, this::onFilterClick);
         chkIsSupplier = new JCheckBox("Supplier");
-        chkIsSupplier.addActionListener(e -> onFilterClick());
-        fieldsPanel.add(labeled("", chkIsSupplier));
+        chkIsSupplier = ViewUtils.addFilterListener(chkIsSupplier, this::onFilterClick);
+        chkIsMember = new JCheckBox("Staff member");
+        chkIsMember = ViewUtils.addFilterListener(chkIsMember, this::onFilterClick);
 
-        chkIsMember = new JCheckBox("Satff member");
-        chkIsMember.addActionListener(e -> onFilterClick());
-        fieldsPanel.add(labeled("", chkIsMember));
-
+        fieldsPanel.add(ViewUtils.labeled(chkIsClient, chkIsClient));
+        fieldsPanel.add(ViewUtils.labeled(chkIsSupplier, chkIsSupplier));
+        fieldsPanel.add(ViewUtils.labeled(chkIsMember, chkIsMember));
 
         searchPanel.add(fieldsPanel, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
         JButton btnSearch = new JButton("Search");
-        btnSearch.addActionListener(e -> onFilterClick());
-
+        btnSearch.addActionListener(e -> onCreateClick());
         JButton btnCreate = new JButton("Create");
         btnCreate.addActionListener(e -> onCreateClick());
-
 
         buttonPanel.add(btnSearch);
         buttonPanel.add(btnCreate);
 
         searchPanel.add(buttonPanel, BorderLayout.SOUTH);
     }
-
     /**
      * Construct the panel containing the document table.
      * The table uses {@link DocumentTableModel} as its data model.
@@ -121,37 +117,13 @@ public class ClientSupplierTable extends JPanel {
                 int row = table.rowAtPoint(e.getPoint());
                 int col = table.columnAtPoint(e.getPoint());
                 if (col == 7) {
-                    onModifyClick();
+                    onUpdateClick();
                 };
                 if (col == 8) {
                     onDeleteClick();
                 };
             }
         });
-    }
-
-    /**
-     * Creates a panel containing a label and a component.
-     * @param text the label text to display
-     * @param comp the associated component
-     * @return a JPanel containing the label and the component
-     */
-    private JPanel labeled(String text, JComponent comp) {
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.add(new JLabel(text));
-        p.add(Box.createVerticalStrut(4));
-        p.add(comp);
-        return p;
-    }
-
-    private JTextField eventListenrInput(JTextField textField){
-        textField.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) { onFilterClick(); }
-            public void removeUpdate(DocumentEvent e) { onFilterClick(); }
-            public void changedUpdate(DocumentEvent e) { onFilterClick(); }
-        });
-        return textField;
     }
 
     /**
@@ -175,30 +147,26 @@ public class ClientSupplierTable extends JPanel {
         for (ClientSupplier cs : clientSuppliers) {
             boolean match = true;
 
-            // ID / loyalty card
             if (!idText.isEmpty() && !String.valueOf(cs.getId()).contains(idText)) {
                 match = false;
             }
 
-            // Last name
             if (!lastNameText.isEmpty()
                     && !cs.getName().toLowerCase().contains(lastNameText)) {
                 match = false;
             }
 
-            // First name
             if (!firstNameText.isEmpty()
                     && !cs.getFirstname().toLowerCase().contains(firstNameText)) {
                 match = false;
             }
 
-            // Type filters
             boolean typeMatch = false;
 
             if (!chkIsClient.isSelected() &&
                     !chkIsSupplier.isSelected() &&
                     !chkIsMember.isSelected()) {
-                typeMatch = true; // aucun filtre => tout afficher
+                typeMatch = true;
             } else {
                 if (chkIsClient.isSelected() && cs.getIsClient()) typeMatch = true;
                 if (chkIsSupplier.isSelected() && cs.getIsSupplier()) typeMatch = true;
@@ -236,7 +204,7 @@ public class ClientSupplierTable extends JPanel {
      * - If an object is passed → form is in EDIT mode.
      * - If null was passed → form would be in CREATE mode.
      */
-    public void onModifyClick(){
+    public void onUpdateClick(){
         int selectedRow = table.getSelectedRow();
 
         if (selectedRow == -1) {

@@ -47,7 +47,7 @@ public class ClientSupplierTableModel extends AbstractTableModel {
             case 3 -> cs.getEmail();
             case 4 -> cs.getVATNumber();
             case 5 -> cs.getType();
-            case 6 -> "100" ;       //cs.getLoyalty(); //TODO add loyality
+            case 6 -> "100" ;       //cs.getLoyalty(); //TODO : add loyalty
             case 7 -> "Edit";
             case 8 -> "Delete";
             default -> null;

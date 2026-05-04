@@ -3,8 +3,8 @@ package model;
 import exception.DataValidationException;
 
 /**
- * A workflow type define if the linked workflow is a buy, sell or internal workflow.
- * It can not be two or more of these at the same time.
+ * A workflow type defines if the linked workflow is a buy, sell, or internal workflow.
+ * It cannot be two or more of these at the same time.
  */
 public class WorkFlowType {
     private String name;
