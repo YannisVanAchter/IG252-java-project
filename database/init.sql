@@ -35,16 +35,17 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 CREATE TABLE Locality (
     postalId INT PRIMARY KEY,
-    city VARCHAR(255) NOT NULL
+    city VARCHAR(255) NOT NULL,
+    PRIMARY KEY (postalId, city) as localityId
 );
 
 
 CREATE TABLE Address_ (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
     streetName VARCHAR(255) NOT NULL,
     streetNumber INT NOT NULL,
-    postalId INT NOT NULL,
-    FOREIGN KEY (postalId) REFERENCES Locality(postalId)
+    localityId INT NOT NULL,
+    PRIMARY KEY (streetName, streetNumber) as addressId,
+    FOREIGN KEY (localityId) REFERENCES Locality(localityId)
 );
 
 -- TODO: Add manager relation between two employees
@@ -61,7 +62,9 @@ CREATE TABLE Employee (
     nbPaidDaysHalfDay INT NOT NULL,
     pwd VARCHAR(255) NOT NULL,
     addressId INT NOT NULL,
-    FOREIGN KEY (addressId) REFERENCES Address_(id_)
+    managerId INT,
+    FOREIGN KEY (addressId) REFERENCES Address_(id_),
+    FOREIGN KEY (managerId) REFERENCES Employee(id_)
 );
 
 CREATE TABLE Absence_type (
@@ -156,13 +159,12 @@ CREATE TABLE Document_ (
 );
 
 CREATE TABLE ProductCategory (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
-    name_ VARCHAR(64) NOT NULL UNIQUE
+    name_ VARCHAR(64) PRIMARY KEY
 );
 
 CREATE TABLE Product (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
-    label_ VARCHAR(255) NOT NULL,
+    name_ VARCHAR(255) NOT NULL,
     priceEVAT DECIMAL(10,2) NOT NULL,
     VAT DECIMAL(5,2) NOT NULL,
     loyaltyPoints INT NOT NULL,
@@ -175,28 +177,28 @@ CREATE TABLE Product (
 CREATE TABLE LocationProduct (
     shelf VARCHAR(255) NOT NULL,
     floor_ INT NOT NULL,
-    PRIMARY KEY (shelf, floor_)
+    isStock BOOLEAN NOT NULL,
+    isFreezer BOOLEAN NOT NULL,
+    PRIMARY KEY (shelf, floor_, isStock) as locationProductId
 );
 
 CREATE TABLE QuantityProduct (
-    shelf VARCHAR(255) NOT NULL,
-    floor_ INT NOT NULL,
+    locationProductId INT NOT NULL,
     productId INT NOT NULL,
     quantity INT NOT NULL CHECK (quantity >= 0),
-    PRIMARY KEY (shelf, floor_, productId),
-    FOREIGN KEY (shelf, floor_) REFERENCES LocationProduct(shelf, floor_),
+    PRIMARY KEY (locationProductId, productId),
+    FOREIGN KEY (locationProductId) REFERENCES LocationProduct(locationProductId),
     FOREIGN KEY (productId) REFERENCES Product(id_)
 );
 
--- TODO: Add 'UNIQUE' constraint on (productId, startDate) to avoid multiple overlapping discounts for the same product
 CREATE TABLE Discount (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
-    productId INT NOT NULL,
-    startDate DATE NOT NULL DEFAULT (CURRENT_DATE),
-    endDate DATE NOT NULL,
-    requiredQuantity INT NOT NULL CHECK (requiredQuantity >= 1),
     discountPercentage DECIMAL(5,2) NOT NULL CHECK (discountPercentage BETWEEN 0 AND 100),
-    label_ VARCHAR(255) NOT NULL,
+    requiredQuantity INT NOT NULL CHECK (requiredQuantity >= 1),
+    startDate DATE NOT NULL UNIQUE DEFAULT (CURRENT_DATE),
+    endDate DATE NOT NULL,
+    name_ VARCHAR(255) NOT NULL,
+    PRIMARY KEY (startDate, endDate, requiredQuantity, discountPercentage),
+    productId INT NOT NULL UNIQUE,
     FOREIGN KEY (productId) REFERENCES Product(id_),
     CHECK (endDate >= startDate)
 );
