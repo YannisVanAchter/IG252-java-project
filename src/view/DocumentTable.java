@@ -136,7 +136,7 @@ public class DocumentTable extends JPanel {
                 int row = table.rowAtPoint(e.getPoint());
                 int col = table.columnAtPoint(e.getPoint());
                 if (col == 4) {
-                    onModifyClick();
+                    onUpdateClick();
                 };
                 if (col == 5) {
                     onDeleteClick();
@@ -230,7 +230,7 @@ public class DocumentTable extends JPanel {
      * - If an object is passed → form is in EDIT mode.
      * - If null was passed → form would be in CREATE mode.
      */
-    public void onModifyClick(){
+    public void onUpdateClick(){
         int selectedRow = table.getSelectedRow();
 
         if (selectedRow == -1) {

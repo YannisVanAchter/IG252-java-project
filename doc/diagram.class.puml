@@ -5,153 +5,197 @@ class Main
 
 package view {
 
-    class MainWindow{
-        -title : String
+    class MainWindow {
+        - history : Stack<String>
+        - currentPage : String
+        - cardLayout : CardLayout
+        - container : JPanel
+
+        + addPage(panel: JPanel, name: String) : void
+        + setPage(name: String) : void
+        + goBack() : void
+        + openDocumentForm(Document) : void
+        + openClientSupplierForm(ClientSupplier) : void
+        + openProductView(Product) : void
+        + openRecipeView(Recipe) : void
     }
 
     class MenuWindow{
-        -mainPanel : JPanel
-        -appMenu : JMenu
-        -appItem : JMenuItem
-
-        +openDocumentForm() : void
-        +openClientSupplierForm() : void
-        +openProductSearchForm() : void
-        +openRecipeSearchForm() : void
+        - appMenu : JMenu
+        - searchMenu : JMenu
+        - receipeMenu : JMenu
+        - closeItem : JMenuItem
+        - helpItem : JMenuItem
+        - clientItem : JMenuItem
+        - suplierItem : JMenuItem
+        - documentItem : JMenuItem
+        - productItem : JMenuItem
+        - recipeItem : JMenuItem
     }
+
+    class MainPanel
 
     'CRUD 1'
     'Read Delete'
     class DocumentTable {
         -documents : ArrayList<Document> // All docs
         -displayDocuments : ArrayList<Document> // Displayed docs in the table
-        -typeDocumentFilter : JComboBox
-        -startCreationDate : JDatePicker
-        -endCreationDate : JDatePicker
+        - searchPanel : JPanel
+        - tablePanel : JPanel
+        - idDocument : JTextField
+        - comboTypeDocumentFilter : JComboBox<ComboBoxItem<DocumentType>>
+        - startCreationDate : JSpinner
+        - endCreationDate : JSpinner
+        - useStartDate : JCheckBox
+        - useEndDate : JCheckBox
+        - table : JTable
 
-        +onFilterClick() : void
-        +onCreateClick() : void
-        +onUpdateClick(Document) : void
-        +onDeleteClick(Document) : void
+        + onFilterClick() : void
+        + onCreateClick() : void
+        + onUpdateClick() : void
+        + onDeleteClick() : void
+        + setDocumentTypes(types: ArrayList<DocumentType>) : void
+        - buildHeader() : JPanel
+        - buildSearchPanel() : void
+        - buildTablePanel() : void
+
     }
 
-    ' TODO: Discus if we create one object for both create and update'
-    'Create'
-    class DocumentCreationForm {
-        -id : JTextField
-        -commentary : JTextArea
-        -checkIsChecked : JCheckBox
-        -pickerPlannedSendDate : JDatePicker
-        -pickerPlannedReceptionDate : JDatePicker
-        -pickerEffectiveSendDate : JDatePicker
-        -pickerEffectiveReceptionDate : JDatePicker
-        -txtPaymentDelay : JTextField
-        -comboWorkflow : JComboBox
-        -comboClientSupplier : JComboBox
-        -spnStreetNumber : JSpinner
-        -spnPostalCode : JSpinner
-        -txtStreet : JComboBox
-        -txtCity : JComboBox
-        -txtCountry : JComboBox
+    'Create Update'
+    class DocumentForm {
+        - allClients : ArrayList<ClientSupplier>
+        - allDocumentTypes : ArrayList<DocumentType>
+        - allWorkflowStatuses : ArrayList<Status>
+        - appPanel : JPanel
+        - panelContent : JPanel
+        - leftPanel : JPanel
+        - rightPanel : JPanel
+        - commentary : JTextArea
+        - checkIsChecked : JCheckBox
+        - pickerPlannedSendDate : JSpinner
+        - pickerPlannedReceptionDate : JSpinner
+        - pickerEffectiveSendDate : JSpinner
+        - pickerEffectiveReceptionDate : JSpinner
+        - spnPaymentDelay : JSpinner
+        - chkPlannedSendDate : JCheckBox
+        - chkPlannedReceptionDate : JCheckBox
+        - chkEffectiveSendDate : JCheckBox
+        - chkEffectiveReceptionDate : JCheckBox
+        - comboDocumentType : JComboBox<ComboBoxItem<DocumentType>>
+        - comboClientSupplier : JComboBox<ComboBoxItem<ClientSupplier>>
+        - comboWorkflowStatus : JComboBox<ComboBoxItem<Status>>
+        - isBuy : JRadioButton
+        - isSell : JRadioButton
+        - isInternal : JRadioButton
+        - spnStreetNumber : JSpinner
+        - spnPostalCode : JSpinner
+        - txtStreet : JTextField
+        - txtCity : JTextField
+        - txtCountry : JTextField
+        - btnSave : JButton
+        - btnClear : JButton
+        - btnNewClient : JButton
 
-        +onSaveClicked() : void
-        +clearForm() : void
-
-        +showError(message : String) : void
-        +validateFields() : boolean
+        - buildHeaderPanel() : void
+        - buildLeftPanel() : void
+        - buildRightPanel() : void
+        - validateForm() : boolean
+        - saveEditForm() : void
+        + clearForm() : void
+        + loadDocument(doc: Document) : void
+        + setClientSuppliers(clientSupplier: ArrayList<ClientSupplier>) : void
+        + setDocumentTypes(types: ArrayList<DocumentType>) : void
+        + setWorkflowStatus(statuses: ArrayList<Status>) : void
+        + onNewClientcliked() : void
+        + openDialog() : ClientSupplier
     }
 
-    'Update'
-    class DocumentUpdateForm {
-        -id : JTextField
-        -commentary : JTextArea
-        -checkIsChecked : JCheckBox
-        -pickerPlannedSendDate : JDatePicker
-        -pickerPlannedReceptionDate : JDatePicker
-        -pickerEffectiveSendDate : JDatePicker
-        -pickerEffectiveReceptionDate : JDatePicker
-        -txtPaymentDelay : JTextField
-        -comboWorkflow : JComboBox
-        -comboClientSupplier : JComboBox
-        -spnStreetNumber : JSpinner
-        -spnPostalCode : JSpinner
-        -txtStreet : JComboBox
-        -txtCity : JComboBox
-        -txtCountry : JComboBox
+    class DocumentTableModel {
+        - documents : ArrayList<Document>
+        {static} - COLUMNS : String[]
 
-        +onValidateClick(Document) : void
-        +onCancelClick() : void
-
-        +showError(message : String) : void
-        +validateFields() : boolean
+        + setDocuments(documents: ArrayList<Document>) : void
+        + getRowCount() : int
+        + getColumnCount() : int
+        + getColumnName(column: int) : String
+        + getValueAt(rowIndex: int, columnIndex: int) : Object
+        + isCellEditable(rowIndex: int, columnIndex: int) : boolean
     }
 
     'CRUD 2 '
     'Read Delete'
     class ClientSupplierTable {
-        -clientSuppliers: ArrayList<ClientSupplier> // All client and supplier
-        -displayClientSupplier: ArrayList<ClientSupplier> // Displayed client and supplier in the table
-        -isStaff : boolean
-        -isClient: boolean
-        -isSupplier: boolean
-        -typeFilter : JComboBox
+        - clientSuppliers : ArrayList<ClientSupplier>
+        - displayClientSupplier : ArrayList<ClientSupplier>
+        - searchPanel : JPanel
+        - tablePanel : JPanel
+        - txtLoyalityCard : JTextField
+        - txtLastName : JTextField
+        - txtFirstName : JTextField
+        - chkIsClient : JCheckBox
+        - chkIsSupplier : JCheckBox
+        - chkIsMember : JCheckBox
+        - table : JTable
 
-        +onFilterClick() : void
-        +onCreateClick() : void
-        +onUpdateClick(Document) : void
-        +onDeleteClick(Document) : void
+        + buildHeader() : JPanel
+        + buildSearchPanel() : void
+        + buildTablePanel() : void
+        + onFilterClick() : void
+        + onCreateClick() : void
+        + onModifyClick() : void
+        + onDeleteClick() : void
     }
 
-    'Create'
-    class ClientSupplierCreationForm {
-        -txtName : JTextField
-        -txtFirstName : JTextField
-        -txtEmail : JTextField
-        -txtVATNumber : JTextField
-        -pickerDateBecameClient : JDatePicker
-        -boxIsClient : JCheckBox
-        -boxIsSupplier : JCheckBox
-        -boxIsUs : JCheckBox
-        -spnFidelityPoints : JSpinner
-        -spnStreetNumber : JSpinner
-        -spnPostalCode : JSpinner
-        -txtStreet : JComboBox
-        -txtCity : JComboBox
-        -txtCountry : JComboBox
+    'Create Update'
+    class ClientSupplierForm {
+        - isOpenInModal : Boolean
+        - appPanel : JPanel
+        - panelContent : JPanel
+        - leftPanel : JPanel
+        - rightPanel : JPanel
+        - txtName : JTextField
+        - txtFirstName : JTextField
+        - txtMail : JTextField
+        - txtPhoneNumber : JTextField
+        - txtVATNumber : JTextField
+        - becameClientDate : JSpinner
+        - txtIdLoyaltyCard : JTextField
+        - spnLoyaltyPoint : JSpinner
+        - chkIsClient : JCheckBox
+        - chkIsSupplier : JCheckBox
+        - chkIsMember : JCheckBox
+        - spnStreetNumber : JSpinner
+        - spnPostalCode : JSpinner
+        - txtStreet : JTextField
+        - txtCity : JTextField
+        - txtCountry : JTextField
+        - btnSave : JButton
+        - btnClear : JButton
+        - btnNewClient : JButton
 
-        +onSaveClicked() : void
-        +clearForm() : void
-
-        +showError(message : String) : void
-        +validateFields() : boolean
+        - buildLeftPanel() : void
+        - buildRightPanel() : void
+        - validateForm() : Boolean
+        - saveEditForm() : void
+        + clearForm() : void
+        + loadClientSupplier(cs : ClientSupplier) : void
+        + getCurrentClientSupplier() : ClientSupplier
     }
 
-    'Update '
-    class ClientSupplierUpdateForm {
-        -txtName : JTextField
-        -txtFirstName : JTextField
-        -txtEmail : JTextField
-        -txtVATNumber : JTextField
-        -pickerDateBecameClient : JDatePicker
-        -boxIsClient : JCheckBox
-        -boxIsSupplier : JCheckBox
-        -boxIsUs : JCheckBox
-        -spnFidelityPoints : JSpinner
-        -spnStreetNumber : JSpinner
-        -spnPostalCode : JSpinner
-        -txtStreet : JComboBox
-        -txtCity : JComboBox
-        -txtCountry : JComboBox
+    class ClientSupplierTableModel {
+        {static} - COLUMNS : String[]
+        - clientSuppliers : ArrayList<ClientSupplier>
 
-        +onSaveClicked() : void
-        +clearForm() : void
-
-        +showError(message : String) : void
-        +validateFields() : boolean
+        + setClientSuppliers(clientSuppliers : ArrayList<ClientSupplier>) : void
+        + getRowCount() : int
+        + getColumnCount() : int
+        + getColumnName(column : int) : String
+        + getValueAt(rowIndex : int, columnIndex : int) : Object
+        + isCellEditable(rowIndex : int, columnIndex : int) : boolean
     }
 
     'Recherche 1 '
-    class ProductSearchForm {
+    class ProductSearchTable {
         -txtProductName : JTextField
         -comboCategory : JComboBox
         -boxpromotion : JCheckBox
@@ -163,30 +207,37 @@ package view {
         +clearForm() : void
         +displayResults(List<Product>) : void
     }
+
     class ProductView {
-        -lblName : JLabel
-        -lblPriceExclTax : JLabel
-        -lblVAT : JLabel
-        -lblFidelityPoints : JLabel
+        - LABEL_NO_DATA : String = "N/A"
 
-        -lblShelf : JLabel
-        -lblFloor : JLabel
-        -lblQuantity : JLabel
-        -lblMinimumThreshold : JLabel
-        -lblIsRefrigerated : JLabel
+        + loadProduct(product : Product) : void
+        - buildContent() : JPanel
+        - buildTitle() : JPanel
+        - buildProductInfo() : JPanel
+        - buildStockInfo() : JPanel
+        - buildPromotion() : JPanel
+        - buildFooter() : JPanel
+        - createCard(title : String) : JPanel
+        - labelValue(label : String, value : String) : JPanel
+        - formatPrice(price : double) : String
+    }
 
-        -lblPromotionPercentage : JLabel
-        -lblPromotionActive : JLabel
-        -lblRequiredQuantity : JLabel
-        -lblPromotionStartDate : JLabel
-        -lblPromotionEndDate : JLabel
-        -btnBack : JButton
+    class ProductTableModel {
+        - products : List<Product>
+        {static} - COLUMNS : String[]
 
-        +displayProduct(Product) : void
+        + setProducts(products : List<Product>) : void
+        + getProductAt(row : int) : Product
+        + getRowCount() : int
+        + getColumnCount() : int
+        + getColumnName(column : int) : String
+        + getValueAt(rowIndex : int, columnIndex : int) : Object
+        + isCellEditable(rowIndex : int, columnIndex : int) : boolean
     }
 
     'Recherche 2 '
-    class RecipeSearchForm {
+    class RecipeSearchTable {
         -txtName : JTextField
         -txtProduct : JTextField
         -btnSearch : JButton
@@ -199,6 +250,7 @@ package view {
         +clearForm() : void
         +displayResults(List<Recipe>) : void
     }
+
     class RecipeView {
         -tableComposition : JTable
         -txtSteps : JTextArea
@@ -208,6 +260,20 @@ package view {
         +onBackClicked() : void
         +onModifyClicked() : void
         +displayRecipe(Recipe) : void
+    }
+
+    class ReciepeTableModel {
+        - recipes : List<Recipe>
+        {static} - COLUMNS : String[]
+
+        + ReciepeTableModel(recipes : List<Recipe>)
+        + setRecipes(recipes : List<Recipe>) : void
+        + getRecipeAt(row : int) : Recipe
+        + getRowCount() : int
+        + getColumnCount() : int
+        + getColumnName(column : int) : String
+        + getValueAt(rowIndex : int, columnIndex : int) : Object
+        + isCellEditable(rowIndex : int, columnIndex : int) : boolean
     }
 
     'Recherche 3 '
@@ -248,7 +314,7 @@ package view {
     }
 
     'Tâche métier 2'
-    class TicketView {
+    class TicketForm {
         - txtSearchProduct : JTextField
         - btnScan : JButton
         - productTable : JTable
@@ -300,28 +366,66 @@ package view {
         + onPayClicked() : void
     }
 
+    class ViewUtils {
+        {static} +createColumnPanel() : JPanel
+        {static} +labeled(text : String, comp : JComponent) : JPanel
+        {static} +labeled(checkBox : JCheckBox, comp : JComponent) : JPanel
+        {static} +labeledRequired(labelText : String, comp : JComponent) : JPanel
+        {static} +createDateSpinner() : JSpinner
+        {static} +labeledToggleDate(label : String, spinner : JSpinner, chk : JCheckBox) : JPanel
+        {static} +createNumberSpinner(value : int, min : int, max : int, step : int) : JSpinner
+        {static} +getDate(spinner : JSpinner) : LocalDate
+        {static} +toDate(localDate : LocalDate) : Date
+        {static} +toLocalDate(date : Date) : LocalDate
+        {static} +addFilterListener(textField : JTextField, onFilter : Runnable) : JTextField
+        {static} +addFilterListener(checkBox : JCheckBox, onFilter : Runnable) : JCheckBox
+        {static} +addFilterListener(combo : JComboBox<T>, onFilter : Runnable) : JComboBox<T>
+        {static} +digitsOnly(textField : JTextField) : JTextField
+    }
+
+    class ComboBoxItem<T> {
+        - object: T
+        - label: String
+
+        + ComboBoxItem(object: T, label: String)
+        + getObject(): T
+        + toString(): String
+        + selectComboItem(combo: JComboBox<ComboBoxItem<T>>, object: T): void
+    }
+
     Main --> MainWindow
-    MainWindow --> MenuWindow
+    MainWindow -up-> MenuWindow
+    MainWindow -up-> MainPanel
+    MainWindow --> ClientSupplierTable
+    MainWindow --> DocumentTable
+    MainWindow --> RecipeSearchTable
+    MainWindow --> ProductSearchTable
+    MainWindow --> ClientSupplierSearchForm
+    MainWindow --> StockAlertView
+    MainWindow --> TicketForm
 
-    MenuWindow --> ClientSupplierTable
-    MenuWindow --> DocumentTable
-    MenuWindow --> RecipeSearchForm
-    MenuWindow --> ProductSearchForm
-    MenuWindow --> ClientSupplierSearchForm
-    MenuWindow --> TicketView
-    MenuWindow --> RecipeView
-    MenuWindow --> StockAlertView
+    DocumentTable --> DocumentForm
+    DocumentTable --> DocumentTableModel
+    DocumentTable ..> ViewUtils
+    DocumentForm ..> ViewUtils
+    DocumentForm ..> ComboBoxItem
 
-    DocumentTable --> DocumentUpdateForm
-    DocumentTable --> DocumentCreationForm
+    ClientSupplierTable --> ClientSupplierForm
+    ClientSupplierTable --> ClientSupplierTableModel
+    ClientSupplierForm ..> ViewUtils
+    ClientSupplierTable ..> ViewUtils
 
-    ClientSupplierTable --> ClientSupplierCreationForm
-    ClientSupplierTable --> ClientSupplierUpdateForm
+    ProductSearchTable --> ProductView
+    ProductSearchTable --> ProductTableModel
+    ProductSearchTable ..> ViewUtils
 
     StockAlertView --> OrderCreationView
 
-    TicketView --> TicketClientSelectView
-    TicketView --> ProductView
+    RecipeSearchTable --> RecipeView
+    RecipeSearchTable --> ReciepeTableModel
+    RecipeSearchTable ..> ViewUtils
+
+    TicketForm --> TicketClientSelectView
     TicketClientSelectView --> TicketPaymentView
 }
 
@@ -360,14 +464,12 @@ package controller {
 }
 
 ' VIEW → CONTROLLER
-DocumentCreationForm --> DocumentController
+DocumentForm --> DocumentController
 DocumentTable --> DocumentController
-DocumentUpdateForm --> DocumentController
 ClientSupplierTable --> ClientSupplierController
-ClientSupplierCreationForm --> ClientSupplierController
-ClientSupplierUpdateForm --> ClientSupplierController
-ProductSearchForm --> ProductSearchController
-RecipeSearchForm --> RecipeSearchController
+ClientSupplierForm --> ClientSupplierController
+ProductSearchTable --> ProductSearchController
+RecipeSearchTable --> RecipeSearchController
 ClientSupplierSearchForm --> ClientSupplierSearchController
 Main ..> StockManagementController: << Thread >>
 

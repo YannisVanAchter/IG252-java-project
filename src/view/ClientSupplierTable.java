@@ -64,15 +64,15 @@ public class ClientSupplierTable extends JPanel {
         txtLoyalityCard = new JTextField(10);
         txtLoyalityCard = ViewUtils.addFilterListener(txtLoyalityCard, this::onFilterClick); 
         txtLoyalityCard = ViewUtils.digitsOnly(txtLoyalityCard);
-        fieldsPanel.add(labeled("Client ID", txtLoyalityCard));
+        fieldsPanel.add(ViewUtils.labeled("Client ID", txtLoyalityCard));
 
         txtLastName = new JTextField(10);
         txtLastName = ViewUtils.addFilterListener(txtLastName, this::onFilterClick); 
-        fieldsPanel.add(labeled("Last name", txtLastName));
+        fieldsPanel.add(ViewUtils.labeled("Last name", txtLastName));
 
         txtFirstName = new JTextField(10);
         txtFirstName = ViewUtils.addFilterListener(txtFirstName, this::onFilterClick); 
-        fieldsPanel.add(labeled("First name", txtFirstName));
+        fieldsPanel.add(ViewUtils.labeled("First name", txtFirstName));
 
         chkIsClient = new JCheckBox("Client");
         chkIsClient = ViewUtils.addFilterListener(chkIsClient, this::onFilterClick);
@@ -117,28 +117,13 @@ public class ClientSupplierTable extends JPanel {
                 int row = table.rowAtPoint(e.getPoint());
                 int col = table.columnAtPoint(e.getPoint());
                 if (col == 7) {
-                    onModifyClick();
+                    onUpdateClick();
                 };
                 if (col == 8) {
                     onDeleteClick();
                 };
             }
         });
-    }
-
-    /**
-     * Creates a panel containing a label and a component.
-     * @param text the label text to display
-     * @param comp the associated component
-     * @return a JPanel containing the label and the component
-     */
-    private JPanel labeled(String text, JComponent comp) {
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.add(new JLabel(text));
-        p.add(Box.createVerticalStrut(4));
-        p.add(comp);
-        return p;
     }
 
     /**
@@ -219,7 +204,7 @@ public class ClientSupplierTable extends JPanel {
      * - If an object is passed → form is in EDIT mode.
      * - If null was passed → form would be in CREATE mode.
      */
-    public void onModifyClick(){
+    public void onUpdateClick(){
         int selectedRow = table.getSelectedRow();
 
         if (selectedRow == -1) {
