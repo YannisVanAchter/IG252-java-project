@@ -3,7 +3,7 @@
 DATABASE IF NOT EXISTS `PROJET_JAVA`;
 USE `PROJET_JAVA`;
 
-SET FOREIGN_KEY_CHECKS = 0;  -- désactive les contraintes FK
+SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS Pointing;
 DROP TABLE IF EXISTS Batch;
@@ -11,12 +11,16 @@ DROP TABLE IF EXISTS Detail;
 DROP TABLE IF EXISTS RecipeComposition;
 DROP TABLE IF EXISTS Recipe;
 DROP TABLE IF EXISTS Discount;
+DROP TABLE IF EXISTS QuantityProduct;
+DROP TABLE IF EXISTS LocationProduct;
 DROP TABLE IF EXISTS Product;
 DROP TABLE IF EXISTS ProductCategory;
 DROP TABLE IF EXISTS Document_;
+DROP TABLE IF EXISTS DocumentType;
 DROP TABLE IF EXISTS WorkFlow;
 DROP TABLE IF EXISTS Status_;
 DROP TABLE IF EXISTS WorkFlowType;
+DROP TABLE IF EXISTS FidelityCard;
 DROP TABLE IF EXISTS Client_supplier;
 DROP TABLE IF EXISTS Position_;
 DROP TABLE IF EXISTS Role_;
@@ -26,22 +30,23 @@ DROP TABLE IF EXISTS Employee;
 DROP TABLE IF EXISTS Address_;
 DROP TABLE IF EXISTS Locality;
 
-SET FOREIGN_KEY_CHECKS = 1;  -- réactive les contraintes FK
+SET FOREIGN_KEY_CHECKS = 1;
 
 
 
 CREATE TABLE Locality (
     postalId INT PRIMARY KEY,
-    city VARCHAR(255) NOT NULL
+    city VARCHAR(255) NOT NULL,
+    PRIMARY KEY (postalId, city) as localityId
 );
 
 
 CREATE TABLE Address_ (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
     streetName VARCHAR(255) NOT NULL,
     streetNumber INT NOT NULL,
-    postalId INT NOT NULL,
-    FOREIGN KEY (postalId) REFERENCES Locality(postalId)
+    localityId INT NOT NULL,
+    PRIMARY KEY (streetName, streetNumber) as addressId,
+    FOREIGN KEY (localityId) REFERENCES Locality(localityId)
 );
 
 -- TODO: Add manager relation between two employees
@@ -58,7 +63,9 @@ CREATE TABLE Employee (
     nbPaidDaysHalfDay INT NOT NULL,
     pwd VARCHAR(255) NOT NULL,
     addressId INT NOT NULL,
-    FOREIGN KEY (addressId) REFERENCES Address_(id_)
+    managerId INT,
+    FOREIGN KEY (addressId) REFERENCES Address_(id_),
+    FOREIGN KEY (managerId) REFERENCES Employee(id_)
 );
 
 CREATE TABLE Absence_type (
@@ -92,6 +99,14 @@ CREATE TABLE Position_ (
     FOREIGN KEY (employeeId) REFERENCES Employee(id_)
 );
 
+CREATE TABLE FidelityCard (
+    id_ INT AUTO_INCREMENT PRIMARY KEY,
+    clientId INT NOT NULL,
+    points INT NOT NULL,
+    isValid BOOLEAN NOT NULL,
+    FOREIGN KEY (clientId) REFERENCES Client_supplier(id_)
+);
+
 CREATE TABLE Client_supplier (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
     name_ VARCHAR(255) NOT NULL,
@@ -108,32 +123,22 @@ CREATE TABLE Client_supplier (
 );
 
 CREATE TABLE WorkFlowType (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
-    name_ VARCHAR(255) NOT NULL UNIQUE,
+    name_ VARCHAR(255) PRIMARY KEY,
     isBuy BOOLEAN NOT NULL,
     isSupplier BOOLEAN NOT NULL,
     isInternal BOOLEAN NOT NULL
 );
 
 CREATE TABLE Status_ (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
-    name_ VARCHAR(255) NOT NULL UNIQUE
+    name_ VARCHAR(255) PRIMARY KEY
 );
 
 CREATE TABLE WorkFlow (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
     workFlowTypeId INT NOT NULL,
     statusId INT NOT NULL,
-    usId INT NOT NULL,
-    otherId INT NOT NULL,
     FOREIGN KEY (workFlowTypeId) REFERENCES WorkFlowType(id_),
     FOREIGN KEY (statusId) REFERENCES Status_(id_)
-    FOREIGN KEY (usId, otherId) REFERENCES Client_supplier(id_)
-);
-
-CREATE TABLE DocumentType (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
-    name_ VARCHAR(255) NOT NULL UNIQUE
 );
 
 CREATE TABLE Document_ (
@@ -155,13 +160,12 @@ CREATE TABLE Document_ (
 );
 
 CREATE TABLE ProductCategory (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
-    name_ VARCHAR(64) NOT NULL UNIQUE
+    name_ VARCHAR(64) PRIMARY KEY
 );
 
 CREATE TABLE Product (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
-    label_ VARCHAR(255) NOT NULL,
+    name_ VARCHAR(255) NOT NULL,
     priceEVAT DECIMAL(10,2) NOT NULL,
     VAT DECIMAL(5,2) NOT NULL,
     loyaltyPoints INT NOT NULL,
@@ -171,15 +175,31 @@ CREATE TABLE Product (
     FOREIGN KEY (categoryId) REFERENCES ProductCategory(id_)
 );
 
--- TODO: Add 'UNIQUE' constraint on (productId, startDate) to avoid multiple overlapping discounts for the same product
-CREATE TABLE Discount (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE LocationProduct (
+    shelf VARCHAR(255) NOT NULL,
+    floor_ INT NOT NULL,
+    isStock BOOLEAN NOT NULL,
+    isFreezer BOOLEAN NOT NULL,
+    PRIMARY KEY (shelf, floor_, isStock) as locationProductId
+);
+
+CREATE TABLE QuantityProduct (
+    locationProductId INT NOT NULL,
     productId INT NOT NULL,
-    startDate DATE NOT NULL DEFAULT (CURRENT_DATE),
-    endDate DATE NOT NULL,
-    requiredQuantity INT NOT NULL CHECK (requiredQuantity >= 1),
+    quantity INT NOT NULL CHECK (quantity >= 0),
+    PRIMARY KEY (locationProductId, productId),
+    FOREIGN KEY (locationProductId) REFERENCES LocationProduct(locationProductId),
+    FOREIGN KEY (productId) REFERENCES Product(id_)
+);
+
+CREATE TABLE Discount (
     discountPercentage DECIMAL(5,2) NOT NULL CHECK (discountPercentage BETWEEN 0 AND 100),
-    label_ VARCHAR(255) NOT NULL,
+    requiredQuantity INT NOT NULL CHECK (requiredQuantity >= 1),
+    startDate DATE NOT NULL UNIQUE DEFAULT (CURRENT_DATE),
+    endDate DATE NOT NULL,
+    name_ VARCHAR(255) NOT NULL,
+    PRIMARY KEY (startDate, endDate, requiredQuantity, discountPercentage),
+    productId INT NOT NULL UNIQUE,
     FOREIGN KEY (productId) REFERENCES Product(id_),
     CHECK (endDate >= startDate)
 );
@@ -211,13 +231,9 @@ CREATE TABLE PreparationOrder (
 
 CREATE TABLE Detail (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
-    quantity INT NOT NULL CHECK (quantity > 0),
-    priceEVAT DECIMAL(10,2) NOT NULL CHECK (priceEVAT >= 0),
-    VAT DECIMAL(5,2) NOT NULL CHECK (VAT >= 0 AND VAT <= 100),
     productId INT NOT NULL,
-    documentId INT NOT NULL,
-    FOREIGN KEY (documentId) REFERENCES Document_(id_),
-    foreign KEY (productId) REFERENCES Product(id_)
+    quantity INT NOT NULL CHECK (quantity > 0),
+    price DECIMAL(10,2) NOT NULL
 );
 
 CREATE TABLE Batch (
@@ -231,9 +247,9 @@ CREATE TABLE Batch (
 );
 
 CREATE TABLE Pointing (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
     date_ DATE NOT NULL DEFAULT (CURRENT_DATE),
     employeeId INT NOT NULL,
+    PRIMARY KEY (date_, employeeId),
     startTime TIME NOT NULL DEFAULT (CURRENT_TIME),
     endTime TIME,
     FOREIGN KEY (employeeId) REFERENCES Employee(id_),
