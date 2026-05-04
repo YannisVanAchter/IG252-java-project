@@ -117,7 +117,7 @@ CREATE TABLE Client_supplier (
     isUs BOOLEAN NOT NULL,
     VATNumber VARCHAR(50),
     dateBecameClient DATE,
-    addressId INT,
+    addressId INT NOT NULL,
     FOREIGN KEY (addressId) REFERENCES Address_(id_)
 );
 
@@ -144,7 +144,7 @@ CREATE TABLE Document_ (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
     workflowId INT NOT NULL,
     documentTypeId INT NOT NULL,
-    addressId INT,
+    addressId INT NOT NULL,
     date_ DATE NOT NULL DEFAULT (CURRENT_DATE),
     plannedSendingDate DATE,
     plannedReceiveDate DATE,
@@ -230,19 +230,25 @@ CREATE TABLE PreparationOrder (
 
 CREATE TABLE Detail (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
-    productId INT NOT NULL,
     quantity INT NOT NULL CHECK (quantity > 0),
-    price DECIMAL(10,2) NOT NULL
+    productId INT NOT NULL,
+    batchId INT,
+    documentId INT NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (productId) REFERENCES Product(id_),
+    FOREIGN KEY (batchId) REFERENCES Batch(numero),
+    FOREIGN KEY (documentId) REFERENCES Document_(id_)
 );
 
 CREATE TABLE Batch (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
+    numero INT AUTO_INCREMENT PRIMARY KEY,
     detailId INT NOT NULL,
     productId INT NOT NULL,
     expirationDate DATE NOT NULL,
     originCountry VARCHAR(255) NOT NULL,
     FOREIGN KEY (detailId) REFERENCES Detail(id_),
     FOREIGN KEY (productId) REFERENCES Product(id_)
+    PRIMARY KEY (detailId, productId, numero) as batchId
 );
 
 CREATE TABLE Pointing (
