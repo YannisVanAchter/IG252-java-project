@@ -1,7 +1,7 @@
 
 
-DATABASE IF NOT EXISTS `PROJET_JAVA`;
-USE `PROJET_JAVA`;
+DATABASE IF NOT EXISTS `JAVA_PROJECT`;
+USE `JAVA_PROJECT`;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -33,7 +33,7 @@ DROP TABLE IF EXISTS Locality;
 SET FOREIGN_KEY_CHECKS = 1;
 
 
-
+-- ! TABLES CREATION --
 CREATE TABLE Locality (
     postalId INT PRIMARY KEY,
     city VARCHAR(255) NOT NULL,
@@ -45,18 +45,19 @@ CREATE TABLE Address_ (
     streetName VARCHAR(255) NOT NULL,
     streetNumber INT NOT NULL,
     localityId INT NOT NULL,
-    PRIMARY KEY (streetName, streetNumber) as addressId,
+    PRIMARY KEY (localityId, streetName, streetNumber) as addressId,
     FOREIGN KEY (localityId) REFERENCES Locality(localityId)
 );
 
--- TODO: Add manager relation between two employees
+-- * Human resources tables --
+
 CREATE TABLE Employee (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
     firstname VARCHAR(255) NOT NULL,
     lastname VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
-    phoneNumber VARCHAR(20),
-    iban VARCHAR(34),
+    phoneNumber VARCHAR(20) NOT NULL UNIQUE,
+    iban VARCHAR(34) NOT NULL UNIQUE,
     hourlyWage DECIMAL(10,2) NOT NULL,
     nbHoursPlannedWeek INT NOT NULL,
     hiringDate DATE NOT NULL,
@@ -73,7 +74,6 @@ CREATE TABLE Absence_type (
     name_ VARCHAR(255) NOT NULL UNIQUE
 );
 
--- TODO: Add 'UNIQUE' constraint because we replace the composed PK with a Technical PK
 CREATE TABLE Absence (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
     employeeId INT NOT NULL,
@@ -83,6 +83,7 @@ CREATE TABLE Absence (
     description_ VARCHAR(255),
     FOREIGN KEY (employeeId) REFERENCES Employee(id_),
     FOREIGN KEY (absenceTypeId) REFERENCES Absence_type(id_),
+    UNIQUE (employeeId, startDate, endDate),
     CHECK (endDate IS NULL OR endDate >= startDate)
 );
 
@@ -99,65 +100,17 @@ CREATE TABLE Position_ (
     FOREIGN KEY (employeeId) REFERENCES Employee(id_)
 );
 
-CREATE TABLE FidelityCard (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
-    clientId INT NOT NULL,
-    points INT NOT NULL,
-    isValid BOOLEAN NOT NULL,
-    FOREIGN KEY (clientId) REFERENCES Client_supplier(id_)
-);
-
-CREATE TABLE Client_supplier (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
-    name_ VARCHAR(255) NOT NULL,
-    firstname VARCHAR(255),
-    email VARCHAR(255) NOT NULL,
-    phoneNumber VARCHAR(20),
-    isClient BOOLEAN NOT NULL,
-    isSupplier BOOLEAN NOT NULL,
-    isUs BOOLEAN NOT NULL,
-    VATNumber VARCHAR(50),
-    dateBecameClient DATE,
-    addressId INT NOT NULL,
-    FOREIGN KEY (addressId) REFERENCES Address_(id_)
-);
-
-CREATE TABLE WorkFlowType (
-    name_ VARCHAR(255) PRIMARY KEY,
-    isBuy BOOLEAN NOT NULL,
-    isSupplier BOOLEAN NOT NULL,
-    isInternal BOOLEAN NOT NULL
-);
-
-CREATE TABLE Status_ (
-    name_ VARCHAR(255) PRIMARY KEY
-);
-
-CREATE TABLE WorkFlow (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
-    workFlowTypeId INT NOT NULL,
-    statusId INT NOT NULL,
-    FOREIGN KEY (workFlowTypeId) REFERENCES WorkFlowType(id_),
-    FOREIGN KEY (statusId) REFERENCES Status_(id_)
-);
-
-CREATE TABLE Document_ (
-    id_ INT AUTO_INCREMENT PRIMARY KEY,
-    workflowId INT NOT NULL,
-    documentTypeId INT NOT NULL,
-    addressId INT NOT NULL,
+CREATE TABLE Pointing (
     date_ DATE NOT NULL DEFAULT (CURRENT_DATE),
-    plannedSendingDate DATE,
-    plannedReceiveDate DATE,
-    effectiveSendingDate DATE,
-    effectiveReceiveDate DATE,
-    paymentDelay INT NOT NULL,
-    commentary VARCHAR(255),
-    isChecked BOOLEAN NOT NULL,
-    FOREIGN KEY (documentTypeId) REFERENCES DocumentType(id_),
-    FOREIGN KEY (workflowId) REFERENCES WorkFlow(id_),
-    FOREIGN KEY (addressId) REFERENCES Address_(id_)
+    employeeId INT NOT NULL,
+    PRIMARY KEY (date_, employeeId),
+    startTime TIME NOT NULL DEFAULT (CURRENT_TIME),
+    endTime TIME,
+    FOREIGN KEY (employeeId) REFERENCES Employee(id_),
+    CHECK (endTime IS NULL OR endTime > startTime)
 );
+
+-- * Stock management tables --
 
 CREATE TABLE ProductCategory (
     name_ VARCHAR(64) PRIMARY KEY
@@ -166,13 +119,13 @@ CREATE TABLE ProductCategory (
 CREATE TABLE Product (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
     name_ VARCHAR(255) NOT NULL,
-    priceEVAT DECIMAL(10,2) NOT NULL,
-    VAT DECIMAL(5,2) NOT NULL,
+    priceEVAT DECIMAL(10,2) NOT NULL CHECK (priceEVAT >= 0),
+    VAT DECIMAL(5,2) NOT NULL CHECK (VAT >= 0 AND VAT <= 100),
     loyaltyPoints INT NOT NULL,
     isEdible BOOLEAN NOT NULL,
     minStockQuantity INT NOT NULL CHECK (minStockQuantity >= 0),
     categoryId INT NOT NULL,
-    FOREIGN KEY (categoryId) REFERENCES ProductCategory(id_)
+    FOREIGN KEY (categoryId) REFERENCES ProductCategory(name_)
 );
 
 CREATE TABLE LocationProduct (
@@ -195,13 +148,80 @@ CREATE TABLE QuantityProduct (
 CREATE TABLE Discount (
     discountPercentage DECIMAL(5,2) NOT NULL CHECK (discountPercentage BETWEEN 0 AND 100),
     requiredQuantity INT NOT NULL CHECK (requiredQuantity >= 1),
-    startDate DATE NOT NULL UNIQUE DEFAULT (CURRENT_DATE),
+    startDate DATE NOT NULL DEFAULT (CURRENT_DATE),
     endDate DATE NOT NULL,
+    productId INT NOT NULL,
     name_ VARCHAR(255) NOT NULL,
     PRIMARY KEY (startDate, endDate, requiredQuantity, discountPercentage),
-    productId INT NOT NULL UNIQUE,
     FOREIGN KEY (productId) REFERENCES Product(id_),
     CHECK (endDate >= startDate)
+);
+
+-- * Workflow and document management tables --
+
+CREATE TABLE Client_supplier (
+    id_ INT AUTO_INCREMENT PRIMARY KEY,
+    name_ VARCHAR(255) NOT NULL,
+    firstname VARCHAR(255),
+    email VARCHAR(255) NOT NULL,
+    phoneNumber VARCHAR(20) NOT NULL,
+    isClient BOOLEAN NOT NULL,
+    isSupplier BOOLEAN NOT NULL,
+    isUs BOOLEAN NOT NULL,
+    VATNumber VARCHAR(50),
+    dateBecameClient DATE,
+    addressId INT NOT NULL,
+    FOREIGN KEY (addressId) REFERENCES Address_(id_)
+);
+
+CREATE TABLE FidelityCard (
+    id_ INT AUTO_INCREMENT PRIMARY KEY,
+    clientId INT NOT NULL,
+    points INT NOT NULL CHECK (points >= 0) DEFAULT 0,
+    isValid BOOLEAN NOT NULL DEFAULT TRUE,
+    FOREIGN KEY (clientId) REFERENCES Client_supplier(id_)
+);
+
+CREATE TABLE WorkFlowType (
+    name_ VARCHAR(255) PRIMARY KEY,
+    isBuy BOOLEAN NOT NULL,
+    isSupplier BOOLEAN NOT NULL,
+    isInternal BOOLEAN NOT NULL
+);
+
+-- ? Add field to specify the next status
+CREATE TABLE Status_ (
+    name_ VARCHAR(255) PRIMARY KEY
+);
+
+CREATE TABLE WorkFlow (
+    id_ INT AUTO_INCREMENT PRIMARY KEY,
+    workFlowTypeId INT NOT NULL,
+    statusId VARCHAR(255) NOT NULL,
+    FOREIGN KEY (workFlowTypeId) REFERENCES WorkFlowType(id_),
+    FOREIGN KEY (statusId) REFERENCES Status_(name_)
+);
+
+CREATE TABLE DocumentType (
+    name_ VARCHAR(255) PRIMARY KEY
+)
+
+CREATE TABLE Document_ (
+    id_ INT AUTO_INCREMENT PRIMARY KEY,
+    workflowId INT NOT NULL,
+    documentTypeId INT NOT NULL,
+    addressId INT NOT NULL,
+    date_ DATE NOT NULL DEFAULT (CURRENT_DATE),
+    plannedSendingDate DATE,
+    plannedReceiveDate DATE,
+    effectiveSendingDate DATE,
+    effectiveReceiveDate DATE,
+    paymentDelay INT NOT NULL,
+    commentary VARCHAR(255),
+    isChecked BOOLEAN NOT NULL,
+    FOREIGN KEY (documentTypeId) REFERENCES DocumentType(id_),
+    FOREIGN KEY (workflowId) REFERENCES WorkFlow(id_),
+    FOREIGN KEY (addressId) REFERENCES Address_(id_)
 );
 
 CREATE TABLE Recipe (
@@ -226,40 +246,32 @@ CREATE TABLE PreparationOrder (
     documentId INT NOT NULL,
     recipeId INT NOT NULL,
     FOREIGN KEY (documentId) REFERENCES Document_(id_),
-    FOREIGN KEY (recipeId) REFERENCES Recipe(id_)
+    FOREIGN KEY (recipeId) REFERENCES Recipe(id_),
+    UNIQUE (documentId, recipeId)
 );
 
 CREATE TABLE Detail (
     id_ INT AUTO_INCREMENT PRIMARY KEY,
-    quantity INT NOT NULL CHECK (quantity > 0),
-    productId INT NOT NULL,
-    batchId INT,
     documentId INT NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
+    productId INT NOT NULL,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    priceVAT DECIMAL(10,2) NOT NULL CHECK (priceVAT >= 0),
+    VAT DECIMAL(5,2) NOT NULL CHECK (VAT >= 0 AND VAT <= 100),
+    fidelityPointsEarned INT NOT NULL CHECK (fidelityPointsEarned >= 0),
     FOREIGN KEY (productId) REFERENCES Product(id_),
-    FOREIGN KEY (batchId) REFERENCES Batch(numero),
-    FOREIGN KEY (documentId) REFERENCES Document_(id_)
+    FOREIGN KEY (documentId) REFERENCES Document_(id_),
+    UNIQUE (documentId, productId)
 );
 
 CREATE TABLE Batch (
-    numero INT AUTO_INCREMENT PRIMARY KEY,
+    id_ INT AUTO_INCREMENT PRIMARY KEY,
     detailId INT NOT NULL,
     productId INT NOT NULL,
-    expirationDate DATE NOT NULL,
+    expirationDate DATE,
     originCountry VARCHAR(255) NOT NULL,
     FOREIGN KEY (detailId) REFERENCES Detail(id_),
     FOREIGN KEY (productId) REFERENCES Product(id_)
-    PRIMARY KEY (detailId, productId, numero) as batchId
-);
-
-CREATE TABLE Pointing (
-    date_ DATE NOT NULL DEFAULT (CURRENT_DATE),
-    employeeId INT NOT NULL,
-    PRIMARY KEY (date_, employeeId),
-    startTime TIME NOT NULL DEFAULT (CURRENT_TIME),
-    endTime TIME,
-    FOREIGN KEY (employeeId) REFERENCES Employee(id_),
-    CHECK (endTime IS NULL OR endTime > startTime)
+    PRIMARY KEY (detailId, productId, id_) as batchId
 );
 
 -- Triggers --
