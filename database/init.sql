@@ -1,7 +1,7 @@
 
 
-DATABASE IF NOT EXISTS `JAVA_PROJECT`;
-USE `JAVA_PROJECT`;
+DATABASE IF NOT EXISTS `${MYSQL_DATABASE}`;
+USE `${MYSQL_DATABASE}`;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -645,7 +645,7 @@ CREATE INDEX idx_ClientSupplier_isSupplier ON Client_supplier(isSupplier);
  * Easy link between a product and it's suppliers
 */
 CREATE VIEW vw_ProductSuppliers AS
-SELECT p.id_ AS productId, p.label_ AS productLabel, cs.id_ AS supplierId, cs.name_ AS supplierName
+SELECT p.id_ AS productId, p.name_ AS productLabel, cs.id_ AS supplierId, cs.name_ AS supplierName
 FROM Product p, idx_ClientSupplier_isSupplier s, Document_ d, WorkFlow w, Detail dt
 WHERE p.id_ = dt.productId
 AND dt.documentId = d.id_
