@@ -1,0 +1,438 @@
+@startuml "view class diagram"
+
+title "Diagramme de class du package View"
+
+' top to bottom direction
+skinparam linetype ortho
+' skinparam linetype polyline
+
+
+class Main
+
+package view {
+
+    class MainWindow {
+        - history : Stack<String>
+        - currentPage : String
+        - cardLayout : CardLayout
+        - container : JPanel
+
+        + addPage(panel: JPanel, name: String) : void
+        + setPage(name: String) : void
+        + goBack() : void
+        + openDocumentForm(Document) : void
+        + openClientSupplierForm(ClientSupplier) : void
+        + openProductView(Product) : void
+        + openRecipeView(Recipe) : void
+    }
+
+    class MenuWindow{
+        - appMenu : JMenu
+        - searchMenu : JMenu
+        - receipeMenu : JMenu
+        - closeItem : JMenuItem
+        - helpItem : JMenuItem
+        - clientItem : JMenuItem
+        - suplierItem : JMenuItem
+        - documentItem : JMenuItem
+        - productItem : JMenuItem
+        - recipeItem : JMenuItem
+    }
+
+    class MainPanel
+
+    'CRUD 1'
+    'Read Delete'
+    class DocumentTable {
+        -documents : ArrayList<Document> // All docs
+        -displayDocuments : ArrayList<Document> // Displayed docs in the table
+        - searchPanel : JPanel
+        - tablePanel : JPanel
+        - idDocument : JTextField
+        - comboTypeDocumentFilter : JComboBox<ComboBoxItem<DocumentType>>
+        - startCreationDate : JSpinner
+        - endCreationDate : JSpinner
+        - useStartDate : JCheckBox
+        - useEndDate : JCheckBox
+        - table : JTable
+
+        + onFilterClick() : void
+        + onCreateClick() : void
+        + onUpdateClick() : void
+        + onDeleteClick() : void
+        + setDocumentTypes(types: ArrayList<DocumentType>) : void
+        - buildHeader() : JPanel
+        - buildSearchPanel() : void
+        - buildTablePanel() : void
+
+    }
+
+    'Create Update'
+    class DocumentForm {
+        - allClients : ArrayList<ClientSupplier>
+        - allDocumentTypes : ArrayList<DocumentType>
+        - allWorkflowStatuses : ArrayList<Status>
+        - appPanel : JPanel
+        - panelContent : JPanel
+        - leftPanel : JPanel
+        - rightPanel : JPanel
+        - commentary : JTextArea
+        - checkIsChecked : JCheckBox
+        - pickerPlannedSendDate : JSpinner
+        - pickerPlannedReceptionDate : JSpinner
+        - pickerEffectiveSendDate : JSpinner
+        - pickerEffectiveReceptionDate : JSpinner
+        - spnPaymentDelay : JSpinner
+        - chkPlannedSendDate : JCheckBox
+        - chkPlannedReceptionDate : JCheckBox
+        - chkEffectiveSendDate : JCheckBox
+        - chkEffectiveReceptionDate : JCheckBox
+        - comboDocumentType : JComboBox<ComboBoxItem<DocumentType>>
+        - comboClientSupplier : JComboBox<ComboBoxItem<ClientSupplier>>
+        - comboWorkflowStatus : JComboBox<ComboBoxItem<Status>>
+        - isBuy : JRadioButton
+        - isSell : JRadioButton
+        - isInternal : JRadioButton
+        - spnStreetNumber : JSpinner
+        - spnPostalCode : JSpinner
+        - txtStreet : JTextField
+        - txtCity : JTextField
+        - txtCountry : JTextField
+        - btnSave : JButton
+        - btnClear : JButton
+        - btnNewClient : JButton
+
+        - buildHeaderPanel() : void
+        - buildLeftPanel() : void
+        - buildRightPanel() : void
+        - validateForm() : boolean
+        - saveEditForm() : void
+        + clearForm() : void
+        + loadDocument(doc: Document) : void
+        + setClientSuppliers(clientSupplier: ArrayList<ClientSupplier>) : void
+        + setDocumentTypes(types: ArrayList<DocumentType>) : void
+        + setWorkflowStatus(statuses: ArrayList<Status>) : void
+        + onNewClientcliked() : void
+        + openDialog() : ClientSupplier
+    }
+
+    class DocumentTableModel {
+        - documents : ArrayList<Document>
+        {static} - COLUMNS : String[]
+
+        + setDocuments(documents: ArrayList<Document>) : void
+        + getRowCount() : int
+        + getColumnCount() : int
+        + getColumnName(column: int) : String
+        + getValueAt(rowIndex: int, columnIndex: int) : Object
+        + isCellEditable(rowIndex: int, columnIndex: int) : boolean
+    }
+
+    'CRUD 2 '
+    'Read Delete'
+    class ClientSupplierTable {
+        - clientSuppliers : ArrayList<ClientSupplier>
+        - displayClientSupplier : ArrayList<ClientSupplier>
+        - searchPanel : JPanel
+        - tablePanel : JPanel
+        - txtLoyalityCard : JTextField
+        - txtLastName : JTextField
+        - txtFirstName : JTextField
+        - chkIsClient : JCheckBox
+        - chkIsSupplier : JCheckBox
+        - chkIsMember : JCheckBox
+        - table : JTable
+
+        + buildHeader() : JPanel
+        + buildSearchPanel() : void
+        + buildTablePanel() : void
+        + onFilterClick() : void
+        + onCreateClick() : void
+        + onModifyClick() : void
+        + onDeleteClick() : void
+    }
+
+    'Create Update'
+    class ClientSupplierForm {
+        - isOpenInModal : Boolean
+        - appPanel : JPanel
+        - panelContent : JPanel
+        - leftPanel : JPanel
+        - rightPanel : JPanel
+        - txtName : JTextField
+        - txtFirstName : JTextField
+        - txtMail : JTextField
+        - txtPhoneNumber : JTextField
+        - txtVATNumber : JTextField
+        - becameClientDate : JSpinner
+        - txtIdLoyaltyCard : JTextField
+        - spnLoyaltyPoint : JSpinner
+        - chkIsClient : JCheckBox
+        - chkIsSupplier : JCheckBox
+        - chkIsMember : JCheckBox
+        - spnStreetNumber : JSpinner
+        - spnPostalCode : JSpinner
+        - txtStreet : JTextField
+        - txtCity : JTextField
+        - txtCountry : JTextField
+        - btnSave : JButton
+        - btnClear : JButton
+        - btnNewClient : JButton
+
+        - buildLeftPanel() : void
+        - buildRightPanel() : void
+        - validateForm() : Boolean
+        - saveEditForm() : void
+        + clearForm() : void
+        + loadClientSupplier(cs : ClientSupplier) : void
+        + getCurrentClientSupplier() : ClientSupplier
+    }
+
+    class ClientSupplierTableModel {
+        {static} - COLUMNS : String[]
+        - clientSuppliers : ArrayList<ClientSupplier>
+
+        + setClientSuppliers(clientSuppliers : ArrayList<ClientSupplier>) : void
+        + getRowCount() : int
+        + getColumnCount() : int
+        + getColumnName(column : int) : String
+        + getValueAt(rowIndex : int, columnIndex : int) : Object
+        + isCellEditable(rowIndex : int, columnIndex : int) : boolean
+    }
+
+    'Recherche 1 '
+    class ProductSearchTable {
+        -txtProductName : JTextField
+        -comboCategory : JComboBox
+        -boxpromotion : JCheckBox
+        -btnSearch : JButton
+        -table : JTable
+
+        +onSearchClicked() : void
+        +onViewClicked() : void
+        +clearForm() : void
+        +displayResults(List<Product>) : void
+    }
+
+    class ProductView {
+        - LABEL_NO_DATA : String = "N/A"
+
+        + loadProduct(product : Product) : void
+        - buildContent() : JPanel
+        - buildTitle() : JPanel
+        - buildProductInfo() : JPanel
+        - buildStockInfo() : JPanel
+        - buildPromotion() : JPanel
+        - buildFooter() : JPanel
+        - createCard(title : String) : JPanel
+        - labelValue(label : String, value : String) : JPanel
+        - formatPrice(price : double) : String
+    }
+
+    class ProductTableModel {
+        - products : List<Product>
+        {static} - COLUMNS : String[]
+
+        + setProducts(products : List<Product>) : void
+        + getProductAt(row : int) : Product
+        + getRowCount() : int
+        + getColumnCount() : int
+        + getColumnName(column : int) : String
+        + getValueAt(rowIndex : int, columnIndex : int) : Object
+        + isCellEditable(rowIndex : int, columnIndex : int) : boolean
+    }
+
+    'Recherche 2 '
+    class RecipeSearchTable {
+        -txtName : JTextField
+        -txtProduct : JTextField
+        -btnSearch : JButton
+        -btnAddProduct : JButton
+        -btnViewProduct : JButton
+        -table : JTable
+
+        +onAddProductClicked() : void
+        +onSearchClicked() : void
+        +clearForm() : void
+        +displayResults(List<Recipe>) : void
+    }
+
+    class RecipeView {
+        -tableComposition : JTable
+        -txtSteps : JTextArea
+        -btnEdit : JButton
+        -btnBack : JButton
+
+        +onBackClicked() : void
+        +onModifyClicked() : void
+        +displayRecipe(Recipe) : void
+    }
+
+    class ReciepeTableModel {
+        - recipes : List<Recipe>
+        {static} - COLUMNS : String[]
+
+        + ReciepeTableModel(recipes : List<Recipe>)
+        + setRecipes(recipes : List<Recipe>) : void
+        + getRecipeAt(row : int) : Recipe
+        + getRowCount() : int
+        + getColumnCount() : int
+        + getColumnName(column : int) : String
+        + getValueAt(rowIndex : int, columnIndex : int) : Object
+        + isCellEditable(rowIndex : int, columnIndex : int) : boolean
+    }
+
+    'Recherche 3 '
+    class ClientSupplierSearchForm {
+        -txtName : JTextField
+        -txtEmail : JTextField
+        -boxFidelityValid : JCheckBox
+        -table : JTable
+
+        +onLoadClicked() : void
+        +onSearchClicked() : void
+        +clearForm() : void
+        +displayResults(List<ClientSupplier>) : void
+    }
+
+    'Tâche métier 1'
+    class StockAlertView {
+        -suppliers : ArrayList<ClientSupplier>
+        -selectedSupplier :ClientSupplier
+        -products : ArrayList<ProductRow>
+        -selectedProducts : ArrayList<ProductRowViewModel>
+        -productTable : JTable
+
+        +onSupplierSelected(supplier :ClientSupplier) : void
+        +onCreatePurchaseOrderClicked() : void
+    }
+    class OrderCreationView {
+        -selectedSupplier :ClientSupplier
+        -productsTable : JTable
+        -createButton : JButton
+        -cancelButton : JButton
+
+        +displayProducts(products : ArrayList<Product>) : void
+        +onQuantityChanged(productId : int, quantity : int) : void
+
+        +onCreateOrderClicked() : void
+        +onCancelClicked() : void
+    }
+
+    'Tâche métier 2'
+    class TicketForm {
+        - txtSearchProduct : JTextField
+        - btnScan : JButton
+        - productTable : JTable
+        - ticketTable : JTable
+        - btnAddItem : JButton
+        - btnRemoveItem : JButton
+        - btnNext : JButton
+
+        + displayProducts(products : ArrayList<Product>) : void
+        + displayCart(items : ArrayList<TicketItem>) : void
+        + updateTotal(total : double) : void
+
+        + onAddItem(product : Product) : void
+        + onRemoveItem(item : TicketItem) : void
+        + onNextClicked() : void
+    }
+    class TicketClientSelectView {
+        - clients : ArrayList<ClientSupplier>
+        - selectedClient : ClientSupplier
+        - comboSearchClient : JComboBox
+        - btnNewClient : JButton
+        - btnScanCard : JButton
+        - btnBack : JButton
+        - btnNext : JButton
+
+        + displaySelectedClient(ClientSupplier)
+
+        + onNewClientClicked()
+        + onScanCardClicked()
+        + onBackClicked()
+        + onNextClicked()
+    }
+    class TicketPaymentView {
+        - client : ClientSupplier
+        - btnUsePoints : JButton
+        - comboPaymentMethod : JComboBox
+
+        - btnBack : JButton
+        - btnPay : JButton
+
+        + displayClient(ClientSupplier) : void
+        + displayLoyalty(int available, int used)
+        + displaySummary(double subtotal, double discount, double total) : void
+        + showPaymentStatus() : void
+
+        + onUsePointsClicked() : void
+        + onPaymentMethodChanged() : void
+        + onBackClicked() : void
+        + onPayClicked() : void
+    }
+
+    class ViewUtils {
+        {static} +createColumnPanel() : JPanel
+        {static} +labeled(text : String, comp : JComponent) : JPanel
+        {static} +labeled(checkBox : JCheckBox, comp : JComponent) : JPanel
+        {static} +labeledRequired(labelText : String, comp : JComponent) : JPanel
+        {static} +createDateSpinner() : JSpinner
+        {static} +labeledToggleDate(label : String, spinner : JSpinner, chk : JCheckBox) : JPanel
+        {static} +createNumberSpinner(value : int, min : int, max : int, step : int) : JSpinner
+        {static} +getDate(spinner : JSpinner) : LocalDate
+        {static} +toDate(localDate : LocalDate) : Date
+        {static} +toLocalDate(date : Date) : LocalDate
+        {static} +addFilterListener(textField : JTextField, onFilter : Runnable) : JTextField
+        {static} +addFilterListener(checkBox : JCheckBox, onFilter : Runnable) : JCheckBox
+        {static} +addFilterListener(combo : JComboBox<T>, onFilter : Runnable) : JComboBox<T>
+        {static} +digitsOnly(textField : JTextField) : JTextField
+    }
+
+    class ComboBoxItem<T> {
+        - object: T
+        - label: String
+
+        + ComboBoxItem(object: T, label: String)
+        + getObject(): T
+        + toString(): String
+        + selectComboItem(combo: JComboBox<ComboBoxItem<T>>, object: T): void
+    }
+
+    Main --> MainWindow
+    MainWindow -up-> MenuWindow
+    MainWindow -up-> MainPanel
+    MainWindow --> ClientSupplierTable
+    MainWindow --> DocumentTable
+    MainWindow --> RecipeSearchTable
+    MainWindow --> ProductSearchTable
+    MainWindow --> ClientSupplierSearchForm
+    MainWindow --> StockAlertView
+    MainWindow --> TicketForm
+
+    DocumentTable --> DocumentForm
+    DocumentTable --> DocumentTableModel
+    DocumentTable ..> ViewUtils
+    DocumentForm ..> ViewUtils
+    DocumentForm ..> ComboBoxItem
+
+    ClientSupplierTable --> ClientSupplierForm
+    ClientSupplierTable --> ClientSupplierTableModel
+    ClientSupplierForm ..> ViewUtils
+    ClientSupplierTable ..> ViewUtils
+
+    ProductSearchTable --> ProductView
+    ProductSearchTable --> ProductTableModel
+    ProductSearchTable ..> ViewUtils
+
+    StockAlertView --> OrderCreationView
+
+    RecipeSearchTable --> RecipeView
+    RecipeSearchTable --> ReciepeTableModel
+    RecipeSearchTable ..> ViewUtils
+
+    TicketForm --> TicketClientSelectView
+    TicketClientSelectView --> TicketPaymentView
+}
+
+@enduml 

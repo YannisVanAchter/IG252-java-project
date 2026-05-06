@@ -1,0 +1,146 @@
+@startuml "controller class diagram"
+
+title "Diagramme de class du package Controller"
+
+' top to bottom direction
+skinparam linetype ortho
+' skinparam linetype polyline
+
+package controller {
+
+    class DocumentController {
+        +getAllDocuments() : List<Document>
+        +getDocument(id: int): Document
+        +getDocumentTypes(): List<DocumentType>
+        +addDocumentType(docType: DocumentType): void
+        +createDocument(newDocument: Document) : void
+        +receiveDelivery(documentId: int, date: LocalDate): void
+        +sendDelivery(documentId: int, date: LocalDate): void
+        +deleteDocument(id : int) : void
+    }
+
+    class PreparationOrderController {
+        +getAllRecipe(): List<Recipe>
+        +getRecipe(recipeName: String): Recipe
+        +getIngredient(recipeName: String): List<Pair<Product, Integer>>
+        +createNewRecipe(newRecipe: Recipe, ingredients: List<Pair<Product, Integer>>): void
+    }
+
+    class WorkFlowController {
+        +getAllWorkFlow(): List<WorkFlow>
+        +getAllBuying(): List<WorkFlow>
+        +getAllInternal(): List<WorkFlow>
+        +getAllSelling(): List<WorkFlow>
+        +getWorkFlowType(): List<WorkFlowType>
+        +addWorkFlowType(newWorkFlowType: WorkFlowType): void
+        +addWorkFlow(workflow: WorkFlow): void
+        +changeStatus(workflowId: int, status: Status): void
+        +addDocument(workflowId: int, document: Document): void
+    }
+
+    abstract class ClientSupplierController {
+        +getAllClientsSuppliers() : List<ClientSupplier>
+        +getClientSupplier(id: int): ClientSupplier
+        +createClientSupplier(newClient: ClientSupplier) : void
+        +changeAddress(id : int, newAddress: Address) : void
+        +changePhoneNumber(id: int, newPhoneNumber: int): void
+        +changeEmail(id: int, newEmail: String) : void
+        +deleteClientSupplier(id : int) : void
+        {abstract} + placeOrder(clientSupplierID: int, products: List<Product>): void
+    }
+
+    class ClientController {
+        +getAllClients(): List<ClientSupplier>
+        +createFidelityCard(clientID: int): void
+        +validateFidelityCardOwnership(clientID: int, cardID: int): boolean
+        +addCheckout(products: List<Product>): void
+        +addCheckout(products: List<Product>, clientID: int): void
+        +addCheckout(products: List<Product>, clientID: int, fidelityCard: FidelityCard, useFidelityPoint: boolean): void
+        +addCheckout(products: List<Product>, clientID: int, fidelityCard: FidelityCard): void
+        +deleteClientAccount(clientID: int)
+        +deleteClientAccount(clientID: int, cardID: int): void
+        +getDeliveryOrders(): List<Document>
+    }
+
+    class SupplierController {
+        +getAllSuppliers(): List<ClientSupplier>
+        +getAllProduct(supplierID: int): List<Product>
+        +changeVATNumber(supplierID: int, newVATNumber): void
+    }
+
+    class ProductController {
+        +getAllProduct(): List<Product>
+        +getProduct(productID: int): Product
+        +getAllProductCategory(): List<Category>
+        +createNewProduct(newProduct: Product): void
+        +changeProductPrice(productID: int, newPrice: double): void
+        +changeProductVAT(productID, newVAT: double): void
+        +changeFidelityPoint(productID, newPoints: int): void
+        +changeMinimalQuantity(productID: int, newQuantity: int): void
+        +deleteProductOffer(productID: int): void
+        +createNewProductCategory(name: String): void
+
+        +addStockLocation(newLocation: Location): void
+        +addToStocks(productID: int, quantity: int, storeLocation: Location): void
+        +subtractFromStock(productID: int, quantity: int, storeLocation: Location): void
+        +deleteStockLocation(location: Location): void
+        +addDiscount(newDiscount: Discount): void
+        +deleteDiscount(discount: Discount): void
+    }
+
+    class EmployeeController {
+        +getAllEmployee(): List<Employee>
+        +getEmployee(employeeID: int): Employee
+        +changeAddress(employeeID: int, newAddress: Address): void
+        +changePassword(employeeID: int, newPassword: String): void
+        +changeManager(employeeID: int, newManager: Employee): void
+        +changeBankAccount(employeeID: int, newIBAN: String): void
+        +changeHoursSalary(employeeID: int, newSalary: double): void
+        +changeHalfDayBreak(employeeID: int, newNbHalfDay: int): void
+
+        +assignPosition(employeeID: int, position: Position): void
+        +addPosition(position: Position): void
+        +revokePosition(employeeID: int, position: Position): void
+        +checkIn(employeeID: int): void
+        +checkOut(employeeID: int): void
+        +addNonAttendance(employeeID: int, type: NonAttendanceType, description: String): void
+        +addNonAttendance(employeeID: int, type: NonAttendanceType, description: String, startDate: LocalDate): void
+        +addNonAttendance(employeeID: int, type: NonAttendanceType, description: String, startDate: LocalDate, endDate: LocalDate): void
+        +changeNonAttendance(employeeID: int, startDate: LocalDate, endDate: LocalDate): void
+    }
+
+    class AddresseController {
+        +getAllAddresse(): List<Addresse>
+        +createAddresse(addresse: Addresse): void
+        +createLocality(locality: Locality): void
+        +deleteAddresse(addresse: Addresse): void
+    }
+
+    class ProductSearchController {
+        +searchProducts(name : String, category : String, promotion : boolean) : List<Product>
+    }
+
+    class RecipeSearchController {
+        +searchRecipes(name : String, product : String) : List<Recipe>
+    }
+
+    class ClientSupplierSearchController {
+        +search(name : String, email : String, fidelityValid : boolean) : List<ClientSupplier>
+    }
+
+    ' TODO: Which attributes should be included ? Which methods should be  created ?'
+    class StockManagementController {
+        {static} notification: List<Pair<Product, Supplier>>
+        {static} thread: Thread
+        {static} startAgent(): boolean
+        {static} stopAgent(): void
+        {static} askStockCheckUp(): void
+        {static} getSharedResource(): 
+    }
+
+    DocumentController <|-- PreparationOrderController
+    ClientSupplierController <|.. ClientController: implement
+    ClientSupplierController <|.. SupplierController: implement
+}
+
+@enduml 

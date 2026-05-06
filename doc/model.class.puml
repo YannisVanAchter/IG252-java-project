@@ -1,0 +1,198 @@
+@startuml "model class diagram"
+
+title "Diagramme de class du package Model"
+
+' top to bottom direction
+skinparam linetype ortho
+' skinparam linetype polyline
+
+package model {
+    class Locality {
+        -postalCode : int
+        -city : String
+    }
+
+    class Address {
+        -streetName : String
+        -streetNumber : int
+    }
+
+    Address --> Locality
+
+    class Employee {
+        -matricule : String
+        -lastname : String
+        -firstname : String
+        -phoneNumber : String
+        -email : String
+        -IBAN : String
+        -salaryPerHour : float
+        -nbHourPerWeek : int
+        -entryDate : Date
+        -nbPaidHoliday : int
+        -password : String
+    }
+
+    Employee --> Address
+    Employee "0..*" --> "0..1" Employee : manager
+
+    class Pointing {
+        -date : Date
+        -startTime : Time
+        -endTime : Time
+    }
+
+    Pointing "*" --> "1" Employee
+
+    class Role_ {
+        -name : String
+    }
+
+    class Position {
+    }
+
+    Position "*" --> "*" Employee
+    Position "*" --> "1" Role_
+
+    class AbsenceType {
+        -name : String
+    }
+
+    class Absence {
+        -startDate : Date
+        -endDate : Date
+        -description : String
+    }
+
+    Absence "*" --> "1" AbsenceType
+    Absence "*" --> "1" Employee
+
+    class ClientSupplier {
+        -id : int
+        -name : String
+        -firstName : String
+        -email : String
+        -phoneNumber : String
+        -isClient : bool
+        -isSupplier : bool
+        -VATNumber : String
+        -dateBecameClient : Date
+    }
+
+    ClientSupplier "*" --> "1" Address
+
+    class FidelityCard {
+        -id : int
+        -totalPoint : int
+        -isValid : bool
+    }
+
+    FidelityCard "1" --> "1" ClientSupplier
+
+    class WorkflowType {
+        -name : String
+        -isBuy : bool
+        -isSupplier : bool
+        -isInternal : bool
+    }
+
+    class Status {
+        -name : String
+    }
+
+    class Workflow {
+        -id : String
+    }
+
+    Workflow "*" --> "1" Status
+    Workflow "*" --> "1" WorkflowType
+
+    class DocumentType {
+        -name: String
+    }
+
+    class Document {
+        -id : int
+        -date : Date
+        -plannedSendDate : Date
+        -plannedReceptionDate : Date
+        -effectiveSendDate : Date
+        -effectiveReceptionDate : Date
+        -paymentDelay : int
+        -commentary : String
+        -isChecked : bool
+    }
+
+    Document "*" --> "1" Workflow
+    Document "*" --> "1" ClientSupplier
+    Document "*" --> "1" Address
+    Document "*" --> "1" DocumentType
+
+    class ProductCategory {
+        -name : String
+    }
+
+    class Product {
+        -id : int
+        -name : String
+        -price : float
+        -VAT : int
+        -fidelityPoint : int
+    }
+
+    Product "*" --> "1" ProductCategory
+
+    class Discount {
+        -requiredQuantity : int
+        -discount : int
+        -startDate : Date
+        -endDate : Date
+        -name : String
+    }
+
+    Discount "*" --> "*" Product
+
+    class LocationProduct {
+        -shelf : String
+        -floor : String
+    }
+
+    class QuantityProduct {
+        -nbProduct : int
+    }
+
+    QuantityProduct "*" --> "1" Product
+    QuantityProduct "*" --> "1" LocationProduct
+
+    class Recipe {
+        -name : String
+        -explanation : String
+    }
+
+    class RecipeComposition {
+        -quantity : int
+    }
+
+    RecipeComposition "*" --> "1" Recipe
+    RecipeComposition "*" --> "1" Product
+
+    class Detail {
+        -id : int
+        -quantity : float
+        -price : float
+    }
+
+    Detail "*" --> "1" Document
+    Detail "*" --> "1" Product
+
+    class Batch {
+        -id : int
+        -expirationDate : Date
+        -originCountry : String
+    }
+
+    Batch "*" --> "1" Product
+    Batch "*" --> "1" Detail
+}
+
+@enduml
