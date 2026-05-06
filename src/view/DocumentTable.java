@@ -1,0 +1,285 @@
+package view;
+
+import controller.DocumentController;
+import exception.DataValidationException;
+import model.Document;
+import model.DocumentType;
+
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.awt.*;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
+
+
+/**
+ * This view allows search and display documents
+ *
+ * This class extends {@link JPanel} and contains:
+ * A search panel allowing you to filter documents according to several criteria
+ * A table displaying the documents and filtered documents
+ *
+ * Possible actions on the table include:
+ * Redirection to editing view
+ * Deleting a document
+ */
+public class DocumentTable extends JPanel {
+    private MainWindow mainWindow;
+    private DocumentController controller;
+    private DocumentTableModel model;
+    private ArrayList<Document> documents;
+    private ArrayList<Document> displayDocuments;
+
+    private JPanel searchPanel, tablePanel;
+    private JTextField idDocument;
+    private JComboBox<ComboBoxItem<DocumentType>> comboTypeDocumentFilter;
+    private JSpinner startCreationDate;
+    private JSpinner endCreationDate;
+    private JCheckBox useStartDate;
+    private JCheckBox useEndDate;
+
+    private JTable table;
+
+    public DocumentTable(MainWindow mainWindow) throws DataValidationException {
+        this.mainWindow = mainWindow;
+        this.controller = new DocumentController();
+
+        setLayout(new BorderLayout(0, 16));
+
+        documents = controller.getAllDocuments();
+        displayDocuments = new ArrayList<>(documents);
+
+        buildSearchPanel();
+        add(searchPanel, BorderLayout.NORTH);
+        buildTablePanel();
+        add(tablePanel, BorderLayout.CENTER);
+    }
+    private JPanel buildHeader() {
+        JLabel title = new JLabel("Document Search");
+        title.setFont(new Font("Inter", Font.BOLD, 20));
+
+        JPanel header = new JPanel(new BorderLayout(0, 8));
+        header.add(title, BorderLayout.NORTH);
+        return header;
+    }
+
+    /**
+     * Builds the search panel containing the filter fields and action buttons.
+     * Each field is encapsulated in a smaller JPanel for better display management.
+     * {@link ViewUtils#labeled(JCheckBox, JComponent)}
+     */
+    private void buildSearchPanel() throws DataValidationException {
+        searchPanel = new JPanel(new BorderLayout());
+        JPanel fieldsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        idDocument = ViewUtils.digitsOnly(new JTextField(10));
+        idDocument = ViewUtils.addFilterListener(idDocument, this::onFilterClick);
+        fieldsPanel.add(ViewUtils.labeled("Document ID", idDocument));
+
+        comboTypeDocumentFilter = new JComboBox<>();
+        setDocumentTypes(controller.getAllDocumentType());
+        comboTypeDocumentFilter = ViewUtils.addFilterListener(comboTypeDocumentFilter, this::onFilterClick);
+        fieldsPanel.add(ViewUtils.labeled("Document Type", comboTypeDocumentFilter));
+
+        useStartDate = new JCheckBox("Start date");
+        startCreationDate = ViewUtils.createDateSpinner();
+        startCreationDate.addChangeListener(e -> onFilterClick());
+        startCreationDate.setEnabled(false);
+        useStartDate.addActionListener(e -> {                          
+            startCreationDate.setEnabled(useStartDate.isSelected());
+            onFilterClick();
+        });
+        fieldsPanel.add(ViewUtils.labeled(useStartDate, startCreationDate));
+
+        useEndDate = new JCheckBox("End date");
+        endCreationDate = ViewUtils.createDateSpinner();
+        endCreationDate.addChangeListener(e -> onFilterClick());
+        endCreationDate.setEnabled(false);
+        useEndDate.addActionListener(e -> {                            
+            endCreationDate.setEnabled(useEndDate.isSelected());
+            onFilterClick();
+        });
+        fieldsPanel.add(ViewUtils.labeled(useEndDate, endCreationDate));
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton btnSearch = new JButton("Search");
+        btnSearch.addActionListener(e -> onFilterClick());
+        JButton btnCreate = new JButton("Create");
+        btnCreate.addActionListener(e -> onCreateClick());
+
+        buttonPanel.add(btnSearch);
+        buttonPanel.add(btnCreate);
+
+        searchPanel.add(buildHeader(), BorderLayout.NORTH);
+        searchPanel.add(fieldsPanel, BorderLayout.CENTER);
+        searchPanel.add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    /**
+     * Construct the panel containing the document table.
+     * The table uses {@link DocumentTableModel} as its data model.
+     */
+    private void buildTablePanel() {
+        tablePanel = new JPanel(new BorderLayout());
+
+        model = new DocumentTableModel(displayDocuments);
+        table = new JTable(model);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        tablePanel.add(scrollPane, BorderLayout.CENTER);
+
+        table.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                int row = table.rowAtPoint(e.getPoint());
+                int col = table.columnAtPoint(e.getPoint());
+                if (col == 4) {
+                    onUpdateClick();
+                };
+                if (col == 5) {
+                    onDeleteClick();
+                };
+            }
+        });
+    }
+
+    /**
+     * Method called when the search button is clicked.
+     * 
+     * Apply the user to selected filters on the document list:
+     * Filter by ID (partial search)
+     * Filter by document type
+     * Filter by start date (if enabled)
+     * Filter by end date (if enabled)
+     *
+     * Updates the table model with the filtered documents.
+     */
+    public void onFilterClick() {
+
+        Integer idValue = null;
+
+        String idText = idDocument.getText().trim();
+
+        if (!idText.isEmpty()) {
+            try {
+                idValue = Integer.parseInt(idText);
+            } catch (NumberFormatException e) {
+                return;
+            }
+        }
+
+        ComboBoxItem<DocumentType> selectedItem = (ComboBoxItem<DocumentType>) comboTypeDocumentFilter.getSelectedItem();
+
+        LocalDate startDate = useStartDate.isSelected()
+                ? ViewUtils.toLocalDate((Date) startCreationDate.getValue())
+                : null;
+
+        LocalDate endDate = useEndDate.isSelected()
+                ? ViewUtils.toLocalDate((Date) endCreationDate.getValue())
+                : null;
+
+        displayDocuments = new ArrayList<>();
+
+        for (Document doc : documents) {
+
+            boolean match = true;
+
+            if (idValue != null && idValue > 0 && doc.getId() != idValue) {
+                match = false;
+            }
+
+            if (selectedItem != null && selectedItem.getObject() != null && !doc.getDocumentType().equals(selectedItem.getObject())) {
+                match = false;
+            }
+
+            if (startDate != null && doc.getDateOfCreation().isBefore(startDate)) {
+                match = false;
+            }
+
+            if (endDate != null && doc.getDateOfCreation().isAfter(endDate)) {
+                match = false;
+            }
+
+            if (match) {
+                displayDocuments.add(doc);
+            }
+        }
+
+        model.setDocuments(displayDocuments);
+    }
+
+    public void onCreateClick(){
+        mainWindow.openDocumentForm(null);
+    }
+
+    /**
+     * Called when the user clicks on "Modify".
+     *
+     * Flow of the selected data:
+     * 1. Get the selected row from the table.
+     * 2. Retrieve the corresponding Document object from displayDocuments.
+     * 3. Send this object to the MainWindow.
+     * @see MainWindow#openDocumentForm(model.Document)
+     * 4. MainWindow forwards it to DocumentForm.
+     * 5. The form loads the data to allow editing.
+     *
+     * Important:
+     * - If no row is selected → show an error message.
+     * - If an object is passed → form is in EDIT mode.
+     * - If null was passed → form would be in CREATE mode.
+     */
+    public void onUpdateClick(){
+        int selectedRow = table.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a document to modify.");
+            return;
+        }
+
+        Document doc = displayDocuments.get(selectedRow);
+
+        mainWindow.openDocumentForm(doc);
+    }
+
+    public void onDeleteClick() {
+        int selectedRow = table.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a document to delete.");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to delete this document?",
+                "Confirm deletion",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            Document docToDelete = displayDocuments.get(selectedRow);
+
+            controller.deleteDocument(docToDelete);
+
+            documents.remove(docToDelete);
+            displayDocuments.remove(selectedRow);
+            model.setDocuments(displayDocuments);
+        }
+    }
+
+    /**
+     * Updates the document type filter ComboBox with the available document types.
+     * An "All" option is added first to allow unfiltered display.
+     *
+     * @param types list of available document types
+     */
+    public void setDocumentTypes(ArrayList<DocumentType> types) {
+        comboTypeDocumentFilter.removeAllItems();
+        comboTypeDocumentFilter.addItem(new ComboBoxItem<>(null, "All"));
+        for (DocumentType documentType : types) {
+            comboTypeDocumentFilter.addItem(new ComboBoxItem<>(documentType, documentType.getName()));
+        }
+    }
+}

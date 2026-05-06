@@ -5,19 +5,19 @@
 ### Build tests instance
 
 ```cmd
-IG252-java-project>for /r src %i in (*.java) do @echo %i >> sources.txt && javac -cp lib\*.jar -d . @sources.txt
-IG252-java-project>javac -cp "lib/*" -d build @sources.txt
+for /r src %i in (*.java) do @echo %i >> sources.txt
+javac -cp "lib/*" -d build @sources.txt
 ```
 
 ### Start tests and create repport
 
 ```cmd
-IG252-java-project>java -jar lib\junit-platform-console-standalone-1.13.0-M3.jar execute -cp "build;lib\junit-platform-console-standalone-1.13.0-M3.jar" --scan-classpath --disable-ansi-colors --reports-dir=reports > test-report.md
+java -jar lib\junit-platform-console-standalone-1.13.0-M3.jar execute -cp "build;lib\junit-platform-console-standalone-1.13.0-M3.jar" --scan-classpath --disable-ansi-colors --reports-dir=reports > test-report.md
 ```
 
 ## Lancer le projet
 
-Pour lance le projet, assurez-vous d'être en possession de l'application Docker pour gérer la conteneurisation.
+Pour lancer le projet, assurez-vous d'être en possession de l'application Docker pour gérer la conteneurisation.
 
 ### Gestion des variables d'environnement
 

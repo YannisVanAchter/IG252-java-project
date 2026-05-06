@@ -1,12 +1,11 @@
 package exception;
 
 public class DataValidationException extends Exception {
-    private String message;
 
-    public DataValidationException(String messageString) { this.message = messageString; }
+    public DataValidationException(String messageString) { super(messageString); }
 
-    public String getMessage() { return message; }
+    public DataValidationException(String messageString, Throwable cause) { super(messageString, cause); }
 
     @Override
-    public String toString() { return "Objet DataConstrainsException, with the following message: " + this.message; }
+    public String toString() { return "Objet DataConstrainsException, with the following message: " + this.getMessage(); }
 }
