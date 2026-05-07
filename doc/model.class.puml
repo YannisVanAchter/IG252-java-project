@@ -4,68 +4,338 @@ title "Diagramme de class du package Model"
 
 ' top to bottom direction
 skinparam linetype ortho
-' skinparam linetype polyline
+skinparam linetype polyline
 
 package model {
     class Locality {
+        -localityId: String
         -postalCode : int
         -city : String
+
+        -setLocalityId(String)
+        -setPostalCode(int)
+        -setCity(String)
+
+        +getLocalityId(): String
+        +getPostalCode(): int
+        +getCity(): String
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
     class Address {
+        -addressId: String
         -streetName : String
         -streetNumber : int
+
+        -setLocality(Locality)
+        -setAddressId(String)
+        -setStreetName(String)
+        -setStreetNumber(int)
+
+        +getLocality(): Locality
+        +getAddressId(): String
+        +getStreetName(): String
+        +getStreetNumber(): int
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
-    Address --> Locality
+    Address " 1..* " --> " 1 " Locality
+
+    ' HR management '
 
     class Employee {
-        -matricule : String
+        -id : int
         -lastname : String
         -firstname : String
         -phoneNumber : String
         -email : String
-        -IBAN : String
+        -iban : String
         -salaryPerHour : float
         -nbHourPerWeek : int
-        -entryDate : Date
+        -hiringDate : LocalDate
         -nbPaidHoliday : int
         -password : String
+        -manager: Employee
+        -subordinate: List<Employee>
+        -attendanceSchedule: List<Pointing>
+        -professionalSeniority: List<Position>
+
+        -setId(int)
+        -setLastname(String)
+        -setFirstname(String)
+        -setPhoneNumber(String)
+        -setEmail(String)
+        -setIban(String)
+        -setSalaryPerHour(float)
+        -setNbHourPerWeek(int)
+        -setHiringDate(LocalDate)
+        -setNbPaidHoliday(int)
+        -setPassword(password)
+        -setManager(Employee)
+        -setSubordinate(List<Employee>)
+        -setAttendanceSchedule(List<Pointing>)
+        -setProfessionalSeniority(List<Position>)
+
+        +getId(): int
+        +getLastname(): String
+        +getFirstname(): String
+        +getPhoneNumber(): String
+        +getEmail(): String
+        +getIban(): String
+        +getSalaryPerHour(): float
+        +getNbHourPerWeek(): int
+        +getHiringDate(): LocalDate
+        +getNbPaidHoliday(): int
+        +getPassword(): String
+        {static} +hashPassword(String): String
+        {static} +comparePasswords(String, String): boolean
+        +comparePasswords(String): boolean
+        +getManager(): Employee
+        +getSubordinate(): List<Employee>
+        +getAttendanceSchedule(): List<Pointing>
+        +getProfessionalSeniority(): List<Position>
+        +getCurrentProfession(): Position
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
-    Employee --> Address
-    Employee "0..*" --> "0..1" Employee : manager
+    Employee " 0..* " --> " 1 " Address
+    Employee " 0..* " --> " 0..1 " Employee : manager
 
     class Pointing {
-        -date : Date
+        -date : LocalDate
         -startTime : Time
         -endTime : Time
+
+        -setEmployee(Employee)
+        -setDate(LocalDate)
+        -setStartTime(Time)
+        -setEndTime(Time)
+
+        +getEmployee(): Employee
+        +getDate(): LocalDate
+        +getStartTime(): Time
+        +getEndTime(): Time
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
-    Pointing "*" --> "1" Employee
+    Pointing "*" <-- "1" Employee
 
     class Role_ {
+        -id: int 
         -name : String
+
+        -setId(int)
+        -setName(String)
+
+        +getId(): int
+        +getName(): String
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
     class Position {
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
-    Position "*" --> "*" Employee
-    Position "*" --> "1" Role_
+    Employee " 0..* " --> " 1..* " Role_
+    (Employee, Role_) .. Position
 
     class AbsenceType {
+        -id: int
         -name : String
+
+        -setId(int)
+        -setName(String)
+
+        +getId(): int
+        +getName(): String
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
     class Absence {
-        -startDate : Date
-        -endDate : Date
+        -id: int
+        -startDate : LocalDate
+        -endDate : LocalDate
         -description : String
+
+        -setEmployee(Employee)
+        -setAbsenceType(AbsenceType)
+        -setId(int)
+        -setStartDate(LocalDate)
+        -setEndDate(LocalDate)
+        -setDescription(String)
+
+        +getEmployee(): Employee
+        +getAbsenceType(): AbsenceType
+        +getId(): int
+        +getStartDate(): LocalDate
+        +getEndDate(): LocalDate
+        +getDescription(): String
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
-    Absence "*" --> "1" AbsenceType
-    Absence "*" --> "1" Employee
+    AbsenceType " * " <-- " * " Employee
+    (AbsenceType, Employee) .. Absence
+
+    ' Stock management '
+
+    class ProductCategory {
+        -name : String
+
+        -setName(String)
+
+        +getName(): String
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
+    }
+
+    class Product {
+        -id : int
+        -name : String
+        -priceEVAT : float
+        -vat : float
+        -fidelityPoint : int
+        -isEdible: boolean
+        -minStockQuantity: int
+        -category: ProductCategory
+        -discounts: List<Discount>
+
+        -setId(int)
+        -setName(String)
+        -setPriceEVAT(float)
+        -setVat(float)
+        -setFidelityPoint(int)
+        -setIsEdible(boolean)
+        -setMinStockQuantity(int)
+        -setCategory(ProductCategory)
+        -setDiscounts(List<Discount>)
+
+        +getId(): int
+        +getName(): String
+        +getPriceEVAT(): float
+        +getVat(): float
+        +getPrice(): float
+        +getFidelityPoint(): int
+        +getIsEdible(): boolean
+        +getMinStockQuantity(): int
+        +getCategory(): ProductCategory
+        +getDiscounts(): List<Discount>
+        +getIsDiscounted(): boolean
+        +getCurrentDiscount(): Discount
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
+    }
+
+    Product " * " --> " 1 " ProductCategory
+
+    class Discount {
+        -requiredQuantity : int
+        -discountPercentage : float
+        -startDate : LocalDate
+        -endDate : LocalDate
+        -name : String
+        -product: Product
+
+        -setRequiredQuantity(int)
+        -setDiscountPercentage(float)
+        -setStartDate(LocalDate)
+        -setEndDate(LocalDate)
+        -setName(String)
+        -setProduct(Product)
+
+        +getRequiredQuantity(): int
+        +getDiscountPercentage(): float
+        +getStartDate(): LocalDate
+        +getEndDate(): LocalDate
+        +getName(): String
+        +getProduct(): Product
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
+    }
+
+    Discount " * " <-- " * " Product
+
+    class LocationProduct {
+        -locationProductId: String
+        -shelf : String
+        -floor : String
+        -isStock : boolean
+        -isFreezer: boolean
+
+        -setLocationProductId(String)
+        -setShelf(String)
+        -setFloor(String)
+        -setIsStock(boolean)
+        -setIsFreezer(boolean)
+
+        +getLocationProductId(): String
+        +getShelf(): String
+        +getFloor(): String
+        +getIsStock(): boolean
+        +getIsFreezer(): boolean
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
+    }
+
+    class QuantityProduct {
+        -quantity : int
+
+        -setQuantity(int)
+
+        +getQuantity(): int
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
+    }
+
+    Product " * " --> " * " LocationProduct
+    (Product, LocationProduct) .. QuantityProduct
+
+    ' Workflow and document management models'
 
     class ClientSupplier {
         -id : int
@@ -73,122 +343,322 @@ package model {
         -firstName : String
         -email : String
         -phoneNumber : String
-        -isClient : bool
-        -isSupplier : bool
+        -isClient : boolean
+        -isSupplier : boolean
+        -isUs: boolean
         -VATNumber : String
-        -dateBecameClient : Date
+        -dateBecameClient : LocalDate
+        -address: Address
+
+        -setId(int)
+        -setName(String)
+        -setFirstName(String)
+        -setEmail(String)
+        -setPhoneNumber(String)
+        -setIsClient(boolean)
+        -setIsSupplier(boolean)
+        -setIsUs(boolean)
+        -setVatNumber(String)
+        -setDateBecameClient(LocalDate)
+        -setAddress(Address)
+
+        +getId(): int
+        +getName(): String
+        +getFirstName(): String
+        +getEmail(): String
+        +getPhoneNumber(): String
+        +getIsClient(): boolean
+        +getIsSupplier(): boolean
+        +getIsUs(): boolean
+        +getVatNumber(): String
+        +getDateBecameClient(): LocalDate
+        +getAddress(): Address
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
-    ClientSupplier "*" --> "1" Address
+    ClientSupplier " * " --> " 1 " Address
 
     class FidelityCard {
         -id : int
         -totalPoint : int
         -isValid : bool
+        -client: ClientSupplier
+
+        -setId(int)
+        -setTotalPoint(int)
+        -setIsValid(boolean)
+        -setClient(ClientSupplier)
+
+        +getId(): int
+        +getTotalPoint(): int
+        +getIsValid(): boolean
+        +getClient(): ClientSupplier
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
-    FidelityCard "1" --> "1" ClientSupplier
+    FidelityCard " 1 " <-- " 1 " ClientSupplier
 
     class WorkflowType {
         -name : String
         -isBuy : bool
         -isSupplier : bool
         -isInternal : bool
+
+        -setName(String)
+        -setIsBuy(boolean)
+        -setIsSupplier(boolean)
+        -setIsInternal(boolean)
+
+        +getName(): String
+        +getIsBuy(): boolean
+        +getIsSupplier(): boolean
+        +getIsInternal(): boolean
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
     class Status {
         -name : String
+
+        -setName(String)
+
+        +getName(): String
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
     class Workflow {
         -id : String
+        -workflowType: WorkflowType
+        -status: Status
+        -us: ClientSupplier
+        -otherParty: ClientSupplier
+        -documents: List<Document>
+
+        -setId(String)
+        -setWorkflowType(WorkFlowType)
+        -setStatus(Status)
+        -setUs(ClientSupplier)
+        -setOtherParty(ClientSupplier)
+        -setDocuments(List<Document>)
+
+        +getId(): String
+        +getWorkflowType(): WorkflowType
+        +getStatus(): Status
+        +getUs(): ClientSupplier
+        +getOtherParty(): ClientSupplier
+        +getDocuments(): List<Documents>
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
-    Workflow "*" --> "1" Status
-    Workflow "*" --> "1" WorkflowType
+    Workflow " * " --> " 1 " Status
+    Workflow " * " --> " 1 " WorkflowType
+    Workflow " * " --> " 2 " ClientSupplier
+    Workflow " 1 " <--> " * " Document
+
+    (Workflow, Document) .. WorkflowDocuments
 
     class DocumentType {
         -name: String
+
+        -setName(String)
+
+        +getName(): String
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
     class Document {
+        .. final attributes ..
+        -DOCUMENT_TYPE_MANDATORY_PLANNED_SEND_DATE: List<DocumentType>
+        -DOCUMENT_TYPE_MANDATORY_PLANNED_RECEPTION_DATE: List<DocumentType>
+        -DOCUMENT_TYPE_MANDATORY_PAYMENT_DELAY: List<DocumentType>
+        -DOCUMENT_TYPE_MANDATORY_COMMENTARY: List<DocumentType>
+
+        .. Instance attributes ..
         -id : int
-        -date : Date
-        -plannedSendDate : Date
-        -plannedReceptionDate : Date
-        -effectiveSendDate : Date
-        -effectiveReceptionDate : Date
+        -date : LocalDate
+        -plannedSendDate : LocalDate
+        -plannedReceptionDate : LocalDate
+        -effectiveSendDate : LocalDate
+        -effectiveReceptionDate : LocalDate
         -paymentDelay : int
         -commentary : String
         -isChecked : bool
+
+        __
+        -setId(int)
+        -setWorkflow(Workflow)
+        -setDocumentType(DocumentType)
+        -setAddress(Address)
+        -setDate(LocalDate)
+        -setPlannedSendDate(LocalDate)
+        -setPlannedReceptionDate(LocalDate)
+        -setEffectiveSendDate(LocalDate)
+        -setEffectiveReceptionDate(LocalDate)
+        -setPaymentDelay(int)
+        -setCommentary(String)
+        -setIsChecked(boolean)
+
+        +getId(): int
+        +getWorkflow(): Workflow
+        +getDocumentType(): DocumentType
+        +getAddress(): Address
+        +getDate(): LocalDate
+        +getPlannedSendDate(): LocalDate
+        +getPlannedReceptionDate(): LocalDate
+        +getEffectiveSendDate(): LocalDate
+        +getEffectiveReceptionDate(): LocalDate
+        +getPaymentDelay(): int
+        +getCommentary(): String
+        +getIsChecked(): boolean
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
-    Document "*" --> "1" Workflow
-    Document "*" --> "1" ClientSupplier
-    Document "*" --> "1" Address
-    Document "*" --> "1" DocumentType
-
-    class ProductCategory {
-        -name : String
-    }
-
-    class Product {
-        -id : int
-        -name : String
-        -price : float
-        -VAT : int
-        -fidelityPoint : int
-    }
-
-    Product "*" --> "1" ProductCategory
-
-    class Discount {
-        -requiredQuantity : int
-        -discount : int
-        -startDate : Date
-        -endDate : Date
-        -name : String
-    }
-
-    Discount "*" --> "*" Product
-
-    class LocationProduct {
-        -shelf : String
-        -floor : String
-    }
-
-    class QuantityProduct {
-        -nbProduct : int
-    }
-
-    QuantityProduct "*" --> "1" Product
-    QuantityProduct "*" --> "1" LocationProduct
+    Document " * " --> " 1 " Address
+    Document " * " --> " 1 " DocumentType
 
     class Recipe {
+        -id: int
         -name : String
-        -explanation : String
+        -instruction : String
+
+        -setId(int)
+        -setName(String)
+        -setInstruction(String)
+        -setFinalProduct(Product)
+
+        +getId(): int
+        +getName(): String
+        +getInstruction(): String
+        +getFinalProduct(): Product
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
     class RecipeComposition {
         -quantity : int
+
+        -setQuantity(int)
+        -setProduct(Product)
+        -setRecipe(Recipe)
+
+        +getQuantity(): int
+        +getProduct(): Product
+        +getRecipe(): Recipe
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
-    RecipeComposition "*" --> "1" Recipe
-    RecipeComposition "*" --> "1" Product
+    Recipe " * " <--> " * " Product
+    (Recipe, Product) .. RecipeComposition
+
+    class PreparationOrder {
+        -id: int
+
+        -setId(int)
+        -setDocument(Document)
+        -setRecipe(Recipe)
+
+        +getId(): int
+        +getDocument(): Document
+        +getRecipe(): Recipe
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
+    }
+
+    Document " 1 " -- " 1 " Recipe
+    (Document, Recipe) .. PreparationOrder
 
     class Detail {
         -id : int
         -quantity : float
-        -price : float
+        -priceEVAT : float
+        -vat: float
+        -fidelityPointEarned: Integer
+
+        -setId(int)
+        -setQuantity(float)
+        -setPriceEVAT(float)
+        -setVat(float)
+        -setFidelityPointEarned(Integer)
+        -setDocument(Document)
+        -setProduct(Product)
+
+        +getId(): int
+        +getQuantity(): int
+        +getPriceEVAT(): float
+        +getVat(): float
+        +getFidelityPointEarned(): Integer
+        +getDocument(): Document
+        +getProduct(): Product
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
-    Detail "*" --> "1" Document
+    Detail "*" <--> "1" Document
+    (Detail, Document) .. DocumentDetails
+
     Detail "*" --> "1" Product
 
     class Batch {
         -id : int
-        -expirationDate : Date
+        -expirationDate : LocalDate
         -originCountry : String
+
+        -setId(int)
+        -setDetail(Detail)
+        -setProduct(Product)
+        -setExpirationDate(LocalDate)
+        -setOriginCountry(String)
+
+        +getId(): int
+        +getDetail(): Detail
+        +getProduct(): Product
+        +getExpirationDate(): LocalDate
+        +getOriginCountry(): String
+        +getLabel(): String
+
+        +toString() : String
+        +equals(Object) : boolean
+        +hashCode() : int
     }
 
     Batch "*" --> "1" Product
