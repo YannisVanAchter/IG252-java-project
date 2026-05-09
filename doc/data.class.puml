@@ -1,0 +1,86 @@
+@startuml "data class diagram"
+
+title "Diagramme de class du package Data"
+
+' top to bottom direction
+skinparam linetype ortho
+' skinparam linetype polyline
+
+' TODO: finish diagram before implementing this layer (deadline: may 15th 2026)
+package data {
+
+    class SingletonConnection {
+        {static} -instance : Connection
+        -url : String
+        -username : String
+        -password : String
+        +getInstance() : Connection
+        +resetConnection(): void
+        +closeConnection(): void
+    }
+
+    abstract class CRUD<T> {
+        # tableName: String
+        # tableAttributeToModel: HashMap<String, class>
+        - modelMappingDate: HashMap<class, class> 
+
+        {abstract} +getAll(): List<T>
+        {abstract} +get(id: String): T
+        {abstract} +insert(new: T): void
+        {abstract} +update(old: T, new: T): void
+        {abstract} +delete(old: T): void
+        #getDBAccessClass(class): class
+    }
+
+    class ClientSupplierDBAccess {
+    }
+
+    class EmployeeDBAccess {
+    }
+
+    class DocumentDBAccess {
+    }
+
+    class ProductDBAccess {
+    }
+
+    class RecipeDBAccess {
+    }
+
+    class AddressDBAccess {
+    }
+
+    class StockDBAccess {
+    }
+
+    class PreparationOrderDBAccess {
+    }
+
+    class WorkFlowDBAccess {
+    }
+
+    SingletonConnection <.. ClientSupplierDBAccess: use 
+    SingletonConnection <.. EmployeeDBAccess: use 
+    SingletonConnection <.. DocumentDBAccess: use 
+    SingletonConnection <.. ProductDBAccess: use 
+    SingletonConnection <.. RecipeDBAccess: use 
+    SingletonConnection <.. AddressDBAccess: use 
+    SingletonConnection <.. StockDBAccess: use 
+    SingletonConnection <.. PreparationOrderDBAccess: use 
+    SingletonConnection <.. WorkFlowDBAccess: use 
+    SingletonConnection <.. ProductSearchManager: use 
+    SingletonConnection <.. RecipeSearchManager: use 
+    SingletonConnection <.. ClientSupplierSearchManager: use
+
+    ClientSupplierDBAccess ..|> CRUD: implement
+    EmployeeDBAccess ..|> CRUD: implement
+    DocumentDBAccess ..|> CRUD: implement
+    ProductDBAccess ..|> CRUD: implement
+    RecipeDBAccess ..|> CRUD: implement
+    AddressDBAccess ..|> CRUD: implement
+    StockDBAccess ..|> CRUD: implement
+    PreparationOrderDBAccess ..|> CRUD: implement
+    WorkFlowDBAccess ..|> CRUD: implement
+}
+
+@enduml
