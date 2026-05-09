@@ -3,6 +3,7 @@ package view;
 import model.DocumentType;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.*;
 import java.awt.*;
 import java.time.*;
@@ -38,23 +39,30 @@ public class ViewUtils {
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.add(new JLabel(text));
         p.add(Box.createVerticalStrut(4));
-        //comp.setMaximumSize(new Dimension(Integer.MAX_VALUE, comp.getPreferredSize().height));
+        comp.setMaximumSize(new Dimension(Integer.MAX_VALUE, comp.getPreferredSize().height));
         p.add(comp);
-        return p;
-    }
-
-    public static JPanel labeled(JCheckBox checkBox, JComponent comp) {
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.add(checkBox);
         p.add(Box.createVerticalStrut(4));
-        p.add(comp);
         return p;
     }
 
     public static JPanel labeledRequired(String labelText, JComponent comp) {
         return labeled(labelText + "*", comp);
     }
+
+    /**
+     * Wraps a component in a JPanel {@code BorderLayout CENTER}
+     * so that it stretches horizontally, with a fixed height.
+     * @return {@code JPanel}
+     */
+    public static JPanel makeRow(JComponent component) {
+        JPanel row = new JPanel(new BorderLayout());
+        row.setBorder(new EmptyBorder(0, 6, 0, 6));
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE,
+                component.getPreferredSize().height + 4));
+        row.add(component, BorderLayout.CENTER);
+        return row;
+    }
+
     /**
      * Creates and returns a date spinner component pre-configured to display dates
      * in the "dd/MM/yyyy" format.
@@ -90,7 +98,7 @@ public class ViewUtils {
     }
     /**
      * Creates a JSpinner configured for integer input.
-     *
+     *  Spinner align on Left
      * @param value initial value
      * @param min minimum value
      * @param max maximum value
@@ -99,7 +107,9 @@ public class ViewUtils {
      */
     public static JSpinner createNumberSpinner(int value, int min, int max, int step) {
         JSpinner spinner = new JSpinner(new SpinnerNumberModel(value, min, max, step));
-        spinner.setEditor(new JSpinner.NumberEditor(spinner, "#"));
+        JSpinner.NumberEditor editor = new JSpinner.NumberEditor(spinner, "#");
+        spinner.setEditor(editor);
+        editor.getTextField().setHorizontalAlignment(JTextField.LEFT);
         return spinner;
     }
 

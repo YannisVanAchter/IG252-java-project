@@ -5,18 +5,19 @@ import exception.DataValidationException;
 import model.*;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.time.*;
 import java.util.*;
-//Todo : uncomment country in loadDocument when available
 
+//TODO : nettoyer throws DataValidationException quand controller sera près
 /**
- * DocumentCreationForm represents the Form panel for creating a new document.
+ * DocumentForm represents the Form panel for creating and modifying a Document.
  * <p>
  * This form allows the user to enter all required information related to a document
  * (dates, workflow, client/supplier, address, etc.).
  * <p>
- * The form communicates with {@link DocumentController}
+ * The form communicates with {@link DocumentController} to perform creation and update operations.
  */
 public class DocumentForm extends JPanel {
     private MainWindow mainWindow;
@@ -24,10 +25,8 @@ public class DocumentForm extends JPanel {
     private Document currentDocument;
 
     private ArrayList<ClientSupplier> allClients;
-    private ArrayList<DocumentType> allDocumentTypes;
-    private ArrayList<Status> allWorkflowStatuses;
 
-    private JPanel appPanel, panelContent, leftPanel, rightPanel;
+    private JPanel leftPanel, rightPanel;
 
     private JTextArea commentary;
     private JCheckBox checkIsChecked;
@@ -60,55 +59,75 @@ public class DocumentForm extends JPanel {
     private JTextField txtCountry;
 
     private JButton btnSave;
-    private JButton btnClear;
-    private JButton btnNewClient;
 
+    /**
+     * Constructs a new instance of the DocumentForm.
+     *
+     * @param mainWindow the main application window associated with this form.
+     */
     public DocumentForm(MainWindow mainWindow) throws DataValidationException {
         this.mainWindow = mainWindow;
         this.controller = new DocumentController();
-
         this.allClients = controller.getAllClientSupplier();
 
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new BorderLayout(10, 16));
+        setBorder(new EmptyBorder(16, 16, 16, 16));
 
-        JLabel title = new JLabel("Document Details");
-        title.setFont(new Font("Inter", Font.BOLD, 20));
+        add(buildHeader(), BorderLayout.NORTH);
+        add(buildFormPanel(), BorderLayout.CENTER);
+        add(buildButtonPanel(), BorderLayout.SOUTH);
+    }
 
-        JPanel topBar = new JPanel(new BorderLayout());
-
+    /**
+     * Builds the header panel containing the title and the back button.
+     * @return the header {@code JPanel}
+     */
+    private JPanel buildHeader() {
         JButton btnBack = new JButton("←");
         btnBack.addActionListener(e -> mainWindow.goBack());
 
-        topBar.add(btnBack, BorderLayout.WEST);
-        topBar.add(title, BorderLayout.CENTER);
+        JLabel title = new JLabel("Document Details");
+        title.setFont(new Font("SansSerif", Font.BOLD, 20));
 
-        add(topBar, BorderLayout.NORTH);
-
-
-        appPanel = new JPanel(new BorderLayout(20, 20));
-        panelContent = new JPanel(new GridLayout(1, 2, 20, 0));
-
-        buildLeftPanel();
-        buildRightPanel();
-
-        panelContent.add(leftPanel);
-        panelContent.add(rightPanel);
-
-        appPanel.add(panelContent, BorderLayout.CENTER);
-        add(appPanel, BorderLayout.CENTER);
+        JPanel header = new JPanel(new BorderLayout(8, 0));
+        header.add(btnBack, BorderLayout.WEST);
+        header.add(title, BorderLayout.CENTER);
+        return header;
     }
 
-    private void buildLeftPanel() throws DataValidationException {
+    /**
+     * Constructs and returns the main form panel containing two subpanels.
+     * The panel is organized using a {@code GridLayout} with two columns and a horizontal gap of 20 pixels.
+     * @return the constructed {@code JPanel} containing all elements.
+     */
+    private JPanel buildFormPanel() throws DataValidationException {
+        JPanel form = new JPanel(new GridLayout(1, 2, 20, 0));
+        form.add(buildLeftPanel());
+        form.add(buildRightPanel());
+        return form;
+    }
+
+    /**
+     * Builds and returns the left section of the document form.
+     * This panel contains general document information such as:
+     * document type, commentary, planned/effective dates, payment delay, and validation check.
+     * Required fields are marked with {@code *} using {@link ViewUtils#labeledRequired(String, JComponent)}.
+     * Some inputs include validation constraints such as numeric-only fields using {@link ViewUtils#digitsOnly(JTextField)}.
+     * @return the left panel of the document form
+     */
+    private JPanel buildLeftPanel() throws DataValidationException {
         leftPanel = ViewUtils.createColumnPanel();
+        leftPanel.setBorder(BorderFactory.createTitledBorder("Document"));
 
         comboDocumentType = new JComboBox<>();
+        comboDocumentType.setEditable(true);
         comboDocumentType.setToolTipText("Select the type of document");
         setDocumentTypes(controller.getAllDocumentType());
         leftPanel.add(ViewUtils.labeledRequired("Document Type", comboDocumentType));
 
         commentary = new JTextArea(4, 20);
         commentary.setToolTipText("Optional comment about the document");
-        leftPanel.add(ViewUtils.labeled("Commentaire", new JScrollPane(commentary)));
+        leftPanel.add(ViewUtils.labeled("Commentary", new JScrollPane(commentary)));
 
         chkPlannedSendDate = new JCheckBox();
         pickerPlannedSendDate = ViewUtils.createDateSpinner();
@@ -132,19 +151,37 @@ public class DocumentForm extends JPanel {
 
         spnPaymentDelay = ViewUtils.createNumberSpinner(0, -1, 3650, 1);
         spnPaymentDelay.setToolTipText("Number of days allowed for payment, minimum 0");
-        leftPanel.add(ViewUtils.labeled("Payment delay", spnPaymentDelay));
+        leftPanel.add(ViewUtils.labeled("Payment Delay", spnPaymentDelay));
 
         checkIsChecked = new JCheckBox("Document is checked");
         leftPanel.add(checkIsChecked);
+
+        leftPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, leftPanel.getPreferredSize().height));
+        return leftPanel;
     }
 
-    private void buildRightPanel() throws DataValidationException {
+    /**
+     * Builds and returns the right section of the form.
+     * This panel contains two grouped sections:
+     * <ul>
+     *   <li>Workflox information: Workflow status, Workflow type.</li>
+     *   <li>Address information: street, street number, postal code, city, and country.</li>
+     * </ul>
+     * Some fields include predefined values, such as the non-editable country field
+     * or restrictions such as numeric spinners for address and loyalty data.
+     *
+     * @return the right form panel
+     */
+    private JPanel buildRightPanel() throws DataValidationException {
         rightPanel = ViewUtils.createColumnPanel();
+        JPanel workflowPanel = ViewUtils.createColumnPanel();
+        workflowPanel.setBorder(BorderFactory.createTitledBorder("Workflow"));
 
         comboWorkflowStatus = new JComboBox<>();
+        comboWorkflowStatus.setEditable(true);
         setWorkflowStatus(controller.getAllWorkflowStatus());
         comboWorkflowStatus.setToolTipText("Current status of the workflow");
-        rightPanel.add(ViewUtils.labeledRequired("Workflow Status", comboWorkflowStatus));
+        workflowPanel.add(ViewUtils.labeledRequired("Workflow Status", comboWorkflowStatus));
 
         isBuy = new JRadioButton("Buy");
         isBuy.setToolTipText("Document relates to a purchase");
@@ -160,65 +197,89 @@ public class DocumentForm extends JPanel {
 
         JPanel radioPanel = new JPanel();
         radioPanel.setLayout(new BoxLayout(radioPanel, BoxLayout.X_AXIS));
+        radioPanel.setToolTipText("At least one type must be selected");
         radioPanel.add(isBuy);
+        radioPanel.add(Box.createHorizontalStrut(10));
         radioPanel.add(isSell);
+        radioPanel.add(Box.createHorizontalStrut(10));
         radioPanel.add(isInternal);
 
-        rightPanel.add(ViewUtils.labeledRequired("WorkflowType", radioPanel));
+        JPanel radioWrapper = new JPanel(new BorderLayout(0, 4));
+        radioWrapper.add(new JLabel("Workflow Type *"), BorderLayout.NORTH);
+        radioWrapper.add(radioPanel, BorderLayout.CENTER);
+        workflowPanel.add(radioWrapper);
 
+        rightPanel.add(workflowPanel);
+        rightPanel.add(Box.createVerticalStrut(15));
+
+        JPanel clientPanel2 = ViewUtils.createColumnPanel();
         comboClientSupplier = new JComboBox<>();
-        setClientSuppliers(allClients);
         comboClientSupplier.setEditable(true);
+        setClientSuppliers(allClients);
 
-        btnNewClient = new JButton("New");
-        btnNewClient.addActionListener(e -> onNewClientcliked());
-        JPanel clientPanel = new JPanel();
-        clientPanel.setLayout(new BoxLayout(clientPanel, BoxLayout.X_AXIS));
-        clientPanel.add(comboClientSupplier);
-        clientPanel.add(Box.createHorizontalStrut(10));
-        clientPanel.add(btnNewClient);
+        JButton btnNewClient = new JButton("New");
+        btnNewClient.addActionListener(e -> onNewClientClicked());
 
-        rightPanel.add(ViewUtils.labeled("Client / Supplier", clientPanel));
+        JPanel clientRow = new JPanel();
+        clientRow.setLayout(new BoxLayout(clientRow, BoxLayout.X_AXIS));
+        clientRow.add(comboClientSupplier);
+        clientRow.add(Box.createHorizontalStrut(10));
+        clientRow.add(btnNewClient);
+
+        clientPanel2.add(ViewUtils.labeled("Client / Supplier", clientRow));
+        rightPanel.add(clientPanel2);
+        rightPanel.add(Box.createVerticalStrut(15));
+
+        JPanel addressPanel = ViewUtils.createColumnPanel();
+        addressPanel.setBorder(BorderFactory.createTitledBorder("Address"));
+
+        txtStreet = new JTextField(10);
+        txtStreet.setToolTipText("Ex: Avenue Louise");
+        addressPanel.add(ViewUtils.labeled("Street", txtStreet));
 
         spnStreetNumber = ViewUtils.createNumberSpinner(1, 1, 10000, 1);
-        rightPanel.add(ViewUtils.labeled("Street Number", spnStreetNumber));
+        addressPanel.add(ViewUtils.labeled("Street Number", spnStreetNumber));
+
         spnPostalCode = ViewUtils.createNumberSpinner(1000, 1, 99999, 1);
-        rightPanel.add(ViewUtils.labeled("Postal Code", spnPostalCode));
+        addressPanel.add(ViewUtils.labeled("Postal Code", spnPostalCode));
 
-        txtStreet = new JTextField();
-        txtStreet.setToolTipText("Ex: Avenue Louise");
-        rightPanel.add(ViewUtils.labeled("Street", txtStreet));
-
-        txtCity = new JTextField();
+        txtCity = new JTextField(10);
         txtCity.setToolTipText("Ex: Bruxelles");
-        rightPanel.add(ViewUtils.labeled("City", txtCity));
+        addressPanel.add(ViewUtils.labeled("City", txtCity));
 
-        txtCountry = new JTextField();
-        txtCountry.setToolTipText("Ex: Belgium");
-        rightPanel.add(ViewUtils.labeled("Country", txtCountry));
+        txtCountry = new JTextField("Belgium");
+        txtCountry.setEditable(false);
+        txtCountry.setFocusable(false);
+        addressPanel.add(ViewUtils.labeled("Country", txtCountry));
 
-        if (currentDocument == null) {
-            btnSave = new JButton("Save");
+        rightPanel.add(addressPanel);
 
-        } else {
-            btnSave = new JButton("Edit");
-        }
+        addressPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, addressPanel.getPreferredSize().height));
+        workflowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, workflowPanel.getPreferredSize().height));
+        clientPanel2.setMaximumSize(new Dimension(Integer.MAX_VALUE, clientPanel2.getPreferredSize().height));
+        rightPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, rightPanel.getPreferredSize().height));
+        return rightPanel;
+    }
+
+    private JPanel buildButtonPanel() {
+        btnSave = new JButton("Save");
         btnSave.addActionListener(e -> saveEditForm());
-        btnClear = new JButton("Clear");
+
+        JButton btnClear = new JButton("Clear");
         btnClear.addActionListener(e -> clearForm());
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.add(btnSave);
-        buttonPanel.add(btnClear);
-
-        rightPanel.add(Box.createVerticalStrut(10));
-        rightPanel.add(buttonPanel);
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        panel.add(btnClear);
+        panel.add(btnSave);
+        return panel;
     }
 
     /**
-     * Validates all required fields in the document form.
-     *
-     * @return true if all required fields are valid, false otherwise
+     * Validates the form fields before submission.
+     * This method checks that all required fields are filled and follow the rules imposed to correctly fill out the database.
+     * If a validation rule fails, a warning dialog is displayed and the method immediately returns {@code false}.
+     * @return {@code true} if all validation rules pass;
+     *         {@code false} otherwise
      */
     private boolean validateForm() {
         if (comboDocumentType.getSelectedItem() == null) {
@@ -239,17 +300,25 @@ public class DocumentForm extends JPanel {
         }
 
         ComboBoxItem<DocumentType> typeItem = (ComboBoxItem<DocumentType>) comboDocumentType.getSelectedItem();
-        String typeName = typeItem.getObject().getName();
-        if ((typeName.equals("Delivery") || typeName.equals("Command")) && !chkPlannedSendDate.isSelected()) {
-            JOptionPane.showMessageDialog(this, "Planned send date is required for Delivery and Command types.", "Validation", JOptionPane.WARNING_MESSAGE);
-            return false;
+        if (typeItem != null) {
+            String typeName = typeItem.getObject().getName();
+            if ((typeName.equals("Delivery") || typeName.equals("Command")) && !chkPlannedSendDate.isSelected()) {
+                JOptionPane.showMessageDialog(this, "Planned send date is required for Delivery and Command types.", "Validation", JOptionPane.WARNING_MESSAGE);
+                return false;
+            }
         }
         return true;
     }
 
     /**
-     * Validates user input and sends the document data to {@link DocumentController}
-     * for creation or update.
+     * Validates the form and saves a document.
+     * This method first calls {@link #validateForm()} to ensure all required fields are correctly filled.
+     * If the form is valid, all values are collected and sent to the controller
+     * to either create a new document or update an existing one depending on
+     * whether {@code currentDocument} is {@code null}.
+     * After a successful save, a confirmation message is displayed and the view
+     * is closed via {@link MainWindow#goBack()}).
+     * In case of errors, a {@code JDialog} is displayed with the error message.
      */
     private void saveEditForm() {
         if (!validateForm()) return;
@@ -351,12 +420,12 @@ public class DocumentForm extends JPanel {
 
         workflowGroup.clearSelection();
 
-        spnStreetNumber.setValue(0);
+        spnStreetNumber.setValue(1);
         spnPostalCode.setValue(1000);
 
         txtStreet.setText("");
         txtCity.setText("");
-        txtCountry.setText("");
+        txtCountry.setText("Belgium");
 
         currentDocument = null;
 
@@ -366,10 +435,11 @@ public class DocumentForm extends JPanel {
     }
 
     /**
-     * Loads data from a Document into the form.a
-     *
-     * @param doc document to display
-     *            If doc is null, the form is in create mode
+     * Loads a document into the form.
+     * If {@code doc} is {@code null}, the form is reset and switched to create mode.
+     * Otherwise, all document data is displayed in the form and the interface is updated to edit mode.
+     * @param doc the document to display;
+     *        {@code null} to initialize the form in create mode
      */
     public void loadDocument(Document doc) {
         if (doc == null) {
@@ -403,7 +473,6 @@ public class DocumentForm extends JPanel {
             pickerEffectiveReceptionDate.setValue(ViewUtils.toDate(doc.getActualDateOfReceipt()));
         }
 
-
         spnPaymentDelay.setValue(doc.getPaymentDelay());
 
         isBuy.setSelected(doc.getWorkflow().getWorkflowType().getIsBuy());
@@ -419,9 +488,11 @@ public class DocumentForm extends JPanel {
 
         txtStreet.setText(doc.getAddress().getStreetName());
         txtCity.setText(doc.getAddress().getLocality().getName());
-        //txtCountry.setText(doc.getAddress().getLocality().getCountry();
+        txtCountry.setText("Belgium");
 
         checkIsChecked.setSelected(doc.getIsChecked());
+
+        btnSave.setText("Edit");
     }
 
     /**
@@ -431,10 +502,9 @@ public class DocumentForm extends JPanel {
      */
     public void setClientSuppliers(ArrayList<ClientSupplier> clientSupplier) {
         comboClientSupplier.removeAllItems();
-
         for (ClientSupplier cs : clientSupplier) {
-            String string = cs.getName() + " " + (cs.getFirstname() != null ? cs.getFirstname() : "");
-            comboClientSupplier.addItem(new ComboBoxItem<>(cs, string));
+            String label = cs.getName() + " " + (cs.getFirstname() != null ? cs.getFirstname() : "");
+            comboClientSupplier.addItem(new ComboBoxItem<>(cs, label.trim()));
         }
     }
 
@@ -463,15 +533,10 @@ public class DocumentForm extends JPanel {
     }
 
     /**
-     * This method opens a modal to create a new client/supplier.
-     * If a new client or supplier is successfully created, it is added to the
-     * ClientSuplier Comboboxlist.
-     *
-     * @see ClientSupplierForm
+     * Opens a modal dialog for creating a new client/supplier and adds it to the combo.
      */
-    public void onNewClientcliked() {
+    public void onNewClientClicked() {
         ClientSupplier newClient = openDialog();
-
         if (newClient != null) {
             allClients.add(newClient);
             setClientSuppliers(allClients);
@@ -481,10 +546,9 @@ public class DocumentForm extends JPanel {
     }
 
     /**
-     * Opens a modal dialog for creating or selecting a client/supplier.
+     * Opens a modal dialog for creating a new client/supplier.
      *
-     * @return The new created {@code ClientSupplier} from the dialog,
-     * or {@code null} if the dialog is closed before saving.
+     * @return The newly created {@code ClientSupplier}, or {@code null} if the dialog was closed without saving.
      */
     public ClientSupplier openDialog() {
         JDialog dialog = new JDialog(mainWindow, "Add new Client", true);

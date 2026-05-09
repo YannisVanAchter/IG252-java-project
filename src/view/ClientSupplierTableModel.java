@@ -2,9 +2,17 @@ package view;
 
 import model.ClientSupplier;
 
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 
+/**
+ * Table model used to display a list of {@link ClientSupplier} in a JTable.
+ * Provides column definitions and maps each client/supplier attribute
+ * to its corresponding table cell, including action columns (Edit/Delete).
+ * The model is read-only and must be refreshed using
+ * {@link #setClientSuppliers(ArrayList)} when data changes.
+ */
 public class ClientSupplierTableModel extends AbstractTableModel {
     private static final String[] COLUMNS = {
             "id", "Name", "First Name", "Email", "TVA", "Type", "Loyality", "Edit", "Delete"
@@ -16,26 +24,35 @@ public class ClientSupplierTableModel extends AbstractTableModel {
         this.clientSuppliers = clientSuppliers;
     }
 
+    /**
+     * Load the ClientSupplier list in the table and allow refresh with new data.
+     * @see AbstractTableModel#fireTableDataChanged();
+     * @param clientSuppliers
+     */
     public void setClientSuppliers(ArrayList<ClientSupplier> clientSuppliers) {
         this.clientSuppliers = clientSuppliers;
         fireTableDataChanged();
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getRowCount() {
         return clientSuppliers.size();
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getColumnCount() {
         return COLUMNS.length;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getColumnName(int column) {
         return COLUMNS[column];
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         ClientSupplier cs = clientSuppliers.get(rowIndex);
@@ -54,6 +71,7 @@ public class ClientSupplierTableModel extends AbstractTableModel {
         };
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         return false;
