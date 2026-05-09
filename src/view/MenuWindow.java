@@ -4,7 +4,7 @@ import javax.swing.*;
 
 public class MenuWindow extends JMenuBar {
     private JMenu appMenu, searchMenu, receipeMenu;
-    private JMenuItem closeItem, helpItem, clientItem, suplierItem, documentItem, recipeItem;
+    private JMenuItem closeItem, helpItem, clientItem, suplierItem, documentItem, productItem, recipeItem;
 
     public MenuWindow(MainWindow window){
         appMenu = new JMenu("Application");
@@ -31,7 +31,16 @@ public class MenuWindow extends JMenuBar {
             window.setPage("DOCUMENT");
         });
         searchMenu.add(documentItem);
+        productItem = new JMenuItem("Product");
+        productItem.addActionListener(e -> {
+            window.setPage("PRODUCT");
+        });
+        searchMenu.add(productItem);
+
         recipeItem = new JMenuItem("Recipe");
+        recipeItem.addActionListener(e -> {
+            window.setPage("RECIPE");
+        });
         searchMenu.add(recipeItem);
 
 

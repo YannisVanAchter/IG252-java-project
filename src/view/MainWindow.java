@@ -21,6 +21,9 @@ public class MainWindow extends JFrame {
 
     private DocumentForm documentForm;
     private ClientSupplierForm clientSupplierForm;
+    private ProductView productView;
+    private RecipeView recipeView;
+
 
     private CardLayout cardLayout;
     private JPanel container;
@@ -39,12 +42,21 @@ public class MainWindow extends JFrame {
         addPage(new MainPanel(), "MAIN");
 
         addPage(new DocumentTable(this), "DOCUMENT");
-        addPage(new DocumentForm(this), "DOCUMENT_FORM");
+        documentForm = new DocumentForm(this);
+        addPage(documentForm, "DOCUMENT_FORM");
 
         addPage(new ClientSupplierTable(this), "CLIENT_SUPPLIER");
-        addPage(new ClientSupplierForm(this), "CLIENT_SUPPLIER_FORM");
+        clientSupplierForm = new ClientSupplierForm(this);
+        addPage(clientSupplierForm, "CLIENT_SUPPLIER_FORM");
 
         addPage(new ProductSearchTable(this), "PRODUCT");
+        productView = new ProductView(this);
+        addPage(productView, "PRODUCT_VIEW");
+
+        addPage(new RecipeSearchTable(this), "RECIPE");
+        recipeView = new RecipeView(this);
+        addPage(recipeView, "RECIPE_VIEW");
+
         add(container);
         setVisible(true);
     }
@@ -89,5 +101,15 @@ public class MainWindow extends JFrame {
     public void openClientSupplierForm(ClientSupplier cs) {
         clientSupplierForm.loadClientSupplier(cs);
         setPage("CLIENT_SUPPLIER_FORM");
+    }
+
+    public void openProductView(Product product) {
+        productView.loadProduct(product);
+        setPage("PRODUCT_VIEW");
+    }
+
+    public void openRecipeView(Recipe recipe) {
+        recipeView.loadRecipe(recipe);
+        setPage("RECIPE_VIEW");
     }
 }
