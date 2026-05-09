@@ -43,9 +43,12 @@ public class ProductSearchTable extends JPanel {
 
         displayProducts = new ArrayList<>(products);
 
-        add(buildHeader(), BorderLayout.NORTH);
-        add(buildSearchPanel(), BorderLayout.CENTER);
-        add(buildTablePanel(), BorderLayout.SOUTH);
+        JPanel top = new JPanel(new BorderLayout());
+        top.add(buildHeader(), BorderLayout.NORTH);
+        top.add(buildSearchPanel(), BorderLayout.CENTER);
+
+        add(top, BorderLayout.NORTH);
+        add(buildTablePanel(), BorderLayout.CENTER);
     }
 
     private JPanel buildHeader() {
