@@ -117,46 +117,48 @@ public class DocumentForm extends JPanel {
      */
     private JPanel buildLeftPanel() throws DataValidationException {
         leftPanel = ViewUtils.createColumnPanel();
-        leftPanel.setBorder(BorderFactory.createTitledBorder("Document"));
+        JPanel leftContent = ViewUtils.createColumnPanel();
+        leftContent.setBorder(BorderFactory.createTitledBorder("Document"));
 
         comboDocumentType = new JComboBox<>();
         comboDocumentType.setEditable(true);
         comboDocumentType.setToolTipText("Select the type of document");
         setDocumentTypes(controller.getAllDocumentType());
-        leftPanel.add(ViewUtils.labeledRequired("Document Type", comboDocumentType));
+        leftContent.add(ViewUtils.labeledRequired("Document Type", comboDocumentType));
 
         commentary = new JTextArea(4, 20);
         commentary.setToolTipText("Optional comment about the document");
-        leftPanel.add(ViewUtils.labeled("Commentary", new JScrollPane(commentary)));
+        leftContent.add(ViewUtils.labeled("Commentary", new JScrollPane(commentary)));
 
         chkPlannedSendDate = new JCheckBox();
         pickerPlannedSendDate = ViewUtils.createDateSpinner();
         chkPlannedSendDate.setToolTipText("Required for Delivery and Command types");
-        leftPanel.add(ViewUtils.labeledToggleDate("Planned Send Date", pickerPlannedSendDate, chkPlannedSendDate));
+        leftContent.add(ViewUtils.labeledToggleDate("Planned Send Date", pickerPlannedSendDate, chkPlannedSendDate));
 
         chkPlannedReceptionDate = new JCheckBox();
         pickerPlannedReceptionDate = ViewUtils.createDateSpinner();
         chkPlannedReceptionDate.setToolTipText("Check to set a planned reception date");
-        leftPanel.add(ViewUtils.labeledToggleDate("Planned Reception Date", pickerPlannedReceptionDate, chkPlannedReceptionDate));
+        leftContent.add(ViewUtils.labeledToggleDate("Planned Reception Date", pickerPlannedReceptionDate, chkPlannedReceptionDate));
 
         chkEffectiveSendDate = new JCheckBox();
         pickerEffectiveSendDate = ViewUtils.createDateSpinner();
         chkEffectiveSendDate.setToolTipText("Check to set the effective send date");
-        leftPanel.add(ViewUtils.labeledToggleDate("Effective Send Date", pickerEffectiveSendDate, chkEffectiveSendDate));
+        leftContent.add(ViewUtils.labeledToggleDate("Effective Send Date", pickerEffectiveSendDate, chkEffectiveSendDate));
 
         chkEffectiveReceptionDate = new JCheckBox();
         pickerEffectiveReceptionDate = ViewUtils.createDateSpinner();
         chkEffectiveReceptionDate.setToolTipText("Check to set the effective reception date");
-        leftPanel.add(ViewUtils.labeledToggleDate("Effective Reception Date", pickerEffectiveReceptionDate, chkEffectiveReceptionDate));
+        leftContent.add(ViewUtils.labeledToggleDate("Effective Reception Date", pickerEffectiveReceptionDate, chkEffectiveReceptionDate));
 
         spnPaymentDelay = ViewUtils.createNumberSpinner(0, -1, 3650, 1);
         spnPaymentDelay.setToolTipText("Number of days allowed for payment, minimum 0");
-        leftPanel.add(ViewUtils.labeled("Payment Delay", spnPaymentDelay));
+        leftContent.add(ViewUtils.labeled("Payment Delay", spnPaymentDelay));
 
         checkIsChecked = new JCheckBox("Document is checked");
-        leftPanel.add(checkIsChecked);
+        leftContent.add(checkIsChecked);
 
-        leftPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, leftPanel.getPreferredSize().height));
+        leftContent.setMaximumSize(new Dimension(Integer.MAX_VALUE, leftContent.getPreferredSize().height));
+        leftPanel.add(leftContent);
         return leftPanel;
     }
 
@@ -184,11 +186,8 @@ public class DocumentForm extends JPanel {
         workflowPanel.add(ViewUtils.labeledRequired("Workflow Status", comboWorkflowStatus));
 
         isBuy = new JRadioButton("Buy");
-        isBuy.setToolTipText("Document relates to a purchase");
         isSell = new JRadioButton("Sell");
-        isSell.setToolTipText("Document relates to a sale");
         isInternal = new JRadioButton("Internal");
-        isInternal.setToolTipText("Document is internal to the company");
 
         workflowGroup = new ButtonGroup();
         workflowGroup.add(isBuy);
@@ -197,22 +196,21 @@ public class DocumentForm extends JPanel {
 
         JPanel radioPanel = new JPanel();
         radioPanel.setLayout(new BoxLayout(radioPanel, BoxLayout.X_AXIS));
-        radioPanel.setToolTipText("At least one type must be selected");
         radioPanel.add(isBuy);
-        radioPanel.add(Box.createHorizontalStrut(10));
+        radioPanel.add(Box.createHorizontalStrut(5));
         radioPanel.add(isSell);
-        radioPanel.add(Box.createHorizontalStrut(10));
+        radioPanel.add(Box.createHorizontalStrut(5));
         radioPanel.add(isInternal);
 
-        JPanel radioWrapper = new JPanel(new BorderLayout(0, 4));
-        radioWrapper.add(new JLabel("Workflow Type *"), BorderLayout.NORTH);
-        radioWrapper.add(radioPanel, BorderLayout.CENTER);
-        workflowPanel.add(radioWrapper);
+        workflowPanel.add(ViewUtils.labeled("Workflow Type *", radioPanel));
 
-        rightPanel.add(workflowPanel);
-        rightPanel.add(Box.createVerticalStrut(15));
+        workflowPanel.setMaximumSize(
+                new Dimension(Integer.MAX_VALUE, workflowPanel.getPreferredSize().height)
+        );
 
-        JPanel clientPanel2 = ViewUtils.createColumnPanel();
+        JPanel clientPanel = ViewUtils.createColumnPanel();
+        clientPanel.setBorder(BorderFactory.createTitledBorder("Client / Supplier"));
+
         comboClientSupplier = new JComboBox<>();
         comboClientSupplier.setEditable(true);
         setClientSuppliers(allClients);
@@ -226,41 +224,52 @@ public class DocumentForm extends JPanel {
         clientRow.add(Box.createHorizontalStrut(10));
         clientRow.add(btnNewClient);
 
-        clientPanel2.add(ViewUtils.labeled("Client / Supplier", clientRow));
-        rightPanel.add(clientPanel2);
-        rightPanel.add(Box.createVerticalStrut(15));
+        clientPanel.add(clientRow);
+
+        clientPanel.setMaximumSize(
+                new Dimension(Integer.MAX_VALUE, clientPanel.getPreferredSize().height)
+        );
 
         JPanel addressPanel = ViewUtils.createColumnPanel();
         addressPanel.setBorder(BorderFactory.createTitledBorder("Address"));
 
         txtStreet = new JTextField(10);
-        txtStreet.setToolTipText("Ex: Avenue Louise");
-        addressPanel.add(ViewUtils.labeled("Street", txtStreet));
-
         spnStreetNumber = ViewUtils.createNumberSpinner(1, 1, 10000, 1);
-        addressPanel.add(ViewUtils.labeled("Street Number", spnStreetNumber));
 
-        spnPostalCode = ViewUtils.createNumberSpinner(1000, 1, 99999, 1);
-        addressPanel.add(ViewUtils.labeled("Postal Code", spnPostalCode));
+        addressPanel.add(ViewUtils.horizontalRowGroup(
+                ViewUtils.labeledRequired("Street", txtStreet),
+                ViewUtils.labeledRequired("Street Number", spnStreetNumber)
+        ));
 
+        addressPanel.add(Box.createVerticalStrut(8));
+
+        spnPostalCode = ViewUtils.createNumberSpinner(1000, 1, 9999, 1000);
         txtCity = new JTextField(10);
-        txtCity.setToolTipText("Ex: Bruxelles");
-        addressPanel.add(ViewUtils.labeled("City", txtCity));
+
+        addressPanel.add(ViewUtils.horizontalRowGroup(
+                ViewUtils.labeledRequired("Postal Code", spnPostalCode),
+                ViewUtils.labeledRequired("City", txtCity)
+        ));
+
+        addressPanel.add(Box.createVerticalStrut(8));
 
         txtCountry = new JTextField("Belgium");
         txtCountry.setEditable(false);
         txtCountry.setFocusable(false);
         addressPanel.add(ViewUtils.labeled("Country", txtCountry));
 
+        addressPanel.setMaximumSize(
+                new Dimension(Integer.MAX_VALUE, addressPanel.getPreferredSize().height)
+        );
+
+        rightPanel.add(workflowPanel);
+        rightPanel.add(Box.createVerticalStrut(15));
+        rightPanel.add(clientPanel);
+        rightPanel.add(Box.createVerticalStrut(15));
         rightPanel.add(addressPanel);
 
-        addressPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, addressPanel.getPreferredSize().height));
-        workflowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, workflowPanel.getPreferredSize().height));
-        clientPanel2.setMaximumSize(new Dimension(Integer.MAX_VALUE, clientPanel2.getPreferredSize().height));
-        rightPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, rightPanel.getPreferredSize().height));
         return rightPanel;
     }
-
     private JPanel buildButtonPanel() {
         btnSave = new JButton("Save");
         btnSave.addActionListener(e -> saveEditForm());

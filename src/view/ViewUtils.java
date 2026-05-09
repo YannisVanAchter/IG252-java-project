@@ -1,7 +1,5 @@
 package view;
 
-import model.DocumentType;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.*;
@@ -60,6 +58,24 @@ public class ViewUtils {
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE,
                 component.getPreferredSize().height + 4));
         row.add(component, BorderLayout.CENTER);
+        return row;
+    }
+
+    /**
+     * Creates a horizontal row grouping two labeled components with fixed spacing between them.
+     * Useful for aligning form fields side by side
+     * @param leftLabelled the left component
+     * @param rightLabelled the right component
+     * @return a JPanel containing both components arranged horizontally
+     */
+    public static JPanel horizontalRowGroup(Component leftLabelled, Component rightLabelled) {
+        JPanel row = new JPanel();
+        row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
+
+        row.add(leftLabelled);
+        row.add(Box.createHorizontalStrut(10));
+        row.add(rightLabelled);
+
         return row;
     }
 

@@ -132,31 +132,32 @@ public class ClientSupplierForm extends JPanel {
      */
     private JPanel buildLeftPanel() {
         leftPanel = ViewUtils.createColumnPanel();
-        leftPanel.setBorder(BorderFactory.createTitledBorder("Identity"));
+        JPanel leftContent = ViewUtils.createColumnPanel();
+        leftContent.setBorder(BorderFactory.createTitledBorder("Identity"));
 
         txtName = new JTextField(10);
         txtName.setToolTipText("Ex: Dupont");
-        leftPanel.add(ViewUtils.labeledRequired("Name", txtName));
+        leftContent.add(ViewUtils.labeledRequired("Name", txtName));
 
         txtFirstName = new JTextField(10);
-        leftPanel.add(ViewUtils.labeledRequired("First name", txtFirstName));
+        leftContent.add(ViewUtils.labeledRequired("First name", txtFirstName));
 
         txtMail = new JTextField(10);
         txtMail.setToolTipText("Ex: jean.dupont@email.com");
-        leftPanel.add(ViewUtils.labeledRequired("Mail", txtMail));
+        leftContent.add(ViewUtils.labeledRequired("Mail", txtMail));
 
         txtPhoneNumber = new JTextField(10);
         txtPhoneNumber.setToolTipText("ex: 0032123456");
         txtPhoneNumber = ViewUtils.digitsOnly(txtPhoneNumber);
-        leftPanel.add(ViewUtils.labeledRequired("Phone number", txtPhoneNumber));
+        leftContent.add(ViewUtils.labeledRequired("Phone number", txtPhoneNumber));
 
         txtVATNumber = new JTextField(10);
         txtVATNumber.setToolTipText("BE + 10 digits");
         txtVATNumber.setText("BE");
-        leftPanel.add(ViewUtils.labeledRequired("VAT number", txtVATNumber));
+        leftContent.add(ViewUtils.labeledRequired("VAT number", txtVATNumber));
 
         becameClientDate = ViewUtils.createDateSpinner();
-        leftPanel.add(ViewUtils.labeled("Become client date", becameClientDate));
+        leftContent.add(ViewUtils.labeled("Become client date", becameClientDate));
 
         chkIsClient = new JCheckBox("Client");
         chkIsSupplier = new JCheckBox("Supplier");
@@ -171,11 +172,11 @@ public class ClientSupplierForm extends JPanel {
         typeRow.add(Box.createHorizontalStrut(10));
         typeRow.add(chkIsMember);
 
-        JPanel typeWrapper = new JPanel(new BorderLayout(0, 4));
-        typeWrapper.add(new JLabel("Type *"), BorderLayout.NORTH);
-        typeWrapper.add(typeRow, BorderLayout.CENTER);
-        leftPanel.add(typeWrapper);
-        leftPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, leftPanel.getPreferredSize().height));
+        leftContent.add(ViewUtils.labeled("Type *", typeRow));
+        leftContent.setMaximumSize(leftPanel.getPreferredSize());
+
+        leftContent.setMaximumSize(new Dimension(Integer.MAX_VALUE, leftContent.getPreferredSize().height));
+        leftPanel.add(leftContent);
 
         return leftPanel;
     }
@@ -195,7 +196,7 @@ public class ClientSupplierForm extends JPanel {
     private JPanel buildRightPanel() {
         rightPanel = ViewUtils.createColumnPanel();
         JPanel addressPanel = ViewUtils.createColumnPanel();
-        addressPanel.setBorder(BorderFactory.createTitledBorder("Address & loyalty"));
+        addressPanel.setBorder(BorderFactory.createTitledBorder("Address"));
 
         txtStreet = new JTextField(10);
         txtStreet.setToolTipText("Ex: Avenue Louise");
@@ -224,8 +225,7 @@ public class ClientSupplierForm extends JPanel {
         txtIdLoyaltyCard = new JTextField(10);
         loyaltyPanel.add(ViewUtils.labeled("Loyalty card ID", txtIdLoyaltyCard));
 
-        spnLoyaltyPoint = new JSpinner(new SpinnerNumberModel(0, 0, 99999, 1));
-        spnLoyaltyPoint.setEditor(new JSpinner.NumberEditor(spnLoyaltyPoint, "#"));
+        spnLoyaltyPoint = ViewUtils.createNumberSpinner(0, 0, 9999, 1000);
         loyaltyPanel.add(ViewUtils.labeled("Loyalty points", spnLoyaltyPoint));
         loyaltyPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, loyaltyPanel.getPreferredSize().height));
 
