@@ -3,8 +3,8 @@ package view;
 import javax.swing.*;
 
 public class MenuWindow extends JMenuBar {
-    private JMenu appMenu, searchMenu, receipeMenu;
-    private JMenuItem closeItem, helpItem, clientItem, suplierItem, documentItem, productItem, recipeItem;
+    private JMenu appMenu, searchMenu, buisnessMenu;
+    private JMenuItem closeItem, helpItem, clientItem, suplierItem, documentItem, productItem, recipeItem, receiptItem;
 
     public MenuWindow(MainWindow window){
         appMenu = new JMenu("Application");
@@ -43,13 +43,19 @@ public class MenuWindow extends JMenuBar {
         });
         searchMenu.add(recipeItem);
 
+        buisnessMenu = new JMenu("Business task");
+        buisnessMenu.setMnemonic('B');
 
-        receipeMenu = new JMenu("Receipe");
-        receipeMenu.setMnemonic('R');
+        receiptItem = new JMenuItem("Receipt");
+        receiptItem.addActionListener(e -> {
+            window.setPage("RECEIPT");
+        });
+        buisnessMenu.add(receiptItem);
+
 
         add(appMenu);
         add(searchMenu);
-        add(receipeMenu);
+        add(buisnessMenu);
     }
 
 }

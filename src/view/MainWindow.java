@@ -57,6 +57,8 @@ public class MainWindow extends JFrame {
         recipeView = new RecipeView(this);
         addPage(recipeView, "RECIPE_VIEW");
 
+        addPage(new ReceiptView(this), "RECEIPT");
+
         add(container);
         setVisible(true);
     }
