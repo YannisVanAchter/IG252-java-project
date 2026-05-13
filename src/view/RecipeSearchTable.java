@@ -21,6 +21,7 @@ import java.util.ArrayList;
  * and with {@link MainWindow} to open a detailed recipe view when a row is selected.
  */
 public class RecipeSearchTable extends JPanel {
+    private static final int TBL_BTN_SEE = 4;
 
     private MainWindow mainWindow;
     private RecipeController controller;
@@ -138,11 +139,13 @@ public class RecipeSearchTable extends JPanel {
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if (table.getSelectedRow() != -1) {
+                if (table.getSelectedRow() == TBL_BTN_SEE) {
                     onRowClick();
                 }
             }
         });
+
+        table.getColumnModel().getColumn(TBL_BTN_SEE).setCellRenderer(new ButtonRenderer());
 
         JScrollPane scroll = new JScrollPane(table);
         scroll.setPreferredSize(new Dimension(0, 200));

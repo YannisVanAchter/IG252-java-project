@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class DocumentTableModel extends AbstractTableModel {
 
     private static final String[] COLUMNS = {
-            "ID", "Workflow", "Creation date", "Send/Receipt date", "Edit", "Delete"
+            "ID", "Workflow", "Creation date", "Send/Receipt date", "", ""
     };
 
     private ArrayList<Document> documents;

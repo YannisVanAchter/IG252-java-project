@@ -19,6 +19,8 @@ import java.util.ArrayList;
  * @see MainWindow#openProductView(Product)
  */
 public class ProductSearchTable extends JPanel {
+    private static final int TBL_BTN_SEE = 5;
+
     private MainWindow mainWindow;
     private ProductController controller;
     private ProductTableModel model;
@@ -93,30 +95,20 @@ public class ProductSearchTable extends JPanel {
         return fieldsColumn;
     }
 
-    /**
-     * Enveloppe un composant dans un JPanel BorderLayout CENTER
-     * pour qu'il s'étire horizontalement, avec une hauteur fixe.
-     */
-    private JPanel makeRow(JComponent component) {
-        JPanel row = new JPanel(new BorderLayout());
-        row.setBorder(new EmptyBorder(0, 6, 0, 6));
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE,
-                component.getPreferredSize().height + 4));
-        row.add(component, BorderLayout.CENTER);
-        return row;
-    }
-
     private JScrollPane buildTablePanel() {
         model = new ProductTableModel(displayProducts);
         table = new JTable(model);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if (table.columnAtPoint(e.getPoint()) == 5) {
+                if (table.columnAtPoint(e.getPoint()) == TBL_BTN_SEE) {
                     onRowClick();
                 }
             }
         });
+
+        table.getColumnModel().getColumn(TBL_BTN_SEE).setCellRenderer(new ButtonRenderer());
+
 
         JScrollPane scroll = new JScrollPane(table);
         scroll.setPreferredSize(new Dimension(0, 250));
