@@ -1,0 +1,110 @@
+@startuml "Conceptualisation du système"
+
+title "Conceptualisation du système"
+
+' top to bottom direction
+skinparam linetype ortho
+' skinparam linetype polyline
+
+package OpenJDK <<Node>> {
+    class Main
+
+    package view {
+        note as n1 
+            The goal of this package is
+            to interact with the user
+            Package details: ./view.class.puml
+        end note
+    }
+
+    Main --> view
+
+    package controller {
+        note as n2
+            The goal of this package is 
+            to check if a user has the rights 
+            to access a certain resource
+            Package details: ./controller.class.puml
+        end note
+    }
+
+    Main ..> controller: Start threads
+    view --> controller
+
+    package business {
+        note as n3
+            The goal of this package is
+            to process the different jobs tasks
+            Package details: ./business.class.puml
+        end note
+    }
+
+    controller --> business
+
+    package data {
+        note as n4
+            The goal of this package is
+            to interact with database
+            Package details: ./data.class.puml
+        end note
+    }
+
+    business --> data
+
+    package exception {
+        note as n5
+            The goal of this package is
+            to abstract other exception through 
+            personal exception of the application
+            Package details: ./exception.class.puml
+        end note
+    }
+
+    view --> exception
+    controller --> exception
+    business --> exception
+    data --> exception
+
+    package model {
+        note as n6
+            The goal of this package is
+            to store within the java application the 
+            sections of the database we currently need
+            Package details: ./model.class.puml
+        end note
+    }
+
+    view --> model
+    controller --> model
+    business --> model
+    data --> model
+
+    json "DotEnv java-application" {
+        "MYSQL_ROOT_PASSWORD": "passwordblabal",
+        "MYSQL_DATABASE": "superdatabasename",
+        "MYSQL_USER": "superadminname",
+        "MYSQL_PASSWORD": "supersuperadminpassword",
+        "DISPLAY": ":0",
+        "DEBIAN_FRONTEND": "noninteractive",
+        "TZ": "Europe/Paris",
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8"
+    }
+}
+
+package MySQL <<Node>> {
+
+    package JAVA_PROJECT <<Database>> {
+    }
+
+    json "DotEnv mysql-database" {
+        "MYSQL_ROOT_PASSWORD": "passwordblabal",
+        "MYSQL_DATABASE": "superdatabasename",
+        "MYSQL_USER": "superadminname",
+        "MYSQL_PASSWORD": "supersuperadminpassword"
+    }
+}
+
+data ..right..> JAVA_PROJECT: "localhost:3306"
+
+@enduml

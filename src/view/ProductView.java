@@ -17,7 +17,7 @@ public class ProductView extends JPanel {
 
     private static final String LABEL_NO_DATA = "N/A";
 
-    private final MainWindow mainWindow;
+    private MainWindow mainWindow;
     private Product product;
 
 

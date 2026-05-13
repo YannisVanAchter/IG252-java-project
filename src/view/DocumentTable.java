@@ -2,10 +2,12 @@ package view;
 
 import controller.DocumentController;
 import exception.DataValidationException;
+import model.ClientSupplier;
 import model.Document;
 import model.DocumentType;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -16,15 +18,15 @@ import java.util.Date;
 
 
 /**
- * This view allows search and display documents
+ * This view allows users to manage and search through a list of documents.
+ * This class extends {@link JPanel} to provide a table view and search functionality for
+ * filtering document data based on various parameters such as ID, Type, date.
  *
- * This class extends {@link JPanel} and contains:
- * A search panel allowing you to filter documents according to several criteria
- * A table displaying the documents and filtered documents
+ * The table is populated via a custom model, {@link DocumentTableModel}, and provides
+ * ease of navigation with interactive search fields and filter checkboxes.
  *
- * Possible actions on the table include:
- * Redirection to editing view
- * Deleting a document
+ * Clicking on a row opens a detailed Form Document view through the main application window.
+ *  @see MainWindow#openDocumentForm(Document)
  */
 public class DocumentTable extends JPanel {
     private MainWindow mainWindow;
@@ -47,15 +49,18 @@ public class DocumentTable extends JPanel {
         this.mainWindow = mainWindow;
         this.controller = new DocumentController();
 
-        setLayout(new BorderLayout(0, 16));
+        setLayout(new BorderLayout(10, 16));
+        setBorder(new EmptyBorder(16, 16, 16, 16));
 
         documents = controller.getAllDocuments();
         displayDocuments = new ArrayList<>(documents);
 
-        buildSearchPanel();
-        add(searchPanel, BorderLayout.NORTH);
-        buildTablePanel();
-        add(tablePanel, BorderLayout.CENTER);
+        JPanel top = new JPanel(new BorderLayout(0, 10));
+        top.add(buildHeader(), BorderLayout.NORTH);
+        top.add(buildSearchPanel(), BorderLayout.SOUTH);
+
+        add(top, BorderLayout.NORTH);
+        add(buildTablePanel(), BorderLayout.CENTER);
     }
     private JPanel buildHeader() {
         JLabel title = new JLabel("Document Search");
@@ -67,94 +72,121 @@ public class DocumentTable extends JPanel {
     }
 
     /**
-     * Builds the search panel containing the filter fields and action buttons.
-     * Each field is encapsulated in a smaller JPanel for better display management.
-     * {@link ViewUtils#labeled(JCheckBox, JComponent)}
+     * Builds the search panel containing input fields and options
+     * to define filters and actions for searching or creating client and supplier records.
+     * Each item is warp in a JPanel and placed with {@code BorderLayout}
+     *
+     * @return a {@link JPanel} containing the search panel layout.
      */
-    private void buildSearchPanel() throws DataValidationException {
+    private JPanel buildSearchPanel() throws DataValidationException {
         searchPanel = new JPanel(new BorderLayout());
         JPanel fieldsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        idDocument = ViewUtils.digitsOnly(new JTextField(10));
+        idDocument = new JTextField(10);
+        idDocument = ViewUtils.digitsOnly(idDocument);
         idDocument = ViewUtils.addFilterListener(idDocument, this::onFilterClick);
-        fieldsPanel.add(ViewUtils.labeled("Document ID", idDocument));
+        JPanel idFields = new JPanel(new BorderLayout(0, 4));
+        idFields.add(new JLabel("Document ID"), BorderLayout.NORTH);
+        idFields.add(idDocument, BorderLayout.CENTER);
 
         comboTypeDocumentFilter = new JComboBox<>();
         setDocumentTypes(controller.getAllDocumentType());
         comboTypeDocumentFilter = ViewUtils.addFilterListener(comboTypeDocumentFilter, this::onFilterClick);
-        fieldsPanel.add(ViewUtils.labeled("Document Type", comboTypeDocumentFilter));
+        JPanel typeFields = new JPanel(new BorderLayout(0, 4));
+        typeFields.add(new JLabel("Document type"), BorderLayout.NORTH);
+        typeFields.add(comboTypeDocumentFilter, BorderLayout.CENTER);
 
-        useStartDate = new JCheckBox("Start date");
-        startCreationDate = ViewUtils.createDateSpinner();
-        startCreationDate.addChangeListener(e -> onFilterClick());
-        startCreationDate.setEnabled(false);
-        useStartDate.addActionListener(e -> {                          
-            startCreationDate.setEnabled(useStartDate.isSelected());
-            onFilterClick();
-        });
-        fieldsPanel.add(ViewUtils.labeled(useStartDate, startCreationDate));
-
-        useEndDate = new JCheckBox("End date");
-        endCreationDate = ViewUtils.createDateSpinner();
-        endCreationDate.addChangeListener(e -> onFilterClick());
-        endCreationDate.setEnabled(false);
-        useEndDate.addActionListener(e -> {                            
-            endCreationDate.setEnabled(useEndDate.isSelected());
-            onFilterClick();
-        });
-        fieldsPanel.add(ViewUtils.labeled(useEndDate, endCreationDate));
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JButton btnSearch = new JButton("Search");
-        btnSearch.addActionListener(e -> onFilterClick());
         JButton btnCreate = new JButton("Create");
         btnCreate.addActionListener(e -> onCreateClick());
 
-        buttonPanel.add(btnSearch);
-        buttonPanel.add(btnCreate);
+        JPanel leftColumn = new JPanel();
+        leftColumn.setLayout(new BoxLayout(leftColumn, BoxLayout.Y_AXIS));
+        leftColumn.add(ViewUtils.makeRow(idFields));
+        leftColumn.add(Box.createVerticalStrut(6));
+        leftColumn.add(ViewUtils.makeRow(typeFields));
+        leftColumn.add(Box.createVerticalStrut(8));
+        leftColumn.add(ViewUtils.makeRow(btnCreate));
 
-        searchPanel.add(buildHeader(), BorderLayout.NORTH);
-        searchPanel.add(fieldsPanel, BorderLayout.CENTER);
-        searchPanel.add(buttonPanel, BorderLayout.SOUTH);
+        useStartDate = new JCheckBox("Start date");
+        startCreationDate = ViewUtils.createDateSpinner();
+        startCreationDate.setEnabled(false);
+        startCreationDate.addChangeListener(e -> onFilterClick());
+        useStartDate.addActionListener(e -> {
+            startCreationDate.setEnabled(useStartDate.isSelected());
+            onFilterClick();
+        });
+        JPanel startDateRow = new JPanel(new BorderLayout(6, 0));
+        startDateRow.add(useStartDate,      BorderLayout.WEST);
+        startDateRow.add(startCreationDate, BorderLayout.CENTER);
+
+        useEndDate = new JCheckBox("End date");
+        endCreationDate = ViewUtils.createDateSpinner();
+        endCreationDate.setEnabled(false);
+        endCreationDate.addChangeListener(e -> onFilterClick());
+        useEndDate.addActionListener(e -> {
+            endCreationDate.setEnabled(useEndDate.isSelected());
+            onFilterClick();
+        });
+        JPanel endDateRow = new JPanel(new BorderLayout(6, 0));
+        endDateRow.add(useEndDate,      BorderLayout.WEST);
+        endDateRow.add(endCreationDate, BorderLayout.CENTER);
+
+        JPanel rightColumn = new JPanel();
+        rightColumn.setLayout(new BoxLayout(rightColumn, BoxLayout.Y_AXIS));
+        rightColumn.setBorder(BorderFactory.createTitledBorder("Date filter"));
+        rightColumn.add(ViewUtils.makeRow(startDateRow));
+        rightColumn.add(Box.createVerticalStrut(6));
+        rightColumn.add(ViewUtils.makeRow(endDateRow));
+
+        JPanel fieldsRow = new JPanel(new BorderLayout(12, 0));
+        fieldsRow.add(leftColumn,  BorderLayout.CENTER);
+        fieldsRow.add(rightColumn, BorderLayout.EAST);
+
+        JPanel fieldsColumn = new JPanel();
+        fieldsColumn.setLayout(new BoxLayout(fieldsColumn, BoxLayout.Y_AXIS));
+        fieldsColumn.setBorder(BorderFactory.createTitledBorder("Filters"));
+        fieldsColumn.add(ViewUtils.makeRow(fieldsRow));
+
+        return fieldsColumn;
     }
 
     /**
-     * Construct the panel containing the document table.
-     * The table uses {@link DocumentTableModel} as its data model.
+     * Builds the panel containing the document table.
+     * The table uses {@link DocumentTableModel} as its data model and allows
+     * single row selection only.
+     * A mouse listener is added to detect clicks on specific columns:
+     * <ul><li>Column 5: triggers the delete action via {@code onDeleteClick()}.</li>
+     *  <li>Other Column: triggers the update action via {@code onUpdateClick()}.</li></ul>
+     * @return a {@link JScrollPane} containing the configured table
      */
-    private void buildTablePanel() {
-        tablePanel = new JPanel(new BorderLayout());
-
+    private JScrollPane buildTablePanel() {
         model = new DocumentTableModel(displayDocuments);
         table = new JTable(model);
-
-        JScrollPane scrollPane = new JScrollPane(table);
-        tablePanel.add(scrollPane, BorderLayout.CENTER);
-
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                int row = table.rowAtPoint(e.getPoint());
-                int col = table.columnAtPoint(e.getPoint());
-                if (col == 4) {
-                    onUpdateClick();
-                };
-                if (col == 5) {
-                    onDeleteClick();
-                };
+                int col = table.convertColumnIndexToModel(
+                        table.columnAtPoint(e.getPoint()));
+                if (col == 5) onDeleteClick();
+                if (col != -1) onUpdateClick();
             }
         });
+
+        JScrollPane scroll = new JScrollPane(table);
+        scroll.setPreferredSize(new Dimension(0, 250));
+        return scroll;
     }
 
     /**
-     * Method called when the search button is clicked.
-     * 
-     * Apply the user to selected filters on the document list:
-     * Filter by ID (partial search)
-     * Filter by document type
-     * Filter by start date (if enabled)
-     * Filter by end date (if enabled)
-     *
-     * Updates the table model with the filtered documents.
+     * Applies filters to the document list and refreshes live table.
+     * Filtering is performed on:
+     * <ul><li>Document ID (partial match)</li>
+     *   <li>Document type</li>
+     *   <li>Creation date (start and end range)</li></ul>
+     * If no filters are selected, all documents are displayed.
+     * The filtered results are stored in {@code displayDocuments}
+     * and the table model is refreshed using
+     * {@link ClientSupplierTableModel#setClientSuppliers(java.util.ArrayList)}.
      */
     public void onFilterClick() {
 
@@ -215,16 +247,10 @@ public class DocumentTable extends JPanel {
     }
 
     /**
-     * Called when the user clicks on "Modify".
-     *
-     * Flow of the selected data:
-     * 1. Get the selected row from the table.
-     * 2. Retrieve the corresponding Document object from displayDocuments.
-     * 3. Send this object to the MainWindow.
-     * @see MainWindow#openDocumentForm(model.Document)
-     * 4. MainWindow forwards it to DocumentForm.
-     * 5. The form loads the data to allow editing.
-     *
+     * Opens the selected document in edit mode.
+     * The selected row from the table is converted into a
+     * {@link Document} and passed to
+     * {@link MainWindow#openDocumentForm(Document)}.
      * Important:
      * - If no row is selected → show an error message.
      * - If an object is passed → form is in EDIT mode.
@@ -272,7 +298,6 @@ public class DocumentTable extends JPanel {
     /**
      * Updates the document type filter ComboBox with the available document types.
      * An "All" option is added first to allow unfiltered display.
-     *
      * @param types list of available document types
      */
     public void setDocumentTypes(ArrayList<DocumentType> types) {
