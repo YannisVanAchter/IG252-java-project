@@ -7,8 +7,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 
-public class Connector {
-    private Connector instance;
+public class MySQLConnector {
+    private static volatile MySQLConnector instance;
     private Connection connection;
 
     /**
@@ -19,33 +19,33 @@ public class Connector {
      * @require MYSQL_USER in .env file
      * @require MYSQL_PASSWORD in .env file
      */
-    private Connector() {
+    private MySQLConnector() {
         try {
             Dotenv dotenv = Dotenv.load();
-            String url = "jdbc:mysql://localhost:3306/" + dotenv.get("MYSQL_DATABASE");
+            String url = String.format("jdbc:mysql://%s:%S/%s", dotenv.get("MYSQL_ADDRESS"), dotenv.get("MYSQL_PORT"), dotenv.get("MYSQL_DATABASE"));
             String user = dotenv.get("MYSQL_USER");
             String password = dotenv.get("MYSQL_PASSWORD");
-            Connection connection = DriverManager.getConnection(url, user, password);
+            this.connection = DriverManager.getConnection(url, user, password);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public Connector getInstance() {
-        if (instance == null) {
-            instance = new Connector();
+    @SuppressWarnings("DoubleCheckedLocking") //  I would rather check two times than fuck up my DB !
+    public MySQLConnector getInstance() {
+        if (instance == null ) {
+            synchronized (MySQLConnector.class) {
+                if (instance == null) {
+                    instance = new MySQLConnector();
+                }
+            }
         }
         return instance;
     }
 
     public Connection getConnection() {
         return connection;
-    }
-
-    public void resetConnection() {
-        closeConnection();
-        instance = new Connector();
     }
 
     public void closeConnection() {
