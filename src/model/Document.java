@@ -24,7 +24,7 @@ public class Document {
     private LocalDate actualSendDate;
     private LocalDate plannedDateOfReceipt;
     private LocalDate actualDateOfReceipt;
-    private Integer paymentDelay;
+    private Integer paymentDelay = null;
     private WorkFlow workflow;
     private ClientSupplier clientSupplier;
     private Address address;
@@ -110,8 +110,8 @@ public class Document {
 
     public Integer getPaymentDelay() { return paymentDelay; }
 
-    private void setPaymentDelay(int paymentDelay) throws DataValidationException {
-        if (paymentDelay < 0) {
+    private void setPaymentDelay(Integer paymentDelay) throws DataValidationException {
+        if (paymentDelay != null && paymentDelay < 0) {
             String message = "Payment delay setting error, payment delay is lower than 0 (zero) when it shouldn't (current value: " + paymentDelay + ")";
             throw new DataValidationException(message);
         }
