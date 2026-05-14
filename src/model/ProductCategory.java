@@ -3,10 +3,20 @@ package model;
 import exception.DataValidationException;
 
 public class ProductCategory {
+    private int id;
     private String name;
 
-    public ProductCategory(String name) throws DataValidationException {
+    public ProductCategory(int id, String name) throws DataValidationException {
+        setId(id);
         setName(name);
+    }
+
+    public int getId() { return id; }
+
+    private void setId(int id) throws DataValidaitonException {
+        if (id < 0)
+            throw new DataValidationException("Product category must posses a positive id");
+        this.id = id;
     }
 
     public String getName() { return name; }
@@ -22,7 +32,7 @@ public class ProductCategory {
 
     @Override
     public String toString() {
-        return String.format("ProductCategory{name=%s", name);
+        return String.format("ProductCategory{id=%d, name=%s}", id, name);
     }
 
     @Override
@@ -30,12 +40,13 @@ public class ProductCategory {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
 
-        ProductCategory o = (ProductCategory) obj;
-        return o.getName().equals(name);
+        ProductCategory other = (ProductCategory) obj;
+        return other.getName().equals(name) && id == other.getId();
     }
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        int result = name.hashCode();
+        return 31 * result + id;
     }
 }

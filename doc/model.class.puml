@@ -207,10 +207,13 @@ package model {
     ' Stock management '
 
     class ProductCategory {
+        - id: int
         -name : String
 
+        -setId(int)
         -setName(String)
 
+        +getId(): int
         +getName(): String
         +getLabel(): String
 
