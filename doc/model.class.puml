@@ -8,15 +8,12 @@ skinparam linetype polyline
 
 package model {
     class Locality {
-        -localityId: String
         -postalCode : int
         -city : String
 
-        -setLocalityId(String)
         -setPostalCode(int)
         -setCity(String)
 
-        +getLocalityId(): String
         +getPostalCode(): int
         +getCity(): String
         +getLabel(): String

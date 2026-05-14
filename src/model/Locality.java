@@ -4,28 +4,28 @@ import exception.DataValidationException;
 
 /**
  * This class represents a Locality, which is a part of an address. 
- * It contains the name of the Locality and its postal code. 
+ * It contains the city of the Locality and its postal code. 
  * The class also includes validation for the postal code \
  * to ensure it is a positive integer and does not exceed a specified maximum value.
  */
 public class Locality {
-    private String name;
+    private String city;
     private int postalCode;
     public static final Integer MAX_POSTAL_CODE_VALUE = Integer.MAX_VALUE;
 
-    public Locality(String name, int postalCode) throws DataValidationException {
-        setName(name);
+    public Locality(String city, int postalCode) throws DataValidationException {
+        setCity(city);
         setPostalCode(postalCode);
     }
 
-    public String getName() { return name; }
+    public String getCity() { return city; }
 
-    private void setName(String name) throws DataValidationException {
-        if (name == null || name.isEmpty()) {
-            String message = "Name setting error, name is null or empty when it shouldn't (current value: " + name + ")";
+    private void setCity(String city) throws DataValidationException {
+        if (city == null || city.isEmpty()) {
+            String message = "city setting error, city is null or empty when it shouldn't (current value: " + city + ")";
             throw new DataValidationException(message);
         }
-        this.name = name;
+        this.city = city;
     }
 
     public int getPostalCode() { return postalCode; }
@@ -42,9 +42,13 @@ public class Locality {
         this.postalCode = postalCode;
     }
 
+    public String getLabel() {
+        return postalCode + " " + city;
+    }
+
     @Override
     public String toString() {
-        return "Locality{name='" + name + "', postalCode=" + postalCode + "}";
+        return "Locality{city='" + city + "', postalCode=" + postalCode + "}";
     }
 
     @Override
@@ -53,12 +57,12 @@ public class Locality {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         Locality other = (Locality) obj;
-        return name.equals(other.getName()) && postalCode == other.getPostalCode();
+        return city.equals(other.getCity()) && postalCode == other.getPostalCode();
     }
 
     @Override
     public int hashCode() {
-        int result = name.hashCode();
+        int result = city.hashCode();
         result = 31 * result + postalCode;
         return result;
     }
