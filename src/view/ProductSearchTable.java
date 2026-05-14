@@ -1,6 +1,7 @@
 package view;
 
 import controller.ProductController;
+import controller.ProductSearchController;
 import exception.DataValidationException;
 import model.*;
 
@@ -12,17 +13,25 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 /**
- * This view displays and manages a searchable table of products.
- * This class allows users to filter products based on name, category, and promotion status
- * and view the filtered results in a table format.
- * Clicking on a row opens a detailed product view through the main application window.
+ * A Swing panel that provides a searchable table of products.
+ * <p>This view allows users to filter products by name, category, and promotion status,
+ * and displays the filtered results in a table format.
+ * <p>This view allows users to filter clients by name, category, and promotion
+ * and displays the results in a table format.</p>
+ * <p>When a row action is triggered, the corresponding product is opened in a detailed view
+ * using {@link MainWindow#openProductView(Product)}.</p>
+ *
  * @see MainWindow#openProductView(Product)
+ * @see ProductSearchController
+ * @see ProductController
+ * @see ProductTableModel
  */
 public class ProductSearchTable extends JPanel {
-    private static final int TBL_BTN_SEE = 5;
+    private static final int TBL_BTN_SEE = 9;
 
     private MainWindow mainWindow;
-    private ProductController controller;
+    private ProductSearchController productSearchController;
+    private ProductController productController;
     private ProductTableModel model;
     private ArrayList<Product> products;
     private ArrayList<Product> displayProducts;
@@ -37,13 +46,12 @@ public class ProductSearchTable extends JPanel {
 
     public ProductSearchTable(MainWindow mainWindow) throws DataValidationException {
         this.mainWindow = mainWindow;
-        this.controller = new ProductController();
-        this.products = controller.getAllProduct();
+        this.productSearchController = new ProductSearchController();
+        this.productController = new ProductController();
+        this.displayProducts = productSearchController.searchProducts(null, null, null);
 
         setLayout(new BorderLayout(10, 16));
         setBorder(new EmptyBorder(16, 16, 16, 16));
-
-        displayProducts = new ArrayList<>(products);
 
         JPanel top = new JPanel(new BorderLayout());
         top.add(buildHeader(), BorderLayout.NORTH);
@@ -64,21 +72,21 @@ public class ProductSearchTable extends JPanel {
 
     private JPanel buildSearchPanel() {
 
-        txtProductName = ViewUtils.addFilterListener(new JTextField(10), this::onFilterClick);
+        txtProductName = ViewUtils.addFilterListener(new JTextField(10), this::onSearchClick);
         JPanel nameFields = new JPanel(new BorderLayout(0, 4));
         nameFields.add(new JLabel("Product name"), BorderLayout.NORTH);
         nameFields.add(txtProductName, BorderLayout.CENTER);
 
-        comboCategory = new JComboBox<>(controller.getCategoryNames());
-        comboCategory = ViewUtils.addFilterListener(comboCategory, this::onFilterClick);
+        comboCategory = new JComboBox<>(productController.getCategoryNames());
+        comboCategory = ViewUtils.addFilterListener(comboCategory, this::onSearchClick);
         JPanel categoryFields = new JPanel(new BorderLayout(0, 4));
         categoryFields.add(new JLabel("Category"), BorderLayout.NORTH);
-        categoryFields.add(comboCategory,          BorderLayout.CENTER);
+        categoryFields.add(comboCategory, BorderLayout.CENTER);
 
-        chkPromotion = ViewUtils.addFilterListener(new JCheckBox("Promotion only"), this::onFilterClick);
+        chkPromotion = ViewUtils.addFilterListener(new JCheckBox("Promotion only"), this::onSearchClick);
 
         btnSearch = new JButton("Search");
-        btnSearch.addActionListener(e -> onFilterClick());
+        btnSearch.addActionListener(e -> onSearchClick());
 
         JPanel fieldsColumn = new JPanel();
         fieldsColumn.setLayout(new BoxLayout(fieldsColumn, BoxLayout.Y_AXIS));
@@ -115,43 +123,38 @@ public class ProductSearchTable extends JPanel {
         return scroll;
     }
 
-    public void onFilterClick() {
-        String nameText = txtProductName.getText().trim().toLowerCase();
-        String selectedCategory = (String) comboCategory.getSelectedItem();
-        boolean promoOnly = chkPromotion.isSelected();
+    /**
+     * Handles the search action triggered by the user.
+     * <p>Calls the controller with filter values. Empty fields are converted to {@code null}
+     * to indicate no filtering for that criterion.
+     * <p>The result updates both the internal {@code displayProducts} list
+     * and the table model via {@code ProductTableModel#setProducts(List)}.
+     * @see ProductSearchController
+     */
+    public void onSearchClick() {
+        String name = txtProductName.getText().trim();
+        String category = (String) comboCategory.getSelectedItem();
+        Boolean promo = chkPromotion.isSelected() ? true : null;
 
-        displayProducts = new ArrayList<>();
+        ArrayList<Product> results = productSearchController.searchProducts(
+                name.isBlank() ? null : name,
+                category == null || category.equals("All") ? null : category,
+                promo
+        );
 
-        for (Product p : products) {
-            boolean match = true;
-
-            if (!nameText.isEmpty()
-                    && !p.getName().toLowerCase().contains(nameText)) {
-                match = false;
-            }
-
-            if (selectedCategory != null && !selectedCategory.equals("All")) {
-                if (p.getCategory() == null
-                        || p.getCategory().getName() == null
-                        || !selectedCategory.equalsIgnoreCase(p.getCategory().getName())) {
-                    match = false;
-                }
-            }
-
-            if (promoOnly && !p.isInPromotion()) {
-                match = false;
-            }
-
-            if (match) displayProducts.add(p);
-        }
-
-        model.setProducts(displayProducts);
+        displayProducts = results;
+        model.setProducts(new ArrayList<>(results));
     }
 
+    /**
+     * Opens the detailed view for the selected product.
+     * <p>If no row is selected, this method does nothing.</p>
+     * @see MainWindow#openProductView(Product)
+     * @see ProductView
+     */
     public void onRowClick() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow == -1) return;
-        Product product = displayProducts.get(selectedRow);
-        mainWindow.openProductView(product);
+        mainWindow.openProductView(model.getProductAt(selectedRow));
     }
 }
