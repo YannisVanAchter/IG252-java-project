@@ -1,6 +1,6 @@
 package view;
 
-import controller.RecipeController;
+import controller.RecipeSearchController;
 import model.*;
 
 import javax.swing.*;
@@ -11,22 +11,24 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 /**
- * This view provides a recipe search interface.
- * This view allows users to:
- * - Search recipes by name
- * - Filter recipes by multiple ingredients
- * - Display results in a selectable table
- * <p>
- * It interacts with {@link RecipeController} to load all recipes
- * and with {@link MainWindow} to open a detailed recipe view when a row is selected.
+ * A Swing-based view that provides a recipe search interface.
+ * <p>This view allows users to search for recipes by name and filter them by multiple ingredients.</p>
+ * <p>Results are displayed in a selectable table built using {@link RecipeTableModel}.</p>
+ * <p>The view interacts with {@link RecipeSearchController} to retrieve data and with
+ * {@link MainWindow} to open a detailed recipe view when a row is selected.</p>
+ *
+ * @see RecipeSearchController
+ * @see RecipeTableModel
+ * @see MainWindow
+ * @see Recipe
  */
 public class RecipeSearchTable extends JPanel {
     private static final int TBL_BTN_SEE = 4;
 
-    private MainWindow mainWindow;
-    private RecipeController controller;
+    private final MainWindow mainWindow;
+    private final RecipeSearchController controller;
     private RecipeTableModel model;
-    private ArrayList<Recipe> recipes;
+
     private ArrayList<Recipe> displayRecipes;
     private ArrayList<JTextField> searchIngredients;
 
@@ -37,10 +39,9 @@ public class RecipeSearchTable extends JPanel {
 
     public RecipeSearchTable(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
-        this.controller = new RecipeController();
-        this.recipes = controller.getAllRecipe();
-        this.displayRecipes = new ArrayList<>(recipes);
+        this.controller = new RecipeSearchController();
         this.searchIngredients = new ArrayList<>();
+        this.displayRecipes = controller.searchRecipes(null, null);
 
         setLayout(new BorderLayout(0, 12));
         setBorder(new EmptyBorder(16, 16, 16, 16));
@@ -54,10 +55,9 @@ public class RecipeSearchTable extends JPanel {
     }
 
     /**
-     * Constructs and returns a JPanel that represents the header section
-     * Use a {@code FlowLayout} to align item on a line.
-     *
-     * @return a JPanel with a title.
+     * Builds the header section of the view.
+     * <p>This section contains the title of the recipe search screen.</p>
+     * @return a {@code JPanel} containing the header
      */
     private JPanel buildHeader() {
         JLabel title = new JLabel("Recipe Search");
@@ -69,22 +69,20 @@ public class RecipeSearchTable extends JPanel {
     }
 
     /**
-     * Constructs and returns a JPanel used for searching by name and ingredients.
-     * The panel is divided into two sections:
-     * - The left section allows the user to enter a recipe name
-     * - The right section provides functionality to add and manage ingredient filters with a scrollable view.
-     * Each item is encapsulated in a {@code JPanel} and placed using {@code BorderLayout}
-     * The whole is placed in a {@code GridLayout}.
-     *
-     * @return a JPanel containing the search interface.
+     * Builds the search panel used to filter recipes.
+     * <p>The panel is divided into two main sections:</p>
+     * <ul><li>Recipe name search field</li>
+     *     <li>Dynamic ingredient filter list with add/remove functionality</li></ul>
+     * <p>Each ingredient filter is represented by a text field inside a scrollable container.</p>
+     * @return a {@code JPanel} containing the full search interface
      */
     private JPanel buildSearchPanel() {
 
         txtRecipeName = new JTextField();
-        txtRecipeName = ViewUtils.addFilterListener(txtRecipeName, this::onFilterClick);
+        txtRecipeName = ViewUtils.addFilterListener(txtRecipeName, this::onSearchClick);
 
         JButton btnSearch = new JButton("Search");
-        btnSearch.addActionListener(e -> onFilterClick());
+        btnSearch.addActionListener(e -> onSearchClick());
 
         JPanel nameFields = new JPanel(new BorderLayout(0, 4));
         nameFields.add(new JLabel(""), BorderLayout.NORTH);
@@ -125,13 +123,10 @@ public class RecipeSearchTable extends JPanel {
     }
 
     /**
-     * Constructs and returns a JScrollPane containing a table displaying recipe data.
-     * The table is built using the {@link RecipeTableModel} to represent the list of recipes
-     * and is made scrollable by embedding it in a JScrollPane.
-     * The table supports row selection and triggers the {@code onRowClick()}
-     * when a row is selected
-     *
-     * @return a JScrollPane containing a JTable.
+     * Builds a scrollable table displaying the list of recipes.
+     * <p>The table is based on {@link RecipeTableModel} and supports single row selection.</p>
+     * <p>Clicking on the action column triggers navigation to the detailed view.</p>
+     * @return a {@code JScrollPane} containing the {@code JPanel}
      */
     private JScrollPane buildTablePanel() {
         model = new RecipeTableModel(displayRecipes);
@@ -139,7 +134,7 @@ public class RecipeSearchTable extends JPanel {
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if (table.getSelectedRow() == TBL_BTN_SEE) {
+                if (table.columnAtPoint(e.getPoint()) == TBL_BTN_SEE) {
                     onRowClick();
                 }
             }
@@ -153,11 +148,9 @@ public class RecipeSearchTable extends JPanel {
     }
 
     /**
-     * Adds one ingredient search row to {@code ingredientRowsPanel}.
-     * Each row contains a text field and a "<html>&times;</html>" button to delete it.
-     * Each addition, the structure is deleted, recalculated, and redrawn.
-     * After each addition, the scroll automatically moves to the bottom
-     * to ensure the newly added ingredient is visible.
+     * Adds a new ingredient filter row to the ingredient panel.
+     * <p>Each row contains a text field and a remove button allowing dynamic filtering.</p>
+     * <p>When a row is removed, the filter is updated automatically.</p>
      */
     private void addIngredientRow() {
         JTextField field = new JTextField();
@@ -175,7 +168,7 @@ public class RecipeSearchTable extends JPanel {
             searchIngredients.remove(field);
             ingredientRowsPanel.revalidate();
             ingredientRowsPanel.repaint();
-            onFilterClick();
+            onSearchClick();
         });
 
         searchIngredients.add(field);
@@ -190,57 +183,45 @@ public class RecipeSearchTable extends JPanel {
     }
 
     /**
-     * Filters the list of recipes based on the current search inputs.
-     * The filter is applied on:
-     * - Recipe name (case-insensitive contains match)
-     * - Ingredient fields (each non-empty field must match at least one ingredient in the recipe)
-     * <p>
-     * The matching items are added on the {@code displayRecipes ArrayList}
-     * After filtering, the table model is updated with the new list.
+     * Filters recipes based on user input.
+     * <p>Filtering is applied on:</p>
+     * <ul><li>Recipe name (case-insensitive partial match)</li>
+     *     <li>Ingredient list (all provided ingredients must match)</li></ul>
+     * <p>The resulting list updates {@code displayRecipes} and refreshes the table model.</p>
      */
-    private void onFilterClick() {
-        String nameFilter = txtRecipeName.getText().trim().toLowerCase();
-        displayRecipes = new ArrayList<>();
+    public void onSearchClick() {
+        String name = txtRecipeName.getText().trim();
 
-        for (Recipe recipe : recipes) {
-            boolean match = true;
-
-            if (!nameFilter.isEmpty()
-                    && !recipe.getName().toLowerCase().contains(nameFilter)) {
-                match = false;
-            }
-
-            for (JTextField field : searchIngredients) {
-                String ingredient = field.getText().trim().toLowerCase();
-                if (!ingredient.isEmpty()) {
-                    boolean found = false;
-                    for (RecipeComposition composition : recipe.getCompositions()) {
-                        if (composition.getProduct().getName().toLowerCase().contains(ingredient)) {
-                            found = true;
-                        }
-                    }
-                    if (!found) {
-                        match = false;
-                    }
-                }
-            }
-
-            if (match) displayRecipes.add(recipe);
+        ArrayList<String> ingredients = new ArrayList<>();
+        for (JTextField field : searchIngredients) {
+            String val = field.getText().trim();
+            if (!val.isBlank()) ingredients.add(val);
         }
 
-        model.setRecipes(displayRecipes);
+        ArrayList<Recipe> results = controller.searchRecipes(
+                name.isBlank() ? null : name,
+                ingredients.isEmpty() ? null : ingredients.get(0)
+        );
+
+        for (int i = 1; i < ingredients.size(); i++) {
+            String ingredient = ingredients.get(i);
+            ArrayList<Recipe> filtered = controller.searchRecipes(null, ingredient);
+            results.retainAll(filtered);
+        }
+
+        displayRecipes = results;
+        model.setRecipes(new ArrayList<>(results));
     }
 
     /**
      * Handles a table row click event.
-     * Keep the selected recipe and ask the main window to load the recipe and open its detailed view.
-     *
-     * @see MainWindow#openRecipeView(Recipe)
+     * <p>Retrieves the selected {@link Recipe} from the table model
+     * and opens its detailed view using {@link MainWindow#openRecipeView(Recipe)}.</p>
+     * <p>If no valid selection is made, the method exits safely.</p>
      */
     private void onRowClick() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow == -1) return;
-        Recipe recipe = displayRecipes.get(selectedRow);
-        mainWindow.openRecipeView(displayRecipes.get(selectedRow));
+        mainWindow.openRecipeView(model.getRecipeAt(selectedRow));
     }
 }

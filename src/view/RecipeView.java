@@ -12,37 +12,40 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 //TODO : add document informations
+
 /**
- * ProductView displaying detailed information about a single Recipe.
+ * A Swing-based view that displays detailed information about a single {@link Recipe}.
+ * <p>This view is dynamically rebuilt every time a recipe is loaded using {@link #loadRecipe(Recipe)}.
+ * <p>It organizes recipe data into logical sections:
+ * general information, composition, and preparation steps.
+ * <p>The view also provides a footer with navigation controls to return to the previous screen
+ * using {@link MainWindow#goBack()}.
  *
- * This view is dynamically rebuilt every time a recipe is loaded using {@link #loadRecipe(Recipe)}.
- * It organizes recipe data into logical sections: general information, composition, and preparation step.
- *
- * The view also provides a footer with navigation controls to return to the previous screen.
+ * @see Recipe
+ * @see RecipeSearchTable
+ * @see MainWindow
  */
 public class RecipeView extends JPanel {
 
     private static final String LABEL_NO_DATA = "N/A";
 
-    private MainWindow mainWindow;
+    private final MainWindow mainWindow;
     private Recipe recipe;
     private JTable table;
 
 
     public RecipeView(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
-        setLayout(new BorderLayout(0,12));
+        setLayout(new BorderLayout(0, 12));
         setBorder(new EmptyBorder(16, 16, 16, 16));
     }
 
     /**
-     * Loads a recipe into the view and rebuilds the UI.
-     * The method is call in {@link MainWindow#openProductView(Product)}
-     * when cliked on a recipe in Jtable of {@link RecipeSearchTable}
-     *
-     * If the recipe is null, the user is notified and the view navigates back automatically.
-     * The method clears the current UI and reconstructs all components
-     * The main contents are created in {@link #buildContent()}.
+     * Loads a recipe into the view and rebuilds the entire UI.
+     * <p>This method is triggered when a recipe is selected in the JTable of {@link RecipeSearchTable}.
+     * <p>If the recipe is {@code null}, the user is notified and the view automatically navigates back
+     * using {@link MainWindow#goBack()}.
+     * <p>The main content is generated in {@link #buildContent()}.
      * @param recipe the recipe to display
      */
     public void loadRecipe(Recipe recipe) {
@@ -88,16 +91,17 @@ public class RecipeView extends JPanel {
     private JPanel buildProductInfo() {
         JPanel card = createCard("Recipe Information");
         card.add(labelValue("Recipe label", recipe.getName()));
-        card.add(labelValue("Document", "100"));
+        card.add(labelValue("Document", "100"));             // TODO: recipe.getDocument().getId()
         card.add(labelValue("Creation date", "02/11/2010"));
+        card.add(labelValue("Comment", "No comment")); //recipe.getDocument.getComment() != null ? recipe.getComment() : "No comment"
         return card;
     }
 
     /**
-     * Builds a table displaying the composition of a recipe, including ingredients and their quantities.
-     * The table supports row selection and triggers to the {@link ProductView}.
-     *
-     * @return a JPanel containing a JTable.
+     * Builds a table displaying the composition of the recipe, including ingredients and quantities.
+     * <p>Each row represents a {@link RecipeComposition} linking a product to its required quantity.
+     * <p>The table supports row selection and allows navigation to the corresponding {@link ProductView}.
+     * @return a {@code JPanel} containing the composition {@code JTable}
      */
     private JPanel buildCompositionTable() {
         JPanel card = createCard("Composition");
@@ -126,7 +130,7 @@ public class RecipeView extends JPanel {
             }
         });
 
-        int rowCount   = Math.max(3, model.getRowCount());
+        int rowCount = Math.max(3, model.getRowCount());
         int tableHeight = Math.min(rowCount * table.getRowHeight() + table.getTableHeader().getPreferredSize().height + 4, 200);
 
         JScrollPane scrollPane = new JScrollPane(table);
@@ -160,7 +164,6 @@ public class RecipeView extends JPanel {
 
     /**
      * Creates a bordered card container with a title.
-     *
      * @param title the title of the section
      * @return a styled panel
      */
@@ -185,9 +188,10 @@ public class RecipeView extends JPanel {
     }
 
     /**
-     * Handles a table row click event.
-     * Keep the selected product and ask the main window to load the Product and open its detailed view.
-     * @see MainWindow#openProductView(Product)
+     * Handles a table row click event on the recipe composition table.
+     * <p>Retrieves the selected {@link Product} from the selected {@link RecipeComposition}
+     * and opens its detailed view using {@link MainWindow#openProductView(Product)}.
+     * <p>If no valid selection is made, the method safely exits without action.
      */
     private void onRowClick() {
         int selectedRow = table.getSelectedRow();
