@@ -12,20 +12,31 @@ import exception.DataValidationException;
  *  2. that takes the components of a locality (name and postal code) to create a locality object.
  */
 public class Address {
+    private int addressId;
     private String streetName;
     private int streetNumber;
     private Locality locality;
 
-    public Address(String streetName, int streetNumber, Locality locality) throws DataValidationException {
+    public Address(int addressId, String streetName, int streetNumber, Locality locality) throws DataValidationException {
+        setAddressId(addressId);
         setStreetName(streetName);
         setStreetNumber(streetNumber);
         setLocality(locality);
     }
 
-    public Address(String streetName, int streetNumber, String localityName, int localityPostalCode) throws DataValidationException {
+    public Address(int addressId, String streetName, int streetNumber, String localityName, int localityPostalCode) throws DataValidationException {
+        setAddressId(addressId);
         setStreetName(streetName);
         setStreetNumber(streetNumber);
         setLocality(new Locality(localityName, localityPostalCode));
+    }
+
+    public int getAddressId() { return addressId; }
+
+    private void setAddressId(int addressId) throws DataValidationException {
+        if (addressId < 0)
+            throw new DataValidationException("Address ID must be positive");
+        this.addressId = addressId;
     }
 
     public String getStreetName() { return streetName; }
@@ -56,6 +67,10 @@ public class Address {
             throw new DataValidationException(message);
         }
         this.locality = locality;
+    }
+
+    public String getLabel() {
+        return String.format("%s %d, %s", streetName, streetNumber, locality.getLabel());
     }
 
     @Override
