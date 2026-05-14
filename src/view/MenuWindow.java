@@ -69,6 +69,13 @@ public class MenuWindow extends JMenuBar {
         searchMenu = new JMenu("Search");
         searchMenu.setMnemonic(KeyEvent.VK_S);
 
+        clientItem = new JMenuItem("Client");
+        clientItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, shortcut));
+        clientItem.addActionListener(e ->
+                window.setPage("CLIENT")
+        );
+        searchMenu.add(clientItem);
+
         productItem = new JMenuItem("Product");
         productItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, shortcut));
         productItem.addActionListener(e ->
