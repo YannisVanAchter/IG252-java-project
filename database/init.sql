@@ -646,8 +646,10 @@ CREATE INDEX idx_ClientSupplier_isSupplier ON Client_supplier(isSupplier);
 */
 CREATE VIEW vw_ProductSuppliers AS
 SELECT p.id_ AS productId, p.name_ AS productLabel, cs.id_ AS supplierId, cs.name_ AS supplierName
-FROM Product p, idx_ClientSupplier_isSupplier s, Document_ d, WorkFlow w, Detail dt
+FROM Product p, idx_ClientSupplier_isSupplier s, Document_ d, WorkFlow w, WorkFlowType wt, Detail dt
 WHERE p.id_ = dt.productId
 AND dt.documentId = d.id_
 AND d.workflowId = w.id_
+AND w.workFlowTypeId = wt.id_
+AND wt.isSupplier = TRUE
 AND w.otherId = s.id_;
