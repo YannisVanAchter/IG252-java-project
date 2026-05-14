@@ -5,6 +5,7 @@ import model.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Stack;
 
 /**
@@ -24,6 +25,7 @@ public class MainWindow extends JFrame {
     private ClientView clientView;
     private ProductView productView;
     private RecipeView recipeView;
+    private StockOrderCreation orderView;
 
 
     private CardLayout cardLayout;
@@ -63,6 +65,9 @@ public class MainWindow extends JFrame {
         addPage(recipeView, "RECIPE_VIEW");
 
         addPage(new ReceiptView(this), "RECEIPT");
+        addPage(new StockAlertView(this), "STOCK");
+        orderView = new StockOrderCreation(this);
+        addPage(orderView, "ORDER_CREATION");
 
         add(container);
         setVisible(true);
@@ -123,5 +128,10 @@ public class MainWindow extends JFrame {
     public void openRecipeView(Recipe recipe) {
         recipeView.loadRecipe(recipe);
         setPage("RECIPE_VIEW");
+    }
+
+    public void openOrderView(ArrayList seletedProduct, ClientSupplier selectedSupplier){
+        orderView.loadOrder(seletedProduct, selectedSupplier);
+        setPage("ORDER_CREATION");
     }
 }
