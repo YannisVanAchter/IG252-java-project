@@ -6,12 +6,15 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * ProductView displaying detailed information about a single Product.
+ * A Swing-based view that displays detailed information about a single {@link Product}.
+ * <p>This panel is dynamically rebuilt each time a product is loaded via {@link #loadProduct(Product)}.
+ * <p>The view organizes product information into three main sections:
+ * general product details, stock information, and promotion details.
+ * <p>A footer provides navigation controls to return to the previous screen using {@link MainWindow#goBack()}.
  *
- * This view is dynamically rebuilt every time a product is loaded using {@link #loadProduct(Product)}.
- * It organizes product data into logical sections: general information, stock information, and promotions.
- *
- * The view also provides a footer with navigation controls to return to the previous screen.
+ * @see Product
+ * @see ProductSearchTable
+ * @see MainWindow
  */
 public class ProductView extends JPanel {
 
@@ -27,16 +30,14 @@ public class ProductView extends JPanel {
     }
 
     /**
-     * Loads a product into the view and rebuilds the UI.
-     * The method is call in {@link MainWindow#openProductView(Product)}
-     * clike on product in Jtable of {@link ProductSearchTable}
-     *
-     * If the product is null, the user is notified and the view navigates back automatically.
-     *
-     * The method clears the current UI and reconstructs all components:
-     * title, product information, stock information, promotion section, and footer.
-     *
-     * The main contents are created in {@link #buildContent()}.
+     * Loads a product into the view and rebuilds all UI components.
+     * <p>This method is triggered when a product is selected in the JTable of {@link ProductSearchTable}
+     * via {@link MainWindow#openProductView(Product)}.
+     * <p>If the provided product is {@code null}, a warning dialog is displayed
+     * and the application automatically navigates back using {@link MainWindow#goBack()}.
+     * <p>When valid, the method clears the current UI and rebuilds the full view:
+     * title, product information, stock section, promotion section, and footer.
+     * <p>The main content layout is generated in {@link #buildContent()}.
      *
      * @param product the product to display
      */
@@ -74,6 +75,7 @@ public class ProductView extends JPanel {
         return panel;
     }
 
+
     private JPanel buildProductInfo() {
         JPanel card = createCard("Product Information");
         card.add(labelValue("Product label", product.getName()));
@@ -108,10 +110,10 @@ public class ProductView extends JPanel {
             return card;
         }
 
-        card.add(labelValue("Discount", product.getPromotion().getDiscount()));
+        card.add(labelValue("Discount", String.valueOf(product.getPromotion().getDiscountPercentage())));
         card.add(labelValue("Required quantity", String.valueOf(product.getPromotion().getRequiredQuantity())));
-        card.add(labelValue("Start date", product.getPromotion().getStartDate()));
-        card.add(labelValue("End date", product.getPromotion().getEndDate()));
+        card.add(labelValue("Start date", String.valueOf(product.getPromotion().getStartDate())));
+        card.add(labelValue("End date", String.valueOf(product.getPromotion().getEndDate())));
         return card;
     }
 
@@ -124,10 +126,9 @@ public class ProductView extends JPanel {
     }
 
     /**
-     * Creates a bordered card container with a title.
-     *
-     * @param title the title of the section
-     * @return a styled panel
+     * Creates a titled container panel used as a visual section card.
+     * @param title the title displayed on the card border
+     * @return a styled JPanel configured with a vertical layout
      */
     private JPanel createCard(String title) {
         JPanel card = new JPanel();
@@ -137,11 +138,12 @@ public class ProductView extends JPanel {
     }
 
     /**
-     * Creates a key-value label row.
+     * Creates a horizontal label-value row.
+     * <p>This helper method is used to display product attributes in a consistent format.
      *
      * @param label the field name
      * @param value the field value
-     * @return a horizontal panel displaying the label and value
+     * @return a JPanel containing a formatted key-value display
      */
     private JPanel labelValue(String label, String value) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));

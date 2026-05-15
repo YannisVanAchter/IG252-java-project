@@ -5,6 +5,7 @@ import model.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Stack;
 
 /**
@@ -21,6 +22,11 @@ public class MainWindow extends JFrame {
 
     private DocumentForm documentForm;
     private ClientSupplierForm clientSupplierForm;
+    private ClientView clientView;
+    private ProductView productView;
+    private RecipeView recipeView;
+    private StockOrderCreation orderView;
+
 
     private CardLayout cardLayout;
     private JPanel container;
@@ -39,12 +45,30 @@ public class MainWindow extends JFrame {
         addPage(new MainPanel(), "MAIN");
 
         addPage(new DocumentTable(this), "DOCUMENT");
-        addPage(new DocumentForm(this), "DOCUMENT_FORM");
+        documentForm = new DocumentForm(this);
+        addPage(documentForm, "DOCUMENT_FORM");
 
         addPage(new ClientSupplierTable(this), "CLIENT_SUPPLIER");
-        addPage(new ClientSupplierForm(this), "CLIENT_SUPPLIER_FORM");
+        clientSupplierForm = new ClientSupplierForm(this);
+        addPage(clientSupplierForm, "CLIENT_SUPPLIER_FORM");
+
+        addPage(new ClientSearchTable(this), "CLIENT");
+        clientView = new ClientView(this);
+        addPage(clientView, "CLIENT_VIEW");
 
         addPage(new ProductSearchTable(this), "PRODUCT");
+        productView = new ProductView(this);
+        addPage(productView, "PRODUCT_VIEW");
+
+        addPage(new RecipeSearchTable(this), "RECIPE");
+        recipeView = new RecipeView(this);
+        addPage(recipeView, "RECIPE_VIEW");
+
+        addPage(new ReceiptView(this), "RECEIPT");
+        addPage(new StockAlertView(this), "STOCK");
+        orderView = new StockOrderCreation(this);
+        addPage(orderView, "ORDER_CREATION");
+
         add(container);
         setVisible(true);
     }
@@ -89,5 +113,25 @@ public class MainWindow extends JFrame {
     public void openClientSupplierForm(ClientSupplier cs) {
         clientSupplierForm.loadClientSupplier(cs);
         setPage("CLIENT_SUPPLIER_FORM");
+    }
+
+    public void openClientView(ClientSupplier client) {
+        clientView.loadClient(client);
+        setPage("CLIENT_VIEW");
+    }
+
+    public void openProductView(Product product) {
+        productView.loadProduct(product);
+        setPage("PRODUCT_VIEW");
+    }
+
+    public void openRecipeView(Recipe recipe) {
+        recipeView.loadRecipe(recipe);
+        setPage("RECIPE_VIEW");
+    }
+
+    public void openOrderView(ArrayList seletedProduct, ClientSupplier selectedSupplier){
+        orderView.loadOrder(seletedProduct, selectedSupplier);
+        setPage("ORDER_CREATION");
     }
 }
