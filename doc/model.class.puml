@@ -8,15 +8,12 @@ skinparam linetype polyline
 
 package model {
     class Locality {
-        -localityId: String
         -postalCode : int
         -city : String
 
-        -setLocalityId(String)
         -setPostalCode(int)
         -setCity(String)
 
-        +getLocalityId(): String
         +getPostalCode(): int
         +getCity(): String
         +getLabel(): String
@@ -210,10 +207,13 @@ package model {
     ' Stock management '
 
     class ProductCategory {
+        - id: int
         -name : String
 
+        -setId(int)
         -setName(String)
 
+        +getId(): int
         +getName(): String
         +getLabel(): String
 
@@ -235,11 +235,11 @@ package model {
 
         -setId(int)
         -setName(String)
-        -setPriceEVAT(float)
-        -setVat(float)
-        -setFidelityPoint(int)
+        +setPriceEVAT(float)
+        +setVat(float)
+        +setFidelityPoint(int)
         -setIsEdible(boolean)
-        -setMinStockQuantity(int)
+        +setMinStockQuantity(int)
         -setCategory(ProductCategory)
         -setDiscounts(List<Discount>)
 
@@ -255,6 +255,7 @@ package model {
         +getDiscounts(): List<Discount>
         +getIsDiscounted(): boolean
         +getCurrentDiscount(): Discount
+        +addDiscount(Discount): void
         +getLabel(): String
 
         +toString() : String
