@@ -256,6 +256,9 @@ package model {
         +getIsDiscounted(): boolean
         +getCurrentDiscount(): Discount
         +addDiscount(Discount): void
+        +getStockQuantity(): int
+        +getNonStockQuantity(): int
+        +getTotalQuantity(): int
         +getLabel(): String
 
         +toString() : String

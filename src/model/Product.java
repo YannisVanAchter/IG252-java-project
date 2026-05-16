@@ -18,9 +18,10 @@ public class Product {
     private boolean isEdible;
     private int minStockQuantity;
     private ProductCategory category;
+    private List<QuantityProduct> location;
     private List<Discount> discounts;
 
-    public Product(int id, String name, BigDecimal priceEVAT, BigDecimal vat, int fidelityPoint, boolean isEdible, int minStockQuantity, ProductCategory category, List<Discount> discounts) throws DataValidationException {
+    public Product(int id, String name, BigDecimal priceEVAT, BigDecimal vat, int fidelityPoint, boolean isEdible, int minStockQuantity, ProductCategory category, List<QuantityProduct> location, List<Discount> discounts) throws DataValidationException {
         setId(id);
         setName(name);
         setPriceEVAT(priceEVAT);
@@ -29,6 +30,7 @@ public class Product {
         setIsEdible(isEdible);
         setMinStockQuantity(minStockQuantity);
         setCategory(category);
+        setLocation(location);
         setDiscounts(discounts);
     }
 
@@ -184,6 +186,37 @@ public class Product {
         }
         if (!discounts.contains(discount))
             discounts.add(discount);
+    }
+
+    public List<QuantityProduct> getLocation() {
+        return location;
+    }
+
+    private void setLocation(List<QuantityProduct> location) {
+        if (location == null)
+            this.location = new ArrayList<>();
+        else
+            this.location = location;
+    }
+
+    public int getStockQuantity() {
+        return location.stream()
+                .filter(e -> e.getLocationProduct().getIsStock())
+                .mapToInt(QuantityProduct::getQuantity)
+                .sum();
+    }
+
+    public int getNonStockQuantity() {
+        return location.stream()
+                .filter(e -> !e.getLocationProduct().getIsStock())
+                .mapToInt(QuantityProduct::getQuantity)
+                .sum();
+    }
+
+    public int getTotalQuantity() {
+        return location.stream()
+                .mapToInt(QuantityProduct::getQuantity)
+                .sum();
     }
 
     public String getLabel() {
