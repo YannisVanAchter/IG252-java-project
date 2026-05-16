@@ -15,7 +15,7 @@ import java.util.ArrayList;
  */
 public class ClientSupplierTableModel extends AbstractTableModel {
     private static final String[] COLUMNS = {
-            "id", "Name", "First Name", "Email", "TVA", "Type", "Loyality", "Edit", "Delete"
+            "id", "Name", "First Name", "Email", "TVA", "Type", "Loyality", "", ""
     };
 
     private ArrayList<ClientSupplier> clientSuppliers;

@@ -34,7 +34,7 @@ public class Document {
     private LocalDate actualSendDate;
     private LocalDate plannedDateOfReceipt;
     private LocalDate actualDateOfReceipt;
-    private Integer paymentDelay;
+    private Integer paymentDelay = null;
     private WorkFlow workflow;
     private Address address;
     private String comment;

@@ -29,6 +29,9 @@ import java.util.Date;
  *  @see MainWindow#openDocumentForm(Document)
  */
 public class DocumentTable extends JPanel {
+    private static final int TBL_BTN_DEL = 5;
+    private static final int TBL_BTN_UPDATE = 4;
+
     private MainWindow mainWindow;
     private DocumentController controller;
     private DocumentTableModel model;
@@ -167,10 +170,14 @@ public class DocumentTable extends JPanel {
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 int col = table.convertColumnIndexToModel(
                         table.columnAtPoint(e.getPoint()));
-                if (col == 5) onDeleteClick();
-                if (col != -1) onUpdateClick();
+                if (col == TBL_BTN_DEL) onDeleteClick();
+                if (col == TBL_BTN_UPDATE) onUpdateClick();
             }
         });
+
+        table.getColumnModel().getColumn(TBL_BTN_DEL).setCellRenderer(new ButtonRenderer());
+        table.getColumnModel().getColumn(TBL_BTN_UPDATE).setCellRenderer(new ButtonRenderer());
+
 
         JScrollPane scroll = new JScrollPane(table);
         scroll.setPreferredSize(new Dimension(0, 250));
