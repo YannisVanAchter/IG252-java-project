@@ -16,14 +16,12 @@ import model.ProductCategory;
 
 public class DiscountTest {
 
-   
     private static final int        VALID_QUANTITY   = 2;
     private static final BigDecimal VALID_PERCENTAGE = new BigDecimal("10");
     private static final LocalDate  VALID_START      = LocalDate.of(2024, 1, 1);
     private static final LocalDate  VALID_END        = LocalDate.of(2024, 1, 31);
     private static final String     VALID_NAME       = "New Year Discount";
 
-   
     private ProductCategory categoryFood;
     private ProductCategory categoryElectronics;
     private Product         validProduct;
@@ -38,7 +36,6 @@ public class DiscountTest {
         );
     }
 
-   
     private Discount buildValid() throws DataValidationException {
         return new Discount(VALID_QUANTITY, VALID_PERCENTAGE, VALID_START, VALID_END, VALID_NAME, validProduct);
     }
@@ -46,12 +43,12 @@ public class DiscountTest {
     @Test
     public void basicCreationTest() throws DataValidationException {
         Discount discount = buildValid();
-        assertEquals(VALID_QUANTITY,  discount.getRequiredQuantity());
-        assertEquals(0,               VALID_PERCENTAGE.compareTo(discount.getDiscountPercentage()));
-        assertEquals(VALID_START,     discount.getStartDate());
-        assertEquals(VALID_END,       discount.getEndDate());
-        assertEquals(VALID_NAME,      discount.getName());
-        assertEquals(validProduct,    discount.getProduct());
+        assertEquals(VALID_QUANTITY, discount.getRequiredQuantity());
+        assertEquals(0,              VALID_PERCENTAGE.compareTo(discount.getDiscountPercentage()));
+        assertEquals(VALID_START,    discount.getStartDate());
+        assertEquals(VALID_END,      discount.getEndDate());
+        assertEquals(VALID_NAME,     discount.getName());
+        assertEquals(validProduct,   discount.getProduct());
     }
 
     @Test
@@ -163,25 +160,25 @@ public class DiscountTest {
     public void getLabelTest() throws DataValidationException {
         Discount d = buildValid();
         String label = d.getLabel();
-        assertTrue(label.contains(VALID_NAME),                     "getLabel doit contenir le nom");
-        assertTrue(label.contains("10"),                           "getLabel doit contenir le pourcentage");
-        assertTrue(label.contains(String.valueOf(VALID_QUANTITY)), "getLabel doit contenir la quantité minimale");
+        assertTrue(label.contains(VALID_NAME),                     "getLabel should contain the name");
+        assertTrue(label.contains("10"),                           "getLabel should contain the percentage");
+        assertTrue(label.contains(String.valueOf(VALID_QUANTITY)), "getLabel should contain the minimum quantity");
     }
 
     @Test
     public void toStringTest() throws DataValidationException {
         Discount d = buildValid();
         String result = d.toString();
-        assertTrue(result.contains("requiredQuantity=2"),        "toString doit contenir requiredQuantity=2");
-        assertTrue(result.contains("discountPercentage=10"),     "toString doit contenir discountPercentage=10");
-        assertTrue(result.contains("name='New Year Discount'"),  "toString doit contenir le nom");
+        assertTrue(result.contains("requiredQuantity=2"),       "toString should contain requiredQuantity=2");
+        assertTrue(result.contains("discountPercentage=10"),    "toString should contain discountPercentage=10");
+        assertTrue(result.contains("name='New Year Discount'"), "toString should contain the name");
     }
 
     @Test
     public void comparisonEqualTest() throws DataValidationException {
         Discount d1 = buildValid();
         Discount d2 = buildValid();
-        assertEquals(d1, d2, "Deux Discounts identiques devraient être égaux");
+        assertEquals(d1, d2, "Two identical Discounts should be equal");
     }
 
     @Test
@@ -210,7 +207,6 @@ public class DiscountTest {
 
     @Test
     public void comparisonNotEqualDifferentProduct() throws DataValidationException {
-        // FIX: ProductCategory.ELECTRONICS remplacé par new ProductCategory(2, "Electronics")
         Product otherProduct = new Product(
             2, "Another Product", new BigDecimal("200"), new BigDecimal("30"),
             20, true, 10, categoryElectronics, new ArrayList<>()

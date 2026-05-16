@@ -25,12 +25,12 @@ public class DocumentTest {
     private static final LocalDate DATE_RECEIPT_A = LocalDate.of(2024, 2, 12);
     private static final int PAYMENT_DELAY        = 30;
 
-    private DocumentType typeDelivery;
-    private DocumentType typeCommand;
-    private DocumentType typeOther;
-    private WorkFlow     workflow;
+    private DocumentType   typeDelivery;
+    private DocumentType   typeCommand;
+    private DocumentType   typeOther;
+    private WorkFlow       workflow;
     private ClientSupplier clientSupplier;
-    private Address      address;
+    private Address        address;
 
     @BeforeEach
     public void setUp() throws DataValidationException {
@@ -38,9 +38,9 @@ public class DocumentTest {
         typeCommand    = new DocumentType("Command");
         typeOther      = new DocumentType("Invoice");
 
-        Status status  = new Status("TODO");
+        Status status    = new Status("TODO");
         WorkFlowType wft = new WorkFlowType("Buy", true, false, false);
-        workflow       = new WorkFlow(0, status, wft);
+        workflow         = new WorkFlow(0, status, wft);
 
         address        = new Address("10 Rue de la Paix", "Paris", "France");
 
@@ -102,7 +102,7 @@ public class DocumentTest {
             0, null, null, null, null
         );
         assertEquals(LocalDate.now(), doc.getDateOfCreation(),
-            "Une date de création null doit être remplacée par aujourd'hui");
+            "A null creation date should default to today");
     }
 
     @Test
@@ -113,7 +113,7 @@ public class DocumentTest {
             0, null, null, null, null
         );
         assertEquals("Unknown", doc.getDocumentType().getName(),
-            "Un type null doit être remplacé par 'Unknown'");
+            "A null document type should default to 'Unknown'");
     }
 
     @Test
@@ -199,17 +199,17 @@ public class DocumentTest {
     public void toStringTest() throws DataValidationException {
         Document doc = buildValid();
         String result = doc.toString();
-        assertTrue(result.contains("id=0"),             "toString doit contenir id=0");
-        assertTrue(result.contains("isChecked=false"),  "toString doit contenir isChecked=false");
-        assertTrue(result.contains("paymentDelay=30"),  "toString doit contenir paymentDelay=30");
-        assertTrue(result.contains("Test comment"),     "toString doit contenir le commentaire");
+        assertTrue(result.contains("id=0"),            "toString should contain id=0");
+        assertTrue(result.contains("isChecked=false"), "toString should contain isChecked=false");
+        assertTrue(result.contains("paymentDelay=30"), "toString should contain paymentDelay=30");
+        assertTrue(result.contains("Test comment"),    "toString should contain the comment");
     }
 
     @Test
     public void comparisonEqualTest() throws DataValidationException {
         Document doc1 = buildValid();
         Document doc2 = buildValid();
-        assertEquals(doc1, doc2, "Deux Documents identiques devraient être égaux");
+        assertEquals(doc1, doc2, "Two identical Documents should be equal");
     }
 
     @Test
@@ -220,7 +220,7 @@ public class DocumentTest {
             DATE_PLANNED, DATE_ACTUAL, DATE_RECEIPT_P, DATE_RECEIPT_A,
             PAYMENT_DELAY, workflow, clientSupplier, address, "Test comment"
         );
-        assertNotEquals(doc1, doc2, "Des Documents avec des ids différents ne devraient pas être égaux");
+        assertNotEquals(doc1, doc2, "Documents with different ids should not be equal");
     }
 
     @Test
@@ -231,6 +231,6 @@ public class DocumentTest {
             DATE_PLANNED, DATE_ACTUAL, DATE_RECEIPT_P, DATE_RECEIPT_A,
             PAYMENT_DELAY, workflow, clientSupplier, address, "Test comment"
         );
-        assertNotEquals(doc1, doc2, "Des Documents avec des types différents ne devraient pas être égaux");
+        assertNotEquals(doc1, doc2, "Documents with different types should not be equal");
     }
 }

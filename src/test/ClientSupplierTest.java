@@ -2,7 +2,6 @@ package test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import exception.DataValidationException;
@@ -13,13 +12,13 @@ import java.time.LocalDate;
 
 public class ClientSupplierTest {
 
-    private static final String VALID_NAME        = "Dupont";
-    private static final String VALID_FIRSTNAME   = "Jean";
-    private static final String VALID_EMAIL       = "jean.dupont@example.com";
-    private static final String VALID_PHONE       = "0123456789";
-    private static final String VALID_VAT         = "FR12345678901";
-    private static final LocalDate VALID_DATE     = LocalDate.of(2020, 1, 15);
-    private static final Address VALID_ADDRESS    = new Address("10 Rue de la Paix", "Paris", "France");
+    private static final String    VALID_NAME      = "Dupont";
+    private static final String    VALID_FIRSTNAME = "Jean";
+    private static final String    VALID_EMAIL     = "jean.dupont@example.com";
+    private static final String    VALID_PHONE     = "0123456789";
+    private static final String    VALID_VAT       = "FR12345678901";
+    private static final LocalDate VALID_DATE      = LocalDate.of(2020, 1, 15);
+    private static final Address   VALID_ADDRESS   = new Address("10 Rue de la Paix", "Paris", "France");
 
     private ClientSupplier buildValid() throws DataValidationException {
         return new ClientSupplier(
@@ -68,7 +67,6 @@ public class ClientSupplierTest {
 
     @Test
     public void basicCreationTestIsUs() throws DataValidationException {
-        // isUs=true est valide dès que isClient ou isSupplier est vrai
         ClientSupplier cs = new ClientSupplier(
             3, VALID_NAME, VALID_FIRSTNAME, VALID_EMAIL, VALID_PHONE,
             VALID_ADDRESS, true, false, true, null, VALID_DATE
@@ -81,7 +79,7 @@ public class ClientSupplierTest {
     public void comparisonEqualTest() throws DataValidationException {
         ClientSupplier cs1 = buildValid();
         ClientSupplier cs2 = buildValid();
-        assertEquals(cs1, cs2, "Deux ClientSupplier identiques devraient être égaux");
+        assertEquals(cs1, cs2, "Two identical ClientSuppliers should be equal");
     }
 
     @Test
@@ -91,22 +89,21 @@ public class ClientSupplierTest {
             0, "Martin", VALID_FIRSTNAME, VALID_EMAIL, VALID_PHONE,
             VALID_ADDRESS, true, true, false, VALID_VAT, VALID_DATE
         );
-        assertNotEquals(cs1, cs2, "Des ClientSupplier avec des noms différents ne devraient pas être égaux");
+        assertNotEquals(cs1, cs2, "ClientSuppliers with different names should not be equal");
     }
 
     @Test
     public void toStringTest() throws DataValidationException {
         ClientSupplier cs = buildValid();
         String result = cs.toString();
-        // Vérification des champs clés dans la chaîne
-        assertTrue(result.contains("id=0"),                   "toString doit contenir id=0");
-        assertTrue(result.contains("name='Dupont'"),          "toString doit contenir name='Dupont'");
-        assertTrue(result.contains("firstname='Jean'"),       "toString doit contenir firstname='Jean'");
-        assertTrue(result.contains("email='jean.dupont@example.com'"), "toString doit contenir l'email");
-        assertTrue(result.contains("phoneNumber='0123456789'"), "toString doit contenir le téléphone");
-        assertTrue(result.contains("isClient=true"),          "toString doit contenir isClient=true");
-        assertTrue(result.contains("isSupplier=true"),        "toString doit contenir isSupplier=true");
-        assertTrue(result.contains("VATNumber='FR12345678901'"), "toString doit contenir le numéro de TVA");
+        assertTrue(result.contains("id=0"),                          "toString should contain id=0");
+        assertTrue(result.contains("name='Dupont'"),                 "toString should contain name='Dupont'");
+        assertTrue(result.contains("firstname='Jean'"),              "toString should contain firstname='Jean'");
+        assertTrue(result.contains("email='jean.dupont@example.com'"), "toString should contain the email");
+        assertTrue(result.contains("phoneNumber='0123456789'"),      "toString should contain the phone number");
+        assertTrue(result.contains("isClient=true"),                 "toString should contain isClient=true");
+        assertTrue(result.contains("isSupplier=true"),               "toString should contain isSupplier=true");
+        assertTrue(result.contains("VATNumber='FR12345678901'"),     "toString should contain the VAT number");
     }
 
     @Test
@@ -151,7 +148,6 @@ public class ClientSupplierTest {
 
     @Test
     public void nullFirstnameWhenNotClientOk() throws DataValidationException {
-        // Pas de client → firstname peut être null
         ClientSupplier cs = new ClientSupplier(
             0, VALID_NAME, null, VALID_EMAIL, VALID_PHONE,
             VALID_ADDRESS, false, true, false, VALID_VAT, null
@@ -250,7 +246,6 @@ public class ClientSupplierTest {
         assertNull(cs.getBecameClientDate());
     }
 
-
     @Test
     public void isUsTrueWithBothFalseThrows() {
         assertThrows(DataValidationException.class, () ->
@@ -258,7 +253,6 @@ public class ClientSupplierTest {
                 null, false, false, true, null, null)
         );
     }
-
 
     @Test
     public void getTypeClientAndSupplier() throws DataValidationException {
