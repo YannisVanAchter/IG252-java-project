@@ -354,14 +354,14 @@ package model {
         -setId(int)
         -setName(String)
         -setFirstName(String)
-        -setEmail(String)
-        -setPhoneNumber(String)
+        +setEmail(String)
+        +setPhoneNumber(String)
         -setIsClient(boolean)
         -setIsSupplier(boolean)
         -setIsUs(boolean)
         -setVatNumber(String)
         -setDateBecameClient(LocalDate)
-        -setAddress(Address)
+        +setAddress(Address)
 
         +getId(): int
         +getName(): String
@@ -391,13 +391,14 @@ package model {
 
         -setId(int)
         -setTotalPoint(int)
-        -setIsValid(boolean)
+        +setIsValid(boolean)
         -setClient(ClientSupplier)
 
         +getId(): int
         +getTotalPoint(): int
         +getIsValid(): boolean
         +getClient(): ClientSupplier
+        +addPoint(int): void
         +getLabel(): String
 
         +toString() : String
@@ -405,7 +406,7 @@ package model {
         +hashCode() : int
     }
 
-    FidelityCard " 1 " <-- " 1 " ClientSupplier
+    FidelityCard " 1 " <-- " 0..1 " ClientSupplier
 
     class WorkflowType {
         -name : String
@@ -452,7 +453,7 @@ package model {
 
         -setId(String)
         -setWorkflowType(WorkFlowType)
-        -setStatus(Status)
+        +setStatus(Status)
         -setUs(ClientSupplier)
         -setOtherParty(ClientSupplier)
         -setDocuments(List<Document>)
@@ -463,6 +464,7 @@ package model {
         +getUs(): ClientSupplier
         +getOtherParty(): ClientSupplier
         +getDocuments(): List<Documents>
+        +addDocument(Document): void
         +getLabel(): String
 
         +toString() : String
@@ -516,11 +518,11 @@ package model {
         -setDate(LocalDate)
         -setPlannedSendDate(LocalDate)
         -setPlannedReceptionDate(LocalDate)
-        -setEffectiveSendDate(LocalDate)
-        -setEffectiveReceptionDate(LocalDate)
+        +setEffectiveSendDate(LocalDate)
+        +setEffectiveReceptionDate(LocalDate)
         -setPaymentDelay(int)
         -setCommentary(String)
-        -setIsChecked(boolean)
+        +setIsChecked(boolean)
 
         +getId(): int
         +getWorkflow(): Workflow
@@ -551,13 +553,15 @@ package model {
 
         -setId(int)
         -setName(String)
-        -setInstruction(String)
+        +setInstruction(String)
         -setFinalProduct(Product)
 
         +getId(): int
         +getName(): String
         +getInstruction(): String
         +getFinalProduct(): Product
+        +addProductInComposition(RecipeComposition)
+        +addProductInComposition(Product, quantity: int)
         +getLabel(): String
 
         +toString() : String
@@ -602,8 +606,7 @@ package model {
         +hashCode() : int
     }
 
-    Document " 1 " -- " 1 " Recipe
-    (Document, Recipe) .. PreparationOrder
+    Document " 1 " --> " 1 " Recipe
 
     class Detail {
         -id : int
@@ -663,7 +666,7 @@ package model {
     }
 
     Batch "*" --> "1" Product
-    Batch "*" --> "1" Detail
+    Batch "*" <-- "1" Detail
 }
 
 @enduml

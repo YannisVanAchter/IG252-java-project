@@ -22,8 +22,9 @@ public class ClientSupplier {
     private boolean isUs;
     private String VATNumber;
     private LocalDate becameClientDate;
+    private FidelityCard fidelityCard;
 
-    public ClientSupplier(int id, String name, String firstname, String email, String phoneNumber, Address address, boolean isClient, boolean isSupplier, boolean isUs, String VATNumber, LocalDate becameClientDate) throws DataValidationException {
+    public ClientSupplier(int id, String name, String firstname, String email, String phoneNumber, Address address, boolean isClient, boolean isSupplier, boolean isUs, String VATNumber, LocalDate becameClientDate, FidelityCard fidelityCard) throws DataValidationException {
         setId(id);
         setIsClient(isClient);
         setIsSupplier(isSupplier);
@@ -35,6 +36,7 @@ public class ClientSupplier {
         setAddress(address);
         setVATNumber(VATNumber);
         setBecameClientDate(becameClientDate);
+        setFidelityCard(fidelityCard);
     }
 
     public int getId() { return id; }
@@ -109,7 +111,7 @@ public class ClientSupplier {
 
     public String getEmail() { return email; }
 
-    private void setEmail(String email) throws DataValidationException {
+    public void setEmail(String email) throws DataValidationException {
         if (email == null || email.isEmpty()) {
             String message = "Email setting error, email is null or empty when it shouldn't (current value: " + email + ")";
             throw new DataValidationException(message);
@@ -123,7 +125,7 @@ public class ClientSupplier {
 
     public String getPhoneNumber() { return phoneNumber; }
 
-    private void setPhoneNumber(String phoneNumber) throws DataValidationException {
+    public void setPhoneNumber(String phoneNumber) throws DataValidationException {
         if (phoneNumber == null || phoneNumber.isEmpty()) {
             String message = "Phone number setting error, phone number is null or empty when it shouldn't (current value: " + phoneNumber + ")";
             throw new DataValidationException(message);
@@ -137,7 +139,7 @@ public class ClientSupplier {
 
     public Address getAddress() { return address; }
 
-    private void setAddress(Address address) throws DataValidationException {
+    public void setAddress(Address address) throws DataValidationException {
         if (getIsSupplier() && address == null) {
             String message = "Address setting error, address is null when it shouldn't";
             throw new DataValidationException(message);
@@ -169,9 +171,40 @@ public class ClientSupplier {
         this.becameClientDate = becameClientDate;
     }
 
+    public FidelityCard getFidelityCard() { return this.fidelityCard; }
+
+    private void setFidelityCard(FidelityCard fidelityCard) throws DataValidationException {
+        if (!getIsClient()) {
+            throw new DataValidationException("One must be a client to posses a fidelity card");
+        }
+        this.fidelityCard = fidelityCard;
+    }
+
+    public String getLabel() {
+        return String.format("(%s%s%s) %s %s", 
+            (getIsClient() ? "C": ""),
+            (getIsSupplier() ? "S": ""),
+            (getIsUs() ? "Us":""),
+            getName(),
+            (getIsClient() ? getFirstname(): "")
+        );
+    }
+
     @Override
     public String toString() {
-        return "ClientSupplier{id=" + id + ", name='" + name + "', firstname='" + firstname + "', email='" + email + "', phoneNumber='" + phoneNumber + "', address=" + (address != null ? address.toString() : "null") + ", isClient=" + isClient + ", isSupplier=" + isSupplier + ", isUs=" + isUs + ", VATNumber='" + VATNumber + "', becameClientDate=" + becameClientDate + "}";
+        return  "ClientSupplier{id=" + id + 
+                                ", name='" + name + 
+                                ", firstname='" + firstname + 
+                                "'', email='" + email + 
+                                "'', phoneNumber='" + phoneNumber + 
+                                "', address=" + (address != null ? address.toString() : "null") + 
+                                ", isClient=" + isClient + 
+                                ", isSupplier=" + isSupplier + 
+                                ", isUs=" + isUs + 
+                                ", VATNumber='" + VATNumber + 
+                                "', becameClientDate=" + becameClientDate + 
+                                ", fidelityCard=" + ( (fidelityCard != null) ? fidelityCard.toString(): "null") +
+                                "}";
     }
 
     @Override
@@ -184,8 +217,13 @@ public class ClientSupplier {
                 firstname.equals(other.getFirstname()) && email.equals(other.getEmail()) && 
                 phoneNumber.equals(other.getPhoneNumber()) && address.equals(other.getAddress()) && 
                 isClient == other.getIsClient() && isSupplier == other.getIsSupplier() && 
-                isUs == other.getIsUs() && VATNumber.equals(other.getVATNumber()) && 
-                becameClientDate.equals(other.getBecameClientDate());
+                isUs == other.getIsUs() && 
+                ((isSupplier && VATNumber.equals(other.getVATNumber())) ||
+                (
+                    isClient &&
+                    (becameClientDate != null && becameClientDate.equals(other.getBecameClientDate())) && 
+                    (fidelityCard != null && fidelityCard.equals(other.getFidelityCard()))
+                ));
     }
 
     @Override
@@ -200,7 +238,8 @@ public class ClientSupplier {
         result = 31 * result + Boolean.hashCode(isSupplier);
         result = 31 * result + Boolean.hashCode(isUs);
         result = 31 * result + VATNumber.hashCode();
-        result = 31 * result + becameClientDate.hashCode();
+        result = 31 * result + (isClient ? becameClientDate.hashCode(): 0);
+        result = 31 * result + (fidelityCard != null ? fidelityCard.hashCode(): 0);
         return result;
     }
 }

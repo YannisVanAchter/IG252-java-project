@@ -12,38 +12,180 @@ import exception.DataValidationException;
  * Regarding the optional fields, they become compulsory depending on the document type.
  */
 public class Document {
-    // TODO: discus how do we plan to name the differents document types, and if we want to use an enum for that
     private static final List<DocumentType> TYPES_REQUIRING_PLANNED_SEND_DATE =
-        Arrays.asList(new DocumentType("Delivery"), new DocumentType("Command"));
+        Arrays.asList(new DocumentType("Delivery"));
+    private static final List<DocumentType> TYPES_REQUIRING_RECEPTION_DATE = 
+        Arrays.asList(new DocumentType("Delivery"));
+    private static final List<DocumentType> TYPES_REQUIRING_PAYMENT_DELAY = 
+        Arrays.asList(new DocumentType("Command"));
+    private static final List<DocumentType> TYPES_REQUIRING_COMMENTARY = 
+        Arrays.asList(new DocumentType("Preparation Order"));
+    private static final List<DocumentType> TYPES_REQUIRING_ADDRESS = 
+        Arrays.asList(new DocumentType("Delivery"));
+    private static final List<DocumentType> TYPES_REQUIRING_RECIPE_ORDER =
+        Arrays.asList(new DocumentType("Preparation Order"));
 
     private int id;
     private LocalDate dateOfCreation;
     private DocumentType documentType;
     private boolean isChecked;
+    private DocumentDetails details;
     private LocalDate plannedSendDate;
     private LocalDate actualSendDate;
     private LocalDate plannedDateOfReceipt;
     private LocalDate actualDateOfReceipt;
     private Integer paymentDelay;
     private WorkFlow workflow;
-    private ClientSupplier clientSupplier;
     private Address address;
     private String comment;
+    private Recipe recipeOrder;
 
-    public Document(int id, LocalDate dateOfCreation, DocumentType documentType, boolean isChecked, LocalDate plannedSendDate, LocalDate actualSendDate, LocalDate plannedDateOfReceipt, LocalDate actualDateOfReceipt, Integer paymentDelay, WorkFlow workflow, ClientSupplier clientSupplier, Address address, String comment) throws DataValidationException {
+    /**
+     * Document constructor
+     * @param id 
+     * @param dateOfCreation
+     * @param documentType
+     * @param isChecked inform if a document is 
+     * @param plannedSendDate
+     * @param plannedDateOfReceipt
+     * @param actualSendDate
+     * @param actualDateOfReceipt
+     * @param paymentDelay
+     * @param workflow
+     * @param clientSupplier
+     * @param address used in delivery notice
+     * @param comment used in preparation orders
+     * @param recipeOrder used in preparation Order
+     * @throws DataValidationException
+     */
+    public Document(int id, LocalDate dateOfCreation, DocumentType documentType, DocumentDetails details, boolean isChecked, LocalDate plannedSendDate, LocalDate plannedDateOfReceipt, LocalDate actualSendDate, LocalDate actualDateOfReceipt, Integer paymentDelay, WorkFlow workflow, Address address, String comment, Recipe recipeOrder) throws DataValidationException {
         setId(id);
         setDateOfCreation(dateOfCreation);
         setDocumentType(documentType);
         setIsChecked(isChecked);
-        setPlannedSendDate(plannedSendDate);
-        setActualSendDate(actualSendDate);
-        setPlannedDateOfReceipt(plannedDateOfReceipt);
-        setActualDateOfReceipt(actualDateOfReceipt);
-        setPaymentDelay(paymentDelay);
+        setDetails(details);
         setWorkflow(workflow);
-        setClientSupplier(clientSupplier);
+
+        setPlannedSendDate(plannedSendDate);
+        setPlannedDateOfReceipt(plannedDateOfReceipt);
+        if (actualSendDate != null)
+            setActualSendDate(actualSendDate);
+        if (actualDateOfReceipt != null)
+            setActualDateOfReceipt(actualDateOfReceipt);
+        setPaymentDelay(paymentDelay);
         setAddress(address);
         setComment(comment);
+        setRecipeOrder(recipeOrder);
+    }
+
+    /**
+     * Delivery document constructor without effective dates
+     */
+    public Document(int id, LocalDate dateOfCreation, DocumentType documentType, DocumentDetails details, boolean isChecked, LocalDate plannedSendDate, LocalDate plannedDateOfReceipt, Integer paymentDelay, WorkFlow workflow) throws DataValidationException {
+        this(
+            id,
+            dateOfCreation,
+            documentType,
+            details,
+            isChecked,
+            plannedSendDate,
+            plannedDateOfReceipt,
+            (LocalDate) null,
+            (LocalDate) null,
+            paymentDelay,
+            workflow,
+            (Address) null,
+            (String) null,
+            (Recipe) null
+        );
+    }
+
+    /**
+     * Delivery document constructor with effective send dates
+     */
+    public Document(int id, LocalDate dateOfCreation, DocumentType documentType, DocumentDetails details, boolean isChecked, LocalDate plannedSendDate, LocalDate plannedDateOfReceipt, LocalDate effectiveSendDate, Integer paymentDelay, WorkFlow workflow) throws DataValidationException {
+        this(
+            id,
+            dateOfCreation,
+            documentType,
+            details,
+            isChecked,
+            plannedSendDate,
+            plannedDateOfReceipt,
+            effectiveSendDate,
+            (LocalDate) null,
+            paymentDelay,
+            workflow,
+            (Address) null,
+            (String) null,
+            (Recipe) null
+        );
+    }
+
+    /**
+     * Delivery document constructor with effective dates
+     */
+    public Document(int id, LocalDate dateOfCreation, DocumentType documentType, DocumentDetails details, boolean isChecked, LocalDate plannedSendDate, LocalDate plannedDateOfReceipt, LocalDate effectiveSendDate, LocalDate effectiveDateOfRecipe, Integer paymentDelay, WorkFlow workflow) throws DataValidationException {
+        this(
+            id,
+            dateOfCreation,
+            documentType,
+            details,
+            isChecked,
+            plannedSendDate,
+            plannedDateOfReceipt,
+            effectiveSendDate,
+            effectiveDateOfRecipe,
+            paymentDelay,
+            workflow,
+            (Address) null,
+            (String) null,
+            (Recipe) null
+        );
+    }
+
+    /**
+     * Command document constructor without effective dates
+     */
+    public Document(int id, LocalDate dateOfCreation, DocumentType documentType, DocumentDetails details, boolean isChecked, Integer paymentDelay, WorkFlow workflow, Address address) throws DataValidationException {
+        this(
+            id, 
+            dateOfCreation, 
+            documentType, 
+            details,
+            isChecked, 
+            (LocalDate) null, 
+            (LocalDate) null, 
+            (LocalDate) null, 
+            (LocalDate) null, 
+            paymentDelay,
+            workflow,
+            address,
+            (String) null,
+            (Recipe) null
+        );
+    }
+
+    /**
+     * Preparation order document constructor without effective dates
+     */
+    public Document(int id, LocalDate dateOfCreation, DocumentType documentType, DocumentDetails details, boolean isChecked, LocalDate plannedSendDate, WorkFlow workflow, String commentary, Recipe recipeOrder) throws DataValidationException {
+        this(
+            id,
+            dateOfCreation,
+            documentType,
+            details,
+            isChecked,
+            plannedSendDate,
+            (LocalDate) null,
+            (LocalDate) null,
+            (LocalDate) null,
+            (Integer) null,
+            workflow,
+            (Address) null,
+            commentary,
+            recipeOrder
+        );
     }
 
     public int getId() { return id; }
@@ -77,41 +219,83 @@ public class Document {
 
     public boolean getIsChecked() { return isChecked; }
 
-    private void setIsChecked(boolean isChecked) {
+    public void setIsChecked(boolean isChecked) {
         this.isChecked = isChecked;
+    }
+
+    public DocumentDetails getDetails() {
+        return details;
+    }
+
+    private void setDetails(DocumentDetails details) {
+        if (details == null)
+            this.details = new DocumentDetails(this);
+        else
+            this.details = details;
+    }
+
+    public void addDetail(Detail detail) {
+        this.details.addDetail(detail);
     }
 
     public LocalDate getPlannedSendDate() { return plannedSendDate; }
 
     private void setPlannedSendDate(LocalDate plannedSendDate) throws DataValidationException {
         if (TYPES_REQUIRING_PLANNED_SEND_DATE.contains(getDocumentType()) && plannedSendDate == null) {
-            throw new DataValidationException("Planned send date cannot be null for Delivery and Command document types.");
+            throw new DataValidationException(
+                String.format(  "Planned send date cannot be null for %s document types.",
+                                        TYPES_REQUIRING_PLANNED_SEND_DATE.toString())
+            );
         }
         this.plannedSendDate = plannedSendDate;
     }
 
     public LocalDate getActualSendDate() { return actualSendDate; }
 
-    private void setActualSendDate(LocalDate actualSendDate) {
+    public final void setActualSendDate(LocalDate actualSendDate) throws DataValidationException {
+        if (TYPES_REQUIRING_PLANNED_SEND_DATE.contains(getDocumentType()) && actualSendDate == null) {
+            throw new DataValidationException(
+                String.format(  "Send date cannot be null for %s document types.",
+                                        TYPES_REQUIRING_PLANNED_SEND_DATE.toString())
+            );
+        }
         this.actualSendDate = actualSendDate;
     }
 
     public LocalDate getPlannedDateOfReceipt() { return plannedDateOfReceipt; }
 
-    private void setPlannedDateOfReceipt(LocalDate plannedDateOfReceipt) {
+    private void setPlannedDateOfReceipt(LocalDate plannedDateOfReceipt) throws DataValidationException {
+        if (TYPES_REQUIRING_RECEPTION_DATE.contains(getDocumentType()) && plannedDateOfReceipt == null) {
+            throw new DataValidationException(
+                String.format(  "Planned reception date cannot be null for %s document types.",
+                                        TYPES_REQUIRING_RECEPTION_DATE.toString())
+            );
+        }
         this.plannedDateOfReceipt = plannedDateOfReceipt;
     }
 
     public LocalDate getActualDateOfReceipt() { return actualDateOfReceipt; }
 
-    private void setActualDateOfReceipt(LocalDate actualDateOfReceipt) {
+    public final void setActualDateOfReceipt(LocalDate actualDateOfReceipt) throws DataValidationException {
+        if (TYPES_REQUIRING_RECEPTION_DATE.contains(getDocumentType()) && plannedDateOfReceipt == null) {
+            throw new DataValidationException(
+                String.format(  "Planned reception date cannot be null for %s document types.",
+                                        TYPES_REQUIRING_RECEPTION_DATE.toString())
+            );
+        }
         this.actualDateOfReceipt = actualDateOfReceipt;
     }
 
     public Integer getPaymentDelay() { return paymentDelay; }
 
     private void setPaymentDelay(int paymentDelay) throws DataValidationException {
-        if (paymentDelay < 0) {
+        if (TYPES_REQUIRING_PAYMENT_DELAY.contains(getDocumentType())) {
+            throw new DataValidationException(
+                String.format(  "Payment delay cannot be null for %s document types.",
+                                        TYPES_REQUIRING_PAYMENT_DELAY.toString())
+            );
+        }
+        else if (paymentDelay < 0) {
             String message = "Payment delay setting error, payment delay is lower than 0 (zero) when it shouldn't (current value: " + paymentDelay + ")";
             throw new DataValidationException(message);
         }
@@ -124,22 +308,46 @@ public class Document {
         this.workflow = workflow;
     }
 
-    public ClientSupplier getClientSupplier() { return clientSupplier; }
-
-    private void setClientSupplier(ClientSupplier clientSupplier) {
-        this.clientSupplier = clientSupplier;
-    }
-
     public Address getAddress() { return address; }
 
-    private void setAddress(Address address) {
+    private void setAddress(Address address) throws DataValidationException {
+        if (TYPES_REQUIRING_ADDRESS.contains(getDocumentType())) {
+            throw new DataValidationException(
+                String.format(  "Address cannot be null for %s document types.",
+                                        TYPES_REQUIRING_ADDRESS.toString())
+            );
+        }
         this.address = address;
     }
 
     public String getComment() { return comment; }
 
-    private void setComment(String comment) {
+    private void setComment(String comment) throws DataValidationException {
+        if (TYPES_REQUIRING_COMMENTARY.contains(getDocumentType())) {
+            throw new DataValidationException(
+                String.format(  "Commentary cannot be null for %s document types.",
+                                        TYPES_REQUIRING_COMMENTARY.toString())
+            );
+        }
         this.comment = comment;
+    }
+
+    public Recipe getRecipeOrder() {
+        return recipeOrder;
+    }
+
+    public void setRecipeOrder(Recipe recipeOrder) throws DataValidationException {
+        if (TYPES_REQUIRING_RECIPE_ORDER.contains(getDocumentType())) {
+            throw new DataValidationException(
+                String.format(  "Recipe cannot be null for %s document types.",
+                                        TYPES_REQUIRING_RECIPE_ORDER.toString())
+            );
+        }
+        this.recipeOrder = recipeOrder;
+    }
+
+    public String getLabel() {
+        return String.format("%s - %s #%d", workflow.getLabel(), documentType.getLabel(), id);
     }
 
     @Override
@@ -147,7 +355,7 @@ public class Document {
         return "Document{id=" + id + ", dateOfCreation=" + dateOfCreation + ", documentType=" + documentType + ", isChecked=" + isChecked + 
                 ", plannedSendDate=" + plannedSendDate + ", actualSendDate=" + actualSendDate + ", plannedDateOfReceipt=" + plannedDateOfReceipt + 
                 ", actualDateOfReceipt=" + actualDateOfReceipt + ", paymentDelay=" + paymentDelay + ", workflow=" + workflow + 
-                ", clientSupplier=" + clientSupplier + ", address=" + address + ", comment='" + comment + "'}";
+                ", address=" + address + ", comment='" + comment + ", recipeOrder=" + recipeOrder + "'}";
     }
 
     @Override
@@ -157,10 +365,11 @@ public class Document {
 
         Document other = (Document) obj;
         return  id == other.getId() && dateOfCreation.equals(other.getDateOfCreation()) && 
+                details.equals(other.getDetails()) &&
                 documentType.equals(other.getDocumentType()) && isChecked == other.getIsChecked() && plannedSendDate.equals(other.getPlannedSendDate()) && 
                 actualSendDate.equals(other.getActualSendDate()) && plannedDateOfReceipt.equals(other.getPlannedDateOfReceipt()) && 
                 actualDateOfReceipt.equals(other.getActualDateOfReceipt()) && paymentDelay.equals(other.getPaymentDelay()) && 
-                workflow.equals(other.getWorkflow()) && clientSupplier.equals(other.getClientSupplier()) && 
+                workflow.equals(other.getWorkflow()) && 
                 address.equals(other.getAddress()) && comment.equals(other.getComment());
     }
 
@@ -176,9 +385,9 @@ public class Document {
         result = 31 * result + actualDateOfReceipt.hashCode();
         result = 31 * result + paymentDelay.hashCode();
         result = 31 * result + workflow.hashCode();
-        result = 31 * result + clientSupplier.hashCode();
         result = 31 * result + address.hashCode();
         result = 31 * result + comment.hashCode();
+        result = 31 * result + details.hashCode();
         return result;
     }
 }

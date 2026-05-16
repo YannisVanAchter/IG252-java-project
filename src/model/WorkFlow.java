@@ -1,5 +1,9 @@
 package model;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import exception.DataValidationException;
 
 /**
@@ -9,11 +13,36 @@ public class WorkFlow {
     private int id;
     private Status status;
     private WorkFlowType workflowType;
+    private ClientSupplier us;
+    private ClientSupplier otherParty;
+    private WorkflowDocuments documents;
 
-    public WorkFlow(int id, Status status, WorkFlowType type) throws DataValidationException {
+    public WorkFlow(int id, Status status, WorkFlowType type, ClientSupplier us, ClientSupplier otherParty, WorkflowDocuments documents) throws DataValidationException {
         setId(id);
         setStatus(status);
         setWorkflowType(type);
+        setUs(us);
+        setOtherParty(otherParty);
+        setDocuments(documents);
+    }
+
+    public WorkFlow(int id, Status status, WorkFlowType type, ClientSupplier us, WorkflowDocuments documents) throws DataValidationException {
+        setId(id);
+        setStatus(status);
+        setWorkflowType(type);
+        setUs(us);
+        setDocuments(documents);
+
+        if ( !workflowType.getIsInternal() )
+            throw new DataValidationException("Only internal workflow can referee to one and only one client or supplier (it is us)");
+    }
+
+    public WorkFlow(int id, Status status, WorkFlowType type, ClientSupplier us, ClientSupplier otherParty) throws DataValidationException {
+        this(id, status, type, us, otherParty, null);
+    }
+
+    public WorkFlow(int id, Status status, WorkFlowType type, ClientSupplier us) throws DataValidationException {
+        this(id, status, type, us, (ClientSupplier) null);
     }
 
     public int getId() {
@@ -31,7 +60,7 @@ public class WorkFlow {
         return status;
     }
 
-    private void setStatus(Status status) throws DataValidationException {
+    public void setStatus(Status status) throws DataValidationException {
         if (status == null) {
             throw new DataValidationException("Status cannot be null.");
         }
@@ -49,9 +78,48 @@ public class WorkFlow {
         this.workflowType = workflowType;
     }
 
+    public ClientSupplier getUs() { return us; }
+
+    private void setUs(ClientSupplier us) throws DataValidationException {
+        if (us == null || !us.getIsUs())
+            throw new DataValidationException("You need to include the store within a workflow");
+        this.us = us;
+    }
+
+    public ClientSupplier getOtherParty() { return otherParty; }
+
+    private void setOtherParty(ClientSupplier otherParty) throws DataValidationException {
+        if ((otherParty == null || otherParty.getIsUs()) && ! workflowType.getIsInternal())
+            throw new DataValidationException("When a workflow involve external relationship, an other party is required");
+        this.otherParty = otherParty;
+    }
+
+    public List<Document> getDocuments() { return documents.getDocuments(); }
+
+    private void setDocuments(WorkflowDocuments docs) {
+        if (docs == null) 
+            this.documents = new WorkflowDocuments(this);
+        else 
+            this.documents = docs;
+    }
+
+    public void addDocument(Document doc) {
+        documents.addDocument(doc);
+    }
+
+    public String getLabel() {
+        return String.format("%s #%d", workflowType.getLabel(), id);
+    }
+
     @Override
     public String toString() {
-        return "WorkFlow{id=" + id + ", status=" + status + ", workflowType=" + workflowType + "}";
+        return  "WorkFlow{id=" + id + 
+                        ", status=" + status + 
+                        ", workflowType=" + workflowType + 
+                        ", us=" + us + 
+                        ", otherParty=" + (otherParty != null ? otherParty:"null") + 
+                        ", documents=" + documents + 
+                        "}";
     }
 
     @Override
@@ -60,7 +128,13 @@ public class WorkFlow {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         WorkFlow other = (WorkFlow) obj;
-        return id == other.getId() && status.equals(other.getStatus()) && workflowType.equals(other.getWorkflowType());
+        return  id == other.getId() 
+                && status.equals(other.getStatus()) 
+                && workflowType.equals(other.getWorkflowType())
+                && us.equals(other.getUs())
+                && (( !workflowType.getIsInternal()) ? otherParty.equals(other.getOtherParty()): true)
+                && documents.equals(other)
+                ;
     }
 
     @Override
@@ -68,6 +142,9 @@ public class WorkFlow {
         int result = Integer.hashCode(id);
         result = 31 * result + status.hashCode();
         result = 31 * result + workflowType.hashCode();
+        result = 31 * result + us.hashCode();
+        result = 31 * result + ((!workflowType.getIsInternal()) ? otherParty.hashCode(): 0);
+        result = 31 * result + documents.hashCode();
         return result;
     }
 }

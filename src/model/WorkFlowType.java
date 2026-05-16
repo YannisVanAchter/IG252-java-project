@@ -69,6 +69,8 @@ public class WorkFlowType {
         this.isInternal = isInternal;
     }
 
+    public String getLabel() { return getName(); }
+
     @Override
     public String toString() {
         return "WorkFlowType{name='" + name + "', isBuy=" + isBuy + ", isSell=" + isSell + ", isInternal=" + isInternal + "}";

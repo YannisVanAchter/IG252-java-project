@@ -21,6 +21,8 @@ public class Status {
         this.name = name;
     }
 
+    public String getLabel() { return getName(); }
+
     @Override
     public String toString() {
         return "Status{name='" + name + "'}";
