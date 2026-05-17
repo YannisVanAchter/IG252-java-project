@@ -31,3 +31,4 @@ out/
 build/
 *.ignore.*
 *.env
+*.properties

@@ -1,0 +1,292 @@
+package main.java.be.henallux.project.view;
+
+import main.java.be.henallux.project.controller.*;
+import main.java.be.henallux.project.exception.DataValidationException;
+
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
+import main.java.be.henallux.project.model.*;
+
+/**
+ * This view allows users to manage and search through a list of clients and suppliers.
+ * This class extends {@link JPanel} to provide a table view and search functionality for
+ * filtering client/supplier data based on various parameters such as ID, first name, last name,
+ * and type (client, supplier, or staff member).
+ * <p>
+ * The table is populated via a custom model, {@link ClientSupplierTableModel}, and provides
+ * ease of navigation with interactive search fields and filter checkboxes.
+ * <p>
+ * Clicking on a row opens a detailed Form Client/Supplier view through the main application window.
+ *
+ * @see MainWindow#openClientSupplierForm(ClientSupplier)
+ */
+public class ClientSupplierTable extends JPanel {
+    private static final int TBL_BTN_DEL = 8;
+    private static final int TBL_BTN_UPDATE = 7;
+
+    private MainWindow mainWindow;
+    private ClientSupplierController controller;
+    private ClientSupplierTableModel model;
+    private ArrayList<ClientSupplier> clientSuppliers;
+    private ArrayList<ClientSupplier> displayClientSupplier;
+
+    private JTextField txtLoyalityCard;
+    private JTextField txtLastName;
+    private JTextField txtFirstName;
+    private JCheckBox chkIsClient;
+    private JCheckBox chkIsSupplier;
+    private JCheckBox chkIsMember;
+
+    private JTable table;
+
+    public ClientSupplierTable(MainWindow mainWindow) throws DataValidationException {
+        this.mainWindow = mainWindow;
+        this.controller = new ClientSupplierController();
+
+        setLayout(new BorderLayout(10, 16));
+        setBorder(new EmptyBorder(16, 16, 16, 16));
+
+        clientSuppliers = controller.getAllClientSupplier();
+        displayClientSupplier = new ArrayList<>(clientSuppliers);
+
+        JPanel top = new JPanel(new BorderLayout(0, 10));
+        top.add(buildHeader(), BorderLayout.NORTH);
+        top.add(buildSearchPanel(), BorderLayout.SOUTH);
+
+        add(top, BorderLayout.NORTH);
+        add(buildTablePanel(), BorderLayout.CENTER);
+    }
+
+    private JPanel buildHeader() {
+        JLabel title = new JLabel("Client or Supplier Search");
+        title.setFont(new Font("Inter", Font.BOLD, 20));
+
+        JPanel header = new JPanel(new BorderLayout(0, 8));
+        header.add(title, BorderLayout.NORTH);
+        return header;
+    }
+
+    /**
+     * Builds the search and filter panel.
+     * The panel is divided into two sections, each wrapped in Border.
+     * This panel contains input fields for filtering clients/suppliers:
+     * ID, last name, first name, and type selection (client, supplier, staff member),
+     * as well as action buttons create.
+     *
+     * @return the configured search panel
+     */
+    private JPanel buildSearchPanel() {
+        txtLoyalityCard = new JTextField(10);
+        txtLoyalityCard = ViewUtils.addFilterListener(txtLoyalityCard, this::onFilterClick);
+        txtLoyalityCard = ViewUtils.digitsOnly(txtLoyalityCard);
+        JPanel idFields = new JPanel(new BorderLayout(0, 4));
+        idFields.add(new JLabel("Client ID"), BorderLayout.NORTH);
+        idFields.add(txtLoyalityCard, BorderLayout.CENTER);
+
+        txtLastName = new JTextField(10);
+        txtLastName = ViewUtils.addFilterListener(txtLastName, this::onFilterClick);
+        JPanel lastNameFields = new JPanel(new BorderLayout(0, 4));
+        lastNameFields.add(new JLabel("Last name"), BorderLayout.NORTH);
+        lastNameFields.add(txtLastName, BorderLayout.CENTER);
+
+        txtFirstName = new JTextField(10);
+        txtFirstName = ViewUtils.addFilterListener(txtFirstName, this::onFilterClick);
+        JPanel firstNameFields = new JPanel(new BorderLayout(0, 4));
+        firstNameFields.add(new JLabel("First name"), BorderLayout.NORTH);
+        firstNameFields.add(txtFirstName, BorderLayout.CENTER);
+
+        chkIsClient = new JCheckBox("Client");
+        chkIsClient = ViewUtils.addFilterListener(chkIsClient, this::onFilterClick);
+        chkIsSupplier = new JCheckBox("Supplier");
+        chkIsSupplier = ViewUtils.addFilterListener(chkIsSupplier, this::onFilterClick);
+        chkIsMember = new JCheckBox("Staff member");
+        chkIsMember = ViewUtils.addFilterListener(chkIsMember, this::onFilterClick);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
+        JButton btnSearch = new JButton("Search");
+        btnSearch.addActionListener(e -> onCreateClick());
+        JButton btnCreate = new JButton("Create");
+        btnCreate.addActionListener(e -> onCreateClick());
+
+        JPanel leftColumn = new JPanel();
+        leftColumn.setLayout(new BoxLayout(leftColumn, BoxLayout.Y_AXIS));
+        leftColumn.add(ViewUtils.makeRow(idFields));
+        leftColumn.add(Box.createVerticalStrut(6));
+        leftColumn.add(ViewUtils.makeRow(lastNameFields));
+        leftColumn.add(Box.createVerticalStrut(6));
+        leftColumn.add(ViewUtils.makeRow(firstNameFields));
+        leftColumn.add(Box.createVerticalStrut(8));
+        leftColumn.add(ViewUtils.makeRow(btnCreate));
+
+        JPanel rightColumn = new JPanel();
+        rightColumn.setLayout(new BoxLayout(rightColumn, BoxLayout.Y_AXIS));
+        rightColumn.setBorder(BorderFactory.createTitledBorder("Type"));
+        rightColumn.add(ViewUtils.makeRow(chkIsClient));
+        rightColumn.add(Box.createVerticalStrut(2));
+        rightColumn.add(ViewUtils.makeRow(chkIsSupplier));
+        rightColumn.add(Box.createVerticalStrut(2));
+        rightColumn.add(ViewUtils.makeRow(chkIsMember));
+
+        JPanel fieldsRow = new JPanel(new BorderLayout(12, 0));
+        fieldsRow.add(leftColumn, BorderLayout.CENTER);
+        fieldsRow.add(rightColumn, BorderLayout.EAST);
+
+        JPanel fieldsColumn = new JPanel();
+        fieldsColumn.setLayout(new BoxLayout(fieldsColumn, BoxLayout.Y_AXIS));
+        fieldsColumn.setBorder(BorderFactory.createTitledBorder("Filters"));
+        fieldsColumn.add(ViewUtils.makeRow(fieldsRow));
+
+        return fieldsColumn;
+    }
+
+    /**
+     * Builds the panel containing the client/supplier table.
+     * The table uses {@link ClientSupplierTableModel} as its data model
+     * and is configured to allow single row selection only.
+     * A mouse listener is added to detect clicks on specific columns:
+     * <ul><li>Column 8: triggers the delete action via {@code onDeleteClick()}.</li>
+     *  <li>Other Column: triggers the update action via {@code onUpdateClick()}.</li></ul>
+     * @return a {@link JScrollPane} containing the configured table
+     */
+    private JScrollPane buildTablePanel() {
+        model = new ClientSupplierTableModel(displayClientSupplier);
+        table = new JTable(model);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                int col = table.convertColumnIndexToModel(
+                        table.columnAtPoint(e.getPoint()));
+                if (col == TBL_BTN_DEL) onDeleteClick();
+                if (col == TBL_BTN_UPDATE) onUpdateClick();
+            }
+        });
+
+        table.getColumnModel().getColumn(TBL_BTN_DEL).setCellRenderer(new ButtonRenderer());
+        table.getColumnModel().getColumn(TBL_BTN_UPDATE).setCellRenderer(new ButtonRenderer());
+
+        JScrollPane scroll = new JScrollPane(table);
+        scroll.setPreferredSize(new Dimension(0, 250));
+        return scroll;
+    }
+
+    /**
+     * Applies filters to the client/supplier list and refreshes live table.
+     * Filtering is performed on:
+     * <ul><li>Client ID (partial match)</li>
+     *   <li>Last name (case-insensitive partial match)</li>
+     *   <li>First name (case-insensitive partial match)</li>
+     *   <li>Type (client, supplier, staff member)</li></ul>
+     * If no type filter is selected, all types are included.
+     * All Client/Supplier in {@code clientSupplier}s are filter and add in {@code displayClientSupplier}
+     * The table is reload in {@link ClientSupplierTableModel#setClientSuppliers(ArrayList)}
+     */
+    public void onFilterClick() {
+        String idText = txtLoyalityCard.getText().trim();
+        String lastNameText = txtLastName.getText().trim().toLowerCase();
+        String firstNameText = txtFirstName.getText().trim().toLowerCase();
+
+        displayClientSupplier = new ArrayList<>();
+
+        for (ClientSupplier cs : clientSuppliers) {
+            boolean match = true;
+
+            if (!idText.isEmpty() && !String.valueOf(cs.getId()).contains(idText)) {
+                match = false;
+            }
+
+            if (!lastNameText.isEmpty()
+                    && !cs.getName().toLowerCase().contains(lastNameText)) {
+                match = false;
+            }
+
+            if (!firstNameText.isEmpty()
+                    && !cs.getFirstname().toLowerCase().contains(firstNameText)) {
+                match = false;
+            }
+
+            boolean typeMatch = false;
+
+            if (!chkIsClient.isSelected() &&
+                    !chkIsSupplier.isSelected() &&
+                    !chkIsMember.isSelected()) {
+                typeMatch = true;
+            } else {
+                if (chkIsClient.isSelected() && cs.getIsClient()) typeMatch = true;
+                if (chkIsSupplier.isSelected() && cs.getIsSupplier()) typeMatch = true;
+                if (chkIsMember.isSelected() && cs.getIsUs()) typeMatch = true;
+            }
+
+            if (!typeMatch) {
+                match = false;
+            }
+
+            if (match) {
+                displayClientSupplier.add(cs);
+            }
+        }
+
+        model.setClientSuppliers(displayClientSupplier);
+    }
+
+    public void onCreateClick() {
+        mainWindow.openClientSupplierForm(null);
+    }
+
+    /**
+     * Opens the selected client/supplier in edit mode.
+     * The selected row from the table is converted into a
+     * {@link ClientSupplier} and passed to
+     * {@link MainWindow#openClientSupplierForm(ClientSupplier)}.
+     * Important:
+     * - If no row is selected → show an error message.
+     * - If an object is passed → form is in EDIT mode.
+     * - If null was passed → form would be in CREATE mode.
+     */
+    public void onUpdateClick() {
+        int selectedRow = table.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a client/supplier to modify.");
+            return;
+        }
+
+        ClientSupplier cs = displayClientSupplier.get(selectedRow);
+
+        mainWindow.openClientSupplierForm(cs);
+    }
+
+    public void onDeleteClick() {
+        int selectedRow = table.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a client/supplier to delete.");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to delete this entry?",
+                "Confirm deletion",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            ClientSupplier csToDelete = displayClientSupplier.get(selectedRow);
+
+            controller.deleteClientSupplier(csToDelete);
+
+            clientSuppliers.remove(csToDelete);
+            displayClientSupplier.remove(selectedRow);
+
+            model.setClientSuppliers(displayClientSupplier);
+        }
+    }
+}

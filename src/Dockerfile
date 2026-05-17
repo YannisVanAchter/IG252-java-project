@@ -1,14 +1,59 @@
 FROM ubuntu:22.04
+
+ARG DISPLAY
+ARG DEBIAN_FRONTEND
+ARG TZ
+ARG LANG
+ARG LC_ALL
+ARG MAVEN_VERSION
+ARG JAVA_VERSION
+
+ENV DISPLAY=${DISPLAY}
+ENV DEBIAN_FRONTEND=${DEBIAN_FRONTEND}
+ENV TZ=${TZ}
+ENV LANG=${LANG}
+ENV LC_ALL=${LC_ALL}
+ENV MAVEN_VERSION=${MAVEN_VERSION}
+ENV JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64
+ENV PATH=/opt/maven/bin:${PATH}
+
 WORKDIR /app
 
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Europe/Paris
-ENV LANG=C.UTF-8
-ENV LC_ALL=C.UTF-8
-
+# Install Java
 RUN apt-get update \
-    && apt-get install -y openjdk-17-jdk xvfb x11vnc fluxbox novnc python3-websockify \
+    && apt-get install -y \
+        openjdk-${JAVA_VERSION}-jdk \
+        xvfb x11vnc fluxbox novnc python3-websockify \
         libxext6 libxrender1 libxtst6 libxi6 fontconfig \
+        tar ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-CMD ["sh", "-c", "javac -cp 'lib/*' Main.java && Xvfb :0 -screen 0 1024x768x24 & fluxbox & x11vnc -forever -shared -display :0 -nopw -listen 0.0.0.0 -bg && websockify --web=/usr/share/novnc 6901 localhost:5900 & java -cp '.:/app/lib/*' Main"]
+# Install Maven
+RUN wget -q https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
+    tar -xzf apache-maven-${MAVEN_VERSION}-bin.tar.gz -C /opt && \
+    ln -s /opt/apache-maven-${MAVEN_VERSION} /opt/maven && \
+    rm apache-maven-${MAVEN_VERSION}-bin.tar.gz
+
+COPY ./pom.xml ./pom.xml
+COPY . .
+
+RUN mvn -B package
+RUN mvn -B test
+
+CMD ["/bin/sh", "-c", "\ 
+    Xvfb :0 -screen 0 1024x768x24 -ac & \ 
+    sleep 2 && \ 
+    fluxbox & \ 
+    sleep 1 && \ 
+    x11vnc -forever -shared -display :0 -nopw -listen 0.0.0.0 -bg && \ 
+    sleep 1 && \ 
+    websockify --web=/usr/share/novnc 6901 localhost:5900 & \ 
+    mvn clean && \
+    mvn compile && \
+    mvn test && \
+    mvn package && \
+    mvn install && \
+    mvn dependency:copy-dependencies && \
+    javac main/java/be/henallux/project/Main.java && \
+    java -jar target/project-1.0-SNAPSHOT.jar  \
+    "]

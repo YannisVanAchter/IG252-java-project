@@ -1,0 +1,163 @@
+package main.java.be.henallux.project.model;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import main.java.be.henallux.project.exception.DataValidationException;
+
+public class Detail {
+    private int id;
+    private double priceEVAT;
+    private BigDecimal vat;
+    private int fidelityPointEarned;
+    private int quantity;
+
+    private DocumentDetails doc;
+    private Product product;
+    private List<Batch> batches;
+
+    public Detail(int id, double priceEVAT, BigDecimal var, int fidelityPointEarned, int quantity, DocumentDetails doc, Product product, List<Batch> batches) throws DataValidationException {
+        setId(id);
+        setPriceEVAT(priceEVAT);
+        setVat(vat);
+        setFidelityPointEarned(fidelityPointEarned);
+        setQuantity(quantity);
+
+        setDoc(doc);
+        setProduct(product);
+        setBatches(batches);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    private void setId(int id) throws DataValidationException {
+        if (id < 0)
+            throw new DataValidationException("ID's cannot be negative");
+        this.id = id;
+    }
+
+    public double getPriceEVAT() {
+        return priceEVAT;
+    }
+
+    private void setPriceEVAT(double priceEVAT) throws DataValidationException {
+        if (priceEVAT < 0)
+            throw new DataValidationException("Price cannot be negative");
+        this.priceEVAT = priceEVAT;
+    }
+
+    public BigDecimal getVat() {
+        return vat;
+    }
+
+    private void setVat(BigDecimal vat) throws DataValidationException {
+        BigDecimal min = new BigDecimal("0.00");
+        BigDecimal max = new BigDecimal("1.00");
+        if (vat == null || min.compareTo(vat) > 0 || max.compareTo(vat) < 0)
+            throw new DataValidationException("vat cannot be under zero or over 1");
+        this.vat = vat;
+    }
+
+    public int getFidelityPointEarned() {
+        return fidelityPointEarned;
+    }
+
+    private void setFidelityPointEarned(int fidelityPointEarned) throws DataValidationException {
+        if (fidelityPointEarned < 0)
+            throw new DataValidationException("Fidelity point cannot be negative");
+        this.fidelityPointEarned = fidelityPointEarned;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    private void setQuantity(int quantity) throws DataValidationException {
+        if (quantity <= 0)
+            throw new DataValidationException("Quantity cannot be negative");
+        this.quantity = quantity;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    private void setProduct(Product product) throws DataValidationException {
+        if (product == null)
+            throw new DataValidationException("Product cannot be null");
+        this.product = product;
+    }
+
+    public Document getDocument() {
+        return doc.getDocument();
+    }
+
+    private void setDoc(DocumentDetails doc) throws DataValidationException {
+        if (doc == null)
+            throw new DataValidationException("Document cannot be null");
+        this.doc = doc;
+    }
+
+    public List<Batch> getBatches() {
+        return Collections.unmodifiableList(batches);
+    }
+
+    private void setBatches(List<Batch> batches) {
+        if (batches == null)
+            this.batches = new ArrayList<>();
+        else
+            this.batches = batches;
+    }
+
+    public void addBatch(Batch batch) {
+        if ( !batches.contains(batch))
+            batches.add(batch);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Detail{id=%d, priceEVAT=%d, vat=%d, fidelityPointEarned=%d, quantity=%d, doc=%s, product=%s, batches=%s",
+            id,
+            priceEVAT,
+            vat,
+            fidelityPointEarned,
+            quantity,
+            doc.getDocument().toString(),
+            product.toString(),
+            batches.toString()
+        );
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        Detail other = (Detail) obj;
+        return  id == other.getId() &&
+                priceEVAT == other.getPriceEVAT() &&
+                vat == other.getVat() &&
+                fidelityPointEarned == other.getFidelityPointEarned() &&
+                quantity == other.getQuantity() &&
+                doc.getDocument().equals(other.getDocument()) &&
+                product.equals(other.getProduct()) &&
+                batches.stream().allMatch(e -> other.getBatches().contains(e));
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Integer.hashCode(id);
+        result = 31 * result + Double.hashCode(priceEVAT);
+        result = 31 * result + vat.hashCode();
+        result = 31 * result + fidelityPointEarned;
+        result = 31 * result + quantity;
+        result = 31 * result + doc.hashCode();
+        result = 31 * result + product.hashCode();
+        result = 31 * result + batches.hashCode();
+        return result;
+    }
+}
