@@ -18,51 +18,56 @@ import main.java.be.henallux.project.model.WorkFlowType;
 
 public class DocumentTest {
 
-    private static final LocalDate DATE_CREATION  = LocalDate.of(2024, 1, 1);
-    private static final LocalDate DATE_PLANNED   = LocalDate.of(2024, 2, 1);
-    private static final LocalDate DATE_ACTUAL    = LocalDate.of(2024, 2, 5);
-    private static final LocalDate DATE_RECEIPT_P = LocalDate.of(2024, 2, 10);
-    private static final LocalDate DATE_RECEIPT_A = LocalDate.of(2024, 2, 12);
-    private static final int PAYMENT_DELAY        = 30;
-
-    private DocumentType   typeDelivery;
-    private DocumentType   typeCommand;
-    private DocumentType   typeOther;
-    private WorkFlow       workflow;
+    private int id;
+    private LocalDate dateOfCreation;
+    private DocumentType documentType;
+    private boolean isChecked;
+    private LocalDate plannedSendDate;
+    private LocalDate actualSendDate;
+    private LocalDate plannedDateOfReceipt;
+    private LocalDate actualDateOfReceipt;
+    private Integer paymentDelay = null;
+    private WorkFlow workflow;
     private ClientSupplier clientSupplier;
-    private Address        address;
+    private Address address;
+    private String comment;
 
     @BeforeEach
     public void setUp() throws DataValidationException {
-        typeDelivery   = new DocumentType("Delivery");
-        typeCommand    = new DocumentType("Command");
-        typeOther      = new DocumentType("Invoice");
-
-        Status status    = new Status("TODO");
-        WorkFlowType wft = new WorkFlowType("Buy", true, false, false);
-        workflow         = new WorkFlow(0, status, wft);
-
-        address        = new Address("10 Rue de la Paix", "Paris", "France");
-
-        clientSupplier = new ClientSupplier(
-            0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-            address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 1)
-        );
+        try {
+            id = 0;
+            dateOfCreation = LocalDate.of(2024, 1, 1);
+            documentType = new DocumentType("Delivery");
+            isChecked = false;
+            plannedSendDate = LocalDate.of(2024, 1, 5);
+            actualSendDate = LocalDate.of(2024, 1, 6);
+            plannedDateOfReceipt = LocalDate.of(2024, 1, 10);
+            actualDateOfReceipt = LocalDate.of(2024, 1, 11);
+            paymentDelay = 30;
+            workflow = new WorkFlow(0, new Status("TODO"), new WorkFlowType("Delivery", true, false, false));
+            clientSupplier = new ClientSupplier(
+                0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
+                new Address("10 Rue de la Paix", "Paris", "France"), true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
+            );
+            address = new Address(1, "Rue de la Paix", 10, "Paris", 75000);
+        } catch (DataValidationException e) {
+            fail("Failed to initialize test dependencies");
+        }
     }
 
     private Document buildValid() throws DataValidationException {
         return new Document(
-            0, DATE_CREATION, typeDelivery, false,
-            DATE_PLANNED, DATE_ACTUAL, DATE_RECEIPT_P, DATE_RECEIPT_A,
-            PAYMENT_DELAY, workflow, clientSupplier, address, "Test comment"
+            id, dateOfCreation, documentType, isChecked,
+            plannedSendDate, actualSendDate, plannedDateOfReceipt, actualDateOfReceipt,
+            paymentDelay, workflow, clientSupplier, address, "Test comment"
         );
     }
 
     private Document buildMinimal() throws DataValidationException {
         return new Document(
-            0, DATE_CREATION, typeOther, false,
+            0, dateOfCreation, documentType, isChecked,
             null, null, null, null,
-            0, null, null, null, null
+            paymentDelay, null, null, null, null
         );
     }
 
@@ -70,14 +75,14 @@ public class DocumentTest {
     public void basicCreationTest() throws DataValidationException {
         Document doc = buildValid();
         assertEquals(0,              doc.getId());
-        assertEquals(DATE_CREATION,  doc.getDateOfCreation());
-        assertEquals(typeDelivery,   doc.getDocumentType());
+        assertEquals(dateOfCreation,  doc.getDateOfCreation());
+        assertEquals(documentType,   doc.getDocumentType());
         assertFalse(doc.getIsChecked());
-        assertEquals(DATE_PLANNED,   doc.getPlannedSendDate());
-        assertEquals(DATE_ACTUAL,    doc.getActualSendDate());
-        assertEquals(DATE_RECEIPT_P, doc.getPlannedDateOfReceipt());
-        assertEquals(DATE_RECEIPT_A, doc.getActualDateOfReceipt());
-        assertEquals(PAYMENT_DELAY,  doc.getPaymentDelay());
+        assertEquals(plannedSendDate,   doc.getPlannedSendDate());
+        assertEquals(actualSendDate,    doc.getActualSendDate());
+        assertEquals(plannedDateOfReceipt, doc.getPlannedDateOfReceipt());
+        assertEquals(actualDateOfReceipt, doc.getActualDateOfReceipt());
+        assertEquals(paymentDelay,  doc.getPaymentDelay());
         assertEquals(workflow,       doc.getWorkflow());
         assertEquals(clientSupplier, doc.getClientSupplier());
         assertEquals(address,        doc.getAddress());
@@ -87,7 +92,7 @@ public class DocumentTest {
     @Test
     public void isCheckedTrueTest() throws DataValidationException {
         Document doc = new Document(
-            1, DATE_CREATION, typeOther, true,
+            1, dateOfCreation, documentType, true,
             null, null, null, null,
             0, null, null, null, null
         );
@@ -97,7 +102,7 @@ public class DocumentTest {
     @Test
     public void nullDateOfCreationDefaultsToToday() throws DataValidationException {
         Document doc = new Document(
-            0, null, typeOther, false,
+            0, null, documentType, false,
             null, null, null, null,
             0, null, null, null, null
         );
@@ -108,7 +113,7 @@ public class DocumentTest {
     @Test
     public void nullDocumentTypeDefaultsToUnknown() throws DataValidationException {
         Document doc = new Document(
-            0, DATE_CREATION, null, false,
+            0, dateOfCreation, null, false,
             null, null, null, null,
             0, null, null, null, null
         );
@@ -132,18 +137,18 @@ public class DocumentTest {
     @Test
     public void negativeIdThrows() {
         assertThrows(DataValidationException.class, () ->
-            new Document(-1, DATE_CREATION, typeOther, false,
+            new Document(-1, dateOfCreation, documentType, false,
                 null, null, null, null,
-                0, null, null, null, null)
+                paymentDelay, null, null, null, null)
         );
     }
 
     @Test
     public void zeroIdIsValid() throws DataValidationException {
         Document doc = new Document(
-            0, DATE_CREATION, typeOther, false,
+            0, dateOfCreation, documentType, false,
             null, null, null, null,
-            0, null, null, null, null
+            paymentDelay, null, null, null, null
         );
         assertEquals(0, doc.getId());
     }
@@ -151,27 +156,27 @@ public class DocumentTest {
     @Test
     public void nullPlannedSendDateForDeliveryThrows() {
         assertThrows(DataValidationException.class, () ->
-            new Document(0, DATE_CREATION, typeDelivery, false,
+            new Document(0, dateOfCreation, documentType, false,
                 null, null, null, null,
-                0, null, null, null, null)
+                paymentDelay, null, null, null, null)
         );
     }
 
     @Test
     public void nullPlannedSendDateForCommandThrows() {
         assertThrows(DataValidationException.class, () ->
-            new Document(0, DATE_CREATION, typeCommand, false,
+            new Document(0, dateOfCreation, documentType, false,
                 null, null, null, null,
-                0, null, null, null, null)
+                paymentDelay, null, null, null, null)
         );
     }
 
     @Test
     public void nullPlannedSendDateForOtherTypeOk() throws DataValidationException {
         Document doc = new Document(
-            0, DATE_CREATION, typeOther, false,
+            0, dateOfCreation, documentType, false,
             null, null, null, null,
-            0, null, null, null, null
+            paymentDelay, null, null, null, null
         );
         assertNull(doc.getPlannedSendDate());
     }
@@ -179,7 +184,7 @@ public class DocumentTest {
     @Test
     public void negativePaymentDelayThrows() {
         assertThrows(DataValidationException.class, () ->
-            new Document(0, DATE_CREATION, typeOther, false,
+            new Document(0, dateOfCreation, documentType, false,
                 null, null, null, null,
                 -1, null, null, null, null)
         );
@@ -188,7 +193,7 @@ public class DocumentTest {
     @Test
     public void zeroPaymentDelayIsValid() throws DataValidationException {
         Document doc = new Document(
-            0, DATE_CREATION, typeOther, false,
+            0, dateOfCreation, documentType, false,
             null, null, null, null,
             0, null, null, null, null
         );
@@ -216,9 +221,9 @@ public class DocumentTest {
     public void comparisonNotEqualDifferentId() throws DataValidationException {
         Document doc1 = buildValid();
         Document doc2 = new Document(
-            99, DATE_CREATION, typeDelivery, false,
-            DATE_PLANNED, DATE_ACTUAL, DATE_RECEIPT_P, DATE_RECEIPT_A,
-            PAYMENT_DELAY, workflow, clientSupplier, address, "Test comment"
+            1, dateOfCreation, documentType, false,
+            plannedSendDate, actualSendDate, plannedDateOfReceipt, actualDateOfReceipt,
+            paymentDelay, workflow, clientSupplier, address, "Test comment"
         );
         assertNotEquals(doc1, doc2, "Documents with different ids should not be equal");
     }
@@ -227,9 +232,9 @@ public class DocumentTest {
     public void comparisonNotEqualDifferentType() throws DataValidationException {
         Document doc1 = buildValid();
         Document doc2 = new Document(
-            0, DATE_CREATION, typeCommand, false,
-            DATE_PLANNED, DATE_ACTUAL, DATE_RECEIPT_P, DATE_RECEIPT_A,
-            PAYMENT_DELAY, workflow, clientSupplier, address, "Test comment"
+            0, dateOfCreation, typeCommand, false,
+            plannedSendDate, actualSendDate, plannedDateOfReceipt, actualDateOfReceipt,
+            paymentDelay, workflow, clientSupplier, address, "Test comment"
         );
         assertNotEquals(doc1, doc2, "Documents with different types should not be equal");
     }

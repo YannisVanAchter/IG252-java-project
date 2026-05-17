@@ -27,9 +27,6 @@ public class WorkFlowTest {
         workFlow         = new WorkFlow(0, statusTodo, typeBuy);
     }
 
-    // =========================================================
-    // 1. Basic creation
-    // =========================================================
 
     @Test
     public void basicCreationTest() throws DataValidationException {
@@ -46,9 +43,6 @@ public class WorkFlowTest {
         assertEquals(typeSell,   wf.getWorkflowType());
     }
 
-    // =========================================================
-    // 2. equals / hashCode
-    // =========================================================
 
     @Test
     public void comparisonEqualTest() throws DataValidationException {
@@ -78,10 +72,6 @@ public class WorkFlowTest {
         assertNotEquals(wf1, wf2, "WorkFlows with different types should not be equal");
     }
 
-    // =========================================================
-    // 3. toString
-    // =========================================================
-
     @Test
     public void toStringTest() {
         String result = workFlow.toString();
@@ -90,10 +80,6 @@ public class WorkFlowTest {
         assertTrue(result.contains("Buy"),  "toString should contain the type");
     }
 
-    // =========================================================
-    // 4. Validations — id
-    // =========================================================
-
     @Test
     public void negativeIdThrows() {
         assertThrows(DataValidationException.class, () ->
@@ -101,20 +87,12 @@ public class WorkFlowTest {
         );
     }
 
-    // =========================================================
-    // 5. Validations — status
-    // =========================================================
-
     @Test
     public void nullStatusThrows() {
         assertThrows(DataValidationException.class, () ->
             new WorkFlow(0, null, typeBuy)
         );
     }
-
-    // =========================================================
-    // 6. Validations — workflowType
-    // =========================================================
 
     @Test
     public void nullTypeThrows() {
