@@ -1,5 +1,7 @@
 package main.java.be.henallux.project.view;
 
+import main.java.be.henallux.project.controller.NotificationController;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -18,11 +20,11 @@ public class MenuWindow extends JMenuBar {
     private JMenuItem homeItem, closeItem, helpItem,
             clientSupItem, documentItem,
             clientItem, productItem, recipeItem,
-            receiptItem;
+            receiptItem, stockItem;
+    private NotifBellButton btnBell;
 
-    public MenuWindow(MainWindow window) {
-        int shortcut = Toolkit.getDefaultToolkit()
-                .getMenuShortcutKeyMaskEx();
+    public MenuWindow(MainWindow window, NotificationController controller) {
+        int shortcut = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
 
         // Application
         appMenu = new JMenu("Application");
@@ -70,7 +72,7 @@ public class MenuWindow extends JMenuBar {
         searchMenu.setMnemonic(KeyEvent.VK_S);
 
         clientItem = new JMenuItem("Client");
-        clientItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, shortcut));
+        clientItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, shortcut));
         clientItem.addActionListener(e ->
                 window.setPage("CLIENT")
         );
@@ -101,9 +103,20 @@ public class MenuWindow extends JMenuBar {
         );
         businessMenu.add(receiptItem);
 
+        stockItem = new JMenuItem("Stock");
+        stockItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_K, shortcut));
+        stockItem.addActionListener(e ->
+                window.setPage("STOCK")
+        );
+        businessMenu.add(stockItem);
+
         add(appMenu);
         add(managementMenu);
         add(searchMenu);
         add(businessMenu);
+
+        add(Box.createHorizontalGlue());
+        btnBell = new NotifBellButton(controller);
+        add(btnBell);
     }
 }
