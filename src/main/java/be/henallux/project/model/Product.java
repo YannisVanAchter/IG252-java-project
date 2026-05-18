@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
-public class Product {
+public class Product implements Model {
     private int id;
     private String name;
     private BigDecimal priceEVAT;
@@ -144,7 +144,7 @@ public class Product {
     }
 
     public List<Discount> getDiscounts() {
-        return Collections.unmodifiableList(discounts);
+        return Collections.unmodifiablelist(discounts);
     }
 
     private void setDiscounts(List<Discount> discounts) {
@@ -189,7 +189,7 @@ public class Product {
     }
 
     public List<QuantityProduct> getLocation() {
-        return location;
+        return Collections.unmodifiablelist(location);
     }
 
     private void setLocation(List<QuantityProduct> location) {
@@ -243,28 +243,11 @@ public class Product {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         Product other = (Product) obj;
-        return id == other.getId() &&
-                name.equals(other.getName()) &&
-                priceEVAT.compareTo(other.getPriceEVAT()) == 0 &&
-                vat.compareTo(other.getVat()) == 0 &&
-                fidelityPoint == other.getFidelityPoint() &&
-                isEdible == other.getIsEdible() &&
-                minStockQuantity == other.getMinStockQuantity() &&
-                category.equals(other.getCategory()) &&
-                discounts.equals(other.getDiscounts());
+        return id == other.getId();
     }
 
     @Override
     public int hashCode() {
-        int result = Integer.hashCode(id);
-        result = 31 * result + name.hashCode();
-        result = 31 * result + priceEVAT.stripTrailingZeros().hashCode();
-        result = 31 * result + vat.stripTrailingZeros().hashCode();
-        result = 31 * result + Integer.hashCode(fidelityPoint);
-        result = 31 * result + Boolean.hashCode(isEdible);
-        result = 31 * result + Integer.hashCode(minStockQuantity);
-        result = 31 * result + category.hashCode();
-        result = 31 * result + discounts.hashCode();
-        return result;
+        return Integer.hashCode(id);
     }
 }

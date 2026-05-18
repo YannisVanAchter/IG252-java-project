@@ -1,8 +1,8 @@
 package main.java.be.henallux.project.model;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
-public class LocationProduct {
+public class LocationProduct implements Model {
     private String locationProductId;
     private String shelf;
     private String floor;
@@ -88,9 +88,9 @@ public class LocationProduct {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         LocationProduct other = (LocationProduct) obj;
-        return shelf.equals(other.getShelf()) &&
-               floor.equals(other.getFloor()) &&
-               isStock == other.getIsStock();
+        return  shelf.equals(other.getShelf()) &&
+                floor.equals(other.getFloor()) &&
+                isStock == other.getIsStock();
     }
 
     @Override

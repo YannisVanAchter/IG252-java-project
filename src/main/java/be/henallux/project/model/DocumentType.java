@@ -3,11 +3,21 @@ package main.java.be.henallux.project.model;
 /**
  * A document type with a name.
  */
-public class DocumentType {
+public class DocumentType implements Model {
+    private int id;
     private String name;
 
-    public DocumentType(String name) {
+    public DocumentType(int id, String name) {
+        setId(id);
         setName(name);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    private void setId(int id) {
+        this.id = id;
     }
 
     public String getName() { return name; }
@@ -24,7 +34,7 @@ public class DocumentType {
 
     @Override
     public String toString() {
-        return "DocumentType{name='" + name + "'}";
+        return "DocumentType{id" + id + "name='" + name + "'}";
     }
 
     @Override
@@ -33,11 +43,11 @@ public class DocumentType {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         DocumentType that = (DocumentType) obj;
-        return name.equals(that.getName());
+        return id == that.getId();
     }
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return Integer.hashCode(id);
     }
 }

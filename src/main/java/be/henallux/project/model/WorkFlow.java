@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
 /**
  * A workfow as an id, a status and a workflow type.
  */
-public class WorkFlow {
+public class WorkFlow implements Model {
     private int id;
     private Status status;
     private WorkFlowType workflowType;
@@ -128,23 +128,11 @@ public class WorkFlow {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         WorkFlow other = (WorkFlow) obj;
-        return  id == other.getId() 
-                && status.equals(other.getStatus()) 
-                && workflowType.equals(other.getWorkflowType())
-                && us.equals(other.getUs())
-                && (( !workflowType.getIsInternal()) ? otherParty.equals(other.getOtherParty()): true)
-                && documents.equals(other)
-                ;
+        return  id == other.getId();
     }
 
     @Override
     public int hashCode() {
-        int result = Integer.hashCode(id);
-        result = 31 * result + status.hashCode();
-        result = 31 * result + workflowType.hashCode();
-        result = 31 * result + us.hashCode();
-        result = 31 * result + ((!workflowType.getIsInternal()) ? otherParty.hashCode(): 0);
-        result = 31 * result + documents.hashCode();
-        return result;
+        return Integer.hashCode(id);
     }
 }

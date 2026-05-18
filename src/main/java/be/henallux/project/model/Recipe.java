@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
-public class Recipe {
+public class Recipe implements Model {
     private int id;
     private String name;
     private String instruction;
@@ -62,7 +62,7 @@ public class Recipe {
     }
 
     public List<RecipeComposition> getComposition() {
-        return Collections.unmodifiable(composition);
+        return Collections.unmodifiablelist(composition);
     }
 
     private void setComposition(List<RecipeComposition> composition) {
@@ -102,18 +102,11 @@ public class Recipe {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         Recipe other = (Recipe) obj;
-        return  id == other.getId() && name.equals(other.getName()) &&
-                instruction.equals(other.getInstruction()) &&
-                finalProduct.equals(other.getFinalProduct());
+        return  id == other.getId();
     }
 
     @Override
     public int hashCode() {
-        int result = Integer.hashCode(id);
-        result = 31 * result + name.hashCode();
-        result = 31 * result + instruction.hashCode();
-        result = 31 * result + finalProduct.hashCode();
-        result = 31 * result + composition.hashCode();
-        return result;
+        return Integer.hashCode(id);
     }
 }

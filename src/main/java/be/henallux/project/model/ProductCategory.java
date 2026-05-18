@@ -1,8 +1,8 @@
 package main.java.be.henallux.project.model;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
-public class ProductCategory {
+public class ProductCategory implements Model {
     private int id;
     private String name;
 
@@ -41,12 +41,11 @@ public class ProductCategory {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         ProductCategory other = (ProductCategory) obj;
-        return other.getName().equals(name) && id == other.getId();
+        return id == other.getId();
     }
 
     @Override
     public int hashCode() {
-        int result = name.hashCode();
-        return 31 * result + id;
+        return Integer.hashCode(id);
     }
 }

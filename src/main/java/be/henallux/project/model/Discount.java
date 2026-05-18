@@ -3,9 +3,9 @@ package main.java.be.henallux.project.model;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
-public class Discount {
+public class Discount implements Model {
     private int requiredQuantity;
     private BigDecimal discountPercentage;
     private LocalDate startDate;
@@ -126,9 +126,7 @@ public class Discount {
         return requiredQuantity == other.getRequiredQuantity() &&
                 discountPercentage.compareTo(other.getDiscountPercentage()) == 0 &&
                 startDate.equals(other.getStartDate()) &&
-                endDate.equals(other.getEndDate()) &&
-                name.equals(other.getName()) &&
-                product.equals(other.getProduct());
+                endDate.equals(other.getEndDate());
     }
 
     @Override
@@ -137,8 +135,6 @@ public class Discount {
         result = 31 * result + discountPercentage.stripTrailingZeros().hashCode();
         result = 31 * result + startDate.hashCode();
         result = 31 * result + endDate.hashCode();
-        result = 31 * result + name.hashCode();
-        result = 31 * result + product.hashCode();
         return result;
     }
 }

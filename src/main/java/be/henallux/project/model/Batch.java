@@ -2,9 +2,9 @@ package main.java.be.henallux.project.model;
 
 import java.time.LocalDate;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
-public class Batch {
+public class Batch implements Model {
     private int id;
     private LocalDate expirationDate;
     private String originCountry;
@@ -78,17 +78,13 @@ public class Batch {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         Batch other = (Batch) obj;
-        return  id == other.getId() && expirationDate.equals(other.getExpirationDate()) 
-                && originCountry.equals(other.getOriginCountry()) &&
+        return  id == other.getId() && 
                 product.equals(other.getProduct());
     }
 
     @Override
     public int hashCode() {
-        int result = expirationDate.hashCode();
-        result = 31 * result + id;
-        result = 31 * result + originCountry.hashCode();
-        result = 31 * result + product.hashCode();
-        return result;
+        int result = Integer.hashCode(id);
+        return 31 * result + product.hashCode();
     }
 }

@@ -1,18 +1,20 @@
 package main.java.be.henallux.project.model;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
 /**
  * A workflow type defines if the linked workflow is a buy, sell, or internal workflow.
  * It cannot be two or more of these at the same time.
  */
-public class WorkFlowType {
+public class WorkFlowType implements Model {
+    private int id;
     private String name;
     private boolean isBuy = false;
     private boolean isSell = false;
     private boolean isInternal = false;
 
-    public WorkFlowType(String name, boolean isBuy, boolean isSell, boolean isInternal) throws DataValidationException {
+    public WorkFlowType(int id, String name, boolean isBuy, boolean isSell, boolean isInternal) throws DataValidationException {
+        setId(id);
         setName(name);
         setIsBuy(isBuy);
         setIsSell(isSell);
@@ -33,6 +35,12 @@ public class WorkFlowType {
         }
     }
 
+    public int getId() { return id; }
+
+    private void setId(int id) {
+        this.id = id;
+    }
+
     public String getName() { return name; }
 
     private void setName(String name) throws DataValidationException {
@@ -44,28 +52,19 @@ public class WorkFlowType {
 
     public boolean getIsBuy() { return isBuy; }
 
-    private void setIsBuy(boolean isBuy) throws DataValidationException {
-        if (getIsSell() || getIsInternal()) {
-            throw new DataValidationException("Cannot set isBuy to true when isSell or isInternal is already true.");
-        }
+    private void setIsBuy(boolean isBuy) {
         this.isBuy = isBuy;
     }
 
     public boolean getIsSell() { return isSell; }
 
-    private void setIsSell(boolean isSell) throws DataValidationException {
-        if (getIsBuy() || getIsInternal()) {
-            throw new DataValidationException("Cannot set isSell to true when isBuy or isInternal is already true.");
-        }
+    private void setIsSell(boolean isSell) {
         this.isSell = isSell;
     }
 
     public boolean getIsInternal() { return isInternal; }
 
-    private void setIsInternal(boolean isInternal) throws DataValidationException {
-        if (getIsBuy() || getIsSell()) {
-            throw new DataValidationException("Cannot set isInternal to true when isBuy or isSell is already true.");
-        }
+    private void setIsInternal(boolean isInternal) {
         this.isInternal = isInternal;
     }
 
@@ -82,15 +81,11 @@ public class WorkFlowType {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         WorkFlowType other = (WorkFlowType) obj;
-        return name.equals(other.getName()) && isBuy == other.getIsBuy() && isSell == other.getIsSell() && isInternal == other.getIsInternal();
+        return this.id == other.getId();
     }
 
     @Override
     public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + (isBuy ? 1 : 0);
-        result = 31 * result + (isSell ? 1 : 0);
-        result = 31 * result + (isInternal ? 1 : 0);
-        return result;
+        return Integer.hashCode(id);
     }
 }

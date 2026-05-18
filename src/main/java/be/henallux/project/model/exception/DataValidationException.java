@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.exception;
+package main.java.be.henallux.project.model.exception;
 
 public class DataValidationException extends Exception {
 

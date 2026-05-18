@@ -1,6 +1,6 @@
 package main.java.be.henallux.project.model;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
 /**
  * This class represents a Locality, which is a part of an address. 
@@ -8,7 +8,7 @@ import main.java.be.henallux.project.exception.DataValidationException;
  * The class also includes validation for the postal code \
  * to ensure it is a positive integer and does not exceed a specified maximum value.
  */
-public class Locality {
+public class Locality implements Model {
     private String city;
     private int postalCode;
     public static final Integer MAX_POSTAL_CODE_VALUE = Integer.MAX_VALUE;

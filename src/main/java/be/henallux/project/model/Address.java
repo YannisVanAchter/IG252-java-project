@@ -1,6 +1,6 @@
 package main.java.be.henallux.project.model;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
 /**
  * This class represents an address, which consists of a street name, street number, and a locality.
@@ -11,7 +11,7 @@ import main.java.be.henallux.project.exception.DataValidationException;
  *  1. that takes a locality object directly
  *  2. that takes the components of a locality (name and postal code) to create a locality object.
  */
-public class Address {
+public class Address implements Model {
     private int addressId;
     private String streetName;
     private int streetNumber;
@@ -84,14 +84,11 @@ public class Address {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         Address other = (Address) obj;
-        return streetName.equals(other.getStreetName()) && streetNumber == other.getStreetNumber() && locality.equals(other.getLocality());
+        return addressId == other.getAddressId();
     }
 
     @Override
     public int hashCode() {
-        int result = streetName.hashCode();
-        result = 31 * result + streetNumber;
-        result = 31 * result + locality.hashCode();
-        return result;
+        return Integer.hashCode(addressId);
     }
 }

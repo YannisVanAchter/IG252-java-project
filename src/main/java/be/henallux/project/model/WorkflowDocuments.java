@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class WorkflowDocuments {
+public class WorkflowDocuments implements Model {
     private WorkFlow workflow;
     private List<Document> documents;
 
@@ -23,7 +23,7 @@ public class WorkflowDocuments {
 
     public WorkFlow getWorkFlow() { return workflow; }
 
-    public List<Document> getDocuments() { return Collections.unmodifiableList(documents); }
+    public List<Document> getDocuments() { return Collections.unmodifiablelist(documents); }
 
     public void addDocument(Document doc) {
         if ( !documents.contains(doc) ) 

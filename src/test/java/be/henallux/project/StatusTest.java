@@ -6,8 +6,7 @@ import java.beans.Transient;
 
 import org.junit.jupiter.api.Test;
 
-import main.java.be.henallux.project.exception.DataValidationException;
-
+import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.*;
 
 public class StatusTest {

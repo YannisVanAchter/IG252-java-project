@@ -1,8 +1,8 @@
 package main.java.be.henallux.project.model;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
-public class QuantityProduct {
+public class QuantityProduct implements Model {
     private LocationProduct locationProduct;
     private Product product;
     private int quantity;
