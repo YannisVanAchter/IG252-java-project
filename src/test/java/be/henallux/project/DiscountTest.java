@@ -16,121 +16,121 @@ import main.java.be.henallux.project.model.ProductCategory;
 
 public class DiscountTest {
 
-    private static final int        VALID_QUANTITY   = 2;
-    private static final BigDecimal VALID_PERCENTAGE = new BigDecimal("10");
-    private static final LocalDate  VALID_START      = LocalDate.of(2024, 1, 1);
-    private static final LocalDate  VALID_END        = LocalDate.of(2024, 1, 31);
-    private static final String     VALID_NAME       = "New Year Discount";
-
-    private ProductCategory categoryFood;
-    private ProductCategory categoryElectronics;
-    private Product         validProduct;
+    private int requiredQuantity;
+    private BigDecimal discountPercentage;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private String name;
+    private Product product;
 
     @BeforeEach
     public void setUp() throws DataValidationException {
-        categoryFood        = new ProductCategory(1, "Food");
-        categoryElectronics = new ProductCategory(2, "Electronics");
-        validProduct        = new Product(
-            1, "Test Product", new BigDecimal("100"), new BigDecimal("20"),
-            10, true, 5, categoryFood, new ArrayList<>()
+        try {}
+        requiredQuantity   = 2;
+        discountPercentage = new BigDecimal("10");
+        startDate          = LocalDate.of(2024, 1, 1);
+        endDate            = LocalDate.of(2024, 1, 31);
+        name               = "New Year Discount";
+        ProductCategory fruitsCategory = new ProductCategory(1, "Fruits", new ArrayList<>());
+        product = new Product(
+            1, "Smartphone", new BigDecimal("500"), new BigDecimal("50"),
+            10, true, 5, fruitsCategory, new ArrayList<>()
         );
     }
 
     private Discount buildValid() throws DataValidationException {
-        return new Discount(VALID_QUANTITY, VALID_PERCENTAGE, VALID_START, VALID_END, VALID_NAME, validProduct);
+        return new Discount(requiredQuantity, discountPercentage, startDate, endDate, name, product);
     }
 
     @Test
     public void basicCreationTest() throws DataValidationException {
         Discount discount = buildValid();
-        assertEquals(VALID_QUANTITY, discount.getRequiredQuantity());
-        assertEquals(0,              VALID_PERCENTAGE.compareTo(discount.getDiscountPercentage()));
-        assertEquals(VALID_START,    discount.getStartDate());
-        assertEquals(VALID_END,      discount.getEndDate());
-        assertEquals(VALID_NAME,     discount.getName());
-        assertEquals(validProduct,   discount.getProduct());
+        assertEquals(requiredQuantity, discount.getRequiredQuantity());
+        assertEquals(0,              discountPercentage.compareTo(discount.getDiscountPercentage()));
+        assertEquals(startDate,    discount.getStartDate());
+        assertEquals(endDate,      discount.getEndDate());
+        assertEquals(name,     discount.getName());
+        assertEquals(product,   discount.getProduct());
     }
 
     @Test
     public void invalidRequiredQuantityZeroThrows() {
         assertThrows(DataValidationException.class, () ->
-            new Discount(0, VALID_PERCENTAGE, VALID_START, VALID_END, VALID_NAME, validProduct)
+            new Discount(0, discountPercentage, startDate, endDate, name, product)
         );
     }
 
     @Test
     public void invalidRequiredQuantityNegativeThrows() {
         assertThrows(DataValidationException.class, () ->
-            new Discount(-1, VALID_PERCENTAGE, VALID_START, VALID_END, VALID_NAME, validProduct)
+            new Discount(-1, discountPercentage, startDate, endDate, name, product)
         );
     }
 
     @Test
     public void requiredQuantityOneIsValid() throws DataValidationException {
-        Discount d = new Discount(1, VALID_PERCENTAGE, VALID_START, VALID_END, VALID_NAME, validProduct);
+        Discount d = new Discount(1, discountPercentage, startDate, endDate, name, product);
         assertEquals(1, d.getRequiredQuantity());
     }
 
     @Test
     public void nullDiscountPercentageThrows() {
         assertThrows(DataValidationException.class, () ->
-            new Discount(VALID_QUANTITY, null, VALID_START, VALID_END, VALID_NAME, validProduct)
+            new Discount(requiredQuantity, null, startDate, endDate, name, product)
         );
     }
 
     @Test
     public void negativeDiscountPercentageThrows() {
         assertThrows(DataValidationException.class, () ->
-            new Discount(VALID_QUANTITY, new BigDecimal("-5"), VALID_START, VALID_END, VALID_NAME, validProduct)
+            new Discount(requiredQuantity, new BigDecimal("-5"), startDate, endDate, name, product)
         );
     }
 
     @Test
     public void discountPercentageOver100Throws() {
         assertThrows(DataValidationException.class, () ->
-            new Discount(VALID_QUANTITY, new BigDecimal("150"), VALID_START, VALID_END, VALID_NAME, validProduct)
+            new Discount(requiredQuantity, new BigDecimal("150"), startDate, endDate, name, product)
         );
     }
 
     @Test
     public void discountPercentageZeroIsValid() throws DataValidationException {
-        Discount d = new Discount(VALID_QUANTITY, BigDecimal.ZERO, VALID_START, VALID_END, VALID_NAME, validProduct);
+        Discount d = new Discount(requiredQuantity, BigDecimal.ZERO, startDate, endDate, name, product);
         assertEquals(0, BigDecimal.ZERO.compareTo(d.getDiscountPercentage()));
     }
 
     @Test
     public void discountPercentage100IsValid() throws DataValidationException {
-        Discount d = new Discount(VALID_QUANTITY, new BigDecimal("100"), VALID_START, VALID_END, VALID_NAME, validProduct);
+        Discount d = new Discount(requiredQuantity, new BigDecimal("100"), startDate, endDate, name, product);
         assertEquals(0, new BigDecimal("100").compareTo(d.getDiscountPercentage()));
     }
 
     @Test
     public void nullStartDateThrows() {
         assertThrows(DataValidationException.class, () ->
-            new Discount(VALID_QUANTITY, VALID_PERCENTAGE, null, VALID_END, VALID_NAME, validProduct)
+            new Discount(requiredQuantity, discountPercentage, null, endDate, name, product)
         );
     }
 
     @Test
     public void nullEndDateThrows() {
         assertThrows(DataValidationException.class, () ->
-            new Discount(VALID_QUANTITY, VALID_PERCENTAGE, VALID_START, null, VALID_NAME, validProduct)
+            new Discount(requiredQuantity, discountPercentage, startDate, null, name, product)
         );
     }
 
     @Test
     public void endDateBeforeStartDateThrows() {
         assertThrows(DataValidationException.class, () ->
-            new Discount(VALID_QUANTITY, VALID_PERCENTAGE,
-                LocalDate.of(2024, 2, 1), LocalDate.of(2024, 1, 1),
-                VALID_NAME, validProduct)
+            new Discount(requiredQuantity, discountPercentage, LocalDate.of(2024, 1, 31), LocalDate.of(2024, 1, 1), name, product)
         );
     }
 
     @Test
     public void startDateEqualsEndDateIsValid() throws DataValidationException {
         LocalDate sameDay = LocalDate.of(2024, 1, 15);
-        Discount d = new Discount(VALID_QUANTITY, VALID_PERCENTAGE, sameDay, sameDay, VALID_NAME, validProduct);
+        Discount d = new Discount(requiredQuantity, discountPercentage, sameDay, sameDay, name, product);
         assertEquals(sameDay, d.getStartDate());
         assertEquals(sameDay, d.getEndDate());
     }
@@ -138,21 +138,21 @@ public class DiscountTest {
     @Test
     public void nullNameThrows() {
         assertThrows(DataValidationException.class, () ->
-            new Discount(VALID_QUANTITY, VALID_PERCENTAGE, VALID_START, VALID_END, null, validProduct)
+            new Discount(requiredQuantity, discountPercentage, startDate, endDate, null, product)
         );
     }
 
     @Test
     public void emptyNameThrows() {
         assertThrows(DataValidationException.class, () ->
-            new Discount(VALID_QUANTITY, VALID_PERCENTAGE, VALID_START, VALID_END, "", validProduct)
+            new Discount(requiredQuantity, discountPercentage, startDate, endDate, "", product)
         );
     }
 
     @Test
     public void nullProductThrows() {
         assertThrows(DataValidationException.class, () ->
-            new Discount(VALID_QUANTITY, VALID_PERCENTAGE, VALID_START, VALID_END, VALID_NAME, null)
+            new Discount(requiredQuantity, discountPercentage, startDate, endDate, name, null)
         );
     }
 
@@ -160,9 +160,9 @@ public class DiscountTest {
     public void getLabelTest() throws DataValidationException {
         Discount d = buildValid();
         String label = d.getLabel();
-        assertTrue(label.contains(VALID_NAME),                     "getLabel should contain the name");
+        assertTrue(label.contains(name),                     "getLabel should contain the name");
         assertTrue(label.contains("10"),                           "getLabel should contain the percentage");
-        assertTrue(label.contains(String.valueOf(VALID_QUANTITY)), "getLabel should contain the minimum quantity");
+        assertTrue(label.contains(String.valueOf(requiredQuantity)), "getLabel should contain the minimum quantity");
     }
 
     @Test
@@ -185,7 +185,7 @@ public class DiscountTest {
     public void comparisonNotEqualDifferentQuantity() throws DataValidationException {
         assertNotEquals(
             buildValid(),
-            new Discount(3, VALID_PERCENTAGE, VALID_START, VALID_END, VALID_NAME, validProduct)
+            new Discount(3, discountPercentage, startDate, endDate, name, product)
         );
     }
 
@@ -193,7 +193,7 @@ public class DiscountTest {
     public void comparisonNotEqualDifferentPercentage() throws DataValidationException {
         assertNotEquals(
             buildValid(),
-            new Discount(VALID_QUANTITY, new BigDecimal("15"), VALID_START, VALID_END, VALID_NAME, validProduct)
+            new Discount(requiredQuantity, new BigDecimal("15"), startDate, endDate, name, product)
         );
     }
 
@@ -201,19 +201,18 @@ public class DiscountTest {
     public void comparisonNotEqualDifferentName() throws DataValidationException {
         assertNotEquals(
             buildValid(),
-            new Discount(VALID_QUANTITY, VALID_PERCENTAGE, VALID_START, VALID_END, "Other Discount", validProduct)
+            new Discount(requiredQuantity, discountPercentage, startDate, endDate, "Other Discount", product)
         );
     }
 
     @Test
     public void comparisonNotEqualDifferentProduct() throws DataValidationException {
-        Product otherProduct = new Product(
-            2, "Another Product", new BigDecimal("200"), new BigDecimal("30"),
-            20, true, 10, categoryElectronics, new ArrayList<>()
+        Product otherProduct = new Product(2, "Laptop", new BigDecimal("1000"), new BigDecimal("100"), 5,
+        true, 10, new ProductCategory(2, "fruitsCategory", new ArrayList<>()), new ArrayList<>()
         );
         assertNotEquals(
             buildValid(),
-            new Discount(VALID_QUANTITY, VALID_PERCENTAGE, VALID_START, VALID_END, VALID_NAME, otherProduct)
+            new Discount(requiredQuantity, discountPercentage, startDate, endDate, name, otherProduct)
         );
     }
 }
