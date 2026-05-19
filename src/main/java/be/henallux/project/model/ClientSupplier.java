@@ -178,7 +178,7 @@ public class ClientSupplier implements Model {
     public FidelityCard getFidelityCard() { return this.fidelityCard; }
 
     public void setFidelityCard(FidelityCard fidelityCard) throws DataValidationException {
-        if (!getIsClient() && fidelityCard == null) {
+        if (!getIsClient() && fidelityCard != null) {
             throw new DataValidationException("One must be a client to posses a fidelity card");
         }
         this.fidelityCard = fidelityCard;

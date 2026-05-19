@@ -53,14 +53,14 @@ public class ClientSearchTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int col) {
         ClientSupplier cs = clients.get(row);
         return switch (col) {
-            case 0  -> cs.getLabel();
+            case 0  -> cs.getName() + " " +cs.getFirstname();
             case 1  -> cs.getEmail();
             case 2  -> cs.getPhoneNumber();
             case 3  -> ViewUtils.formatDate(cs.getBecameClientDate());
-            case 4  -> cs.getFidelityCard().getTotalPoint();
-            case 5  -> cs.getFidelityCard();
-            case 6  -> cs.getAddress().getLocality().getCity();
-            case 7 -> cs.getAddress().getLocality().getPostalCode();
+            case 4  -> cs.getFidelityCard() != null ? cs.getFidelityCard().getTotalPoint() : "-";
+            case 5  -> cs.getFidelityCard() != null ? cs.getFidelityCard().getId() : "-";
+            case 6  -> cs.getAddress() != null ? cs.getAddress().getLocality().getCity() : "-";
+            case 7  -> cs.getAddress() != null ? cs.getAddress().getLocality().getPostalCode() : "-";
             case 8  -> "See";
             default -> null;
         };

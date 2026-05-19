@@ -31,11 +31,7 @@ public class ClientSupplierSearchController {
     public List<ClientSupplier> search(String name, String email, String fidelityCardNumber) {
 
         List<ClientSupplier> clients;
-        try {
             clients = clientSupplierController.getAllClientSupplier();
-        } catch (DataValidationException e) {
-            return new ArrayList<>();
-        }
 
         List<ClientSupplier> results = new ArrayList<>();
         for (ClientSupplier cs : clients) {

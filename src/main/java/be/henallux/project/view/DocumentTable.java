@@ -82,7 +82,7 @@ public class DocumentTable extends JPanel {
      *
      * @return a {@link JPanel} containing the search panel layout.
      */
-    private JPanel buildSearchPanel() throws DataValidationException {
+    private JPanel buildSearchPanel()  {
         searchPanel = new JPanel(new BorderLayout());
         JPanel fieldsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
