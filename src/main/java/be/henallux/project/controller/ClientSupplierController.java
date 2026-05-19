@@ -1,6 +1,6 @@
 package main.java.be.henallux.project.controller;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.Address;
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.Locality;
