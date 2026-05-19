@@ -1,8 +1,8 @@
 package main.java.be.henallux.project.model;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
-public class FidelityCard {
+public class FidelityCard implements Model {
     private int id;
     private int totalPoint;
     private boolean isValid;
@@ -13,6 +13,10 @@ public class FidelityCard {
         setTotalPoint(totalPoint);
         setIsValid(isValid);
         setClient(client);
+    }
+
+    public FidelityCard(int id, ClientSupplier client) throws DataValidationException {
+        this(id, 0, true, client);
     }
 
     public int getId() {
@@ -51,7 +55,7 @@ public class FidelityCard {
         return client;
     }
 
-    private void setClient(ClientSupplier client) throws DataValidationException {
+    public void setClient(ClientSupplier client) throws DataValidationException {
         if (client == null) {
             String message = "Client setting error, client is null when it shouldn't";
             throw new DataValidationException(message);
@@ -82,18 +86,11 @@ public class FidelityCard {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         FidelityCard other = (FidelityCard) obj;
-        return  id == other.getId() &&
-                totalPoint == other.getTotalPoint() &&
-                isValid == other.getIsValid() &&
-                client.equals(other.getClient());
+        return  id == other.getId();
     }
 
     @Override
     public int hashCode() {
-        int result = Integer.hashCode(id);
-        result = 31 * result + Integer.hashCode(totalPoint);
-        result = 31 * result + Boolean.hashCode(isValid);
-        result = 31 * result + client.hashCode();
-        return result;
+        return Integer.hashCode(id);
     }
 }

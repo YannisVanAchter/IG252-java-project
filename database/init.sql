@@ -216,7 +216,11 @@ CREATE TABLE WorkFlow (
 
     workFlowTypeId INT NOT NULL,
     statusId VARCHAR(255) NOT NULL,
+    usId INT NOT NULL,
+    otherId INT,
     FOREIGN KEY (workFlowTypeId) REFERENCES WorkFlowType(id_),
+    FOREIGN KEY (usId) REFERENCES Client_supplier(id_),
+    FOREIGN KEY (otherId) REFERENCES Client_supplier(id_),
     FOREIGN KEY (statusId) REFERENCES Status_(name_)
 );
 
@@ -243,6 +247,15 @@ CREATE TABLE Document_ (
     FOREIGN KEY (workflowId) REFERENCES WorkFlow(id_),
     FOREIGN KEY (addressId) REFERENCES Address_(id_)
 );
+
+CREATE TABLE WorkFlowDocument (
+    workflowId INT NOT NULL,
+    documentId INT NOT NULL,
+
+    PRIMARY KEY (workflowId, documentId),
+    FOREIGN KEY (workflowId) REFERENCES WorkFlow(id_),
+    FOREIGN KEY (documentId) REFERENCES Document_(id_)
+)
 
 CREATE TABLE Recipe (
     id_ INT AUTO_INCREMENT PRIMARY KEY,

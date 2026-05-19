@@ -1,8 +1,8 @@
 package main.java.be.henallux.project.model;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
-public class RecipeComposition {
+public class RecipeComposition implements Model {
     private int quantity;
     private Product product;
     private Recipe recipe;
@@ -62,15 +62,13 @@ public class RecipeComposition {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         RecipeComposition other = (RecipeComposition) obj;
-        return  quantity == other.getQuantity() &&
-                recipe.equals(other.getRecipe()) &&
+        return  recipe.equals(other.getRecipe()) &&
                 product.equals(other.getProduct());
     }
 
     @Override
     public int hashCode() {
-        int result = Integer.hashCode(quantity);
-        result = 31 * result + recipe.hashCode();
+        int result = recipe.hashCode();
         result = 31 * result + product.hashCode();
         return result;
     }

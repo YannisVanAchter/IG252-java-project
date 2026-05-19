@@ -2,7 +2,7 @@ package main.java.be.henallux.project.model;
 
 import java.time.LocalDate;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
 /**
  * This class represents a client or supplier, which can be either a client, a supplier, or both.
@@ -10,7 +10,7 @@ import main.java.be.henallux.project.exception.DataValidationException;
  * The class includes several validations for these fields such as regex, not null, not empty, and logical consistency between the boolean fields (isClient, isSupplier, isUs).
  * The class provides a constructor that takes all the fields as parameters and performs the necessary validations.
  */
-public class ClientSupplier {
+public class ClientSupplier implements Model {
     private int id;
     private String name;
     private String firstname;
@@ -37,6 +37,10 @@ public class ClientSupplier {
         setVATNumber(VATNumber);
         setBecameClientDate(becameClientDate);
         setFidelityCard(fidelityCard);
+    }
+
+    public ClientSupplier(int id, String name, String firstname, String email, String phoneNumber, Address address, boolean isClient, boolean isSupplier, boolean isUs, String VATNumber, LocalDate becameClientDate) throws DataValidationException {
+        this(id, name, firstname, email, phoneNumber, address, isClient, isSupplier, isUs, VATNumber, becameClientDate, null);
     }
 
     public int getId() { return id; }
@@ -173,8 +177,8 @@ public class ClientSupplier {
 
     public FidelityCard getFidelityCard() { return this.fidelityCard; }
 
-    private void setFidelityCard(FidelityCard fidelityCard) throws DataValidationException {
-        if (!getIsClient()) {
+    public void setFidelityCard(FidelityCard fidelityCard) throws DataValidationException {
+        if (!getIsClient() && fidelityCard == null) {
             throw new DataValidationException("One must be a client to posses a fidelity card");
         }
         this.fidelityCard = fidelityCard;
@@ -213,33 +217,11 @@ public class ClientSupplier {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         ClientSupplier other = (ClientSupplier) obj;
-        return  id == other.getId() && name.equals(other.getName()) && 
-                firstname.equals(other.getFirstname()) && email.equals(other.getEmail()) && 
-                phoneNumber.equals(other.getPhoneNumber()) && address.equals(other.getAddress()) && 
-                isClient == other.getIsClient() && isSupplier == other.getIsSupplier() && 
-                isUs == other.getIsUs() && 
-                ((isSupplier && VATNumber.equals(other.getVATNumber())) ||
-                (
-                    isClient &&
-                    (becameClientDate != null && becameClientDate.equals(other.getBecameClientDate())) && 
-                    (fidelityCard != null && fidelityCard.equals(other.getFidelityCard()))
-                ));
+        return  id == other.getId();
     }
 
     @Override
     public int hashCode() {
-        int result = Integer.hashCode(id);
-        result = 31 * result + name.hashCode();
-        result = 31 * result + firstname.hashCode();
-        result = 31 * result + email.hashCode();
-        result = 31 * result + phoneNumber.hashCode();
-        result = 31 * result + address.hashCode();
-        result = 31 * result + Boolean.hashCode(isClient);
-        result = 31 * result + Boolean.hashCode(isSupplier);
-        result = 31 * result + Boolean.hashCode(isUs);
-        result = 31 * result + VATNumber.hashCode();
-        result = 31 * result + (isClient ? becameClientDate.hashCode(): 0);
-        result = 31 * result + (fidelityCard != null ? fidelityCard.hashCode(): 0);
-        return result;
+        return Integer.hashCode(id);
     }
 }

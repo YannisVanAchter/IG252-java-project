@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
-public class Detail {
+public class Detail implements Model {
     private int id;
     private double priceEVAT;
     private BigDecimal vat;
@@ -103,7 +103,7 @@ public class Detail {
     }
 
     public List<Batch> getBatches() {
-        return Collections.unmodifiableList(batches);
+        return Collections.unmodifiablelist(batches);
     }
 
     private void setBatches(List<Batch> batches) {
@@ -138,26 +138,11 @@ public class Detail {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         Detail other = (Detail) obj;
-        return  id == other.getId() &&
-                priceEVAT == other.getPriceEVAT() &&
-                vat == other.getVat() &&
-                fidelityPointEarned == other.getFidelityPointEarned() &&
-                quantity == other.getQuantity() &&
-                doc.getDocument().equals(other.getDocument()) &&
-                product.equals(other.getProduct()) &&
-                batches.stream().allMatch(e -> other.getBatches().contains(e));
+        return  id == other.getId();
     }
 
     @Override
     public int hashCode() {
-        int result = Integer.hashCode(id);
-        result = 31 * result + Double.hashCode(priceEVAT);
-        result = 31 * result + vat.hashCode();
-        result = 31 * result + fidelityPointEarned;
-        result = 31 * result + quantity;
-        result = 31 * result + doc.hashCode();
-        result = 31 * result + product.hashCode();
-        result = 31 * result + batches.hashCode();
-        return result;
+        return Integer.hashCode(id);
     }
 }

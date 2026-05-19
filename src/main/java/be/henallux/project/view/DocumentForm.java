@@ -1,7 +1,7 @@
 package main.java.be.henallux.project.view;
 
 import main.java.be.henallux.project.controller.DocumentController;
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.*;
 
 import javax.swing.*;

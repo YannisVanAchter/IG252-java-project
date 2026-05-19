@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class DocumentDetails {
+public class DocumentDetails implements Model {
     private Document doc;
     private List<Detail> details;
 
@@ -23,7 +23,7 @@ public class DocumentDetails {
 
     public Document getDocument() { return doc; }
 
-    public List<Detail> getDetails() { return Collections.unmodifiableList(details); }
+    public List<Detail> getDetails() { return Collections.unmodifiablelist(details); }
 
     public void addDetail(Detail detail) {
         if (!details.contains(detail))

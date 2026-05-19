@@ -9,16 +9,14 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-<<<<<<< Updated upstream:src/test/java/be/henallux/project/ProductTest.java
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.Product;
 import main.java.be.henallux.project.model.ProductCategory;
-=======
 import exception.DataValidationException;
 import model.Discount;
 import model.Product;
 import model.ProductCategory;
->>>>>>> Stashed changes:src/test/ProductTest.java
+
 
 public class ProductTest {
 

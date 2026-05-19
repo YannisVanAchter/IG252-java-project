@@ -1,11 +1,11 @@
 package main.java.be.henallux.project.model;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
 /**
  * A status with a name.
  */
-public class Status {
+public class Status implements Model {
     private String name;
 
     public Status(String name) throws DataValidationException {

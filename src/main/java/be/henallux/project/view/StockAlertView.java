@@ -2,7 +2,7 @@ package main.java.be.henallux.project.view;
 
 import main.java.be.henallux.project.controller.ProductController;
 import main.java.be.henallux.project.controller.SupplierController;
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.Product;
 

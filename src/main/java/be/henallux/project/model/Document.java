@@ -4,14 +4,14 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
 /**
  * This class represents a document, which can be of various types (e.g., delivery, command, etc.).
  * It contains certains compulsory fields like id, date of creation, document type and is checked. 
  * Regarding the optional fields, they become compulsory depending on the document type.
  */
-public class Document {
+public class Document implements Model {
     private static final List<DocumentType> TYPES_REQUIRING_PLANNED_SEND_DATE =
         Arrays.asList(new DocumentType("Delivery"));
     private static final List<DocumentType> TYPES_REQUIRING_RECEPTION_DATE = 
@@ -364,30 +364,11 @@ public class Document {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         Document other = (Document) obj;
-        return  id == other.getId() && dateOfCreation.equals(other.getDateOfCreation()) && 
-                details.equals(other.getDetails()) &&
-                documentType.equals(other.getDocumentType()) && isChecked == other.getIsChecked() && plannedSendDate.equals(other.getPlannedSendDate()) && 
-                actualSendDate.equals(other.getActualSendDate()) && plannedDateOfReceipt.equals(other.getPlannedDateOfReceipt()) && 
-                actualDateOfReceipt.equals(other.getActualDateOfReceipt()) && paymentDelay.equals(other.getPaymentDelay()) && 
-                workflow.equals(other.getWorkflow()) && 
-                address.equals(other.getAddress()) && comment.equals(other.getComment());
+        return  id == other.getId() ;
     }
 
     @Override
     public int hashCode() {
-        int result = Integer.hashCode(id);
-        result = 31 * result + dateOfCreation.hashCode();
-        result = 31 * result + documentType.hashCode();
-        result = 31 * result + Boolean.hashCode(isChecked);
-        result = 31 * result + plannedSendDate.hashCode();
-        result = 31 * result + actualSendDate.hashCode();
-        result = 31 * result + plannedDateOfReceipt.hashCode();
-        result = 31 * result + actualDateOfReceipt.hashCode();
-        result = 31 * result + paymentDelay.hashCode();
-        result = 31 * result + workflow.hashCode();
-        result = 31 * result + address.hashCode();
-        result = 31 * result + comment.hashCode();
-        result = 31 * result + details.hashCode();
-        return result;
+        return Integer.hashCode(id);
     }
 }
