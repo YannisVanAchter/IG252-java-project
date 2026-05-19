@@ -201,18 +201,30 @@ public class ReceiptView extends JPanel {
      */
     private JPanel buildReceiptFooter() {
         JPanel footer = new JPanel(new BorderLayout());
-        lblTotal = new JLabel("Total: 0.00€");
+        lblTotal = new JLabel("Total: 0.00€ ");
         lblTotal.setFont(FONT_TOTAL);
         lblTotal.setHorizontalAlignment(SwingConstants.RIGHT);
         footer.add(lblTotal, BorderLayout.NORTH);
 
-        JPanel btnBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        JPanel btnBar = new JPanel(new BorderLayout());
         btnBar.setBorder(new EmptyBorder(16, 0, 0, 0));
 
         btnClearAll = new JButton("Clear all");
         ViewUtils.setCursor(btnClearAll);
         btnClearAll.setPreferredSize(new Dimension(150, 44));
-        btnClearAll.addActionListener(e -> clearAll());
+        btnClearAll.setEnabled(false);
+        btnClearAll.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to clear all items?",
+                    "Clear Receipt",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+            if (confirm == JOptionPane.YES_OPTION) {
+                clearAll();
+            }
+        });
 
         btnDelete = new JButton("Delete Last Item");
         ViewUtils.setCursor(btnDelete);
@@ -232,9 +244,15 @@ public class ReceiptView extends JPanel {
             }
         });
 
-        btnBar.add(btnClearAll);
-        btnBar.add(btnDelete);
-        btnBar.add(btnNext);
+        JPanel leftBtns = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        leftBtns.add(btnClearAll);
+
+        JPanel rightBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        rightBtns.add(btnDelete);
+        rightBtns.add(btnNext);
+
+        btnBar.add(leftBtns, BorderLayout.WEST);
+        btnBar.add(rightBtns, BorderLayout.EAST);
         footer.add(btnBar, BorderLayout.SOUTH);
         return footer;
     }
@@ -325,6 +343,7 @@ public class ReceiptView extends JPanel {
         boolean hasItems = !receipt.isEmpty();
         btnDelete.setEnabled(hasItems);
         btnNext.setEnabled(hasItems);
+        btnClearAll.setEnabled(hasItems);
     }
 
     /**
