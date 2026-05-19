@@ -112,8 +112,8 @@ public class StockAlertTableModel extends AbstractTableModel {
      * @return the product status
      */
     private String getStatus(Product product) {
-        if (product.getMinStock() == 0) return "Low";
-        double ratio = (double) product.getQuantity().getNbProduct() / product.getMinStock();
+        if (product.getMinStockQuantity() == 0) return "Low";
+        double ratio = (double) product.getTotalQuantity() / product.getMinStockQuantity();
         if (ratio < 0.5) return "Critical";
         return "Low";
     }
@@ -143,9 +143,9 @@ public class StockAlertTableModel extends AbstractTableModel {
         return switch (columnIndex) {
             case 0 -> selected.get(rowIndex);
             case 1 -> p.getName();
-            case 2 -> p.getQuantity().getNbProduct();
-            case 3 -> p.getMinStock();
-            case 4 -> Math.max(0, p.getMinStock() - p.getQuantity().getNbProduct());
+            case 2 -> p.getTotalQuantity();
+            case 3 -> p.getMinStockQuantity();
+            case 4 -> Math.max(0, p.getMinStockQuantity() - p.getTotalQuantity());
             case 5 -> getStatus(p);
             default -> null;
         };

@@ -1,9 +1,12 @@
 package main.java.be.henallux.project.controller;
 
+import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -13,100 +16,117 @@ import java.util.stream.Stream;
  */
 public class ProductController {
 
+    ArrayList<Product> products = null;
+
     public ArrayList<Product> getAllProduct() {
 
-        ArrayList<Product> products = new ArrayList<>();
+        try {
+            products = new ArrayList<>();
 
-        ProductCategory fruit = new ProductCategory("fruit");
-        ProductCategory autre = new ProductCategory("autre");
-        ProductCategory boisson = new ProductCategory("Boisson");
+            ProductCategory fruit    = new ProductCategory(1, "fruit");
+            ProductCategory boisson  = new ProductCategory(3, "Boisson");
 
-        Product pomme = new Product(
-                1, "Pomme", 1.20, 0.06, 10,
-                null,
-                fruit,
-                new QuantityProduct(2, 1, 0, new Location(false)),
-                20
-        );
+            // --- Pomme ---
+            Product pomme = new Product(
+                    1, "Pomme",
+                    new BigDecimal("1.20"), new BigDecimal("6"),
+                    10, true, 20, fruit, null, null
+            );
+            pomme.setLocation(new ArrayList<>(List.of(
+                    new QuantityProduct(
+                            new LocationProduct("A", "1", false, false),
+                            pomme,
+                            2
+                    ),
+                    new QuantityProduct(
+                            new LocationProduct("A", "2", false, false),
+                            pomme,
+                            2
+                    )
+            )));
+            products.add(pomme);
 
-        Product banane = new Product(
-                2, "Banane", 2, 0.06, 8,
-                null,
-                fruit,
-                new QuantityProduct(120, 1, 0, new Location(false)),
-                20
-        );
+            // --- Banane ---
+            Product banane = new Product(
+                    2, "Banane",
+                    new BigDecimal("2.00"), new BigDecimal("6"),
+                    8, true, 20, fruit, null, null
+            );
+            banane.setLocation(new ArrayList<>(List.of(new QuantityProduct(
+                    new LocationProduct("A", "2", false, false), banane, 120
+            ))));
+            products.add(banane);
 
-        Product chocolat = new Product(
-                3, "Chocolat", 5, 0.21, 25,
-                null,
-                fruit,
-                new QuantityProduct(60, 2, 1, new Location(false)),
-                10
-        );
+            // --- Chocolat ---
+            Product chocolat = new Product(
+                    3, "Chocolat",
+                    new BigDecimal("5.00"), new BigDecimal("21"),
+                    25, true, 10, fruit, null, null
+            );
+            chocolat.setLocation(new ArrayList<>(List.of(new QuantityProduct(
+                    new LocationProduct("B", "1", false, false), chocolat, 60
+            ))));
+            chocolat.addDiscount(new Discount(
+                    2,
+                    new BigDecimal("20"),
+                    LocalDate.of(2026, 4, 1),
+                    LocalDate.of(2026, 5, 31),
+                    "-20%",
+                    chocolat
+            ));
+            chocolat.addDiscount(new Discount(
+                    4,
+                    new BigDecimal("50"),
+                    LocalDate.of(2026, 2, 1),
+                    LocalDate.of(2026, 3, 31),
+                    "-50%",
+                    chocolat
+            ));
+            products.add(chocolat);
 
-        Discount chocolatDiscount = new Discount(
-                2,
-                20,
-                LocalDate.of(2026, 4, 1),
-                LocalDate.of(2026, 5, 31),
-                "-20%",
-                chocolat
-        );
+            // --- Lait ---
+            Product lait = new Product(
+                    4, "Lait",
+                    new BigDecimal("1.10"), new BigDecimal("6"),
+                    5, true, 15, boisson, null, null
+            );
+            lait.setLocation(new ArrayList<>(List.of(new QuantityProduct(
+                    new LocationProduct("C", "1", true, true), lait, 80
+            ))));
+            products.add(lait);
 
-        chocolat.setDiscount(chocolatDiscount);
-
-        Product lait = new Product(
-                4, "Lait", 1.10, 0.06, 5,
-                null,
-                boisson,
-                new QuantityProduct(80, 3, 1, new Location(true)),
-                15
-        );
-
-        Product cafe = new Product(
-                5, "Café", 3.00, 0.21, 15,
-                null,
-                boisson,
-                new QuantityProduct(40, 4, 2, new Location(false)),
-                10
-        );
-
-        Discount cafeDiscount = new Discount(
-                3,
-                10,
-                LocalDate.of(2026, 4, 10),
-                LocalDate.of(2026, 5, 20),
-                "-10%",
-                cafe
-        );
-
-        cafe.setDiscount(cafeDiscount);
-
-        products.add(pomme);
-        products.add(banane);
-        products.add(chocolat);
-        products.add(lait);
-        products.add(cafe);
+            // --- Café ---
+            Product cafe = new Product(
+                    5, "Café",
+                    new BigDecimal("3.00"), new BigDecimal("21"),
+                    15, true, 10, boisson, null, null
+            );
+            cafe.setLocation(new ArrayList<>(List.of(new QuantityProduct(
+                    new LocationProduct("C", "2", false, false), cafe, 40
+            ))));
+            cafe.addDiscount(new Discount(
+                    3,
+                    new BigDecimal("10"),
+                    LocalDate.of(2026, 4, 10),
+                    LocalDate.of(2026, 5, 20),
+                    "-10%",
+                    cafe
+            ));
+            products.add(cafe);
+        } catch (DataValidationException e) {
+            throw new RuntimeException(e);
+        }
 
         return products;
     }
 
-    public ArrayList<ProductCategory> getAllCategory(){
-        ArrayList<ProductCategory> categories = new ArrayList<>();
-        categories.add(new ProductCategory("mobilier"));
-        categories.add(new ProductCategory("fruit"));
-        categories.add(new ProductCategory("legume"));
-        categories.add(new ProductCategory("boisson"));
-        categories.add(new ProductCategory("autre"));
 
-        return categories;
-    }
-
-    public String[] getCategoryNames() {
+    public String[] getAllCategory() {
         return Stream.concat(
                 Stream.of("All"),
-                getAllCategory().stream().map(ProductCategory::getName)
+                products.stream()
+                        .map(product -> product.getCategory().getName())
+                        .distinct()
         ).toArray(String[]::new);
     }
 }

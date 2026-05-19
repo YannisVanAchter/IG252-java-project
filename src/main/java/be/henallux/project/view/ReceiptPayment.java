@@ -1,11 +1,18 @@
 package main.java.be.henallux.project.view;
 
-import main.java.be.henallux.project.model.*;
+import main.java.be.henallux.project.*;
+import main.java.be.henallux.project.model.ClientSupplier;
+import main.java.be.henallux.project.model.Discount;
+import main.java.be.henallux.project.model.FidelityCard;
+import main.java.be.henallux.project.model.Product;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
+
 /**
  * ReceiptPayment is a Swing panel responsible for displaying the final payment and receipt summary before transaction validation.
  * <p>This view is the final step of the checkout workflow and allows the user to:
@@ -17,11 +24,11 @@ import java.util.*;
  *     <li>Validate and complete the payment</li></ul>
  *
  * <p>The receipt data is stored using a {@link java.util.LinkedHashMap}
- * where {@code Key} is {@link Product}. {@code Vlue} is {@code Integer} representing purchased quantity.
+ * where {@code Key} is {@link main.java.be.henallux.project.model.Product}. {@code Value} is {@code Integer} representing purchased quantity.
  *
- * @see model.Product
- * @see model.ClientSupplier
- * @see model.Discount
+ * @see main.java.be.henallux.project.model.Product
+ * @see main.java.be.henallux.project.model.ClientSupplier
+ * @see main.java.be.henallux.project.model.Discount
  * @see ReceiptView
  * @see java.util.LinkedHashMap
  */
@@ -96,15 +103,22 @@ public class ReceiptPayment extends JPanel {
     /**
      * Builds the loyalty card section.
      * <p>This section allows the user to view available loyalty points on the card
-     * and use or remove loyalty discounts
-     * <p>Methode use {@link #togglePoints()}, {@link #updatePoints()} to control point.
+     * and use or remove loyalty discounts.
+     * <p>Points are retrieved from the client's {@link FidelityCard}.
+     * If the client has no fidelity card, the section shows a placeholder message.
+     * <p>Method uses {@link #togglePoints()}, {@link #updatePoints()} to control points.
      *
      * @return loyalty section panel
      */
     private JPanel buildLoyaltySection() {
         JPanel panel = section("Loyalty Card");
         if (clientSupplier != null) {
-            panel.add(row("Available points:", "100")); // FIXME: clientSupplier.getLoyaltyPoints()
+            FidelityCard card = clientSupplier.getFidelityCard();
+            if (card == null) {
+                panel.add(row("No fidelity card", null));
+                return panel;
+            }
+            panel.add(row("Available points:", String.valueOf(card.getTotalPoint())));
 
             lblPointsUsed = new JLabel("0");
             JPanel pointsRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
@@ -116,7 +130,8 @@ public class ReceiptPayment extends JPanel {
             panel.add(pointsRow);
 
             JButton btnUsePoints = new JButton("Use points");
-            btnUsePoints.setEnabled(true);
+            ViewUtils.setCursor(btnUsePoints);
+            btnUsePoints.setEnabled(card.getIsValid());
             btnUsePoints.addActionListener(e -> togglePoints());
             panel.add(btnUsePoints);
         } else {
@@ -150,7 +165,6 @@ public class ReceiptPayment extends JPanel {
         return ticketPanel;
     }
 
-
     /**
      * Rebuilds the receipt content dynamically using:
      * <ul><li>{@link #createTicketLine(Product, int)}</li>
@@ -182,12 +196,12 @@ public class ReceiptPayment extends JPanel {
         container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
         container.setOpaque(false);
 
-        container.add(createLine("Subtotal:", String.format("%.2f€", getSubTotal()), FONT_BOLD, null));
-        container.add(createLine("Discount:", String.format("-%.2f€", getProductDiscount()), FONT_BOLD, COLOR_PROMO));
-        container.add(createLine("Points:", String.format("-%.2f€", getPointDiscount()), FONT_BOLD, COLOR_PROMO));
-        container.add(createLine("VAT:", String.format("%.2f€", getVATTotal()), FONT_BOLD, null));
+        container.add(createLine("Subtotal:", formatPrice(getSubTotal()), FONT_BOLD, null));
+        container.add(createLine("Discount:", "-" + formatPrice(getProductDiscount()), FONT_BOLD, COLOR_PROMO));
+        container.add(createLine("Points:", "-" + formatPrice(getPointDiscount()), FONT_BOLD, COLOR_PROMO));
+        container.add(createLine("VAT:", formatPrice(getVATTotal()), FONT_BOLD, null));
         container.add(Box.createVerticalStrut(20));
-        container.add(createLine("TOTAL:", String.format("%.2f€", getTotal()), FONT_TOTAL, null));
+        container.add(createLine("TOTAL:", formatPrice(getTotal()), FONT_TOTAL, null));
 
         ticketPanel.add(container);
         ticketPanel.revalidate();
@@ -201,7 +215,8 @@ public class ReceiptPayment extends JPanel {
      *     <li>Product name</li>
      *     <li>Line total price</li>
      *     <li>Promotion discount if applicable</li></ul>
-     * @param product displayed product
+     *
+     * @param product  displayed product
      * @param quantity purchased quantity
      * @return configured receipt line {@code JPanel}
      * @see #createLine(String, String, Font, Color)
@@ -211,13 +226,15 @@ public class ReceiptPayment extends JPanel {
         container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
         container.setOpaque(false);
 
-        double lineTotal = product.getPrice() * quantity;
-        container.add(createLine(quantity + " x " + product.getName(), String.format("%.2f€", lineTotal), FONT_REG, null));
+        BigDecimal lineTotal = BigDecimal.valueOf(product.getPrice()).multiply(BigDecimal.valueOf(quantity));
+        container.add(createLine(quantity + " x " + product.getName(), formatPrice(lineTotal), FONT_REG, null));
 
-        Discount discount = product.getPromotion();
-        if (discount != null && discount.isActive() && quantity >= discount.getRequiredQuantity()) {
-            double discountAmount = lineTotal * (discount.getDiscountPercentage() / 100.0);
-            container.add(createLine("   Discount -" + (int) discount.getDiscountPercentage() + "%", String.format("-%.2f€", discountAmount), FONT_PROMO, COLOR_PROMO));
+        Discount discount = product.getCurrentDiscount();
+        if (discount != null && product.getIsDiscounted() && quantity >= discount.getRequiredQuantity()) {
+            BigDecimal discountAmount = lineTotal
+                    .multiply(discount.getDiscountPercentage())
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            container.add(createLine("   Discount -" + (int) discount.getDiscountPercentage().doubleValue() + "%", String.format("-%.2f€", discountAmount), FONT_PROMO, COLOR_PROMO));
         }
         return container;
     }
@@ -225,10 +242,11 @@ public class ReceiptPayment extends JPanel {
     /**
      * Creates a generic formatted line with left and right aligned labels.
      * <p>This utility method is used throughout the receipt display for totals, discounts, taxes, and product lines.
-     * @param leftText text displayed on the left side. The title
+     *
+     * @param leftText  text displayed on the left side. The title
      * @param rightText text displayed on the right side. The value
-     * @param font font applied to labels
-     * @param color optional text color, may be {@code null}
+     * @param font      font applied to labels
+     * @param color     optional text color, may be {@code null}
      * @return formatted line {@code JPanel}
      */
     private JPanel createLine(String leftText, String rightText, Font font, Color color) {
@@ -252,6 +270,7 @@ public class ReceiptPayment extends JPanel {
     /**
      * Builds the payment selection section.
      * <p>The section contains a {@code JComboBox}.
+     *
      * @return payment section {@code JPanel}
      */
     private JPanel buildPaymentSection() {
@@ -268,16 +287,19 @@ public class ReceiptPayment extends JPanel {
     /**
      * Builds the bottom action button panel.
      * <p>Contains a back button to return to the previous page and a pay button to finalize the transaction
+     *
      * @return button action panel
      * @see #onPayClick()
      * @see MainWindow#goBack()
      */
     private JPanel buildButtons() {
         JButton btnBack = new JButton("Back");
+        ViewUtils.setCursor(btnBack);
         btnBack.setFont(FONT_REG);
         btnBack.addActionListener(e -> mainWindow.goBack());
 
         btnPay = new JButton("Pay");
+        ViewUtils.setCursor(btnPay);
         btnPay.setFont(FONT_REG);
         btnPay.addActionListener(e -> onPayClick());
         JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
@@ -303,12 +325,16 @@ public class ReceiptPayment extends JPanel {
 
     /**
      * Calculates the subtotal of all products before discounts and VAT.
+     *
      * @return subtotal amount
      */
-    private double getSubTotal() {
-        double subTotal = 0;
+    private BigDecimal getSubTotal() {
+        BigDecimal subTotal = BigDecimal.ZERO;
+
         for (Map.Entry<Product, Integer> entry : receipt.entrySet()) {
-            subTotal += entry.getKey().getPrice() * entry.getValue();
+            BigDecimal lineTotal = BigDecimal.valueOf(entry.getKey().getPrice())
+                    .multiply(BigDecimal.valueOf(entry.getValue()));
+            subTotal = subTotal.add(lineTotal);
         }
         return subTotal;
     }
@@ -316,18 +342,25 @@ public class ReceiptPayment extends JPanel {
     /**
      * Calculates the total discount amount generated by product promotions.
      * <p>Only active promotions meeting required quantity conditions are included in the calculation.
+     *
      * @return total promotional discount amount
      */
-    private double getProductDiscount() {
-        double discount = 0;
+    private BigDecimal getProductDiscount() {
+        BigDecimal discount = BigDecimal.ZERO;
 
         for (Map.Entry<Product, Integer> entry : receipt.entrySet()) {
             Product product = entry.getKey();
             int quantity = entry.getValue();
-            Discount d = product.getPromotion();
+            Discount d = product.getCurrentDiscount();
+
             if (d != null && quantity >= d.getRequiredQuantity()) {
-                double lineTotal = product.getPrice() * quantity;
-                discount += lineTotal * d.getDiscountPercentage() / 100.0;
+                BigDecimal lineTotal = BigDecimal.valueOf(product.getPrice())
+                        .multiply(BigDecimal.valueOf(quantity));
+
+                discount = discount.add(
+                        lineTotal.multiply(d.getDiscountPercentage())
+                                .divide(BigDecimal.valueOf(100))
+                );
             }
         }
         return discount;
@@ -336,54 +369,64 @@ public class ReceiptPayment extends JPanel {
     /**
      * Calculates the discount amount generated by loyalty points usage.
      * <p>Current conversion: <pre> 1 point = 0.01€ </pre>
+     *
      * @return loyalty points discount amount
      */
-    private double getPointDiscount() {
-        return pointsUsed * 0.01;
+    private BigDecimal getPointDiscount() {
+        return BigDecimal.valueOf(pointsUsed).multiply(BigDecimal.valueOf(0.01));
     }
 
     /**
      * Calculates the total VAT amount applied to the receipt.
      * <p>VAT is computed after promotional discounts are applied.
+     *
      * @return total VAT amount
      */
-    private double getVATTotal() {
-        double vat = 0.0;
+    private BigDecimal getVATTotal() {
+        BigDecimal vat = BigDecimal.ZERO;
 
         for (Map.Entry<Product, Integer> entry : receipt.entrySet()) {
             Product product = entry.getKey();
             int quantity = entry.getValue();
 
-            double lineTotal = product.getPrice() * quantity;
+            BigDecimal lineTotal = BigDecimal.valueOf(product.getPrice()).multiply(BigDecimal.valueOf(quantity));
 
-            Discount d = product.getPromotion();
+            Discount d = product.getCurrentDiscount();
+
             if (d != null && quantity >= d.getRequiredQuantity()) {
-                lineTotal -= lineTotal * (d.getDiscountPercentage() / 100.0);
+                BigDecimal discountAmount = lineTotal
+                        .multiply(d.getDiscountPercentage())
+                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+                lineTotal = lineTotal.subtract(discountAmount);
             }
-
-            double lineVat = lineTotal * product.getVat();
-
-            vat += lineVat;
+            BigDecimal lineVat = lineTotal.multiply(product.getVat());
+            vat = vat.add(lineVat);
         }
-        return vat;
+        return vat.setScale(2, RoundingMode.HALF_UP);
     }
 
     /**
      * Calculates the final payable amount.
      * <p>Formula: <pre>subtotal - productDiscount - pointDiscount + VAT</pre>
+     *
      * @return final receipt total
      * @see #getSubTotal()
      * @see #getProductDiscount()
      * @see #getPointDiscount()
      * @see #getVATTotal()
      */
-    private double getTotal() {
-        return getSubTotal() - getProductDiscount() - getPointDiscount() + getVATTotal();
+    private BigDecimal getTotal() {
+        return getSubTotal()
+                .subtract(getProductDiscount())
+                .subtract(getPointDiscount())
+                .add(getVATTotal())
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
     /**
      * Creates a reusable titled section panel.
      * <p>This helper method standardizes layout and visual appearance for all major UI sections.
+     *
      * @param title displayed section title
      * @return configured section {@code JPanel}
      */
@@ -398,28 +441,40 @@ public class ReceiptPayment extends JPanel {
     /**
      * Applies or removes loyalty points from the current receipt.
      * <p>If points are already applied, they are reset to zero.
-     * Otherwise, the maximum possible discount is calculated and applied according to available points.
+     * Otherwise, the maximum possible discount is calculated and applied according to available points
+     * retrieved from the client's {@link FidelityCard}.
+     * <p>Points can only be used if the fidelity card exists and is valid.
+     *
      * @see #updatePoints()
      * @see #refreshTicket()
      */
     private void togglePoints() {
         if (clientSupplier == null) return;
-        int availablePoints = 100; // FIXME: clientSupplier.getLoyaltyPoints()
+
+        FidelityCard card = clientSupplier.getFidelityCard();
+        if (card == null || !card.getIsValid()) return;
+
+        int availablePoints = card.getTotalPoint();
 
         if (pointsUsed > 0) {
             pointsUsed = 0;
         } else {
-            double maxDiscountEuros = getSubTotal() - getProductDiscount();
-            pointsUsed = (int) Math.min(availablePoints, maxDiscountEuros * 100);
+            BigDecimal maxDiscountEuros = getSubTotal().subtract(getProductDiscount());
+            pointsUsed = Math.min(
+                    availablePoints,
+                    maxDiscountEuros
+                            .multiply(BigDecimal.valueOf(100))
+                            .intValue()
+            );
         }
         updatePoints();
         refreshTicket();
     }
 
-
     /**
      * Updates the loyalty points display label.
      * <p>This method refreshes the UI after loyalty point changes.
+     *
      * @see #togglePoints()
      */
     private void updatePoints() {
@@ -430,10 +485,10 @@ public class ReceiptPayment extends JPanel {
         repaint();
     }
 
-
     /**
      * Creates a simple labeled row used in information sections.
      * <p>The left label is displayed in bold, and the right label displays the associated value.
+     *
      * @param title label title
      * @param value associated value, may be {@code null}
      * @return formatted row {@code JPanel}
@@ -446,5 +501,9 @@ public class ReceiptPayment extends JPanel {
         panel.add(label);
         if (value != null) panel.add(new JLabel(value));
         return panel;
+    }
+
+    private String formatPrice(BigDecimal amount) {
+        return amount.setScale(2, RoundingMode.HALF_UP) + "€";
     }
 }

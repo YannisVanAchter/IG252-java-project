@@ -49,7 +49,7 @@ public class StockAlertView extends JPanel {
     private JButton btnOrder;
     private JCheckBox headerCheckBox;
 
-    public StockAlertView(MainWindow mainWindow) throws DataValidationException {
+    public StockAlertView(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         this.supplierController = new SupplierController();
         this.productController = new ProductController();
@@ -205,7 +205,7 @@ public class StockAlertView extends JPanel {
         productTable.getColumnModel().getColumn(0).setMinWidth(50);
 
         headerCheckBox = new JCheckBox();
-        headerCheckBox.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        ViewUtils.setCursor(headerPanel);
         headerCheckBox.setHorizontalAlignment(SwingConstants.CENTER);
         productTable.getColumnModel().getColumn(0).setHeaderRenderer(
                 (table, value, isSelected, hasFocus, row, column) -> headerCheckBox
@@ -228,7 +228,7 @@ public class StockAlertView extends JPanel {
 
         btnOrder = new JButton("Create purchase order");
         btnOrder.addActionListener(e -> onCreateOrder());
-        btnOrder.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        ViewUtils.setCursor(btnOrder);
         JPanel btnBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         btnBar.setOpaque(false);
         btnBar.add(btnOrder);

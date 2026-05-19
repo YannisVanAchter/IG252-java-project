@@ -1,12 +1,11 @@
 package main.java.be.henallux.project.controller;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Controller fictif utilisé uniquement pour simuler les vues de l'application.
@@ -23,91 +22,113 @@ public class DocumentController {
      * @return une liste de documents au format ArrayList
      * @throws DataValidationException a supprimé, je pense. (j'en avais besoin ici, car création d'objet)
      */
-    public ArrayList<Document> getAllDocuments() throws DataValidationException {
-        documents.add(new Document(
-                1,
-                LocalDate.of(2020, 12, 2),
-                new DocumentType("Invoice"),
-                true,
-                LocalDate.of(2020, 12, 2),
-                LocalDate.of(2020, 12, 2),
-                LocalDate.of(2020, 12, 2),
-                LocalDate.of(2020, 12, 2),
-                20,
-                new WorkFlow(
-                        1,
-                        new Status("Status"),
-                        new WorkFlowType("Internal", false, false, true)
-                ),
-                new ClientSupplier(
-                        1,
-                        "clem",
-                        "cloum",
-                        "azer@gmail.com",
-                        "12345678",
-                        new Address(
-                                "Café route",
-                                12,
-                                "Namur",
-                                5000
-                        ),
-                        true,
-                        false,
-                        false,
-                        "",
-                        LocalDate.now()
-                ),
-                new Address(
-                        "Café route",
-                        12,
-                        "Namur",
-                        5000
-                ),
-                "AUTO"
-        ));
-        documents.add(new Document(
-                2,
-                LocalDate.of(2024, 3, 15),
-                new DocumentType("Quote"),
-                false,
-                LocalDate.of(2024, 3, 15),
-                LocalDate.of(2024, 3, 20),
-                LocalDate.of(2024, 3, 16),
-                LocalDate.of(2024, 3, 21),
-                30,
-                new WorkFlow(
-                        2,
-                        new Status("Pending"),
-                        new WorkFlowType("Buy", false, false, true)
-                ),
-                new ClientSupplier(
-                        2,
-                        "Martin",
-                        "Sophie",
-                        "sophie.martin@email.com",
-                        "32470000002",
-                        new Address(
-                                "Avenue Louise",
-                                10,
-                                "Bruxelles",
-                                1050
-                        ),
-                        true,
-                        false,
-                        false,
-                        "BE0987654321",
-                        LocalDate.now()
-                ),
-                new Address(
-                        "Avenue Louise",
-                        10,
-                        "Bruxelles",
-                        1050
-                ),
-                "AUTO"
-        ));
+    public ArrayList<Document> getAllDocuments() {
+        try {
+            documents.clear();
 
-        return new ArrayList<>(documents);
+            ClientSupplier usCompany = new ClientSupplier(
+                    999,
+                    "TerraClic",
+                    "Store",
+                    "contact@terraclic.be",
+                    "3200000000",
+                    new Address(
+                            999,
+                            "Rue Centrale",
+                            1,
+                            "Namur",
+                            5000
+                    ),
+                    true,
+                    true,
+                    true,
+                    "BE0000000001",
+                    LocalDate.now(),
+                    null
+            );
+
+            documents.add(new Document(
+                    1,
+                    LocalDate.of(2020, 12, 2),
+                    new DocumentType(1,"Test"),
+                    null,
+                    true,
+                    LocalDate.of(2020, 12, 2),
+                    LocalDate.of(2020, 12, 2),
+                    LocalDate.of(2020, 12, 2),
+                    LocalDate.of(2020, 12, 2),
+                    20,
+                    new WorkFlow(
+                            1,
+                            new Status("Status"),
+                            new WorkFlowType(1,"Internal", false, false, true),
+                            usCompany
+                    ),
+                    new Address(
+                            1,
+                            "Café route",
+                            12,
+                            "Namur",
+                            5000
+                    ),
+                    null,
+                    null
+            ));
+
+            ClientSupplier martinSophie = new ClientSupplier(
+                    2,
+                    "Martin",
+                    "Sophie",
+                    "sophie.martin@email.com",
+                    "32470000002",
+                    new Address(
+                            2,
+                            "Avenue Louise",
+                            10,
+                            "Bruxelles",
+                            1050
+                    ),
+                    true,
+                    false,
+                    false,
+                    "BE0987654321",
+                    LocalDate.now(),
+                    null
+            );
+
+            documents.add(new Document(
+                    2,
+                    LocalDate.of(2024, 3, 15),
+                    new DocumentType(2, "Quote"),
+                    null,
+                    false,
+                    LocalDate.of(2024, 3, 15),
+                    LocalDate.of(2024, 3, 20),
+                    LocalDate.of(2024, 3, 16),
+                    LocalDate.of(2024, 3, 21),
+                    30,
+                    new WorkFlow(
+                            2,
+                            new Status("Pending"),
+                            new WorkFlowType(2,"Buy", false, false, false),
+                            usCompany,
+                            martinSophie
+                    ),
+                    new Address(
+                            2,
+                            "Avenue Louise",
+                            10,
+                            "Bruxelles",
+                            1050
+                    ),
+                    null,
+                    null
+            ));
+
+            return new ArrayList<>(documents);
+        } catch (DataValidationException e) {
+            return new ArrayList<>();
+        }
     }
 
     /**
@@ -126,85 +147,93 @@ public class DocumentController {
      * @return une liste de clients/fournisseurs en ArrayList
      * @throws DataValidationException a supprimé, je pense. (j'en avais besoin ici, car création d'objet)
      */
-    public ArrayList<ClientSupplier> getAllClientSupplier() throws DataValidationException {
-        ArrayList<ClientSupplier> clients = new ArrayList<>();
+    public ArrayList<ClientSupplier> getAllClientSupplier() {
+        try {
+            ArrayList<ClientSupplier> clients = new ArrayList<>();
 
-        clients.add(new ClientSupplier(
-                1,
-                "Dupont",
-                "Jean",
-                "jean.dupont@email.com",
-                "32470000001",
-                new Address("Avenue Louise 10", 1050, new Locality("Ixelles", 6000)),
-                true,
-                false,
-                true,
-                "BE0123456789",
-                LocalDate.now()
-        ));
+            clients.add(new ClientSupplier(
+                    1,
+                    "Dupont",
+                    "Jean",
+                    "jean.dupont@email.com",
+                    "32470000001",
+                    new Address(1, "Avenue Louise", 10, new Locality("Ixelles", 1050)),
+                    true,
+                    false,
+                    true,
+                    "BE0123456789",
+                    LocalDate.now(),
+                    null
+            ));
 
-        clients.add(new ClientSupplier(
-                2,
-                "Martin",
-                "Sophie",
-                "sophie.martin@email.com",
-                "32470000002",
-                new Address("Avenue Louise 10", 1050, new Locality("Ixelles", 6000)),
-                true,
-                false,
-                false,
-                "BE0987654321",
-                LocalDate.now()
-        ));
+            clients.add(new ClientSupplier(
+                    2,
+                    "Martin",
+                    "Sophie",
+                    "sophie.martin@email.com",
+                    "32470000002",
+                    new Address(2, "Avenue Louise", 10, new Locality("Ixelles", 1050)),
+                    true,
+                    false,
+                    false,
+                    "BE0987654321",
+                    LocalDate.now(),
+                    null
+            ));
 
-        clients.add(new ClientSupplier(
-                3,
-                "Nguyen",
-                "Linh",
-                "linh.nguyen@email.com",
-                "32470000003",
-                new Address("Avenue Louise 10", 1050, new Locality("Ixelles", 6000)),
-                true,
-                false,
-                true,
-                "BE1122334455",
-                LocalDate.now()
-        ));
+            clients.add(new ClientSupplier(
+                    3,
+                    "Nguyen",
+                    "Linh",
+                    "linh.nguyen@email.com",
+                    "32470000003",
+                    new Address(3, "Avenue Louise", 10, new Locality("Ixelles", 1050)),
+                    true,
+                    false,
+                    true,
+                    "BE1122334455",
+                    LocalDate.now(),
+                    null
+            ));
 
-        clients.add(new ClientSupplier(
-                4,
-                "Dubois",
-                "Marc",
-                "marc.dubois@email.com",
-                "32470000004",
-                new Address("Avenue Louise 10", 1050, new Locality("Ixelles", 6000)),
-                true,
-                false,
-                false,
-                "BE6677889900",
-                LocalDate.now()
-        ));
+            clients.add(new ClientSupplier(
+                    4,
+                    "Dubois",
+                    "Marc",
+                    "marc.dubois@email.com",
+                    "32470000004",
+                    new Address(4, "Avenue Louise", 10, new Locality("Ixelles", 1050)),
+                    true,
+                    false,
+                    false,
+                    "BE6677889900",
+                    LocalDate.now(),
+                    null
+            ));
 
-        clients.add(new ClientSupplier(
-                5,
-                "Smith",
-                "Anna",
-                "anna.smith@email.com",
-                "32470000005",
-                new Address("Avenue Louise 10", 1050, new Locality("Ixelles", 6000)),
-                true,
-                false,
-                true,
-                "BE5566778899",
-                LocalDate.now()
-        ));
+            clients.add(new ClientSupplier(
+                    5,
+                    "Smith",
+                    "Anna",
+                    "anna.smith@email.com",
+                    "32470000005",
+                    new Address(5, "Avenue Louise", 10, new Locality("Ixelles", 1050)),
+                    true,
+                    false,
+                    true,
+                    "BE5566778899",
+                    LocalDate.now(),
+                    null
+            ));
 
-        return clients;
+            return clients;
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
 
     /**
      * Crée un nouveau document.
-     * La méthode prend tous les arguments en charge
      *
      * @return le nouvel objet
      * @throws DataValidationException en cas de problème de validation
@@ -239,9 +268,8 @@ public class DocumentController {
 
     /**
      * Update un document.
-     * La méthode prend tous les arguments en charge
      *
-     * @param documentId fais référence ou doc a modifé.
+     * @param documentId fais référence au doc à modifier.
      * @return l'état de l'update
      * @throws DataValidationException en cas de problème de validation
      */
@@ -277,32 +305,41 @@ public class DocumentController {
 
     /**
      * Retourne la liste des types de documents disponibles.
-     * <p>
-     * Ici les types sont extraits des documents fictifs existants.
-     * Un élément "All" est ajouté en premier pour les filtres.
-     * Utilisé pour Combobox
      *
-     * @return tableau de noms de types de documents
-     * @throws DataValidationException à supprimer (présent à cause de la creation dans getAllDocuments())
+     * @return liste de types de documents
+     * @throws DataValidationException à supprimer
      */
-    public ArrayList<DocumentType> getAllDocumentType() throws DataValidationException {
-        return getAllDocuments().stream()
-                .map(Document::getDocumentType)
-                .distinct()
-                .collect(Collectors.toCollection(ArrayList::new));
+    public ArrayList<DocumentType> getAllDocumentType() {
+        try {
+            return getAllDocuments().stream()
+                    .map(Document::getDocumentType)
+                    .distinct()
+                    .collect(Collectors.toCollection(ArrayList::new));
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+
     }
 
     /**
      * Retourne les statuts des workflows associés aux documents.
      *
-     * @return tableau des statuts de workflow
-     * @throws DataValidationException à supprimer (présent à cause de la creation dans getAllDocuments())
+     * @return liste des statuts de workflow
+     * @throws DataValidationException à supprimer
      */
-    public ArrayList<Status> getAllWorkflowStatus() throws DataValidationException {
+    public ArrayList<Status> getAllWorkflowStatus() {
+
         return getAllDocuments().stream()
                 .map(doc -> doc.getWorkflow().getStatus())
                 .distinct()
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    public Status createStatus(String value) throws DataValidationException {
+        return new Status(value);
+    }
+
+    public DocumentType createDocumentType(String value) throws DataValidationException {
+        return new DocumentType(1,value);
+    }
 }

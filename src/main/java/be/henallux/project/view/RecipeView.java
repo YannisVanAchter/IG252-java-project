@@ -11,8 +11,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-//TODO : add document informations
-
 /**
  * A Swing-based view that displays detailed information about a single {@link Recipe}.
  * <p>This view is dynamically rebuilt every time a recipe is loaded using {@link #loadRecipe(Recipe)}.
@@ -46,6 +44,7 @@ public class RecipeView extends JPanel {
      * <p>If the recipe is {@code null}, the user is notified and the view automatically navigates back
      * using {@link MainWindow#goBack()}.
      * <p>The main content is generated in {@link #buildContent()}.
+     *
      * @param recipe the recipe to display
      */
     public void loadRecipe(Recipe recipe) {
@@ -72,7 +71,7 @@ public class RecipeView extends JPanel {
         panel.setBorder(new EmptyBorder(0, 0, 8, 0));
         panel.add(buildTitle());
         panel.add(Box.createVerticalStrut(8));
-        panel.add(buildProductInfo());
+        panel.add(buildRecipeInfo());
         panel.add(Box.createVerticalStrut(8));
         panel.add(buildCompositionTable());
         panel.add(Box.createVerticalStrut(8));
@@ -88,12 +87,11 @@ public class RecipeView extends JPanel {
         return panel;
     }
 
-    private JPanel buildProductInfo() {
+    private JPanel buildRecipeInfo() {
         JPanel card = createCard("Recipe Information");
         card.add(labelValue("Recipe label", recipe.getName()));
-        card.add(labelValue("Document", "100"));             // TODO: recipe.getDocument().getId()
-        card.add(labelValue("Creation date", "02/11/2010"));
-        card.add(labelValue("Comment", "No comment")); //recipe.getDocument.getComment() != null ? recipe.getComment() : "No comment"
+        card.add(labelValue("ID", String.valueOf(recipe.getId())));
+        card.add(labelValue("Final product", recipe.getFinalProduct().getName()));
         return card;
     }
 
@@ -101,6 +99,7 @@ public class RecipeView extends JPanel {
      * Builds a table displaying the composition of the recipe, including ingredients and quantities.
      * <p>Each row represents a {@link RecipeComposition} linking a product to its required quantity.
      * <p>The table supports row selection and allows navigation to the corresponding {@link ProductView}.
+     *
      * @return a {@code JPanel} containing the composition {@code JTable}
      */
     private JPanel buildCompositionTable() {
@@ -110,11 +109,8 @@ public class RecipeView extends JPanel {
                 new String[]{"Ingrédient", "Quantité"}, 0
         );
 
-        for (RecipeComposition composition : recipe.getCompositions()) {
-            model.addRow(new Object[]{
-                    composition.getProduct().getName(),
-                    composition.getQuantity(),
-            });
+        for (RecipeComposition compo : recipe.getComposition()) {
+            model.addRow(new Object[]{compo.getProduct().getName(), compo.getQuantity()});
         }
 
         table = new JTable(model);
@@ -141,11 +137,10 @@ public class RecipeView extends JPanel {
         return card;
     }
 
-
     private JPanel buildPreparationStep() {
         JPanel card = createCard("Preparation step");
 
-        JTextArea textArea = new JTextArea(recipe.getExplanation());
+        JTextArea textArea = new JTextArea(recipe.getInstruction());
         textArea.setEditable(false);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
@@ -156,14 +151,16 @@ public class RecipeView extends JPanel {
 
     private JPanel buildFooter() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton back = new JButton("Back");
-        back.addActionListener(e -> mainWindow.goBack());
-        panel.add(back);
+        JButton btnBack = new JButton("Back");
+        ViewUtils.setCursor(btnBack);
+        btnBack.addActionListener(e -> mainWindow.goBack());
+        panel.add(btnBack);
         return panel;
     }
 
     /**
      * Creates a bordered card container with a title.
+     *
      * @param title the title of the section
      * @return a styled panel
      */
@@ -176,6 +173,7 @@ public class RecipeView extends JPanel {
 
     /**
      * Creates a key-value label row.
+     *
      * @param label the field name
      * @param value the field value
      * @return a horizontal panel displaying the label and value
@@ -197,15 +195,14 @@ public class RecipeView extends JPanel {
         int selectedRow = table.getSelectedRow();
         if (selectedRow == -1) return;
 
-        if (recipe == null || recipe.getCompositions() == null) return;
-        if (selectedRow >= recipe.getCompositions().size()) return;
+        if (recipe == null || recipe.getComposition() == null) return;
+        if (selectedRow >= recipe.getComposition().size()) return;
 
-        RecipeComposition composition = recipe.getCompositions().get(selectedRow);
+        RecipeComposition composition = recipe.getComposition().get(selectedRow);
         Product product = composition.getProduct();
 
         if (product != null) {
             mainWindow.openProductView(product);
         }
     }
-
 }

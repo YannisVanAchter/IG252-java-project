@@ -1,6 +1,7 @@
 package main.java.be.henallux.project.view;
 
 import main.java.be.henallux.project.controller.DocumentController;
+import main.java.be.henallux.project.model.NotificationItem;
 import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.Document;
@@ -29,8 +30,8 @@ import java.util.Date;
  *  @see MainWindow#openDocumentForm(Document)
  */
 public class DocumentTable extends JPanel {
-    private static final int TBL_BTN_DEL = 5;
-    private static final int TBL_BTN_UPDATE = 4;
+    private static final int TBL_BTN_DEL = DocumentTableModel.TBL_BTN_DEL;
+    private static final int TBL_BTN_UPDATE = DocumentTableModel.TBL_BTN_UPDATE;
 
     private MainWindow mainWindow;
     private DocumentController controller;
@@ -48,7 +49,7 @@ public class DocumentTable extends JPanel {
 
     private JTable table;
 
-    public DocumentTable(MainWindow mainWindow) throws DataValidationException {
+    public DocumentTable(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         this.controller = new DocumentController();
 
@@ -86,6 +87,7 @@ public class DocumentTable extends JPanel {
         JPanel fieldsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         idDocument = new JTextField(10);
+        ViewUtils.setCursor(idDocument);
         idDocument = ViewUtils.digitsOnly(idDocument);
         idDocument = ViewUtils.addFilterListener(idDocument, this::onFilterClick);
         JPanel idFields = new JPanel(new BorderLayout(0, 4));
@@ -93,6 +95,7 @@ public class DocumentTable extends JPanel {
         idFields.add(idDocument, BorderLayout.CENTER);
 
         comboTypeDocumentFilter = new JComboBox<>();
+        ViewUtils.setCursor(comboTypeDocumentFilter);
         setDocumentTypes(controller.getAllDocumentType());
         comboTypeDocumentFilter = ViewUtils.addFilterListener(comboTypeDocumentFilter, this::onFilterClick);
         JPanel typeFields = new JPanel(new BorderLayout(0, 4));
@@ -100,6 +103,7 @@ public class DocumentTable extends JPanel {
         typeFields.add(comboTypeDocumentFilter, BorderLayout.CENTER);
 
         JButton btnCreate = new JButton("Create");
+        ViewUtils.setCursor(btnCreate);
         btnCreate.addActionListener(e -> onCreateClick());
 
         JPanel leftColumn = new JPanel();
@@ -111,6 +115,7 @@ public class DocumentTable extends JPanel {
         leftColumn.add(ViewUtils.makeRow(btnCreate));
 
         useStartDate = new JCheckBox("Start date");
+        ViewUtils.setCursor(useStartDate);
         startCreationDate = ViewUtils.createDateSpinner();
         startCreationDate.setEnabled(false);
         startCreationDate.addChangeListener(e -> onFilterClick());
@@ -123,6 +128,7 @@ public class DocumentTable extends JPanel {
         startDateRow.add(startCreationDate, BorderLayout.CENTER);
 
         useEndDate = new JCheckBox("End date");
+        ViewUtils.setCursor(useEndDate);
         endCreationDate = ViewUtils.createDateSpinner();
         endCreationDate.setEnabled(false);
         endCreationDate.addChangeListener(e -> onFilterClick());
@@ -276,9 +282,14 @@ public class DocumentTable extends JPanel {
         mainWindow.openDocumentForm(doc);
     }
 
+    /**
+     * Handles the delete action triggered from the UI.
+     * <p>Retrieves the currently selected row in the table, asks for user confirmation,
+     * and delegates the deletion to the overloaded {@link #onDeleteClick(Document)} method.
+     * <p>If no row is selected, a warning dialog is shown and the operation is canceled.
+     */
     public void onDeleteClick() {
         int selectedRow = table.getSelectedRow();
-
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this, "Please select a document to delete.");
             return;
@@ -293,12 +304,41 @@ public class DocumentTable extends JPanel {
 
         if (confirm == JOptionPane.YES_OPTION) {
             Document docToDelete = displayDocuments.get(selectedRow);
-
+            onDeleteClick(docToDelete);
             controller.deleteDocument(docToDelete);
 
+        }
+    }
+
+    /**
+     * Deletes the specified Document and updates the UI and model accordingly.
+     * <p>If the deletion is successful, the item is removed from both the internal lists
+     * and the table model, and a success notification is displayed.
+     * <p>If the deletion fails, an error notification is shown with an option to retry the operation.
+     *
+     * @param docToDelete the Document to delete
+     */
+    public void onDeleteClick(Document docToDelete) {
+        boolean isSuccess = controller.deleteDocument(docToDelete);
+        if (isSuccess) {
             documents.remove(docToDelete);
-            displayDocuments.remove(selectedRow);
+            displayDocuments.remove(docToDelete);
             model.setDocuments(displayDocuments);
+
+            mainWindow.getNotificationController().push(new NotificationItem(
+                    "Delete",
+                    docToDelete.getLabel() + " has been deleted.",
+                    NotificationItem.Type.SUCCESS,
+                    null
+            ));
+
+        } else {
+            mainWindow.getNotificationController().push(new NotificationItem(
+                    "Delete",
+                    "Failed to delete. Click to retry.",
+                    NotificationItem.Type.ERROR,
+                    () -> onDeleteClick(docToDelete)
+            ));
         }
     }
 

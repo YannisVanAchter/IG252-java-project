@@ -3,6 +3,7 @@ package main.java.be.henallux.project.view;
 import main.java.be.henallux.project.controller.ClientSupplierController;
 import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.ClientSupplier;
+import main.java.be.henallux.project.model.FidelityCard;
 import main.java.be.henallux.project.model.Product;
 
 import javax.swing.*;
@@ -19,15 +20,12 @@ import java.util.LinkedHashMap;
  *     <li>Scan a loyalty or membership card</li>
  *     <li>View client information before payment</li>
  *     <li>Continue checkout with or without a linked client</li></ul>
- *
- * <p>The panel interacts with {@link controller.ClientSupplierController} to retrieve available clients
- * and maintains the currently selected {@link model.ClientSupplier}.
- *
+ * <p>The panel interacts with {@link ClientSupplierController} to retrieve available clients
+ * and maintains the currently selected {@link ClientSupplier}.
  * <p>When the workflow is validated, the view transitions to {@link ReceiptPayment} to finalize the transaction.
- *
- * @see controller.ClientSupplierController
- * @see model.ClientSupplier
- * @see model.Product
+ * @see ClientSupplierController
+ * @see ClientSupplier
+ * @see Product
  * @see ReceiptView
  * @see ReceiptPayment
  */
@@ -78,6 +76,7 @@ public class ReceiptClientInfoDialog extends JPanel {
         comboPanel.add(lblClient);
 
         comboClientSupplier = new JComboBox<>();
+        ViewUtils.setCursor(comboClientSupplier);
         comboClientSupplier.setEditable(true);
         setComboClients(allClients);
         comboClientSupplier.setMaximumSize(new Dimension(Integer.MAX_VALUE, comboClientSupplier.getPreferredSize().height));
@@ -100,8 +99,10 @@ public class ReceiptClientInfoDialog extends JPanel {
 
         JPanel comboBtnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         btnNew = new JButton("New Client");
+        ViewUtils.setCursor(btnNew);
         btnNew.addActionListener(e -> onNewClick());
         btnScan = new JButton("Scan card");
+        ViewUtils.setCursor(btnScan);
         btnScan.addActionListener(e -> onScanClick());
         comboBtnPanel.add(btnNew);
         comboBtnPanel.add(btnScan);
@@ -116,7 +117,8 @@ public class ReceiptClientInfoDialog extends JPanel {
     /**
      * Builds the information panel displaying details of the currently selected client.
      * <p>If no client is selected, a placeholder message is shown.
-     * Otherwise, the panel displays: Full name, Email address, and Loyalty points*
+     * Otherwise, the panel displays: Full name, Email address, and Loyalty points
+     * (retrieved from the client's {@link FidelityCard}, or "No fidelity card" if absent).
      * <p>This panel is dynamically rebuilt whenever {@code selectedClient} changes.
      *
      * @return the constructed client information {@code JPanel}
@@ -129,49 +131,42 @@ public class ReceiptClientInfoDialog extends JPanel {
         );
 
         if (selectedClient == null) {
-
             JPanel noClientPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
             JLabel lblName = new JLabel("Select a customer or continue without");
             noClientPanel.add(lblName);
             infoPanel.add(noClientPanel);
-
         } else {
             Dimension labelSize = new Dimension(100, 25);
             infoPanel.removeAll();
-            JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
 
+            JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
             JLabel lblName = new JLabel("Name:");
             lblName.setPreferredSize(new Dimension(labelSize));
-
             JLabel lblNameValue = new JLabel(selectedClient.getFirstname() + " " + selectedClient.getName());
-
             namePanel.add(lblName);
             namePanel.add(lblNameValue);
-
             infoPanel.add(namePanel);
 
             JPanel emailPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-
             JLabel lblEmail = new JLabel("Email:");
             lblEmail.setPreferredSize(new Dimension(labelSize));
-
             JLabel lblEmailValue = new JLabel(selectedClient.getEmail());
-
             emailPanel.add(lblEmail);
             emailPanel.add(lblEmailValue);
-
             infoPanel.add(emailPanel);
 
             JPanel loyaltyPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-
             JLabel lblLoyalty = new JLabel("Loyalty points:");
             lblLoyalty.setPreferredSize(new Dimension(labelSize));
 
-            JLabel lblLoyaltyValue = new JLabel("100"); //FIXME : remplacer par getter reel.
+            FidelityCard card = selectedClient.getFidelityCard();
+            String loyaltyValue = (card != null)
+                    ? String.valueOf(card.getTotalPoint())
+                    : "No fidelity card";
+            JLabel lblLoyaltyValue = new JLabel(loyaltyValue);
 
             loyaltyPanel.add(lblLoyalty);
             loyaltyPanel.add(lblLoyaltyValue);
-
             infoPanel.add(loyaltyPanel);
         }
 
@@ -189,8 +184,10 @@ public class ReceiptClientInfoDialog extends JPanel {
     private JPanel buildBtnPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         btnCancel = new JButton("Cancel");
+        ViewUtils.setCursor(btnCancel);
         btnCancel.addActionListener(e -> onCancelClick());
         btnNext = new JButton("Next");
+        ViewUtils.setCursor(btnNext);
         btnNext.addActionListener(e -> onNextClick());
         panel.add(btnCancel);
         panel.add(btnNext);
@@ -199,7 +196,8 @@ public class ReceiptClientInfoDialog extends JPanel {
 
     /**
      * Handles scanning of a client card number.
-     * <p>Prompts the user for a numeric input, validates it, and searches for a matching client in {@code allClients}.
+     * <p>Prompts the user for a numeric input, validates it, and searches for a matching client
+     * by comparing the input against each client's {@link FidelityCard} ID.
      * <p>If a match is found, the client is selected and the UI is updated.
      * Otherwise, an informational message is displayed.
      */
@@ -211,28 +209,23 @@ public class ReceiptClientInfoDialog extends JPanel {
 
         int cardNumber;
         try {
-            cardNumber = Integer.parseInt(input);
+            cardNumber = Integer.parseInt(input.trim());
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Le numéro est invalide", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        boolean found = false;
-        int i = 0;
-        while (i < allClients.size() && !found) {
-            ClientSupplier client = allClients.get(i);
-            if (12345678 == cardNumber) { //FIXME: remplace par reel getter
+        for (ClientSupplier client : allClients) {
+            FidelityCard card = client.getFidelityCard();
+            if (card != null && card.getId() == cardNumber) {
                 selectedClient = client;
                 setComboClient(client);
                 refreshInfoPanel();
                 return;
             }
-            i++;
         }
 
-        if (!found) {
-            JOptionPane.showMessageDialog(this, "Aucun client trouvé", "Information", JOptionPane.INFORMATION_MESSAGE);
-        }
+        JOptionPane.showMessageDialog(this, "No customers found", "Information", JOptionPane.INFORMATION_MESSAGE);
     }
 
     /**

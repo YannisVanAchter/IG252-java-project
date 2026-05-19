@@ -1,6 +1,8 @@
 package main.java.be.henallux.project.controller;
 
+import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.Product;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +26,7 @@ public class ProductSearchController {
                     || !p.getCategory().getName().equalsIgnoreCase(category)))
                 match = false;
 
-            if (promotion != null && promotion && !p.isInPromotion())
+            if (promotion != null && promotion && !p.getIsDiscounted())
                 match = false;
 
             if (match) results.add(p);

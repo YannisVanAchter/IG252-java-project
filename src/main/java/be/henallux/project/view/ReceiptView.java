@@ -20,11 +20,12 @@ import java.util.List;
  * <ul><li>Left panel: product browsing and filtering</li>
  *     <li>Right panel: receipt/cart management and checkout actions</li></ul>
  *
- * <p>It interacts with {@link controller.ProductController} to retrieve available products
+ * <p>It interacts with {@link ProductController} to retrieve available products
  * and maintains in local memory receipt structure using a {@link java.util.LinkedHashMap}
- * where {@code Key} is {@link Product}. {@code Vlue} is {@code Integer} representing purchased quantity. *
- * @see controller.ProductController
- * @see model.Product
+ * where {@code Key} is {@link Product}. {@code Value} is {@code Integer} representing purchased quantity.
+ *
+ * @see ProductController
+ * @see Product
  * @see ReceiptProductTableModel
  * @see ReceiptTableModel
  * @see ReceiptClientInfoDialog
@@ -36,7 +37,7 @@ public class ReceiptView extends JPanel {
     private static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 18);
     private static final Font FONT_TOTAL = new Font("SansSerif", Font.BOLD, 18);
 
-    private static final int TBL_BTN_INDEX = 2;
+    private static final int TBL_BTN_ADD = ReceiptProductTableModel.TBL_BTN_ADD;
 
     private final MainWindow mainWindow;
     private final ProductController productController;
@@ -72,22 +73,26 @@ public class ReceiptView extends JPanel {
      * <ul><li>Text field for live filtering</li>
      *     <li>Clear button to reset search input</li>
      *     <li>Scan button to manually enter product ID</li></ul>
+     *
      * @return {@code JPanel} configured search panel
      */
     private JPanel buildSearchPanel() {
         searchPanel = new JPanel(new BorderLayout(8, 0));
 
         txtSearch = new JTextField();
+        ViewUtils.setCursor(txtSearch);
         txtSearch.setPreferredSize(new Dimension(0, 44));
         txtSearch = ViewUtils.addFilterListener(txtSearch, this::onFilterClick);
 
         JPanel btnPanel = new JPanel();
         btnClear = new JButton("Clear");
+        ViewUtils.setCursor(btnClear);
         btnClear.setPreferredSize(new Dimension(89, 44));
         btnClear.addActionListener(e -> onClearClick());
         btnPanel.add(btnClear);
 
         btnScan = new JButton("Scan");
+        ViewUtils.setCursor(btnScan);
         btnScan.setPreferredSize(new Dimension(89, 44));
         btnScan.addActionListener(e -> onScanClick());
         btnPanel.add(btnScan);
@@ -102,6 +107,7 @@ public class ReceiptView extends JPanel {
      * Builds the main body of the view using a horizontal {@code JSplitPane}.
      * <p>The split pane contains: {@link #buildLeftPanel()} product list
      * and {@link #buildRightPanel()} receipt summary
+     *
      * @return {@code JSplitPane} configured
      */
     private JSplitPane buildBody() {
@@ -118,6 +124,7 @@ public class ReceiptView extends JPanel {
      * <ul><li>Product table with selectable rows</li>
      *     <li>Button column for adding products to receipt</li>
      *     <li>Live filtering via search input</li></ul>
+     *
      * @return product browsing {@code JPanel}
      */
     private JPanel buildLeftPanel() {
@@ -132,20 +139,19 @@ public class ReceiptView extends JPanel {
         header.setBorder(new EmptyBorder(8, 16, 2, 16));
         panel.add(header, BorderLayout.NORTH);
 
-
         productModel = new ReceiptProductTableModel(displayProducts);
         productTable = new JTable(productModel);
         productTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         productTable.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 int row = productTable.rowAtPoint(e.getPoint());
-                if (productTable.columnAtPoint(e.getPoint()) == TBL_BTN_INDEX) {
+                if (productTable.columnAtPoint(e.getPoint()) == TBL_BTN_ADD) {
                     addToReceipt(displayProducts.get(row));
                 }
             }
         });
 
-        productTable.getColumnModel().getColumn(TBL_BTN_INDEX).setCellRenderer(new ButtonRenderer());
+        productTable.getColumnModel().getColumn(TBL_BTN_ADD).setCellRenderer(new ButtonRenderer());
 
         JScrollPane scroll = new JScrollPane(productTable);
         scroll.setBorder(null);
@@ -159,6 +165,7 @@ public class ReceiptView extends JPanel {
      * <ul><li>Display selected products and quantities</li>
      *     <li>Allow item removal</li>
      *     <li>Show computed total price</li></ul>
+     *
      * @return receipt {@code JPanel}
      */
     private JPanel buildRightPanel() {
@@ -189,6 +196,7 @@ public class ReceiptView extends JPanel {
      * <ul><li>Clear all items</li>
      *     <li>Delete the selected or last item</li>
      *     <li>Proceed to the next checkout step</li></ul>
+     *
      * @return footer {@code JPanel} with action controls
      */
     private JPanel buildReceiptFooter() {
@@ -202,15 +210,18 @@ public class ReceiptView extends JPanel {
         btnBar.setBorder(new EmptyBorder(16, 0, 0, 0));
 
         btnClearAll = new JButton("Clear all");
+        ViewUtils.setCursor(btnClearAll);
         btnClearAll.setPreferredSize(new Dimension(150, 44));
         btnClearAll.addActionListener(e -> clearAll());
 
         btnDelete = new JButton("Delete Last Item");
+        ViewUtils.setCursor(btnDelete);
         btnDelete.setPreferredSize(new Dimension(150, 44));
         btnDelete.setEnabled(false);
         btnDelete.addActionListener(e -> deleteSelected());
 
         btnNext = new JButton("Next");
+        ViewUtils.setCursor(btnDelete);
         btnNext.setPreferredSize(new Dimension(88, 44));
         btnNext.setEnabled(false);
         btnNext.addActionListener(e -> {
@@ -255,12 +266,9 @@ public class ReceiptView extends JPanel {
                 addToReceipt(product);
                 found = true;
             }
-            i++;
         }
 
-        if (!found) {
-            JOptionPane.showMessageDialog(this, "No product found", "Information", JOptionPane.INFORMATION_MESSAGE);
-        }
+        JOptionPane.showMessageDialog(this, "No product found", "Information", JOptionPane.INFORMATION_MESSAGE);
     }
 
     /**
@@ -287,11 +295,13 @@ public class ReceiptView extends JPanel {
 
     /**
      * Adds a product to the receipt with stock validation.
-     * <p>If the product already exists in the receipt, its quantity is increased. If stock limits are reached, the operation is rejected.
+     * <p>If the product already exists in the receipt, its quantity is increased.
+     * If the quantity already in the cart reaches the total available stock, the operation is rejected.
+     *
      * @param product product to add to receipt
      */
     private void addToReceipt(Product product) {
-        int stock = product.getQuantity().getNbProduct();
+        int stock = product.getTotalQuantity();
         int alreadyInCart = receipt.getOrDefault(product, 0);
         if (alreadyInCart >= stock) {
             JOptionPane.showMessageDialog(this, "Insufficient stock for this product", "Erreur", JOptionPane.WARNING_MESSAGE);
@@ -299,8 +309,7 @@ public class ReceiptView extends JPanel {
         }
 
         if (receipt.containsKey(product)) {
-            int currentQuantity = receipt.get(product);
-            receipt.put(product, currentQuantity + 1);
+            receipt.put(product, alreadyInCart + 1);
         } else {
             receipt.put(product, 1);
         }
@@ -340,7 +349,6 @@ public class ReceiptView extends JPanel {
         }
         lblTotal.setText(String.format("Total: %.2f €", total));
     }
-
 
     /**
      * Removes an item from the receipt.

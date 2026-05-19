@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-//TODO: remplacer name + firstName par label
 /**
  * Table model used to display a list of {@link ClientSupplier} instances
  * in a {@link ClientSearchTable} through a {@link javax.swing.JTable}.
@@ -23,11 +22,13 @@ import java.util.List;
 public class ClientSearchTableModel extends AbstractTableModel {
 
     private static final String[] COLUMNS = {
-            "Name", "First Name", "Email", "Phone", "Client since",
+            "Name & First Name", "Email", "Phone", "Client since",
             "Points", "Card",
             "City", "Postal code",
             ""
     };
+
+    public static final int TBL_BTN_SEE = 8;
 
     private List<ClientSupplier> clients;
 
@@ -52,16 +53,15 @@ public class ClientSearchTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int col) {
         ClientSupplier cs = clients.get(row);
         return switch (col) {
-            case 0  -> cs.getName();
-            case 1  -> cs.getFirstname();
-            case 2  -> cs.getEmail();
-            case 3  -> cs.getPhoneNumber();
-            case 4  -> cs.getBecameClientDate();
-            case 5  -> "100"; // FidelityCard — TODO: cs.getFidelityCard().getTotalPoint()
-            case 6  -> "123456789"; // TODO: cs.getFidelityCard()
-            case 7  -> cs.getAddress().getLocality().getName();
-            case 8  -> cs.getAddress().getLocality().getPostalCode();
-            case 9  -> "See";
+            case 0  -> cs.getLabel();
+            case 1  -> cs.getEmail();
+            case 2  -> cs.getPhoneNumber();
+            case 3  -> ViewUtils.formatDate(cs.getBecameClientDate());
+            case 4  -> cs.getFidelityCard().getTotalPoint();
+            case 5  -> cs.getFidelityCard();
+            case 6  -> cs.getAddress().getLocality().getCity();
+            case 7 -> cs.getAddress().getLocality().getPostalCode();
+            case 8  -> "See";
             default -> null;
         };
     }

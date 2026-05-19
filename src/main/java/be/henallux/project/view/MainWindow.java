@@ -2,6 +2,7 @@ package main.java.be.henallux.project.view;
 
 import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.*;
+import main.java.be.henallux.project.controller.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,7 +20,7 @@ import java.util.Stack;
 public class MainWindow extends JFrame {
     private Stack<String> history = new Stack<>();
     private String currentPage;
-
+    private final NotificationController notificationController;
     private DocumentForm documentForm;
     private ClientSupplierForm clientSupplierForm;
     private ClientView clientView;
@@ -27,18 +28,19 @@ public class MainWindow extends JFrame {
     private RecipeView recipeView;
     private StockOrderCreation orderView;
 
-
     private CardLayout cardLayout;
     private JPanel container;
 
-    public MainWindow() throws DataValidationException {
+    public MainWindow(NotificationController notificationController) {
         super("Magasin du Grand Bazard");
+        this.notificationController = notificationController;
 
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        setJMenuBar(new MenuWindow(this));
+        setJMenuBar(new MenuWindow(this, notificationController));
+        notificationController.setMainWindow(this);
         cardLayout = new CardLayout();
         container = new JPanel(cardLayout);
 
@@ -133,5 +135,9 @@ public class MainWindow extends JFrame {
     public void openOrderView(ArrayList seletedProduct, ClientSupplier selectedSupplier){
         orderView.loadOrder(seletedProduct, selectedSupplier);
         setPage("ORDER_CREATION");
+    }
+
+    public NotificationController getNotificationController() {
+        return notificationController;
     }
 }

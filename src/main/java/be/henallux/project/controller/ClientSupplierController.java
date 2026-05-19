@@ -1,6 +1,7 @@
 package main.java.be.henallux.project.controller;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.FidelityCard;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.Address;
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.Locality;
@@ -24,77 +25,55 @@ public class ClientSupplierController {
     public ArrayList<ClientSupplier> getAllClientSupplier() throws DataValidationException {
         ArrayList<ClientSupplier> clients = new ArrayList<>();
 
-        clients.add(new ClientSupplier(
-                1,
-                "Dupont",
-                "Jean",
-                "jean.dupont@email.com",
-                "32470000001",
-                new Address("Avenue Louise 10", 1050, new Locality("Ixelles", 6000)),
-                true,
-                false,
-                true,
-                "BE0123456789",
-                LocalDate.now()
-        ));
+        try {
+            // --- Client 1 : Dupont Jean (isClient=true) ---
+            ClientSupplier dupont = new ClientSupplier(
+                    1, "Dupont", "Jean", "jean.dupont@email.com", "32470000001",
+                    new Address(1, "Avenue Louise", 10, new Locality("Ixelles", 1050)),
+                    true, false, true, "BE0123456789", LocalDate.of(2020, 1, 15), null
+            );
+            dupont.setFidelityCard(new FidelityCard(1, 150, true, dupont));
+            clients.add(dupont);
 
-        clients.add(new ClientSupplier(
-                2,
-                "Martin",
-                "Sophie",
-                "sophie.martin@email.com",
-                "32470000002",
-                new Address("Avenue Louise 10", 1050, new Locality("Ixelles", 6000)),
-                true,
-                false,
-                false,
-                "BE0987654321",
-                LocalDate.now()
-        ));
+            // --- Client 2 : Martin Sophie (isClient=true) ---
+            ClientSupplier martin = new ClientSupplier(
+                    2, "Martin", "Sophie", "sophie.clem@email.com", "32470000002",
+                    new Address(2, "Rue de la Loi", 42, new Locality("Bruxelles", 1000)),
+                    true, false, false, "BE0987654321", LocalDate.of(2021, 3, 22), null
+            );
+            martin.setFidelityCard(new FidelityCard(2, 80, true, martin));
+            clients.add(martin);
 
-        clients.add(new ClientSupplier(
-                3,
-                "Nguyen",
-                "Linh",
-                "linh.nguyen@email.com",
-                "32470000003",
-                new Address("Avenue Louise 10", 1050, new Locality("Ixelles", 6000)),
-                true,
-                false,
-                true,
-                "BE1122334455",
-                LocalDate.now()
-        ));
+            // --- Client 3 : Clem Cloum (isClient=false) ---
+            ClientSupplier clem = new ClientSupplier(
+                    3, "Clem", "cloum", "cloum.clem@email.com", "32123456789",
+                    new Address(2, "Rue de ici", 12, new Locality("Namur", 5000)),
+                    true, false, false, "BE0987654321", LocalDate.of(2021, 3, 22)
+            );
+            clients.add(clem);
 
-        clients.add(new ClientSupplier(
-                4,
-                "Dubois",
-                "Marc",
-                "marc.dubois@email.com",
-                "32470000004",
-                new Address("Avenue Louise 10", 1050, new Locality("Ixelles", 6000)),
-                true,
-                false,
-                false,
-                "BE6677889900",
-                LocalDate.now()
-        ));
+            // --- Client+Fournisseur 4 : Dubois Marc (isClient=true, isSupplier=true) ---
+            ClientSupplier dubois = new ClientSupplier(
+                    4, "Dubois", "Marc", "marc.dubois@email.com", "32470000004",
+                    new Address(4, "Rue Neuve", 88, new Locality("Schaerbeek", 1030)),
+                    true, true, false, "BE6677889900", LocalDate.of(2022, 5, 5), null
+            );
+            dubois.setFidelityCard(new FidelityCard(4, 320, true, dubois));
+            clients.add(dubois);
 
-        clients.add(new ClientSupplier(
-                5,
-                "Smith",
-                "Anna",
-                "anna.smith@email.com",
-                "32470000005",
-                new Address("Avenue Louise 10", 1050, new Locality("Ixelles", 6000)),
-                true,
-                false,
-                true,
-                "BE5566778899",
-                LocalDate.now()
-        ));
+            // --- Client 5 : Smith Anna (isClient=true) ---
+            ClientSupplier smith = new ClientSupplier(
+                    5, "Smith", "Anna", "anna.smith@email.com", "32470000005",
+                    new Address(5, "Avenue Fonsny", 20, new Locality("Saint-Gilles", 1060)),
+                    true, false, true, "BE5566778899", LocalDate.of(2018, 11, 30), null
+            );
+            smith.setFidelityCard(new FidelityCard(5, 500, false, smith));
+            clients.add(smith);
 
-        return clients;
+            return clients;
+        } catch (DataValidationException e) {
+            return new ArrayList<>();
+        }
     }
 
     /**
@@ -102,7 +81,8 @@ public class ClientSupplierController {
      * La suppression dans la vue est deja gérée dans la vue
      * @param csToDelete le ClientSupplier objet à supprimer
      */
-    public void deleteClientSupplier(ClientSupplier csToDelete) {
+    public boolean deleteClientSupplier(ClientSupplier csToDelete) {
+        return true;
     }
 
     /**
@@ -113,7 +93,7 @@ public class ClientSupplierController {
      * @throws DataValidationException en cas de problème de validation
      */
     public ClientSupplier createClientSupplier (String name, String firstName, String mail, String phoneNumber, String vatNumber, LocalDate becomeClient, String loyaltyCardId, int loyaltyPoints, boolean isClient, boolean isSupplier, boolean isMember, int streetNumber, int postalCode, String street, String city, String country) throws DataValidationException {
-        return new ClientSupplier( 1,  name,  firstName,  mail,  phoneNumber, new Address(street, streetNumber, city, postalCode),  isClient,  isSupplier,  isMember,  vatNumber, becomeClient);
+        return null; //new ClientSupplier( 1,  name,  firstName,  mail,  phoneNumber, new Address(1,street, streetNumber, city, postalCode),  isClient,  isSupplier,  isMember,  vatNumber, becomeClient);
     }
 
     /**
@@ -125,7 +105,6 @@ public class ClientSupplierController {
      * @throws DataValidationException en cas de problème de validation
      */
     public ClientSupplier updateClientSupplier(int id, String name, String firstName, String mail, String phoneNumber, String vatNumber, LocalDate becomeClient, String loyaltyCardId, int loyaltyPoints, boolean isClient, boolean isSupplier, boolean isMember, int streetNumber, int postalCode, String street, String city, String country) throws DataValidationException {
-        return new ClientSupplier( 1,  name,  firstName,  mail,  phoneNumber, new Address(street, streetNumber, city, postalCode),  isClient,  isSupplier,  isMember,  vatNumber, becomeClient);
-
+        return null; //new ClientSupplier( 1,  name,  firstName,  mail,  phoneNumber, new Address(1,street, streetNumber, city, postalCode),  isClient,  isSupplier,  isMember,  vatNumber, becomeClient);
     }
 }

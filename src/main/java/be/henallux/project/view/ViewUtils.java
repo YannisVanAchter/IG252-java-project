@@ -4,7 +4,11 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -16,6 +20,7 @@ public class ViewUtils {
      * Creates and returns a JPanel configured with a vertical BoxLayout.
      * The panel can be used as a container to arrange components in a column layout.
      *
+     * @return a JPanel with a vertical BoxLayout
      * @return a JPanel with a vertical BoxLayout
      */
     public static JPanel createColumnPanel() {
@@ -50,6 +55,7 @@ public class ViewUtils {
     /**
      * Wraps a component in a JPanel {@code BorderLayout CENTER}
      * so that it stretches horizontally, with a fixed height.
+     *
      * @return {@code JPanel}
      */
     public static JPanel makeRow(JComponent component) {
@@ -64,7 +70,8 @@ public class ViewUtils {
     /**
      * Creates a horizontal row grouping two labeled components with fixed spacing between them.
      * Useful for aligning form fields side by side
-     * @param leftLabelled the left component
+     *
+     * @param leftLabelled  the left component
      * @param rightLabelled the right component
      * @return a JPanel containing both components arranged horizontally
      */
@@ -96,9 +103,9 @@ public class ViewUtils {
      * and a right-aligned panel with a JCheckBox and a JSpinner.
      * The JCheckBox toggles the enabled state of the JSpinner.
      *
-     * @param label the text to display in the JLabel
+     * @param label   the text to display in the JLabel
      * @param spinner the JSpinner to be displayed and toggled by the JCheckBox
-     * @param chk the JCheckBox used to enable or disable the JSpinner
+     * @param chk     the JCheckBox used to enable or disable the JSpinner
      * @return a structured JPanel containing the JLabel, JCheckBox, and JSpinner
      */
     public static JPanel labeledToggleDate(String label, JSpinner spinner, JCheckBox chk) {
@@ -112,13 +119,15 @@ public class ViewUtils {
 
         return labeled(label, right);
     }
+
     /**
      * Creates a JSpinner configured for integer input.
-     *  Spinner align on Left
+     * Spinner align on Left
+     *
      * @param value initial value
-     * @param min minimum value
-     * @param max maximum value
-     * @param step increment step
+     * @param min   minimum value
+     * @param max   maximum value
+     * @param step  increment step
      * @return a number JSpinner
      */
     public static JSpinner createNumberSpinner(int value, int min, int max, int step) {
@@ -166,18 +175,31 @@ public class ViewUtils {
         return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
+    public static String formatDate(LocalDate date) {
+        if (date == null) return "N/A";
+        return date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    }
+
     /**
      * Attaches a DocumentListener to a JTextField that triggers onFilter on every change.
      *
      * @param textField the text field to listen to
-     * @param onFilter action to run on change
+     * @param onFilter  action to run on change
      * @return the same JTextField
      */
     public static JTextField addFilterListener(JTextField textField, Runnable onFilter) {
         textField.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e)  { onFilter.run(); }
-            public void removeUpdate(DocumentEvent e)  { onFilter.run(); }
-            public void changedUpdate(DocumentEvent e) { onFilter.run(); }
+            public void insertUpdate(DocumentEvent e) {
+                onFilter.run();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onFilter.run();
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                onFilter.run();
+            }
         });
         return textField;
     }
@@ -208,4 +230,118 @@ public class ViewUtils {
         return textField;
     }
 
+    /**
+     * Sets an appropriate mouse cursor for the given Swing component based on its type.
+     * <p>This method applies a context-aware cursor to improve user experience:
+     * <ul><li>Text input components (e.g., {@link JTextField}, {@link JSpinner}) receive a text cursor.</li>
+     *     <li>Interactive components (e.g., {@link JButton}, {@link JCheckBox}, {@link JRadioButton}) receive a hand cursor.</li>
+     *     <li>All other components receive the default cursor.</li></ul>
+     *
+     * @param component the Swing component to which the cursor will be applied
+     */
+    public static void setCursor(JComponent component) {
+        if (component instanceof JTextField || component instanceof JSpinner) {
+            component.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+        } else if (component instanceof JButton || component instanceof JCheckBox || component instanceof JRadioButton) {
+            component.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        } else {
+            component.setCursor(Cursor.getDefaultCursor());
+        }
+    }
+
+    /**
+     * Attaches a real-time autocomplete filter to an editable {@link JComboBox}.
+     * <p>Filters the combobox items as the user types (case-insensitive). The displayed
+     * text is automatically capitalized (first letter uppercase only).
+     * <ul><li><b>TYPING:</b> filters the list and opens/closes the popup accordingly.</li>
+     *   <li><b>ENTER:</b> confirms the best match and restores the full list.</li>
+     *   <li><b>ESCAPE:</b> resets the list, clears the selection and the editor.</li></ul>
+     *
+     * @param <T>      the type wrapped inside each {@link ComboBoxItem}
+     * @param comboBox the target editable combo box
+     * @param allItems the full reference list, never modified
+     */
+    public static <T> void setupAutoComplete(JComboBox<ComboBoxItem<T>> comboBox, ArrayList<ComboBoxItem<T>> allItems) {
+        JTextField editor = (JTextField) comboBox.getEditor().getEditorComponent();
+        editor.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                int key = e.getKeyCode();
+                if (key == KeyEvent.VK_UP || key == KeyEvent.VK_DOWN ||
+                        key == KeyEvent.VK_LEFT || key == KeyEvent.VK_RIGHT ||
+                        key == KeyEvent.VK_SHIFT || key == KeyEvent.VK_CONTROL) {
+                    return;
+                }
+
+                if (key == KeyEvent.VK_ENTER) {
+                    String currentText = editor.getText().trim();
+                    ComboBoxItem<T> match = null;
+                    for (int i = 0; i < comboBox.getItemCount(); i++) {
+                        ComboBoxItem<T> item = comboBox.getItemAt(i);
+                        if (item.toString().equalsIgnoreCase(currentText) && match == null) match = item;
+                    }
+
+                    if (match == null && comboBox.getItemCount() > 0) {
+                        ComboBoxItem<T> first = comboBox.getItemAt(0);
+                        if (first.toString().toLowerCase().contains(currentText.toLowerCase())) match = first;
+                    }
+
+                    comboBox.removeAllItems();
+                    for (ComboBoxItem<T> item : allItems) {
+                        comboBox.addItem(item);
+                    }
+
+                    if (match != null) {
+                        comboBox.setSelectedItem(match);
+                        editor.setText(match.toString());
+                    } else {
+                        comboBox.setSelectedIndex(-1);
+                        editor.setText(currentText);
+                    }
+                    comboBox.hidePopup();
+                    return;
+                }
+
+                if (key == KeyEvent.VK_ESCAPE) {
+                    comboBox.removeAllItems();
+                    for (ComboBoxItem<T> item : allItems) {
+                        comboBox.addItem(item);
+                    }
+                    comboBox.setSelectedIndex(-1);
+                    editor.setText("");
+                    comboBox.hidePopup();
+                    return;
+                }
+
+                String texte = editor.getText();
+                String texteLower = texte.toLowerCase();
+
+                comboBox.removeAllItems();
+                if (texte.isEmpty()) {
+                    for (ComboBoxItem<T> item : allItems) {
+                        comboBox.addItem(item);
+                    }
+                } else {
+                    for (ComboBoxItem<T> item : allItems) {
+                        if (item.toString().toLowerCase().contains(texteLower)) comboBox.addItem(item);
+                    }
+                }
+
+                if (!texte.isEmpty()) {
+                    String texteCapitalize = texte.substring(0, 1).toUpperCase() + texte.substring(1).toLowerCase();
+                    int caretPos = editor.getCaretPosition();
+                    editor.setText(texteCapitalize);
+                    try {
+                        editor.setCaretPosition(Math.min(caretPos, texteCapitalize.length()));
+                    } catch (IllegalArgumentException ex) {
+                        editor.setCaretPosition(texteCapitalize.length());
+                    }
+                }
+                editor.setText(texte);
+
+                if (comboBox.getItemCount() > 0) comboBox.showPopup();
+                else comboBox.hidePopup();
+            }
+        });
+    }
 }
