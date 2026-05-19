@@ -17,12 +17,16 @@ import java.util.ArrayList;
  * <p>The view allows the user to:
  * <ul><li>review supplier details</li><li>adjust ordered quantities</li>
  * <li>cancel the order creation</li><li>confirm the purchase order</li></ul>
+ *
  * @see StockOrderTableModel
  * @see SpinnerEditor
  * @see JTable
  * @see ClientSupplier
  */
 public class StockOrderCreation extends JPanel {
+    private static final String LABEL_NO_DATA = "N/A";
+
+    private static final Font FONT_COMMENT = new Font("SansSerif", Font.ITALIC, 12);
     private static final Font FONT_REG = new Font("SansSerif", Font.PLAIN, 16);
     private static final Font FONT_BOLD = new Font("SansSerif", Font.BOLD, 16);
     private static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 18);
@@ -55,18 +59,25 @@ public class StockOrderCreation extends JPanel {
      * @return the assembled content panel
      */
     private JPanel buildContent() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(new EmptyBorder(0, 0, 8, 0));
-        panel.add(buildTitle());
-        panel.add(Box.createVerticalStrut(16));
-        panel.add(buildSupplier());
-        panel.add(Box.createVerticalStrut(16));
-        panel.add(buildTable());
-        panel.add(Box.createVerticalStrut(16));
-        panel.add(buildTotal());
-        panel.add(Box.createVerticalStrut(16));
-        panel.add(buildButtons());
+        JPanel panel = new JPanel(new BorderLayout());
+
+        JPanel center = new JPanel();
+        center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
+        center.setBorder(new EmptyBorder(0, 0, 8, 0));
+        center.add(buildSupplier());
+        center.add(Box.createVerticalStrut(16));
+        center.add(buildTable());
+        center.add(Box.createVerticalStrut(16));
+        center.add(buildTotal());
+
+        JScrollPane pane = new JScrollPane(center);
+        pane.setBorder(BorderFactory.createEmptyBorder());
+        panel.add(pane, BorderLayout.NORTH);
+
+        add(buildTitle(), BorderLayout.NORTH);
+        add(panel, BorderLayout.CENTER);
+        add(buildButtons(), BorderLayout.SOUTH);
+
         return panel;
     }
 
@@ -75,7 +86,8 @@ public class StockOrderCreation extends JPanel {
      * <p>The current content is rebuilt using the selected supplier and products.
      * <p>If no product is provided, a warning dialog is displayed and the previous
      * screen is restored.
-     * @param seletedProduct the selected products
+     *
+     * @param seletedProduct   the selected products
      * @param selectedSupplier the supplier linked to the order
      */
     public void loadOrder(ArrayList seletedProduct, ClientSupplier selectedSupplier) {
@@ -88,15 +100,14 @@ public class StockOrderCreation extends JPanel {
             return;
         }
         removeAll();
-        JScrollPane pane = new JScrollPane(buildContent());
-        pane.setBorder(BorderFactory.createEmptyBorder());
-        add(pane, BorderLayout.CENTER);
+        buildContent();
         revalidate();
         repaint();
     }
 
     /**
      * Builds the page title section.
+     *
      * @return the title panel
      */
     private JPanel buildTitle() {
@@ -114,8 +125,9 @@ public class StockOrderCreation extends JPanel {
      * <p>The card displays:
      * <ul><li>supplier name</li><li>email</li><li>phone number</li>
      * <li>VAT number</li><li>postal address</li></ul>
-     * @see Address
+     *
      * @return the supplier information panel
+     * @see Address
      */
     private JPanel buildSupplier() {
         JPanel card = createCard("Supplier information");
@@ -130,7 +142,7 @@ public class StockOrderCreation extends JPanel {
         card.add(Box.createVerticalStrut(10));
         card.add(labelValue("VAT", selectedSupplier.getVATNumber()));
         Address address = selectedSupplier.getAddress();
-        String adresseTxt = address.getStreetName() + ", " + address.getStreetNumber() + ". " + address.getLabel();
+        String adresseTxt = address != null ? address.getLabel() : LABEL_NO_DATA;
         card.add(Box.createVerticalStrut(10));
         card.add(labelValue("Adresse", adresseTxt));
 
@@ -142,16 +154,23 @@ public class StockOrderCreation extends JPanel {
      * <p>The quantity column uses a {@link SpinnerEditor} editor to allow quantity
      * adjustments directly inside the table.
      * <p>The total quantity label is automatically refreshed whenever table data changes.
+     *
      * @return the table container panel
      * @see StockOrderTableModel
      * @see SpinnerEditor
      */
-    private JPanel buildTable(){
+    private JPanel buildTable() {
         JPanel card = createCard("Items ordered");
         model = new StockOrderTableModel(selectedProduct);
         table = new JTable(model);
         table.setRowHeight(28);
         table.getColumnModel().getColumn(TBL_SPN_INDEX).setCellEditor(new SpinnerEditor());
+
+        JLabel hint = new JLabel("✏ Click on 'Quantity Ordered' to edit");
+        hint.setFont(FONT_COMMENT);
+        hint.setForeground(Color.GRAY);
+        card.add(hint);
+        table.getTableHeader().setToolTipText("Click on 'Quantity Ordered' to edit");
 
         model.addTableModelListener(e -> updateTotal());
         int rowCount = Math.max(3, model.getRowCount());
@@ -169,6 +188,7 @@ public class StockOrderCreation extends JPanel {
     /**
      * Builds the total quantity panel.
      * <p>The displayed value is synchronized with {@link StockOrderTableModel#getTotal()}.
+     *
      * @return the total panel
      */
     private JPanel buildTotal() {
@@ -197,6 +217,7 @@ public class StockOrderCreation extends JPanel {
      * Builds the action button bar.
      * <p>Available actions:
      * <ul><li>cancel the order creation</li><li>confirm the purchase order</li></ul>
+     *
      * @return the button panel
      */
     private JPanel buildButtons() {
@@ -220,6 +241,7 @@ public class StockOrderCreation extends JPanel {
      * Handles the cancel action.
      * <p> A confirmation dialog is displayed before leaving the page.
      * <p>If confirmed, the application navigates back to the previous view.
+     *
      * @see MainWindow#goBack()
      */
     private void onCancelClick() {
@@ -298,15 +320,23 @@ public class StockOrderCreation extends JPanel {
      * @return a horizontal panel displaying the label and value
      */
     private JPanel labelValue(String label, String value) {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT,  0, 0));
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         panel.add(new JLabel(label + " : "));
-        panel.add(new JLabel(value));
-        return panel;
+        if (value != null) {
+            panel.add(new JLabel(value));
+        } else {
+            panel.add(new JLabel(LABEL_NO_DATA));
+        }        return panel;
     }
+
     private JPanel labelValue(JLabel label, String value) {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT,  0, 0));
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         panel.add(label);
-        panel.add(new JLabel(value));
+        if (value != null) {
+            panel.add(new JLabel(value));
+        } else {
+            panel.add(new JLabel(LABEL_NO_DATA));
+        }
         return panel;
     }
 }
