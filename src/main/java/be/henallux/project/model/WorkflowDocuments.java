@@ -23,11 +23,16 @@ public class WorkflowDocuments implements Model {
 
     public WorkFlow getWorkFlow() { return workflow; }
 
-    public List<Document> getDocuments() { return Collections.unmodifiablelist(documents); }
+    public List<Document> getDocuments() { return Collections.unmodifiableList(documents); }
 
     public void addDocument(Document doc) {
         if ( !documents.contains(doc) ) 
             documents.add(doc);
+    }
+
+    @Override
+    public String getLabel() {
+        return workflow.getLabel();
     }
 
     @Override

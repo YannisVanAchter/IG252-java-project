@@ -144,7 +144,7 @@ public class Product implements Model {
     }
 
     public List<Discount> getDiscounts() {
-        return Collections.unmodifiablelist(discounts);
+        return Collections.unmodifiableList(discounts);
     }
 
     private void setDiscounts(List<Discount> discounts) {
@@ -189,10 +189,10 @@ public class Product implements Model {
     }
 
     public List<QuantityProduct> getLocation() {
-        return Collections.unmodifiablelist(location);
+        return Collections.unmodifiableList(location);
     }
 
-    private void setLocation(List<QuantityProduct> location) {
+    public void setLocation(List<QuantityProduct> location) {
         if (location == null)
             this.location = new ArrayList<>();
         else

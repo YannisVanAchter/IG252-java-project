@@ -12,18 +12,18 @@ import main.java.be.henallux.project.model.exception.DataValidationException;
  * Regarding the optional fields, they become compulsory depending on the document type.
  */
 public class Document implements Model {
-    private static final List<DocumentType> TYPES_REQUIRING_PLANNED_SEND_DATE =
-        Arrays.asList(new DocumentType("Delivery"));
-    private static final List<DocumentType> TYPES_REQUIRING_RECEPTION_DATE = 
-        Arrays.asList(new DocumentType("Delivery"));
-    private static final List<DocumentType> TYPES_REQUIRING_PAYMENT_DELAY = 
-        Arrays.asList(new DocumentType("Command"));
-    private static final List<DocumentType> TYPES_REQUIRING_COMMENTARY = 
-        Arrays.asList(new DocumentType("Preparation Order"));
-    private static final List<DocumentType> TYPES_REQUIRING_ADDRESS = 
-        Arrays.asList(new DocumentType("Delivery"));
-    private static final List<DocumentType> TYPES_REQUIRING_RECIPE_ORDER =
-        Arrays.asList(new DocumentType("Preparation Order"));
+    public static final List<DocumentType> TYPES_REQUIRING_PLANNED_SEND_DATE =
+        Arrays.asList(new DocumentType(1,"Delivery"));
+    public static final List<DocumentType> TYPES_REQUIRING_RECEPTION_DATE =
+        Arrays.asList(new DocumentType(2,"Delivery"));
+    public static final List<DocumentType> TYPES_REQUIRING_PAYMENT_DELAY =
+        Arrays.asList(new DocumentType(3,"Command"));
+    public static final List<DocumentType> TYPES_REQUIRING_COMMENTARY =
+        Arrays.asList(new DocumentType(4,"Preparation Order"));
+    public static final List<DocumentType> TYPES_REQUIRING_ADDRESS =
+        Arrays.asList(new DocumentType(5,"Delivery"));
+    public static final List<DocumentType> TYPES_REQUIRING_RECIPE_ORDER =
+        Arrays.asList(new DocumentType(6,"Preparation Order"));
 
     private int id;
     private LocalDate dateOfCreation;
@@ -52,7 +52,6 @@ public class Document implements Model {
      * @param actualDateOfReceipt
      * @param paymentDelay
      * @param workflow
-     * @param clientSupplier
      * @param address used in delivery notice
      * @param comment used in preparation orders
      * @param recipeOrder used in preparation Order
@@ -211,7 +210,7 @@ public class Document implements Model {
 
     private void setDocumentType(DocumentType documentType) {
         if (documentType == null) {
-            this.documentType = new DocumentType("Unknown");
+            this.documentType = new DocumentType(-1,"Unknown");
             return;
         }
         this.documentType = documentType;

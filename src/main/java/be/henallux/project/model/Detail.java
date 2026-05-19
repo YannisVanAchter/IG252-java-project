@@ -103,7 +103,7 @@ public class Detail implements Model {
     }
 
     public List<Batch> getBatches() {
-        return Collections.unmodifiablelist(batches);
+        return Collections.unmodifiableList(batches);
     }
 
     private void setBatches(List<Batch> batches) {
@@ -116,6 +116,12 @@ public class Detail implements Model {
     public void addBatch(Batch batch) {
         if ( !batches.contains(batch))
             batches.add(batch);
+    }
+
+    @Override
+    public String getLabel() {
+        return "Product #" + id + " - " + quantity + " pcs - "
+                + String.format("%.2f", priceEVAT) + "€ EVAT";
     }
 
     @Override
