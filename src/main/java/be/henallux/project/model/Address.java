@@ -33,7 +33,7 @@ public class Address implements Model {
 
     public int getAddressId() { return addressId; }
 
-    private void setAddressId(int addressId) throws DataValidationException {
+    public void setAddressId(int addressId) throws DataValidationException {
         if (addressId < 0)
             throw new DataValidationException("Address ID must be positive");
         this.addressId = addressId;
