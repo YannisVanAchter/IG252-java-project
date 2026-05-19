@@ -23,7 +23,7 @@ import java.util.ArrayList;
  * @see Recipe
  */
 public class RecipeSearchTable extends JPanel {
-    private static final int TBL_BTN_SEE = 4;
+    private static final int TBL_BTN_SEE = RecipeTableModel.TBL_BTN_SEE;
 
     private final MainWindow mainWindow;
     private final RecipeSearchController controller;
@@ -79,9 +79,11 @@ public class RecipeSearchTable extends JPanel {
     private JPanel buildSearchPanel() {
 
         txtRecipeName = new JTextField();
+        ViewUtils.setCursor(txtRecipeName);
         txtRecipeName = ViewUtils.addFilterListener(txtRecipeName, this::onSearchClick);
 
         JButton btnSearch = new JButton("Search");
+        ViewUtils.setCursor(btnSearch);
         btnSearch.addActionListener(e -> onSearchClick());
 
         JPanel nameFields = new JPanel(new BorderLayout(0, 4));
@@ -95,6 +97,7 @@ public class RecipeSearchTable extends JPanel {
         leftColumn.add(btnSearch, BorderLayout.SOUTH);
 
         JButton btnAddIngredient = new JButton("+ Add ingredient");
+        ViewUtils.setCursor(btnAddIngredient);
         btnAddIngredient.addActionListener(e -> addIngredientRow());
 
         ingredientRowsPanel = new JPanel();
@@ -154,8 +157,10 @@ public class RecipeSearchTable extends JPanel {
      */
     private void addIngredientRow() {
         JTextField field = new JTextField();
+        ViewUtils.setCursor(field);
         //field = ViewUtils.addFilterListener(field, this::onFilterClick);
         JButton btnRemove = new JButton("<html>&times;</html>");
+        ViewUtils.setCursor(btnRemove);
 
         JPanel row = new JPanel(new BorderLayout(4, 0));
         row.setBorder(new EmptyBorder(2, 4, 2, 4));

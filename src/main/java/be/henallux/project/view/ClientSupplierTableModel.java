@@ -15,8 +15,11 @@ import java.util.ArrayList;
  */
 public class ClientSupplierTableModel extends AbstractTableModel {
     private static final String[] COLUMNS = {
-            "id", "Name", "First Name", "Email", "TVA", "Type", "Loyality", "", ""
+            "id", "Name & First Name", "Email", "TVA", "Type", "Loyality", "", ""
     };
+
+    public static final int TBL_BTN_DEL = 7;
+    public static final int TBL_BTN_UPDATE = 6;
 
     private ArrayList<ClientSupplier> clientSuppliers;
 
@@ -59,14 +62,13 @@ public class ClientSupplierTableModel extends AbstractTableModel {
 
         return switch (columnIndex) {
             case 0 -> cs.getId();
-            case 1 -> cs.getName();
-            case 2 -> cs.getFirstname();
-            case 3 -> cs.getEmail();
-            case 4 -> cs.getVATNumber();
-            case 5 -> cs.getType();
-            case 6 -> "100" ;       //cs.getLoyalty(); //TODO : add loyalty
-            case 7 -> "Edit";
-            case 8 -> "Delete";
+            case 1 -> cs.getLabel();
+            case 2 -> cs.getEmail();
+            case 3 -> cs.getVATNumber();
+            case 4 -> cs.getType();
+            case 5 -> cs.getFidelityCard().getTotalPoint();
+            case 6 -> "Edit";
+            case 7 -> "Delete";
             default -> null;
         };
     }

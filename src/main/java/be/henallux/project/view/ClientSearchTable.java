@@ -14,14 +14,14 @@ import java.util.List;
 
 /**
  * A Swing panel that displays and manages a searchable table of clients.
- * <p>This view allows users to filter clients by name, email, and fidelity card number,
+ * <p>This view allows users to filter clients by name, email, and fidelity card number
  * and displays the results in a table format.</p>
  * <p>Users can click on a row action button to open a detailed client view
  * in the main application window.</p>
  * @see MainWindow#openClientView(ClientSupplier)
  */
 public class ClientSearchTable extends JPanel {
-    private static final int TBL_BTN_SEE = 9;
+    private static final int TBL_BTN_SEE = ClientSearchTableModel.TBL_BTN_SEE;
 
     private MainWindow mainWindow;
     private ClientSupplierSearchController controller;  // ← nouveau controller
@@ -35,7 +35,7 @@ public class ClientSearchTable extends JPanel {
 
     private JTable table;
 
-    public ClientSearchTable(MainWindow mainWindow) throws DataValidationException {
+    public ClientSearchTable(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         this.controller = new ClientSupplierSearchController();
 
@@ -71,23 +71,27 @@ public class ClientSearchTable extends JPanel {
      */
     private JPanel buildSearchPanel() {
         txtName = new JTextField(10);
+        ViewUtils.setCursor(txtName);
         JPanel namePanel = new JPanel(new BorderLayout(0, 4));
         namePanel.add(new JLabel("Name"), BorderLayout.NORTH);
         namePanel.add(txtName, BorderLayout.CENTER);
 
         txtEmail = new JTextField(10);
+        ViewUtils.setCursor(txtEmail);
         JPanel emailPanel = new JPanel(new BorderLayout(0, 4));
         emailPanel.add(new JLabel("Email"), BorderLayout.NORTH);
         emailPanel.add(txtEmail, BorderLayout.CENTER);
 
         txtFidelityCard = new JTextField(10);
         txtFidelityCard = ViewUtils.digitsOnly(txtFidelityCard);
+        ViewUtils.setCursor(txtFidelityCard);
         JPanel fidelityPanel = new JPanel(new BorderLayout(0, 4));
         fidelityPanel.add(new JLabel("Fidelity card number"), BorderLayout.NORTH);
         fidelityPanel.add(txtFidelityCard, BorderLayout.CENTER);
 
         JButton btnSearch = new JButton("Search");
         btnSearch.addActionListener(e -> onSearchClick());
+        ViewUtils.setCursor(btnSearch);
 
         JPanel column = new JPanel();
         column.setLayout(new BoxLayout(column, BoxLayout.Y_AXIS));
@@ -117,6 +121,19 @@ public class ClientSearchTable extends JPanel {
                 int col = table.convertColumnIndexToModel(
                         table.columnAtPoint(e.getPoint()));
                 if (col == TBL_BTN_SEE) onSeeClick();
+            }
+        });
+        table.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int row = table.rowAtPoint(e.getPoint());
+                int col = table.columnAtPoint(e.getPoint());
+
+                if (row >= 0 && col == TBL_BTN_SEE) {
+                    table.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                } else {
+                    table.setCursor(Cursor.getDefaultCursor());
+                }
             }
         });
 

@@ -1,9 +1,12 @@
 package main.java.be.henallux.project.view;
 
+import main.java.be.henallux.project.model.Discount;
 import main.java.be.henallux.project.model.Product;
+import main.java.be.henallux.project.model.QuantityProduct;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 /**
  * A Swing-based view that displays detailed information about a single {@link Product}.
@@ -75,51 +78,77 @@ public class ProductView extends JPanel {
         return panel;
     }
 
-
     private JPanel buildProductInfo() {
         JPanel card = createCard("Product Information");
         card.add(labelValue("Product label", product.getName()));
-        card.add(labelValue("Category", product.getCategory().toString()));
-        card.add(labelValue("Price (Excl. Tax)", formatPrice(product.getPrice())));
+        card.add(labelValue("Category", product.getCategory().getLabel()));
+        card.add(labelValue("Price (Excl. Tax)", formatPrice(product.getPriceEVAT().floatValue())));
+        card.add(labelValue("Price (Incl. Tax)", formatPrice(product.getPrice())));
         card.add(labelValue("VAT", product.getVat() + "%"));
-        card.add(labelValue("Loyalty points", product.getPoints() + " pts"));
+        card.add(labelValue("Loyalty points", product.getFidelityPoint() + " pts"));
+        card.add(labelValue("Edible", product.getIsEdible() ? "Yes" : "No"));
         return card;
     }
 
     private JPanel buildStockInfo() {
         JPanel card = createCard("Stock Information");
 
-        if (product.getQuantity() == null) {
+        List<QuantityProduct> locations = product.getLocation();
+
+        if (locations == null || locations.isEmpty()) {
             card.add(labelValue("No stock data available", LABEL_NO_DATA));
             return card;
         }
 
-        card.add(labelValue("Number of products", String.valueOf(product.getQuantity().getNbProduct())));
-        card.add(labelValue("Minimum threshold", String.valueOf(product.getMinStock())));
-        card.add(labelValue("Shelf", String.valueOf(product.getQuantity().getShelf())));
-        card.add(labelValue("Floor", String.valueOf(product.getQuantity().getFloor())));
-        card.add(labelValue("Refrigerated", product.getQuantity().getLocation().getIsRefrigerated() ? "yes" : "no"));
+        card.add(labelValue("Total quantity", String.valueOf(product.getTotalQuantity())));
+        card.add(labelValue("Stock quantity", String.valueOf(product.getStockQuantity())));
+        card.add(labelValue("Non-stock quantity", String.valueOf(product.getNonStockQuantity())));
+        card.add(labelValue("Minimum threshold", String.valueOf(product.getMinStockQuantity())));
+
+        for (QuantityProduct qp : locations) {
+            JPanel locationCard = createCard("Location " + qp.getLocationProduct().getLabel());
+            locationCard.add(labelValue("Quantity", String.valueOf(qp.getQuantity())));
+            card.add(locationCard);
+        }
+
         return card;
     }
 
     private JPanel buildPromotion() {
         JPanel card = createCard("Promotion");
 
-        if (product.getPromotion() == null) {
+        List<Discount> discounts = product.getDiscounts();
+        if (discounts == null || discounts.isEmpty()) {
             card.add(labelValue("No promotion available", LABEL_NO_DATA));
             return card;
         }
 
-        card.add(labelValue("Discount", String.valueOf(product.getPromotion().getDiscountPercentage())));
-        card.add(labelValue("Required quantity", String.valueOf(product.getPromotion().getRequiredQuantity())));
-        card.add(labelValue("Start date", String.valueOf(product.getPromotion().getStartDate())));
-        card.add(labelValue("End date", String.valueOf(product.getPromotion().getEndDate())));
+        Discount current = product.getCurrentDiscount();
+        if (current != null) {
+            card.add(labelValue("Discount", product.getCurrentDiscount().getDiscountPercentage() + "%"));
+            card.add(labelValue("Required quantity", String.valueOf(product.getCurrentDiscount().getRequiredQuantity())));
+            card.add(labelValue("Start date", ViewUtils.formatDate(product.getCurrentDiscount().getStartDate())));
+            card.add(labelValue("End date", ViewUtils.formatDate(product.getCurrentDiscount().getEndDate())));
+        }
+        System.out.println("ok");
+        for (Discount discount : discounts) {
+            System.out.println("boucle");
+            if (current != null && !current.equals(discount)) {
+                System.out.println("test 1");
+                JPanel promoCard = createCard("Previous");
+                promoCard.add(labelValue("Date", ViewUtils.formatDate(discount.getStartDate()) + " - " + ViewUtils.formatDate(discount.getEndDate())));
+                promoCard.add(labelValue("Discount", discount.getDiscountPercentage() + "%"));
+                promoCard.add(labelValue("Required quantity", String.valueOf(discount.getRequiredQuantity())));
+                card.add(promoCard);
+            }
+        }
         return card;
     }
 
     private JPanel buildFooter() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton back = new JButton("Back");
+        ViewUtils.setCursor(back);
         back.addActionListener(e -> mainWindow.goBack());
         panel.add(back);
         return panel;
@@ -127,6 +156,7 @@ public class ProductView extends JPanel {
 
     /**
      * Creates a titled container panel used as a visual section card.
+     *
      * @param title the title displayed on the card border
      * @return a styled JPanel configured with a vertical layout
      */
@@ -152,7 +182,7 @@ public class ProductView extends JPanel {
         return panel;
     }
 
-    private String formatPrice(double price) {
-        return price + "€";
+    private String formatPrice(float price) {
+        return String.format("%.2f €", price);
     }
 }

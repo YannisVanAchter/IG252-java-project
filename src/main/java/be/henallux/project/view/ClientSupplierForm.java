@@ -9,7 +9,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import main.java.be.henallux.project.model.*;
-// Todo : uncomment loyalty loadDocument when available
 
 /**
  * ClientSupplierForm represents the form for creating and modifying a Client or Supplier.
@@ -91,6 +90,7 @@ public class ClientSupplierForm extends JPanel {
      */
     private JPanel buildHeader() {
         JButton btnBack = new JButton("←");
+        ViewUtils.setCursor(btnBack);
         btnBack.addActionListener(e -> {
             if (isOpenInModal != null && isOpenInModal) {
                 SwingUtilities.getWindowAncestor(this).dispose();
@@ -137,23 +137,28 @@ public class ClientSupplierForm extends JPanel {
 
         txtName = new JTextField(10);
         txtName.setToolTipText("Ex: Dupont");
+        ViewUtils.setCursor(txtName);
         leftContent.add(ViewUtils.labeledRequired("Name", txtName));
 
         txtFirstName = new JTextField(10);
+        ViewUtils.setCursor(txtFirstName);
         leftContent.add(ViewUtils.labeledRequired("First name", txtFirstName));
 
         txtMail = new JTextField(10);
+        ViewUtils.setCursor(txtMail);
         txtMail.setToolTipText("Ex: jean.dupont@email.com");
         leftContent.add(ViewUtils.labeledRequired("Mail", txtMail));
 
         txtPhoneNumber = new JTextField(10);
         txtPhoneNumber.setToolTipText("ex: 0032123456");
+        ViewUtils.setCursor(txtPhoneNumber);
         txtPhoneNumber = ViewUtils.digitsOnly(txtPhoneNumber);
         leftContent.add(ViewUtils.labeledRequired("Phone number", txtPhoneNumber));
 
         txtVATNumber = new JTextField(10);
         txtVATNumber.setToolTipText("BE + 10 digits");
         txtVATNumber.setText("BE");
+        ViewUtils.setCursor(txtVATNumber);
         leftContent.add(ViewUtils.labeledRequired("VAT number", txtVATNumber));
 
         becameClientDate = ViewUtils.createDateSpinner();
@@ -200,21 +205,27 @@ public class ClientSupplierForm extends JPanel {
 
         txtStreet = new JTextField(10);
         txtStreet.setToolTipText("Ex: Avenue Louise");
+        ViewUtils.setCursor(txtStreet);
         addressPanel.add(ViewUtils.labeledRequired("Street", txtStreet));
 
         spnStreetNumber = ViewUtils.createNumberSpinner(1, 1, 10000, 1);
+        ViewUtils.setCursor(spnStreetNumber);
         addressPanel.add(ViewUtils.labeled("Street Number", spnStreetNumber));
 
         spnPostalCode = ViewUtils.createNumberSpinner(1000, 1, 99999, 1);
+        ViewUtils.setCursor(spnPostalCode);
         addressPanel.add(ViewUtils.labeled("Postal Code", spnPostalCode));
 
         txtCity = new JTextField(10);
         txtCity.setToolTipText("Ex: Bruxelles");
+        ViewUtils.setCursor(txtCity);
         addressPanel.add(ViewUtils.labeledRequired("City", txtCity));
 
         txtCountry = new JTextField("Belgium");
         txtCountry.setEditable(false);
         txtCountry.setFocusable(false);
+        txtCountry.setBackground(Color.LIGHT_GRAY);
+        txtCountry.setForeground(Color.DARK_GRAY);
         addressPanel.add(ViewUtils.labeled("Country", txtCountry));
 
         addressPanel.add(Box.createVerticalStrut(10));
@@ -223,9 +234,11 @@ public class ClientSupplierForm extends JPanel {
         JPanel loyaltyPanel = ViewUtils.createColumnPanel();
         loyaltyPanel.setBorder(BorderFactory.createTitledBorder("Loyalty"));
         txtIdLoyaltyCard = new JTextField(10);
+        ViewUtils.setCursor(txtIdLoyaltyCard);
         loyaltyPanel.add(ViewUtils.labeled("Loyalty card ID", txtIdLoyaltyCard));
 
         spnLoyaltyPoint = ViewUtils.createNumberSpinner(0, 0, 9999, 1000);
+        ViewUtils.setCursor(spnLoyaltyPoint);
         loyaltyPanel.add(ViewUtils.labeled("Loyalty points", spnLoyaltyPoint));
         loyaltyPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, loyaltyPanel.getPreferredSize().height));
 
@@ -238,9 +251,11 @@ public class ClientSupplierForm extends JPanel {
     private JPanel buildButtonPanel() {
         btnSave = new JButton("Save");
         btnSave.addActionListener(e -> saveEditForm());
+        ViewUtils.setCursor(btnSave);
 
-        JButton btnClear = new JButton("Clear");
+        btnClear = new JButton("Clear");
         btnClear.addActionListener(e -> clearForm());
+        ViewUtils.setCursor(btnClear);
 
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         panel.add(btnClear);
@@ -390,7 +405,6 @@ public class ClientSupplierForm extends JPanel {
         txtCountry.setText("Belgique");
 
         currentClientSupplier = null;
-        isOpenInModal = false;
     }
 
     /**
@@ -420,8 +434,8 @@ public class ClientSupplierForm extends JPanel {
             becameClientDate.setValue(ViewUtils.toDate(cs.getBecameClientDate()));
         }
 
-        //txtIdLoyaltyCard.setText(cs.getLoyaltyCard.getId());
-        //spnLoyaltyPoint.setValue(cs.getLoyaltyCard.getPoints());
+        txtIdLoyaltyCard.setText(String.valueOf(cs.getFidelityCard().getId()));
+        spnLoyaltyPoint.setValue(String.valueOf(cs.getFidelityCard().getTotalPoint()));
 
         chkIsClient.setSelected(cs.getIsClient());
         chkIsSupplier.setSelected(cs.getIsSupplier());
@@ -431,7 +445,7 @@ public class ClientSupplierForm extends JPanel {
         spnPostalCode.setValue(cs.getAddress().getLocality().getPostalCode());
 
         txtStreet.setText(cs.getAddress().getStreetName());
-        txtCity.setText(cs.getAddress().getLocality().getName());
+        txtCity.setText(cs.getAddress().getLocality().getCity());
         txtCountry.setText("Belgium");
 
         btnSave.setText("Edit");
@@ -444,6 +458,7 @@ public class ClientSupplierForm extends JPanel {
      *         or {@code null} if no client/supplier is loaded
      */
     public ClientSupplier getCurrentClientSupplier() {
+        System.out.println("getCurrentClientSupplier: " + currentClientSupplier);
         return currentClientSupplier;
     }
 }

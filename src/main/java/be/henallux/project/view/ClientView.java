@@ -64,7 +64,7 @@ public class ClientView extends JPanel {
 
     private JPanel buildTitle() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JLabel label = new JLabel(client.getFirstname() + " " + client.getName());
+        JLabel label = new JLabel(client.getLabel() != null ? client.getLabel() : LABEL_NO_DATA);
         label.setFont(new Font("Arial", Font.BOLD, 20));
         panel.add(label);
         return panel;
@@ -78,19 +78,21 @@ public class ClientView extends JPanel {
         card.add(labelValue("Email", client.getEmail()));
         card.add(labelValue("Phone", client.getPhoneNumber()));
         card.add(labelValue("Client since", client.getBecameClientDate() != null
-                ? client.getBecameClientDate().toString()
+                ? ViewUtils.formatDate(client.getBecameClientDate())
                 : LABEL_NO_DATA));
         card.add(labelValue("Is staff member", client.getIsUs() ? "Yes" : "No"));
         return card;
     }
 
-    /**
-     * TODO: remplacer par client.getFidelityCard() quand implémenté
-     */
     private JPanel buildFidelityInfo() {
         JPanel card = createCard("Fidelity Card");
-        card.add(labelValue("Total points", "100"));
-        card.add(labelValue("Card valid", "Yes"));
+
+        if (!client.getFidelityCard().getIsValid()) {
+            card.add(labelValue("Fidelity card", LABEL_NO_DATA));
+            return card;
+        }
+        card.add(labelValue("Card Number", String.valueOf(client.getFidelityCard().getId())));
+        card.add(labelValue("Total points", String.valueOf(client.getFidelityCard().getTotalPoint())));
         return card;
     }
 
@@ -100,6 +102,7 @@ public class ClientView extends JPanel {
         String street = LABEL_NO_DATA;
         String streetNb = LABEL_NO_DATA;
         String postalCode = LABEL_NO_DATA;
+        String city = LABEL_NO_DATA;
 
         if (client.getAddress() != null) {
             street = client.getAddress().getStreetName() != null
@@ -109,6 +112,9 @@ public class ClientView extends JPanel {
             if (client.getAddress().getLocality() != null) {
                 postalCode = String.valueOf(client.getAddress().getLocality().getPostalCode());
             }
+            city = client.getAddress().getLocality().getCity() != null
+                    ? client.getAddress().getLocality().getCity() : LABEL_NO_DATA;
+            card.add(labelValue("City", city));
         }
 
         card.add(labelValue("Street", street));
@@ -121,10 +127,12 @@ public class ClientView extends JPanel {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
         JButton edit = new JButton("Edit");
+        ViewUtils.setCursor(edit);
         edit.addActionListener(e -> {
             mainWindow.openClientSupplierForm(client);
         });
         JButton back = new JButton("Back");
+        ViewUtils.setCursor(back);
         back.addActionListener(e -> mainWindow.goBack());
 
         panel.add(edit);

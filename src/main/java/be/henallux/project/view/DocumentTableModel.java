@@ -18,6 +18,9 @@ public class DocumentTableModel extends AbstractTableModel {
             "ID", "Workflow", "Creation date", "Send/Receipt date", "", ""
     };
 
+    public static final int TBL_BTN_DEL = 5;
+    public static final int TBL_BTN_UPDATE = 4;
+
     private ArrayList<Document> documents;
 
     public DocumentTableModel(ArrayList<Document> documents) {
@@ -26,7 +29,7 @@ public class DocumentTableModel extends AbstractTableModel {
 
     /**
      * Load the Documents list in the table and allow refresh with new data.
-     * @see AbstractTableModel#fireTableDataChanged();
+     * @see AbstractTableModel#fireTableDataChanged()
      * @param documents
      */
     public void setDocuments(ArrayList<Document> documents) {
@@ -58,9 +61,9 @@ public class DocumentTableModel extends AbstractTableModel {
         Document doc = documents.get(rowIndex);
         return switch (columnIndex) {
             case 0 -> doc.getId();
-            case 1 -> doc.getDocumentType().getName();
+            case 1 -> doc.getWorkflow() != null ? doc.getWorkflow().getLabel() : "N/A";
             case 2 -> doc.getDateOfCreation();
-            case 3 -> doc.getActualSendDate() != null ? doc.getActualSendDate() : doc.getActualDateOfReceipt();
+            case 3 -> doc.getActualSendDate() != null ? ViewUtils.formatDate(doc.getActualSendDate()) : ViewUtils.formatDate(doc.getActualDateOfReceipt());
             case 4 -> "Edit";
             case 5 -> "Delete";
             default -> null;

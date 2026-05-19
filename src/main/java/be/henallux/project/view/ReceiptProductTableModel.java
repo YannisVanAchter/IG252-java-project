@@ -20,6 +20,8 @@ public class ReceiptProductTableModel extends AbstractTableModel {
             "Name", "Price", "Action"
     };
 
+    public static final int TBL_BTN_ADD = 2;
+
     private List<Product> products;
 
     public ReceiptProductTableModel(ArrayList<Product> products) {
@@ -59,7 +61,7 @@ public class ReceiptProductTableModel extends AbstractTableModel {
         Product p = products.get(rowIndex);
         return switch (columnIndex) {
             case 0 -> p.getName();
-            case 1 -> p.getPrice();
+            case 1 -> String.format("%.2f €", p.getPrice());
             case 2 -> "Add";
             default -> null;
         };

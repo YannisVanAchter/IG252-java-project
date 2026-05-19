@@ -66,18 +66,18 @@ public class ProductTableModel extends AbstractTableModel {
 
     public Object getValueAt(int row, int col) {
         Product p = products.get(row);
-        Discount promo = p.getPromotion();
+        Discount promo = p.getCurrentDiscount();
 
         return switch (col) {
             case 0 -> p.getName();
             case 1 -> p.getCategory() != null ? p.getCategory().getName() : "N/A";
-            case 2 -> p.getPoints();
+            case 2 -> p.getFidelityPoint();
             case 3 -> p.getPrice();
             case 4 -> p.getVat();
-            case 5 -> p.getQuantity().getNbProduct();
-            case 6 -> promo != null ? "yes" : "no";
+            case 5 -> p.getTotalQuantity();
+            case 6 -> p.getIsDiscounted();
             case 7 -> promo != null ? promo.getDiscountPercentage() + "%" : "-";
-            case 8 -> promo != null ? promo.getStartDate() : "-";
+            case 8 -> promo != null ? ViewUtils.formatDate(promo.getStartDate()) : "-";
             case 9 -> "See";
             default -> null;
         };
@@ -87,5 +87,13 @@ public class ProductTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         return false;
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        if (columnIndex == 6) {
+            return Boolean.class;
+        }
+        return Object.class;
     }
 }

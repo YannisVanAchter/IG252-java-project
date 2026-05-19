@@ -44,7 +44,7 @@ public class ProductSearchTable extends JPanel {
 
     private JTable table;
 
-    public ProductSearchTable(MainWindow mainWindow) throws DataValidationException {
+    public ProductSearchTable(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         this.productSearchController = new ProductSearchController();
         this.productController = new ProductController();
@@ -73,19 +73,23 @@ public class ProductSearchTable extends JPanel {
     private JPanel buildSearchPanel() {
 
         txtProductName = ViewUtils.addFilterListener(new JTextField(10), this::onSearchClick);
+        ViewUtils.setCursor(txtProductName);
         JPanel nameFields = new JPanel(new BorderLayout(0, 4));
         nameFields.add(new JLabel("Product name"), BorderLayout.NORTH);
         nameFields.add(txtProductName, BorderLayout.CENTER);
 
-        comboCategory = new JComboBox<>(productController.getCategoryNames());
+        comboCategory = new JComboBox<>(productController.getAllCategory());
+        ViewUtils.setCursor(comboCategory);
         comboCategory = ViewUtils.addFilterListener(comboCategory, this::onSearchClick);
         JPanel categoryFields = new JPanel(new BorderLayout(0, 4));
         categoryFields.add(new JLabel("Category"), BorderLayout.NORTH);
         categoryFields.add(comboCategory, BorderLayout.CENTER);
 
         chkPromotion = ViewUtils.addFilterListener(new JCheckBox("Promotion only"), this::onSearchClick);
+        ViewUtils.setCursor(chkPromotion);
 
         btnSearch = new JButton("Search");
+        ViewUtils.setCursor(btnSearch);
         btnSearch.addActionListener(e -> onSearchClick());
 
         JPanel fieldsColumn = new JPanel();
@@ -131,7 +135,7 @@ public class ProductSearchTable extends JPanel {
      * and the table model via {@code ProductTableModel#setProducts(List)}.
      * @see ProductSearchController
      */
-    public void onSearchClick() {
+    public void onSearchClick()  {
         String name = txtProductName.getText().trim();
         String category = (String) comboCategory.getSelectedItem();
         Boolean promo = chkPromotion.isSelected() ? true : null;

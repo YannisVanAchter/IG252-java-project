@@ -1,6 +1,6 @@
 package main.java.be.henallux.project.controller;
 
-import main.java.be.henallux.project.exception.DataValidationException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.Address;
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.Product;
@@ -10,65 +10,34 @@ import java.util.ArrayList;
 
 /**
  * Controller fictif utilisé uniquement pour simuler les vues de l'application.
- *
+ * <p>
  * TODO: clean & implement class.
  */
 public class SupplierController {
+
+    private final ClientSupplierController clientSupplierController = new ClientSupplierController();
 
     /**
      * Retourne tous les fournisseurs disponibles (mock data)
      *
      * @return liste de fournisseurs
      */
-    public ArrayList<ClientSupplier> getAllSuppliers() throws DataValidationException {
-        ArrayList<ClientSupplier> suppliers = new ArrayList<>();
+    public ArrayList<ClientSupplier> getAllSuppliers() {
 
-        Address address = new Address("Rue", 48, "Namur", 5000);
-        suppliers.add(new ClientSupplier(
-                101,
-                "Lefevre",
-                "Paul",
-                "paul.lefevre@supplier.com",
-                "32470001001",
-                address,
-                false,
-                true,
-                false,
-                "BE1000000001",
-                LocalDate.now()
-        ));
+        try {
+            ArrayList<ClientSupplier> allClients = clientSupplierController.getAllClientSupplier();
+            ArrayList<ClientSupplier> suppliers = new ArrayList<>();
 
-        suppliers.add(new ClientSupplier(
-                102,
-                "Vermeulen",
-                "Anna",
-                "anna.vermeulen@supplier.com",
-                "32470001002",
-                address,
-                false,
-                true,
-                false,
-                "BE1000000002",
-                LocalDate.now()
-        ));
-
-        suppliers.add(new ClientSupplier(
-                103,
-                "Dubois",
-                "Marc",
-                "marc.dubois@supplier.com",
-                "32470001003",
-                address,
-                false,
-                true,
-                false,
-                "BE1000000003",
-                LocalDate.now()
-        ));
-
-        return suppliers;
+            for (ClientSupplier cs : allClients) {
+                if (cs.getIsSupplier()) {
+                    suppliers.add(cs);
+                }
+            }
+            return suppliers;
+        } catch (DataValidationException e) {
+            return new ArrayList<>();
+        }
     }
-
     /**
      * Retourne tous les produits d'un fournisseur (mock data)
      *

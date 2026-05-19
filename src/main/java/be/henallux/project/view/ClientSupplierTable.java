@@ -28,8 +28,8 @@ import main.java.be.henallux.project.model.*;
  * @see MainWindow#openClientSupplierForm(ClientSupplier)
  */
 public class ClientSupplierTable extends JPanel {
-    private static final int TBL_BTN_DEL = 8;
-    private static final int TBL_BTN_UPDATE = 7;
+    private static final int TBL_BTN_DEL = ClientSupplierTableModel.TBL_BTN_DEL;
+    private static final int TBL_BTN_UPDATE = ClientSupplierTableModel.TBL_BTN_UPDATE;
 
     private MainWindow mainWindow;
     private ClientSupplierController controller;
@@ -46,7 +46,7 @@ public class ClientSupplierTable extends JPanel {
 
     private JTable table;
 
-    public ClientSupplierTable(MainWindow mainWindow) throws DataValidationException {
+    public ClientSupplierTable(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         this.controller = new ClientSupplierController();
 
@@ -84,6 +84,7 @@ public class ClientSupplierTable extends JPanel {
      */
     private JPanel buildSearchPanel() {
         txtLoyalityCard = new JTextField(10);
+        ViewUtils.setCursor(txtLoyalityCard);
         txtLoyalityCard = ViewUtils.addFilterListener(txtLoyalityCard, this::onFilterClick);
         txtLoyalityCard = ViewUtils.digitsOnly(txtLoyalityCard);
         JPanel idFields = new JPanel(new BorderLayout(0, 4));
@@ -91,12 +92,14 @@ public class ClientSupplierTable extends JPanel {
         idFields.add(txtLoyalityCard, BorderLayout.CENTER);
 
         txtLastName = new JTextField(10);
+        ViewUtils.setCursor(txtLastName);
         txtLastName = ViewUtils.addFilterListener(txtLastName, this::onFilterClick);
         JPanel lastNameFields = new JPanel(new BorderLayout(0, 4));
         lastNameFields.add(new JLabel("Last name"), BorderLayout.NORTH);
         lastNameFields.add(txtLastName, BorderLayout.CENTER);
 
         txtFirstName = new JTextField(10);
+        ViewUtils.setCursor(txtFirstName);
         txtFirstName = ViewUtils.addFilterListener(txtFirstName, this::onFilterClick);
         JPanel firstNameFields = new JPanel(new BorderLayout(0, 4));
         firstNameFields.add(new JLabel("First name"), BorderLayout.NORTH);
@@ -112,8 +115,10 @@ public class ClientSupplierTable extends JPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
         JButton btnSearch = new JButton("Search");
-        btnSearch.addActionListener(e -> onCreateClick());
+        ViewUtils.setCursor(btnSearch);
+        btnSearch.addActionListener(e -> onFilterClick());
         JButton btnCreate = new JButton("Create");
+        ViewUtils.setCursor(btnCreate);
         btnCreate.addActionListener(e -> onCreateClick());
 
         JPanel leftColumn = new JPanel();
@@ -154,6 +159,7 @@ public class ClientSupplierTable extends JPanel {
      * A mouse listener is added to detect clicks on specific columns:
      * <ul><li>Column 8: triggers the delete action via {@code onDeleteClick()}.</li>
      *  <li>Other Column: triggers the update action via {@code onUpdateClick()}.</li></ul>
+     *
      * @return a {@link JScrollPane} containing the configured table
      */
     private JScrollPane buildTablePanel() {
@@ -263,9 +269,14 @@ public class ClientSupplierTable extends JPanel {
         mainWindow.openClientSupplierForm(cs);
     }
 
+    /**
+     * Handles the delete action triggered from the UI.
+     * <p>Retrieves the currently selected row in the table, asks for user confirmation,
+     * and delegates the deletion to the overloaded {@link #onDeleteClick(ClientSupplier)} method.
+     * <p>If no row is selected, a warning dialog is shown and the operation is canceled.
+     */
     public void onDeleteClick() {
         int selectedRow = table.getSelectedRow();
-
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this, "Please select a client/supplier to delete.");
             return;
@@ -279,14 +290,41 @@ public class ClientSupplierTable extends JPanel {
         );
 
         if (confirm == JOptionPane.YES_OPTION) {
+
             ClientSupplier csToDelete = displayClientSupplier.get(selectedRow);
+            onDeleteClick(csToDelete);
+        }
+    }
 
-            controller.deleteClientSupplier(csToDelete);
-
+    /**
+     * Deletes the specified ClientSupplier and updates the UI and model accordingly.
+     * <p>If the deletion is successful, the item is removed from both the internal lists
+     * and the table model, and a success notification is displayed.
+     * <p>If the deletion fails, an error notification is shown with an option to retry the operation.
+     *
+     * @param csToDelete the ClientSupplier to delete
+     */
+    public void onDeleteClick(ClientSupplier csToDelete) {
+        boolean isSuccess = controller.deleteClientSupplier(csToDelete);
+        if (isSuccess) {
             clientSuppliers.remove(csToDelete);
-            displayClientSupplier.remove(selectedRow);
-
+            displayClientSupplier.remove(csToDelete);
             model.setClientSuppliers(displayClientSupplier);
+
+            mainWindow.getNotificationController().push(new NotificationItem(
+                    "Delete",
+                    csToDelete.getLabel() + " has been deleted.",
+                    NotificationItem.Type.SUCCESS,
+                    null
+            ));
+
+        } else {
+            mainWindow.getNotificationController().push(new NotificationItem(
+                    "Delete",
+                    "Failed to delete. Click to retry.",
+                    NotificationItem.Type.ERROR,
+                    () -> onDeleteClick(csToDelete)
+            ));
         }
     }
 }

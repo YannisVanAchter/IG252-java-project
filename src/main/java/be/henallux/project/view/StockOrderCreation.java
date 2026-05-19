@@ -130,7 +130,7 @@ public class StockOrderCreation extends JPanel {
         card.add(Box.createVerticalStrut(10));
         card.add(labelValue("VAT", selectedSupplier.getVATNumber()));
         Address address = selectedSupplier.getAddress();
-        String adresseTxt = address.getStreetName() + ", " + address.getStreetNumber() + ". " + address.getLocality().getPostalCode() + " " + address.getLocality().getName();
+        String adresseTxt = address.getStreetName() + ", " + address.getStreetNumber() + ". " + address.getLabel();
         card.add(Box.createVerticalStrut(10));
         card.add(labelValue("Adresse", adresseTxt));
 
@@ -203,13 +203,15 @@ public class StockOrderCreation extends JPanel {
         JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
         p.setOpaque(false);
 
-        JButton cancel = new JButton("Cancel");
-        cancel.addActionListener(e -> onCancelClick());
-        JButton confirm = new JButton("Confirm");
-        confirm.addActionListener(e -> onConfirmClick());
+        JButton btnCancel = new JButton("Cancel");
+        ViewUtils.setCursor(btnCancel);
+        btnCancel.addActionListener(e -> onCancelClick());
+        JButton btnConfirm = new JButton("Confirm");
+        ViewUtils.setCursor(btnConfirm);
+        btnConfirm.addActionListener(e -> onConfirmClick());
 
-        p.add(cancel);
-        p.add(confirm);
+        p.add(btnCancel);
+        p.add(btnConfirm);
 
         return p;
     }
