@@ -25,7 +25,7 @@ public class DiscountTest {
 
     @BeforeEach
     public void setUp() throws DataValidationException {
-        try {}
+        try {
         requiredQuantity   = 2;
         discountPercentage = new BigDecimal("10");
         startDate          = LocalDate.of(2024, 1, 1);
@@ -36,6 +36,9 @@ public class DiscountTest {
             1, "Smartphone", new BigDecimal("500"), new BigDecimal("50"),
             10, true, 5, fruitsCategory, new ArrayList<>()
         );
+        } catch (DataValidationException e) {
+            fail("Failed to initialize test dependencies");
+        }
     }
 
     private Discount buildValid() throws DataValidationException {
