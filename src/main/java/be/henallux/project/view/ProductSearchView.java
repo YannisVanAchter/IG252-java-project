@@ -5,6 +5,7 @@ import main.java.be.henallux.project.model.Product;
 import main.java.be.henallux.project.model.QuantityProduct;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.List;
 
@@ -30,7 +31,26 @@ public class ProductSearchView extends JPanel {
 
     public ProductSearchView(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(0, 12));
+        setBorder(new EmptyBorder(8, 16, 8, 16));
+    }
+
+    private void build() {
+        removeAll();
+
+        JPanel top = new JPanel(new BorderLayout());
+        top.add(buildContent(), BorderLayout.NORTH);
+
+        JScrollPane scrollPane = new JScrollPane(top);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setPreferredSize(new Dimension(0, 250));
+
+        add(scrollPane, BorderLayout.CENTER);
+        add(buildFooter(), BorderLayout.SOUTH);
+        revalidate();
+        repaint();
     }
 
     /**
@@ -54,19 +74,19 @@ public class ProductSearchView extends JPanel {
             return;
         }
 
-        removeAll();
-        add(new JScrollPane(buildContent()), BorderLayout.CENTER);
-        add(buildFooter(), BorderLayout.SOUTH);
-        revalidate();
-        repaint();
+        build();
     }
 
     private JPanel buildContent() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(new EmptyBorder(0, 0, 8, 0));
         panel.add(buildTitle());
+        panel.add(Box.createVerticalStrut(8));
         panel.add(buildProductInfo());
+        panel.add(Box.createVerticalStrut(8));
         panel.add(buildStockInfo());
+        panel.add(Box.createVerticalStrut(8));
         panel.add(buildPromotion());
         return panel;
     }

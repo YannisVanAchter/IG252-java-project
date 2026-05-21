@@ -134,9 +134,7 @@ public class ReceiptClientInfoDialog extends JPanel {
     private JPanel buildInfoPanel() {
         infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-        infoPanel.setBorder(
-                BorderFactory.createTitledBorder("Client information")
-        );
+        infoPanel.setBorder(BorderFactory.createTitledBorder("Client information"));
 
         if (selectedClient == null) {
             JPanel noClientPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
@@ -149,7 +147,7 @@ public class ReceiptClientInfoDialog extends JPanel {
 
             JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
             JLabel lblName = new JLabel("Name:");
-            lblName.setPreferredSize(new Dimension(labelSize));
+            lblName.setPreferredSize(labelSize);
             JLabel lblNameValue = new JLabel(selectedClient.getFirstname() + " " + selectedClient.getName());
             namePanel.add(lblName);
             namePanel.add(lblNameValue);
@@ -157,7 +155,7 @@ public class ReceiptClientInfoDialog extends JPanel {
 
             JPanel emailPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
             JLabel lblEmail = new JLabel("Email:");
-            lblEmail.setPreferredSize(new Dimension(labelSize));
+            lblEmail.setPreferredSize(labelSize);
             JLabel lblEmailValue = new JLabel(selectedClient.getEmail());
             emailPanel.add(lblEmail);
             emailPanel.add(lblEmailValue);
@@ -165,7 +163,7 @@ public class ReceiptClientInfoDialog extends JPanel {
 
             JPanel loyaltyPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
             JLabel lblLoyalty = new JLabel("Loyalty points:");
-            lblLoyalty.setPreferredSize(new Dimension(labelSize));
+            lblLoyalty.setPreferredSize(labelSize);
 
             FidelityCard card = selectedClient.getFidelityCard();
             String loyaltyValue = (card != null)

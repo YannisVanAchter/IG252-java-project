@@ -25,18 +25,19 @@ public class HelpPanel extends JPanel {
 
     private static final Color COLOR_TEXT_DESC = Color.GRAY;
     private static final Color COLOR_BG = Color.WHITE;
+    private JScrollPane scrollPane;
 
     public HelpPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.decode("#EEEEEE"));
 
-        JScrollPane scroll = new JScrollPane();
-        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scroll.setBorder(BorderFactory.createEmptyBorder());
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-        scroll.setViewportView(buildContent());
+        scrollPane = new JScrollPane(buildContent());
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.getVerticalScrollBar().setValue(0);
 
-        add(scroll, BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     /**
@@ -57,6 +58,7 @@ public class HelpPanel extends JPanel {
         panel.add(buildSectionDescriptions());
         panel.add(Box.createVerticalStrut(12));
         panel.add(buildProjectInfo());
+        panel.add(Box.createVerticalGlue());
 
         return panel;
     }
@@ -96,7 +98,7 @@ public class HelpPanel extends JPanel {
      * Builds the keyboard shortcuts section.
      * <p>Displays a non-editable {@link JTable} listing all menu accelerators grouped by menu name.
      *
-     * @return a {@link JPanel} containing the shortcuts table
+     * @return a {@link JPanel} containing the shortcut table
      */
     private JPanel buildShortcuts() {
         JPanel panel = new JPanel();
@@ -288,5 +290,9 @@ public class HelpPanel extends JPanel {
         row.add(keyLabel);
         row.add(valueLabel);
         return row;
+    }
+
+    public void scrollToTop() {
+        scrollPane.getVerticalScrollBar().setValue(0);
     }
 }

@@ -12,14 +12,11 @@ import main.java.be.henallux.project.model.*;
 
 /**
  * ClientSupplierForm represents the form for creating and modifying a Client or Supplier.
- * <p>
- * This form allows the user to enter all required information related to a Client/Supplier
- * (name, fistname, type, address, etc.).
- * <p>
- * This view can be open with {@link CardLayout} in JPanel via {@link ClientSupplierTable}
+ * <p>This form allows the user to enter all required information related to a Client/Supplier
+ * (name, firstname, type, address, etc.).
+ * <p>This view can be open with {@link CardLayout} in JPanel via {@link ClientSupplierTable}
  * This view can be open with {@link JDialog} in modal via {@link DocumentForm}
- * <p>
- * The form communicates with {@link ClientSupplierController} to perform creation and update operations.
+ * <p>The form communicates with {@link ClientSupplierController} to perform creation and update operations.
  */
 public class ClientSupplierForm extends JPanel {
     private MainWindow mainWindow;
@@ -53,7 +50,6 @@ public class ClientSupplierForm extends JPanel {
 
     private JButton btnSave;
     private JButton btnClear;
-    private JButton btnNewClient;
 
     /**
      * Constructs a new instance of the ClientSupplierForm.
@@ -111,13 +107,20 @@ public class ClientSupplierForm extends JPanel {
     /**
      * Constructs and returns the main form panel containing two subpanels.
      * The panel is organized using a {@code GridLayout} with two columns and a horizontal gap of 20 pixels.
-     * @return the constructed {@code JPanel} containing all elements.
+     * Using a {@code JScrollPane} for automatic adaptation to window resizing
+     * @return a {@code JScrollPanel} containing all elements.
      */
-    private JPanel buildFormPanel() {
+    private JScrollPane buildFormPanel() {
         JPanel form = new JPanel(new GridLayout(1, 2, 20, 0));
         form.add(buildLeftPanel());
         form.add(buildRightPanel());
-        return form;
+
+        JScrollPane scrollPane = new JScrollPane(form);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setPreferredSize(new Dimension(0, 250));
+        return scrollPane;
     }
 
 
@@ -152,7 +155,7 @@ public class ClientSupplierForm extends JPanel {
         txtPhoneNumber = new JTextField(10);
         txtPhoneNumber.setToolTipText("ex: 0032123456");
         ViewUtils.setCursor(txtPhoneNumber);
-        txtPhoneNumber = ViewUtils.digitsOnly(txtPhoneNumber);
+        ViewUtils.digitsOnly(txtPhoneNumber);
         leftContent.add(ViewUtils.labeledRequired("Phone number", txtPhoneNumber));
 
         txtVATNumber = new JTextField(10);

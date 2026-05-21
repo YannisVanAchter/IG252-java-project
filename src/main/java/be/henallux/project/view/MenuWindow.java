@@ -107,11 +107,14 @@ public class MenuWindow extends JMenuBar {
         helpItem.setMnemonic(KeyEvent.VK_F1);
         helpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
         helpItem.addActionListener(e -> {
+            HelpPanel helpPanel = new HelpPanel();
             JDialog dialog = new JDialog(window, "Help", false);
             dialog.setSize(600, 500);
-            dialog.setLocationRelativeTo(window);
-            dialog.add(new HelpPanel());
+            dialog.add(helpPanel);
             dialog.setVisible(true);
+            SwingUtilities.invokeLater(() ->
+                    helpPanel.scrollToTop()
+            );
         });
         helpMenu.add(helpItem);
 

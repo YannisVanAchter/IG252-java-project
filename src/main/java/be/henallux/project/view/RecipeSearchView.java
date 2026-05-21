@@ -37,7 +37,7 @@ public class RecipeSearchView extends JPanel {
     public RecipeSearchView(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         setLayout(new BorderLayout(0, 12));
-        setBorder(new EmptyBorder(16, 16, 16, 16));
+        setBorder(new EmptyBorder(8, 16, 8, 16));
     }
 
     private void build() {

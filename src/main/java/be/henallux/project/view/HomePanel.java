@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 /**
  * HomePanel represents the main dashboard of the application.
@@ -166,7 +167,8 @@ public class HomePanel extends JPanel {
         JPanel card = new JPanel();
         card.setBackground(COLOR_BG);
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-        card.addMouseListener(new MouseAdapter() {
+
+        MouseListener listener = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 mainWindow.setPage(pageName);
@@ -187,9 +189,9 @@ public class HomePanel extends JPanel {
                         BorderFactory.createEmptyBorder(10, 12, 10, 12)
                 ));
             }
-        });
-        card.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        };
 
+        card.setCursor(new Cursor(Cursor.HAND_CURSOR));
         card.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.GRAY, 1, true),
                 BorderFactory.createEmptyBorder(10, 12, 10, 12)
@@ -220,9 +222,13 @@ public class HomePanel extends JPanel {
         card.add(Box.createVerticalStrut(4));
         card.add(descArea);
 
+        card.addMouseListener(listener);
+        accent.addMouseListener(listener);
+        titleLbl.addMouseListener(listener);
+        descArea.addMouseListener(listener);
+
         return card;
     }
-
     /**
      * Builds the footer of the home panel.
      * <p>The footer contains a horizontal separator followed by a centered label

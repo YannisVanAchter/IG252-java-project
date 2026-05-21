@@ -34,7 +34,7 @@ public class MainWindow extends JFrame {
         super("Magasin du Grand Bazard");
         this.notificationController = notificationController;
 
-        setSize(800, 600);
+        setSize(820, 620);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 

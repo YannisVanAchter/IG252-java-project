@@ -25,7 +25,25 @@ public class ClientSearchView extends JPanel {
     public ClientSearchView(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         setLayout(new BorderLayout(0, 12));
-        setBorder(new EmptyBorder(16, 16, 16, 16));
+        setBorder(new EmptyBorder(8, 16, 8, 16));
+    }
+
+    private void build() {
+        removeAll();
+
+        JPanel top = new JPanel(new BorderLayout());
+        top.add(buildContent(), BorderLayout.NORTH);
+
+        JScrollPane scrollPane = new JScrollPane(top);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setPreferredSize(new Dimension(0, 250));
+
+        add(scrollPane, BorderLayout.CENTER);
+        add(buildFooter(), BorderLayout.SOUTH);
+        revalidate();
+        repaint();
     }
 
     /**
@@ -43,13 +61,7 @@ public class ClientSearchView extends JPanel {
             return;
         }
 
-        removeAll();
-        JScrollPane pane = new JScrollPane(buildContent());
-        pane.setBorder(BorderFactory.createEmptyBorder());
-        add(pane, BorderLayout.CENTER);
-        add(buildFooter(), BorderLayout.SOUTH);
-        revalidate();
-        repaint();
+        build();
     }
 
     private JPanel buildContent() {

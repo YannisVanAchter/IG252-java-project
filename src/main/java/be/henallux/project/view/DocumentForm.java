@@ -15,11 +15,9 @@ import java.util.List;
 
 /**
  * DocumentForm represents the Form panel for creating and modifying a Document.
- * <p>
- * This form allows the user to enter all required information related to a document
+This form allows the user to enter all required information related to a document
  * (dates, workflow, client/supplier, address, etc.).
- * <p>
- * The form communicates with {@link DocumentController} to perform creation and update operations.
+The form communicates with {@link DocumentController} to perform creation and update operations.
  */
 public class DocumentForm extends JPanel {
     private final MainWindow mainWindow;
@@ -104,14 +102,21 @@ public class DocumentForm extends JPanel {
     /**
      * Constructs and returns the main form panel containing two subpanels.
      * The panel is organized using a {@code GridLayout} with two columns and a horizontal gap of 20 pixels.
+     * Using a {@code JScrollPane} for automatic adaptation to window resizing
      *
-     * @return the constructed {@code JPanel} containing all elements.
+     * @return a {@code JScrollPanel} containing all elements.
      */
-    private JPanel buildFormPanel() {
+    private JScrollPane buildFormPanel() {
         JPanel form = new JPanel(new GridLayout(1, 2, 20, 0));
         form.add(buildLeftPanel());
         form.add(buildRightPanel());
-        return form;
+
+        JScrollPane scrollPane = new JScrollPane(form);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setPreferredSize(new Dimension(0, 250));
+        return scrollPane;
     }
 
     /**
@@ -187,7 +192,7 @@ public class DocumentForm extends JPanel {
     /**
      * Builds and returns the right section of the form.
      * This panel contains two grouped sections:
-     * <ul><li>Workflox information: Workflow status, Workflow type.</li>
+     * <ul><li>Workflow information: Workflow status, Workflow type.</li>
      *   <li>Address information: street, street number, postal code, city, and country.</li></ul>
      * Some fields include predefined values, such as the non-editable country field
      * or restrictions such as numeric spinners for address and loyalty data.

@@ -74,15 +74,14 @@ public class StockOrderCreation extends JPanel {
 
         JScrollPane pane = new JScrollPane(center);
         pane.setBorder(BorderFactory.createEmptyBorder());
-        panel.add(pane, BorderLayout.NORTH);
+        pane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         add(buildTitle(), BorderLayout.NORTH);
-        add(panel, BorderLayout.CENTER);
+        add(pane, BorderLayout.CENTER);
         add(buildButtons(), BorderLayout.SOUTH);
 
         return panel;
     }
-
     /**
      * Loads a purchase order into the view.
      * <p>The current content is rebuilt using the selected supplier and products.
@@ -200,6 +199,9 @@ public class StockOrderCreation extends JPanel {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setPreferredSize(new Dimension(0, tableHeight));
         scrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, tableHeight));
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
 
         card.add(scrollPane, BorderLayout.CENTER);
 
