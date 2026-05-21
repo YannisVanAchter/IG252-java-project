@@ -29,6 +29,8 @@ public class ProductSearchTableModel extends AbstractTableModel {
 
     private List<Product> products;
 
+    public static final int TBL_BTN_SEE = 9;
+
     public ProductSearchTableModel(List<Product> products) {
         this.products = products;
     }

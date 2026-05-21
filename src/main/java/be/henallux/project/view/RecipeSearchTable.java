@@ -8,6 +8,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 
 /**
@@ -23,7 +24,6 @@ import java.util.ArrayList;
  * @see Recipe
  */
 public class RecipeSearchTable extends JPanel {
-    private static final int TBL_BTN_SEE = RecipeSearchTableModel.TBL_BTN_SEE;
 
     private final MainWindow mainWindow;
     private final RecipeSearchController controller;
@@ -137,13 +137,27 @@ public class RecipeSearchTable extends JPanel {
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if (table.columnAtPoint(e.getPoint()) == TBL_BTN_SEE) {
+                if (table.columnAtPoint(e.getPoint()) == RecipeSearchTableModel.TBL_BTN_SEE) {
                     onRowClick();
                 }
             }
         });
+        table.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int row = table.rowAtPoint(e.getPoint());
+                int col = table.columnAtPoint(e.getPoint());
 
-        table.getColumnModel().getColumn(TBL_BTN_SEE).setCellRenderer(new ButtonRenderer());
+                if (row >= 0 && col == RecipeSearchTableModel.TBL_BTN_SEE) {
+                    table.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                } else {
+                    table.setCursor(Cursor.getDefaultCursor());
+                }
+            }
+        });
+
+        table.getColumnModel().getColumn(RecipeSearchTableModel.TBL_BTN_SEE).setCellRenderer(new ButtonRenderer());
+        ViewUtils.resizeColumnWidth(table);
 
         JScrollPane scroll = new JScrollPane(table);
         scroll.setPreferredSize(new Dimension(0, 200));

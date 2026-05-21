@@ -24,6 +24,7 @@ public class StockOrderTableModel extends AbstractTableModel {
 
     private final ArrayList<ProductRow> rows = new ArrayList<>();
 
+    public final static int TBL_SPN_INDEX = 2;
 
     /**
      * Creates a new table model from a list of products.

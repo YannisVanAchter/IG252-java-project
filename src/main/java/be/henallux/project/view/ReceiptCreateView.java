@@ -9,6 +9,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.*;
 import java.util.List;
 
@@ -37,7 +38,6 @@ public class ReceiptCreateView extends JPanel {
     private static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 18);
     private static final Font FONT_TOTAL = new Font("SansSerif", Font.BOLD, 18);
 
-    private static final int TBL_BTN_ADD = ReceiptProductTableModel.TBL_BTN_ADD;
 
     private final MainWindow mainWindow;
     private final ProductController productController;
@@ -153,13 +153,26 @@ public class ReceiptCreateView extends JPanel {
         productTable.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 int row = productTable.rowAtPoint(e.getPoint());
-                if (productTable.columnAtPoint(e.getPoint()) == TBL_BTN_ADD) {
+                if (productTable.columnAtPoint(e.getPoint()) == ReceiptProductTableModel.TBL_BTN_ADD) {
                     addToReceipt(displayProducts.get(row));
                 }
             }
         });
+        productTable.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int row = productTable.rowAtPoint(e.getPoint());
+                int col = productTable.columnAtPoint(e.getPoint());
 
-        productTable.getColumnModel().getColumn(TBL_BTN_ADD).setCellRenderer(new ButtonRenderer());
+                if (col == ReceiptProductTableModel.TBL_BTN_ADD) {
+                    productTable.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                } else {
+                    productTable.setCursor(Cursor.getDefaultCursor());
+                }
+            }
+        });
+
+        productTable.getColumnModel().getColumn(ReceiptProductTableModel.TBL_BTN_ADD).setCellRenderer(new ButtonRenderer());
 
         JScrollPane scroll = new JScrollPane(productTable);
         scroll.setBorder(null);
@@ -191,6 +204,14 @@ public class ReceiptCreateView extends JPanel {
         receiptTable = new JTable(receiptModel);
         receiptTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         receiptTable.getSelectionModel().addListSelectionListener(e -> updateDeleteButtonText());
+        ViewUtils.resizeColumnWidth(receiptTable);
+        receiptTable.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                receiptTable.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+        });
+
         JScrollPane scroll = new JScrollPane(receiptTable);
         panel.add(scroll, BorderLayout.CENTER);
 

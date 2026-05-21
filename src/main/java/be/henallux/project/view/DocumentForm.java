@@ -227,17 +227,13 @@ public class DocumentForm extends JPanel {
 
         JPanel radioPanel = new JPanel();
         radioPanel.setLayout(new BoxLayout(radioPanel, BoxLayout.X_AXIS));
+        radioPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         radioPanel.add(isBuy);
         radioPanel.add(Box.createHorizontalStrut(5));
         radioPanel.add(isSell);
         radioPanel.add(Box.createHorizontalStrut(5));
         radioPanel.add(isInternal);
-
         workflowPanel.add(ViewUtils.labeled("Workflow Type *", radioPanel));
-
-        workflowPanel.setMaximumSize(
-                new Dimension(Integer.MAX_VALUE, workflowPanel.getPreferredSize().height)
-        );
 
         JPanel clientPanel = ViewUtils.createColumnPanel();
         clientPanel.setBorder(BorderFactory.createTitledBorder("Client / Supplier"));
@@ -258,15 +254,11 @@ public class DocumentForm extends JPanel {
 
         JPanel clientRow = new JPanel();
         clientRow.setLayout(new BoxLayout(clientRow, BoxLayout.X_AXIS));
+        clientRow.setAlignmentX(Component.LEFT_ALIGNMENT);
         clientRow.add(comboClientSupplier);
         clientRow.add(Box.createHorizontalStrut(10));
         clientRow.add(btnNewClient);
-
         clientPanel.add(clientRow);
-
-        clientPanel.setMaximumSize(
-                new Dimension(Integer.MAX_VALUE, clientPanel.getPreferredSize().height)
-        );
 
         JPanel addressPanel = ViewUtils.createColumnPanel();
         addressPanel.setBorder(BorderFactory.createTitledBorder("Address"));
@@ -274,7 +266,6 @@ public class DocumentForm extends JPanel {
         txtStreet = new JTextField(10);
         ViewUtils.setCursor(txtStreet);
         spnStreetNumber = ViewUtils.createNumberSpinner(1, 1, 10000, 1);
-
         addressPanel.add(ViewUtils.horizontalRowGroup(
                 ViewUtils.labeledRequired("Street", txtStreet),
                 ViewUtils.labeledRequired("Street Number", spnStreetNumber)
@@ -285,7 +276,6 @@ public class DocumentForm extends JPanel {
         spnPostalCode = ViewUtils.createNumberSpinner(1000, 1, 9999, 1000);
         txtCity = new JTextField(10);
         ViewUtils.setCursor(txtCity);
-
         addressPanel.add(ViewUtils.horizontalRowGroup(
                 ViewUtils.labeledRequired("Postal Code", spnPostalCode),
                 ViewUtils.labeledRequired("City", txtCity)
@@ -299,9 +289,12 @@ public class DocumentForm extends JPanel {
         txtCountry.setFocusable(false);
         addressPanel.add(ViewUtils.labeled("Country", txtCountry));
 
-        addressPanel.setMaximumSize(
-                new Dimension(Integer.MAX_VALUE, addressPanel.getPreferredSize().height)
-        );
+        workflowPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        clientPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        addressPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        workflowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, workflowPanel.getPreferredSize().height));
+        clientPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, clientPanel.getPreferredSize().height));
+        addressPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, addressPanel.getPreferredSize().height));
 
         rightPanel.add(workflowPanel);
         rightPanel.add(Box.createVerticalStrut(15));

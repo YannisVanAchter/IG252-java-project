@@ -2,7 +2,6 @@ package main.java.be.henallux.project.view;
 
 import main.java.be.henallux.project.model.ClientSupplier;
 
-import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 

@@ -12,6 +12,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -30,8 +32,6 @@ import java.util.Date;
  *  @see MainWindow#openDocumentForm(Document)
  */
 public class DocumentTable extends JPanel {
-    private static final int TBL_BTN_DEL = DocumentTableModel.TBL_BTN_DEL;
-    private static final int TBL_BTN_UPDATE = DocumentTableModel.TBL_BTN_UPDATE;
 
     private MainWindow mainWindow;
     private DocumentController controller;
@@ -176,14 +176,28 @@ public class DocumentTable extends JPanel {
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 int col = table.convertColumnIndexToModel(
                         table.columnAtPoint(e.getPoint()));
-                if (col == TBL_BTN_DEL) onDeleteClick();
-                if (col == TBL_BTN_UPDATE) onUpdateClick();
+                if (col == DocumentTableModel.TBL_BTN_DEL) onDeleteClick();
+                if (col == DocumentTableModel.TBL_BTN_UPDATE) onUpdateClick();
+            }
+        });
+        table.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int row = table.rowAtPoint(e.getPoint());
+                int col = table.columnAtPoint(e.getPoint());
+
+                if (col == DocumentTableModel.TBL_BTN_UPDATE || col == DocumentTableModel.TBL_BTN_DEL) {
+                    table.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                } else {
+                    table.setCursor(Cursor.getDefaultCursor());
+                }
             }
         });
 
-        table.getColumnModel().getColumn(TBL_BTN_DEL).setCellRenderer(new ButtonRenderer());
-        table.getColumnModel().getColumn(TBL_BTN_UPDATE).setCellRenderer(new ButtonRenderer());
+        table.getColumnModel().getColumn(DocumentTableModel.TBL_BTN_DEL).setCellRenderer(new ButtonRenderer());
+        table.getColumnModel().getColumn(DocumentTableModel.TBL_BTN_UPDATE).setCellRenderer(new ButtonRenderer());
 
+        ViewUtils.resizeColumnWidth(table);
 
         JScrollPane scroll = new JScrollPane(table);
         scroll.setPreferredSize(new Dimension(0, 250));

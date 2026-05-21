@@ -3,6 +3,7 @@ package main.java.be.henallux.project.view;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.*;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -21,7 +22,6 @@ public class ViewUtils {
      * The panel can be used as a container to arrange components in a column layout.
      *
      * @return a JPanel with a vertical BoxLayout
-     * @return a JPanel with a vertical BoxLayout
      */
     public static JPanel createColumnPanel() {
         JPanel panel = new JPanel();
@@ -38,13 +38,17 @@ public class ViewUtils {
      * @return a structured JPanel containing the JLabel and the JComponent
      */
     public static JPanel labeled(String text, JComponent comp) {
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.add(new JLabel(text));
+        JPanel p = createColumnPanel();
+        JLabel label = new JLabel(text);
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        p.add(label);
         p.add(Box.createVerticalStrut(4));
         comp.setMaximumSize(new Dimension(Integer.MAX_VALUE, comp.getPreferredSize().height));
+        comp.setAlignmentX(Component.LEFT_ALIGNMENT);
         p.add(comp);
         p.add(Box.createVerticalStrut(4));
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
         return p;
     }
 
@@ -369,5 +373,36 @@ public class ViewUtils {
                 else comboBox.hidePopup();
             }
         });
+    }
+
+
+    /**
+     * Adjusts the preferred width of each column in the specified {@link JTable} based on the content of its cells and headers.
+     * <p> The method iterates through all rows and columns to determine the maximum
+     * preferred width required for displaying the cell contents without truncation.
+     * It also takes the column header width into account and applies additional padding for better readability.
+     *
+     * @param table the {@link JTable} whose column widths should be resized
+     */
+    public static void resizeColumnWidth(JTable table) {
+        for (int column = 0; column < table.getColumnCount(); column++) {
+            int width = 30;
+
+            for (int row = 0; row < table.getRowCount(); row++) {
+                TableCellRenderer renderer = table.getCellRenderer(row, column);
+                Component comp = table.prepareRenderer(renderer, row, column);
+
+                width = Math.max(comp.getPreferredSize().width + 10, width);
+            }
+
+            TableCellRenderer headerRenderer = table.getTableHeader().getDefaultRenderer();
+            Component headerComp = headerRenderer.getTableCellRendererComponent(
+                    table,
+                    table.getColumnModel().getColumn(column).getHeaderValue(),
+                    false, false, 0, column);
+
+            width = Math.max(width, headerComp.getPreferredSize().width + 10);
+            table.getColumnModel().getColumn(column).setPreferredWidth(width);
+        }
     }
 }

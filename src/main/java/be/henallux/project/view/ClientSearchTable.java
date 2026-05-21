@@ -127,7 +127,7 @@ public class ClientSearchTable extends JPanel {
                 int row = table.rowAtPoint(e.getPoint());
                 int col = table.columnAtPoint(e.getPoint());
 
-                if (row >= 0 && col == TBL_BTN_SEE) {
+                if (row >= 0 && col == ClientSearchTableModel.TBL_BTN_SEE) {
                     table.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 } else {
                     table.setCursor(Cursor.getDefaultCursor());
@@ -136,6 +136,7 @@ public class ClientSearchTable extends JPanel {
         });
 
         table.getColumnModel().getColumn(TBL_BTN_SEE).setCellRenderer(new ButtonRenderer());
+        ViewUtils.resizeColumnWidth(table);
 
         JScrollPane scroll = new JScrollPane(table);
         scroll.setPreferredSize(new Dimension(0, 250));

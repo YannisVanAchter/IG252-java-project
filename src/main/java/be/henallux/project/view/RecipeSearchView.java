@@ -10,6 +10,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 
 /**
  * A Swing-based view that displays detailed information about a single {@link Recipe}.
@@ -141,6 +142,14 @@ public class RecipeSearchView extends JPanel {
                 }
             }
         });
+        table.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                table.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+        });
+
+        ViewUtils.resizeColumnWidth(table);
 
         int rowCount = Math.max(3, model.getRowCount());
         int tableHeight = Math.min(rowCount * table.getRowHeight() + table.getTableHeader().getPreferredSize().height + 4, 200);

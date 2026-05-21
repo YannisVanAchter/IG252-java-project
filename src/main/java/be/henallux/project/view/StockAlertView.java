@@ -2,7 +2,6 @@ package main.java.be.henallux.project.view;
 
 import main.java.be.henallux.project.controller.ProductController;
 import main.java.be.henallux.project.controller.SupplierController;
-import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.Product;
 
@@ -11,6 +10,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 
 /**
@@ -200,9 +200,23 @@ public class StockAlertView extends JPanel {
         panel.add(headerPanel, BorderLayout.NORTH);
 
         tableModel = new StockAlertTableModel(new ArrayList<>());
+        tableModel.addTableModelListener(e -> updateButtonState());
         productTable = new JTable(tableModel);
         productTable.getColumnModel().getColumn(0).setMaxWidth(50);
         productTable.getColumnModel().getColumn(0).setMinWidth(50);
+        productTable.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int row = productTable.rowAtPoint(e.getPoint());
+                int col = productTable.columnAtPoint(e.getPoint());
+
+                if (col == 0) {
+                    productTable.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                } else {
+                    productTable.setCursor(Cursor.getDefaultCursor());
+                }
+            }
+        });
 
         headerCheckBox = new JCheckBox();
         ViewUtils.setCursor(headerPanel);
@@ -225,15 +239,25 @@ public class StockAlertView extends JPanel {
         JScrollPane scroll = new JScrollPane(productTable);
         panel.add(scroll, BorderLayout.CENTER);
 
+        panel.add(buildButtonFooter(), BorderLayout.SOUTH);
 
+        return panel;
+    }
+
+    private JPanel buildButtonFooter() {
         btnOrder = new JButton("Create purchase order");
         btnOrder.addActionListener(e -> onCreateOrder());
+        btnOrder.setPreferredSize(new Dimension(150, 44));
+        btnOrder.setOpaque(false);
+        btnOrder.setEnabled(false);
+
         ViewUtils.setCursor(btnOrder);
+
         JPanel btnBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-        btnBar.setOpaque(false);
+        btnBar.setBorder(new EmptyBorder(10, 10, 10, 10));
         btnBar.add(btnOrder);
-        panel.add(btnBar, BorderLayout.SOUTH);
-        return panel;
+
+        return btnBar;
     }
 
     /**
@@ -248,6 +272,7 @@ public class StockAlertView extends JPanel {
             boolean allSelected = tableModel.getSelectedProducts().size() == tableModel.getRowCount();
             headerCheckBox.setSelected(allSelected);
             productTable.getTableHeader().repaint();
+            updateButtonState();
         }
     }
 
@@ -261,6 +286,7 @@ public class StockAlertView extends JPanel {
         headerCheckBox.setSelected(true);
         ArrayList<Product> products = supplierController.getAllProduct(supplier.getId());
         tableModel.setProducts(products);
+        updateButtonState();
         refreshSupplierList();
     }
 
@@ -277,6 +303,10 @@ public class StockAlertView extends JPanel {
             return;
         }
         mainWindow.openOrderView(selectedProducts, selectedSupplier);
+    }
+
+    private void updateButtonState() {
+        btnOrder.setEnabled(!tableModel.getSelectedProducts().isEmpty());
     }
 
 }
