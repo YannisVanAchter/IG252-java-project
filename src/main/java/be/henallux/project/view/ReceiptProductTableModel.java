@@ -12,7 +12,7 @@ import java.util.List;
  * including action columns for editing and deleting.
  * The model is read-only and must be refreshed using
  * {@link #setProducts(List)} when the data changes.
- * @see RecipeView
+ * @see RecipeSearchView
  */
 public class ReceiptProductTableModel extends AbstractTableModel {
 
@@ -60,13 +60,12 @@ public class ReceiptProductTableModel extends AbstractTableModel {
     public Object getValueAt(int rowIndex, int columnIndex) {
         Product p = products.get(rowIndex);
         return switch (columnIndex) {
-            case 0 -> p.getName();
+            case 0 -> ViewUtils.safeText(p.getName(), "Unknown");
             case 1 -> String.format("%.2f €", p.getPrice());
             case 2 -> "Add";
             default -> null;
         };
     }
-
     /** {@inheritDoc} */
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {

@@ -22,9 +22,9 @@ public class MainWindow extends JFrame {
     private final NotificationController notificationController;
     private DocumentForm documentForm;
     private ClientSupplierForm clientSupplierForm;
-    private ClientView clientView;
-    private ProductView productView;
-    private RecipeView recipeView;
+    private ClientSearchView clientSearchView;
+    private ProductSearchView productSearchView;
+    private RecipeSearchView recipeSearchView;
     private StockOrderCreation orderView;
 
     private CardLayout cardLayout;
@@ -54,16 +54,16 @@ public class MainWindow extends JFrame {
         addPage(clientSupplierForm, "CLIENT_SUPPLIER_FORM");
 
         addPage(new ClientSearchTable(this), "CLIENT");
-        clientView = new ClientView(this);
-        addPage(clientView, "CLIENT_VIEW");
+        clientSearchView = new ClientSearchView(this);
+        addPage(clientSearchView, "CLIENT_VIEW");
 
         addPage(new ProductSearchTable(this), "PRODUCT");
-        productView = new ProductView(this);
-        addPage(productView, "PRODUCT_VIEW");
+        productSearchView = new ProductSearchView(this);
+        addPage(productSearchView, "PRODUCT_VIEW");
 
         addPage(new RecipeSearchTable(this), "RECIPE");
-        recipeView = new RecipeView(this);
-        addPage(recipeView, "RECIPE_VIEW");
+        recipeSearchView = new RecipeSearchView(this);
+        addPage(recipeSearchView, "RECIPE_VIEW");
 
         addPage(new ReceiptCreateView(this), "RECEIPT");
         addPage(new StockAlertView(this), "STOCK");
@@ -117,17 +117,17 @@ public class MainWindow extends JFrame {
     }
 
     public void openClientView(ClientSupplier client) {
-        clientView.loadClient(client);
+        clientSearchView.loadClient(client);
         setPage("CLIENT_VIEW");
     }
 
     public void openProductView(Product product) {
-        productView.loadProduct(product);
+        productSearchView.loadProduct(product);
         setPage("PRODUCT_VIEW");
     }
 
     public void openRecipeView(Recipe recipe) {
-        recipeView.loadRecipe(recipe);
+        recipeSearchView.loadRecipe(recipe);
         setPage("RECIPE_VIEW");
     }
 

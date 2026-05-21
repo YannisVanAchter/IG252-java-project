@@ -181,6 +181,32 @@ public class ViewUtils {
     }
 
     /**
+     * Returns {@code value} when non-null and non-blank, otherwise {@code fallback}.
+     * Use this for every String field fetched from the database before displaying it.
+     *<pre>{@code
+     * label.setText(ViewUtils.safeText(client.getEmail(), "-"));
+     * }</pre>
+     *
+     * @param value    the raw String from the model (can be null)
+     * @param fallback the fallback shown when value is absent
+     * @return a non-null, display-safe String
+     */
+    public static String safeText(String value, String fallback) {
+        return (value != null && !value.isBlank()) ? value : fallback;
+    }
+
+    /**
+     * Returns {@code value} when non-null and non-blank, otherwise using {@code "-"} as fallbac.
+     * Using for {@link #safeText(String, String)}.
+     *
+     * @param value the raw String from the model (can be null)
+     * @return a non-null, display-safe String
+     */
+    public static String safeText(String value) {
+        return safeText(value, "-");
+    }
+
+    /**
      * Attaches a DocumentListener to a JTextField that triggers onFilter on every change.
      *
      * @param textField the text field to listen to

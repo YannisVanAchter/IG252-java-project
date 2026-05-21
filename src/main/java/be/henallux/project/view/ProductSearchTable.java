@@ -2,7 +2,6 @@ package main.java.be.henallux.project.view;
 
 import main.java.be.henallux.project.controller.ProductController;
 import main.java.be.henallux.project.controller.ProductSearchController;
-import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.*;
 
 import javax.swing.*;
@@ -14,7 +13,7 @@ import java.util.ArrayList;
 
 /**
  * A Swing panel that provides a searchable table of products.
- * <p>This view allows users to filter products by name, category, and promotion status,
+ * <p>This view allows users to filter products by name, category, and promotion status
  * and displays the filtered results in a table format.
  * <p>This view allows users to filter clients by name, category, and promotion
  * and displays the results in a table format.</p>
@@ -24,7 +23,7 @@ import java.util.ArrayList;
  * @see MainWindow#openProductView(Product)
  * @see ProductSearchController
  * @see ProductController
- * @see ProductTableModel
+ * @see ProductSearchTableModel
  */
 public class ProductSearchTable extends JPanel {
     private static final int TBL_BTN_SEE = 9;
@@ -32,7 +31,7 @@ public class ProductSearchTable extends JPanel {
     private MainWindow mainWindow;
     private ProductSearchController productSearchController;
     private ProductController productController;
-    private ProductTableModel model;
+    private ProductSearchTableModel model;
     private ArrayList<Product> products;
     private ArrayList<Product> displayProducts;
 
@@ -108,7 +107,7 @@ public class ProductSearchTable extends JPanel {
     }
 
     private JScrollPane buildTablePanel() {
-        model = new ProductTableModel(displayProducts);
+        model = new ProductSearchTableModel(displayProducts);
         table = new JTable(model);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.addMouseListener(new MouseAdapter() {
@@ -132,7 +131,7 @@ public class ProductSearchTable extends JPanel {
      * <p>Calls the controller with filter values. Empty fields are converted to {@code null}
      * to indicate no filtering for that criterion.
      * <p>The result updates both the internal {@code displayProducts} list
-     * and the table model via {@code ProductTableModel#setProducts(List)}.
+     * and the table model via {@code ProductSearchTableModel#setProducts(List)}.
      * @see ProductSearchController
      */
     public void onSearchClick()  {
@@ -154,7 +153,7 @@ public class ProductSearchTable extends JPanel {
      * Opens the detailed view for the selected product.
      * <p>If no row is selected, this method does nothing.</p>
      * @see MainWindow#openProductView(Product)
-     * @see ProductView
+     * @see ProductSearchView
      */
     public void onRowClick() {
         int selectedRow = table.getSelectedRow();

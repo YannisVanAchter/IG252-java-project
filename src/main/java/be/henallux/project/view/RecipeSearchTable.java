@@ -13,21 +13,21 @@ import java.util.ArrayList;
 /**
  * A Swing-based view that provides a recipe search interface.
  * <p>This view allows users to search for recipes by name and filter them by multiple ingredients.</p>
- * <p>Results are displayed in a selectable table built using {@link RecipeTableModel}.</p>
+ * <p>Results are displayed in a selectable table built using {@link RecipeSearchTableModel}.</p>
  * <p>The view interacts with {@link RecipeSearchController} to retrieve data and with
  * {@link MainWindow} to open a detailed recipe view when a row is selected.</p>
  *
  * @see RecipeSearchController
- * @see RecipeTableModel
+ * @see RecipeSearchTableModel
  * @see MainWindow
  * @see Recipe
  */
 public class RecipeSearchTable extends JPanel {
-    private static final int TBL_BTN_SEE = RecipeTableModel.TBL_BTN_SEE;
+    private static final int TBL_BTN_SEE = RecipeSearchTableModel.TBL_BTN_SEE;
 
     private final MainWindow mainWindow;
     private final RecipeSearchController controller;
-    private RecipeTableModel model;
+    private RecipeSearchTableModel model;
 
     private ArrayList<Recipe> displayRecipes;
     private ArrayList<JTextField> searchIngredients;
@@ -127,12 +127,12 @@ public class RecipeSearchTable extends JPanel {
 
     /**
      * Builds a scrollable table displaying the list of recipes.
-     * <p>The table is based on {@link RecipeTableModel} and supports single row selection.</p>
+     * <p>The table is based on {@link RecipeSearchTableModel} and supports single row selection.</p>
      * <p>Clicking on the action column triggers navigation to the detailed view.</p>
      * @return a {@code JScrollPane} containing the {@code JPanel}
      */
     private JScrollPane buildTablePanel() {
-        model = new RecipeTableModel(displayRecipes);
+        model = new RecipeSearchTableModel(displayRecipes);
         table = new JTable(model);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.addMouseListener(new MouseAdapter() {
@@ -156,27 +156,31 @@ public class RecipeSearchTable extends JPanel {
      * <p>When a row is removed, the filter is updated automatically.</p>
      */
     private void addIngredientRow() {
-        JTextField field = new JTextField();
-        ViewUtils.setCursor(field);
-        //field = ViewUtils.addFilterListener(field, this::onFilterClick);
+        JTextField search = new JTextField();
+        ViewUtils.setCursor(search);
+
         JButton btnRemove = new JButton("<html>&times;</html>");
         ViewUtils.setCursor(btnRemove);
 
         JPanel row = new JPanel(new BorderLayout(4, 0));
         row.setBorder(new EmptyBorder(2, 4, 2, 4));
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
-        row.add(field, BorderLayout.CENTER);
+        row.add(search, BorderLayout.CENTER);
         row.add(btnRemove, BorderLayout.EAST);
+
+        JTextField finalSearch = ViewUtils.addFilterListener(search, this::onSearchClick);
+        row.remove(search);
+        row.add(finalSearch, BorderLayout.CENTER);
 
         btnRemove.addActionListener(e -> {
             ingredientRowsPanel.remove(row);
-            searchIngredients.remove(field);
+            searchIngredients.remove(finalSearch);
             ingredientRowsPanel.revalidate();
             ingredientRowsPanel.repaint();
             onSearchClick();
         });
 
-        searchIngredients.add(field);
+        searchIngredients.add(finalSearch);
         ingredientRowsPanel.add(row);
         ingredientRowsPanel.revalidate();
         ingredientRowsPanel.repaint();
@@ -186,7 +190,6 @@ public class RecipeSearchTable extends JPanel {
             bar.setValue(bar.getMaximum());
         });
     }
-
     /**
      * Filters recipes based on user input.
      * <p>Filtering is applied on:</p>

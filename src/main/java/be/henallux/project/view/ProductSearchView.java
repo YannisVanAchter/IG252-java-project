@@ -19,15 +19,16 @@ import java.util.List;
  * @see ProductSearchTable
  * @see MainWindow
  */
-public class ProductView extends JPanel {
+public class ProductSearchView extends JPanel {
 
     private static final String LABEL_NO_DATA = "N/A";
+    private static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 20);
 
     private MainWindow mainWindow;
     private Product product;
 
 
-    public ProductView(MainWindow mainWindow) {
+    public ProductSearchView(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         setLayout(new BorderLayout());
     }
@@ -72,17 +73,18 @@ public class ProductView extends JPanel {
 
     private JPanel buildTitle() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JLabel label = new JLabel(product.getName());
-        label.setFont(new Font("Arial", Font.BOLD, 20));
+        JLabel label = new JLabel(ViewUtils.safeText(product.getName()));
+        label.setFont(FONT_TITLE);
         panel.add(label);
         return panel;
     }
 
+
     private JPanel buildProductInfo() {
         JPanel card = createCard("Product Information");
         card.add(labelValue("Product label", product.getName()));
-        card.add(labelValue("Category", product.getCategory().getLabel()));
-        card.add(labelValue("Price (Excl. Tax)", formatPrice(product.getPriceEVAT().floatValue())));
+        card.add(labelValue("Category", product.getCategory() != null ? product.getCategory().getLabel() : LABEL_NO_DATA));
+        card.add(labelValue("Price (Excl. Tax)", product.getPriceEVAT() != null ? formatPrice(product.getPriceEVAT().floatValue()) : "N/A"));
         card.add(labelValue("Price (Incl. Tax)", formatPrice(product.getPrice())));
         card.add(labelValue("VAT", product.getVat() + "%"));
         card.add(labelValue("Loyalty points", product.getFidelityPoint() + " pts"));
@@ -106,7 +108,7 @@ public class ProductView extends JPanel {
         card.add(labelValue("Minimum threshold", String.valueOf(product.getMinStockQuantity())));
 
         for (QuantityProduct qp : locations) {
-            JPanel locationCard = createCard("Location " + qp.getLocationProduct().getLabel());
+            JPanel locationCard = createCard("Location " + (qp.getLocationProduct() != null ? qp.getLocationProduct().getLabel() : LABEL_NO_DATA));
             locationCard.add(labelValue("Quantity", String.valueOf(qp.getQuantity())));
             card.add(locationCard);
         }
@@ -125,16 +127,13 @@ public class ProductView extends JPanel {
 
         Discount current = product.getCurrentDiscount();
         if (current != null) {
-            card.add(labelValue("Discount", product.getCurrentDiscount().getDiscountPercentage() + "%"));
-            card.add(labelValue("Required quantity", String.valueOf(product.getCurrentDiscount().getRequiredQuantity())));
-            card.add(labelValue("Start date", ViewUtils.formatDate(product.getCurrentDiscount().getStartDate())));
-            card.add(labelValue("End date", ViewUtils.formatDate(product.getCurrentDiscount().getEndDate())));
+            card.add(labelValue("Discount", current.getDiscountPercentage() + "%"));
+            card.add(labelValue("Required quantity", String.valueOf(current.getRequiredQuantity())));
+            card.add(labelValue("Start date", ViewUtils.formatDate(current.getStartDate())));
+            card.add(labelValue("End date", ViewUtils.formatDate(current.getEndDate())));
         }
-        System.out.println("ok");
         for (Discount discount : discounts) {
-            System.out.println("boucle");
             if (current != null && !current.equals(discount)) {
-                System.out.println("test 1");
                 JPanel promoCard = createCard("Previous");
                 promoCard.add(labelValue("Date", ViewUtils.formatDate(discount.getStartDate()) + " - " + ViewUtils.formatDate(discount.getEndDate())));
                 promoCard.add(labelValue("Discount", discount.getDiscountPercentage() + "%"));
@@ -178,7 +177,7 @@ public class ProductView extends JPanel {
     private JPanel labelValue(String label, String value) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.add(new JLabel(label + " : "));
-        panel.add(new JLabel(value));
+        panel.add(new JLabel(ViewUtils.safeText(value, LABEL_NO_DATA)));
         return panel;
     }
 

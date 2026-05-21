@@ -23,19 +23,37 @@ import java.awt.event.MouseEvent;
  * @see RecipeSearchTable
  * @see MainWindow
  */
-public class RecipeView extends JPanel {
+public class RecipeSearchView extends JPanel {
 
     private static final String LABEL_NO_DATA = "N/A";
+    private static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 20);
 
     private final MainWindow mainWindow;
     private Recipe recipe;
     private JTable table;
 
 
-    public RecipeView(MainWindow mainWindow) {
+    public RecipeSearchView(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         setLayout(new BorderLayout(0, 12));
         setBorder(new EmptyBorder(16, 16, 16, 16));
+    }
+
+    private void build() {
+        removeAll();
+
+        JPanel top = new JPanel(new BorderLayout());
+        top.add(buildContent(), BorderLayout.NORTH);
+
+        JScrollPane scroll = new JScrollPane(top);
+        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.setBorder(null);
+        scroll.setPreferredSize(new Dimension(0, 250));
+
+        add(scroll, BorderLayout.CENTER);
+        add(buildFooter(), BorderLayout.SOUTH);
+        revalidate();
+        repaint();
     }
 
     /**
@@ -56,13 +74,7 @@ public class RecipeView extends JPanel {
             return;
         }
 
-        removeAll();
-        JScrollPane pane = new JScrollPane(buildContent());
-        pane.setBorder(BorderFactory.createEmptyBorder());
-        add(pane, BorderLayout.CENTER);
-        add(buildFooter(), BorderLayout.SOUTH);
-        revalidate();
-        repaint();
+        build();
     }
 
     private JPanel buildContent() {
@@ -81,8 +93,8 @@ public class RecipeView extends JPanel {
 
     private JPanel buildTitle() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JLabel label = new JLabel(recipe.getName());
-        label.setFont(new Font("Arial", Font.BOLD, 20));
+        JLabel label = new JLabel(ViewUtils.safeText(recipe.getName()));
+        label.setFont(FONT_TITLE);
         panel.add(label);
         return panel;
     }
@@ -91,14 +103,14 @@ public class RecipeView extends JPanel {
         JPanel card = createCard("Recipe Information");
         card.add(labelValue("Recipe label", recipe.getName()));
         card.add(labelValue("ID", String.valueOf(recipe.getId())));
-        card.add(labelValue("Final product", recipe.getFinalProduct().getName()));
+        card.add(labelValue("Final product",  recipe.getFinalProduct() != null ? recipe.getFinalProduct().getName() : LABEL_NO_DATA));
         return card;
     }
 
     /**
      * Builds a table displaying the composition of the recipe, including ingredients and quantities.
      * <p>Each row represents a {@link RecipeComposition} linking a product to its required quantity.
-     * <p>The table supports row selection and allows navigation to the corresponding {@link ProductView}.
+     * <p>The table supports row selection and allows navigation to the corresponding {@link ProductSearchView}.
      *
      * @return a {@code JPanel} containing the composition {@code JTable}
      */
@@ -106,11 +118,15 @@ public class RecipeView extends JPanel {
         JPanel card = createCard("Composition");
 
         DefaultTableModel model = new DefaultTableModel(
-                new String[]{"Ingrédient", "Quantité"}, 0
+                new String[]{"Ingredient", "Quantity"}, 0
         );
 
-        for (RecipeComposition compo : recipe.getComposition()) {
-            model.addRow(new Object[]{compo.getProduct().getName(), compo.getQuantity()});
+        if (recipe.getComposition() != null) {
+            for (RecipeComposition compo : recipe.getComposition()) {
+                model.addRow(new Object[]{
+                        compo.getProduct() != null ? ViewUtils.safeText(compo.getProduct().getName(), "Unknow") : "Unknow",
+                        compo.getQuantity()});
+            }
         }
 
         table = new JTable(model);
@@ -140,7 +156,7 @@ public class RecipeView extends JPanel {
     private JPanel buildPreparationStep() {
         JPanel card = createCard("Preparation step");
 
-        JTextArea textArea = new JTextArea(recipe.getInstruction());
+        JTextArea textArea = new JTextArea(ViewUtils.safeText(recipe.getInstruction(), "No information"));
         textArea.setEditable(false);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
@@ -181,7 +197,7 @@ public class RecipeView extends JPanel {
     private JPanel labelValue(String label, String value) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.add(new JLabel(label + " : "));
-        panel.add(new JLabel(value));
+        panel.add(new JLabel(ViewUtils.safeText(value, LABEL_NO_DATA)));
         return panel;
     }
 

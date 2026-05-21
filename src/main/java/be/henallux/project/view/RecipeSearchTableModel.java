@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @see Recipe
  */
-public class RecipeTableModel extends AbstractTableModel {
+public class RecipeSearchTableModel extends AbstractTableModel {
     private static final String[] COLUMNS = {
             "Name", "Document ID", "Product", ""
     };
@@ -24,7 +24,7 @@ public class RecipeTableModel extends AbstractTableModel {
 
     private List<Recipe> recipes;
 
-    public RecipeTableModel(List<Recipe> recipes) {
+    public RecipeSearchTableModel(List<Recipe> recipes) {
         this.recipes = recipes;
     }
 
@@ -70,9 +70,8 @@ public class RecipeTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         Recipe r = recipes.get(rowIndex);
-
         return switch (columnIndex) {
-            case 0 -> r.getName();
+            case 0 -> ViewUtils.safeText(r.getName(), "Unknown");
             case 1 -> r.getId();
             case 2 -> getCompositionLabel(r.getComposition());
             case 3 -> "See Recipe";
@@ -83,12 +82,12 @@ public class RecipeTableModel extends AbstractTableModel {
     public String getCompositionLabel(List<RecipeComposition> compositions) {
         StringBuilder out = new StringBuilder();
         for (RecipeComposition compo : compositions) {
-            if (out.length() > 0) {
+            if (!out.isEmpty()) {
                 out.append(", ");
             }
-            out.append(compo.getProduct().getName());
+            out.append(ViewUtils.safeText(compo.getProduct() != null ? compo.getProduct().getName() : null));
         }
-        return out.length() > 0 ? out.toString() : "-";
+        return !out.isEmpty() ? out.toString() : "-";
     }
 
 }

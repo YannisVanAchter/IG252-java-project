@@ -1,11 +1,8 @@
 package main.java.be.henallux.project.view;
 
 import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.Product;
 
 import javax.swing.table.AbstractTableModel;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -53,9 +50,9 @@ public class ClientSearchTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int col) {
         ClientSupplier cs = clients.get(row);
         return switch (col) {
-            case 0  -> cs.getName() + " " +cs.getFirstname();
-            case 1  -> cs.getEmail();
-            case 2  -> cs.getPhoneNumber();
+            case 0  -> ViewUtils.safeText(cs.getName()) + " " + ViewUtils.safeText(cs.getFirstname());
+            case 1  -> ViewUtils.safeText(cs.getEmail());
+            case 2  -> ViewUtils.safeText(cs.getPhoneNumber());
             case 3  -> ViewUtils.formatDate(cs.getBecameClientDate());
             case 4  -> cs.getFidelityCard() != null ? cs.getFidelityCard().getTotalPoint() : "-";
             case 5  -> cs.getFidelityCard() != null ? cs.getFidelityCard().getId() : "-";

@@ -425,10 +425,10 @@ public class ClientSupplierForm extends JPanel {
 
         currentClientSupplier = cs;
 
-        txtName.setText(cs.getName());
-        txtFirstName.setText(cs.getFirstname());
-        txtMail.setText(cs.getEmail());
-        txtVATNumber.setText(cs.getVATNumber());
+        txtName.setText(ViewUtils.safeText(cs.getName(), ""));
+        txtFirstName.setText(ViewUtils.safeText(cs.getFirstname(), ""));
+        txtMail.setText(ViewUtils.safeText(cs.getEmail(), ""));
+        txtVATNumber.setText(ViewUtils.safeText(cs.getVATNumber(), "BE"));
 
         if (cs.getBecameClientDate() != null) {
             becameClientDate.setValue(ViewUtils.toDate(cs.getBecameClientDate()));
@@ -444,8 +444,9 @@ public class ClientSupplierForm extends JPanel {
         spnStreetNumber.setValue(cs.getAddress().getStreetNumber());
         spnPostalCode.setValue(cs.getAddress().getLocality().getPostalCode());
 
-        txtStreet.setText(cs.getAddress().getStreetName());
-        txtCity.setText(cs.getAddress().getLocality().getCity());
+        Address address = cs.getAddress();
+        txtStreet.setText(address != null ? address.getStreetName() : "");
+        txtCity.setText(address != null && address.getLocality() != null ? cs.getAddress().getLocality().getCity() : "");
         txtCountry.setText("Belgium");
 
         btnSave.setText("Edit");

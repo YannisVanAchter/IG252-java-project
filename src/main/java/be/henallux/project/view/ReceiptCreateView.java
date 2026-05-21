@@ -79,12 +79,20 @@ public class ReceiptCreateView extends JPanel {
     private JPanel buildSearchPanel() {
         searchPanel = new JPanel(new BorderLayout(8, 0));
 
+        JPanel search = ViewUtils.createColumnPanel();
+
+        JLabel label = new JLabel("Search for a product by name or scan the barcode");
+
         txtSearch = new JTextField();
         ViewUtils.setCursor(txtSearch);
-        txtSearch.setPreferredSize(new Dimension(0, 44));
+        txtSearch.setPreferredSize(new Dimension(250, 20));
         txtSearch = ViewUtils.addFilterListener(txtSearch, this::onFilterClick);
 
+        search.add(label);
+        search.add(txtSearch);
+
         JPanel btnPanel = new JPanel();
+
         btnClear = new JButton("Clear");
         ViewUtils.setCursor(btnClear);
         btnClear.setPreferredSize(new Dimension(89, 44));
@@ -97,7 +105,7 @@ public class ReceiptCreateView extends JPanel {
         btnScan.addActionListener(e -> onScanClick());
         btnPanel.add(btnScan);
 
-        searchPanel.add(txtSearch, BorderLayout.CENTER);
+        searchPanel.add(search, BorderLayout.CENTER);
         searchPanel.add(btnPanel, BorderLayout.EAST);
 
         return searchPanel;

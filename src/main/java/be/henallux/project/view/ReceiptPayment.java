@@ -1,6 +1,5 @@
 package main.java.be.henallux.project.view;
 
-import main.java.be.henallux.project.*;
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.Discount;
 import main.java.be.henallux.project.model.FidelityCard;
@@ -29,7 +28,7 @@ import java.util.*;
  * @see main.java.be.henallux.project.model.Product
  * @see main.java.be.henallux.project.model.ClientSupplier
  * @see main.java.be.henallux.project.model.Discount
- * @see ReceiptView
+ * @see ReceiptCreateView
  * @see java.util.LinkedHashMap
  */
 public class ReceiptPayment extends JPanel {
@@ -41,7 +40,7 @@ public class ReceiptPayment extends JPanel {
     private static final Color COLOR_PROMO = new Color(0, 140, 0);
 
     private final MainWindow mainWindow;
-    private final ReceiptView receiptView;
+    private final ReceiptCreateView receiptCreateView;
     private final ClientSupplier clientSupplier;
     private final LinkedHashMap<Product, Integer> receipt;
     private int pointsUsed;
@@ -50,9 +49,9 @@ public class ReceiptPayment extends JPanel {
     private JLabel lblPointsUsed;
     private JButton btnPay;
 
-    public ReceiptPayment(MainWindow mainWindow, ReceiptView receiptView, ClientSupplier clientSupplier, LinkedHashMap<Product, Integer> receipt) {
+    public ReceiptPayment(MainWindow mainWindow, ReceiptCreateView receiptCreateView, ClientSupplier clientSupplier, LinkedHashMap<Product, Integer> receipt) {
         this.mainWindow = mainWindow;
-        this.receiptView = receiptView;
+        this.receiptCreateView = receiptCreateView;
         this.clientSupplier = clientSupplier;
         this.receipt = receipt;
         this.pointsUsed = 0;
@@ -313,13 +312,13 @@ public class ReceiptPayment extends JPanel {
      * <p>When payment succeeds:
      * <ul><li>A success message is displayed</li>
      *     <li>The payment button is disabled</li>
-     *     <li>The receipt is cleared {@link ReceiptView#clearAll()}</li>
+     *     <li>The receipt is cleared {@link ReceiptCreateView#clearAll()}</li>
      *     <li>The application navigates back to the receipt page {@link MainWindow#setPage(String)}</li></ul>
      */
     private void onPayClick() {
         JOptionPane.showMessageDialog(this, "Payment successful", "Success", JOptionPane.INFORMATION_MESSAGE);
         btnPay.setEnabled(false);
-        receiptView.clearAll();
+        receiptCreateView.clearAll();
         mainWindow.setPage("RECEIPT");
     }
 
@@ -400,7 +399,6 @@ public class ReceiptPayment extends JPanel {
                     .multiply(vatRate)
                     .divide(BigDecimal.ONE.add(vatRate), 2, RoundingMode.HALF_UP);
             vat = vat.add(lineVat);
-            System.out.println("VAT de " + product.getName() + " : " + product.getVat());
         }
         return vat.setScale(2, RoundingMode.HALF_UP);
     }

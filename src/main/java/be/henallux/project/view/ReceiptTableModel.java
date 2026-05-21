@@ -13,7 +13,7 @@ import java.util.List;
  * including action columns for editing and deleting.
  * The model is read-only and must be refreshed using
  * {@link #setProducts(LinkedHashMap)} when the data changes.
- * @see RecipeView
+ * @see RecipeSearchView
  */
 public class ReceiptTableModel extends AbstractTableModel {
 
@@ -61,7 +61,7 @@ public class ReceiptTableModel extends AbstractTableModel {
     public Object getValueAt(int rowIndex, int columnIndex) {
         Product p = productList.get(rowIndex);
         return switch (columnIndex) {
-            case 0 -> p.getName();
+            case 0 -> ViewUtils.safeText(p.getName());
             case 1 -> products.get(p);
             case 2 -> String.format("%.2f €", p.getPrice() * products.get(p));
             default -> null;

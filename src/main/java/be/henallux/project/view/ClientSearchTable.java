@@ -1,9 +1,7 @@
 package main.java.be.henallux.project.view;
 
 import main.java.be.henallux.project.controller.ClientSupplierSearchController;
-import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.Product;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -167,7 +165,7 @@ public class ClientSearchTable extends JPanel {
      * Opens the detailed view for the selected client.
      * <p>If no row is selected, this method does nothing.</p>
      * @see MainWindow#openClientView(ClientSupplier) 
-     * @see ClientView
+     * @see ClientSearchView
      */
     public void onSeeClick() {
         int selectedRow = table.getSelectedRow();

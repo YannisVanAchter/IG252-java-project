@@ -18,7 +18,7 @@ import java.awt.event.MouseEvent;
  */
 public class HomePanel extends JPanel {
     private static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 20);
-    private static final Font FONT_TITLE_SECTION = new Font("Arial", Font.BOLD, 11);
+    private static final Font FONT_TITLE_SECTION = new Font("SansSerif", Font.BOLD, 11);
     private static final Font FONT_CARD_TITLE = new Font("SansSerif", Font.BOLD, 13);
     private static final Font FONT_REG = new Font("SansSerif", Font.PLAIN, 11);
 

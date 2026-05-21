@@ -61,8 +61,8 @@ public class DocumentTableModel extends AbstractTableModel {
         Document doc = documents.get(rowIndex);
         return switch (columnIndex) {
             case 0 -> doc.getId();
-            case 1 -> doc.getWorkflow() != null ? doc.getWorkflow().getLabel() : "N/A";
-            case 2 -> doc.getDateOfCreation();
+            case 1 -> ViewUtils.safeText(doc.getWorkflow().getLabel(), "N/A");
+            case 2 -> ViewUtils.formatDate(doc.getDateOfCreation());
             case 3 -> doc.getActualSendDate() != null ? ViewUtils.formatDate(doc.getActualSendDate()) : ViewUtils.formatDate(doc.getActualDateOfReceipt());
             case 4 -> "Edit";
             case 5 -> "Delete";

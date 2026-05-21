@@ -142,7 +142,7 @@ public class StockAlertTableModel extends AbstractTableModel {
         Product p = products.get(rowIndex);
         return switch (columnIndex) {
             case 0 -> selected.get(rowIndex);
-            case 1 -> p.getName();
+            case 1 -> ViewUtils.safeText(p.getName());
             case 2 -> p.getTotalQuantity();
             case 3 -> p.getMinStockQuantity();
             case 4 -> Math.max(0, p.getMinStockQuantity() - p.getTotalQuantity());

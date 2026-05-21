@@ -20,7 +20,7 @@ import java.util.List;
  * @see Product
  * @see Discount
  */
-public class ProductTableModel extends AbstractTableModel {
+public class ProductSearchTableModel extends AbstractTableModel {
     private static final String[] COLUMNS = {
             "Name", "Category", "Fidelity pts", "Price", "VAT", "Stock",
             "Promo", "Discount", "Promo start",
@@ -29,7 +29,7 @@ public class ProductTableModel extends AbstractTableModel {
 
     private List<Product> products;
 
-    public ProductTableModel(List<Product> products) {
+    public ProductSearchTableModel(List<Product> products) {
         this.products = products;
     }
 
@@ -65,17 +65,17 @@ public class ProductTableModel extends AbstractTableModel {
     }
 
     public Object getValueAt(int row, int col) {
-        Product p = products.get(row);
-        Discount promo = p.getCurrentDiscount();
+        Product product = products.get(row);
+        Discount promo = product.getCurrentDiscount();
 
         return switch (col) {
-            case 0 -> p.getName();
-            case 1 -> p.getCategory() != null ? p.getCategory().getName() : "N/A";
-            case 2 -> p.getFidelityPoint();
-            case 3 -> p.getPrice();
-            case 4 -> p.getVat();
-            case 5 -> p.getTotalQuantity();
-            case 6 -> p.getIsDiscounted();
+            case 0 -> ViewUtils.safeText(product.getName());
+            case 1 -> product.getCategory() != null ? product.getCategory().getName() : "-";
+            case 2 -> product.getFidelityPoint();
+            case 3 -> product.getPrice();
+            case 4 -> product.getVat() != null ? product.getVat() + "%" : "21%";
+            case 5 -> product.getTotalQuantity();
+            case 6 -> product.getIsDiscounted();
             case 7 -> promo != null ? promo.getDiscountPercentage() + "%" : "-";
             case 8 -> promo != null ? ViewUtils.formatDate(promo.getStartDate()) : "-";
             case 9 -> "See";

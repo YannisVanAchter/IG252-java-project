@@ -62,11 +62,11 @@ public class ClientSupplierTableModel extends AbstractTableModel {
 
         return switch (columnIndex) {
             case 0 -> cs.getId();
-            case 1 -> cs.getName() + " " + cs.getFirstname();
-            case 2 -> cs.getEmail();
-            case 3 -> cs.getVATNumber();
-            case 4 -> cs.getType();
-            case 5 -> cs.getFidelityCard() != null ? String.valueOf(cs.getFidelityCard().getTotalPoint()) : "-";
+            case 1 -> ViewUtils.safeText(cs.getName()) + " " + ViewUtils.safeText(cs.getFirstname());
+            case 2 -> ViewUtils.safeText(cs.getEmail());
+            case 3 -> ViewUtils.safeText(cs.getVATNumber());
+            case 4 -> ViewUtils.safeText(cs.getType());
+            case 5 -> cs.getFidelityCard() != null ? cs.getFidelityCard().getTotalPoint() : "-";
             case 6 -> "Edit";
             case 7 -> "Delete";
             default -> null;

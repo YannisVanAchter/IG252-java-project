@@ -1,25 +1,28 @@
 package main.java.be.henallux.project.view;
 
+import main.java.be.henallux.project.model.Address;
 import main.java.be.henallux.project.model.ClientSupplier;
+import main.java.be.henallux.project.model.Locality;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
- * ClientView displays detailed information about a single Client.
+ * ClientSearchView displays detailed information about a single Client.
  * This view is dynamically rebuilt every time a client is loaded using {@link #loadClient(ClientSupplier)}.
  * It organizes data into logical sections matching the search output columns:
  * ClientSupplier, FidelityCard, Address, Locality.
  */
-public class ClientView extends JPanel {
+public class ClientSearchView extends JPanel {
 
     private static final String LABEL_NO_DATA = "N/A";
+    private static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 20);
 
     private final MainWindow mainWindow;
     private ClientSupplier client;
 
-    public ClientView(MainWindow mainWindow) {
+    public ClientSearchView(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         setLayout(new BorderLayout(0, 12));
         setBorder(new EmptyBorder(16, 16, 16, 16));
@@ -28,6 +31,7 @@ public class ClientView extends JPanel {
     /**
      * Loads a client into the view and rebuilds the UI.
      * If the client is null, the user is notified and the view navigates back.
+     *
      * @param client the ClientSupplier to display
      */
     public void loadClient(ClientSupplier client) {
@@ -64,8 +68,8 @@ public class ClientView extends JPanel {
 
     private JPanel buildTitle() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JLabel label = new JLabel(client.getLabel() != null ? client.getLabel() : LABEL_NO_DATA);
-        label.setFont(new Font("Arial", Font.BOLD, 20));
+        JLabel label = new JLabel(ViewUtils.safeText(client.getLabel(), LABEL_NO_DATA));
+        label.setFont(FONT_TITLE);
         panel.add(label);
         return panel;
     }
@@ -87,7 +91,7 @@ public class ClientView extends JPanel {
     private JPanel buildFidelityInfo() {
         JPanel card = createCard("Fidelity Card");
 
-        if (!client.getFidelityCard().getIsValid()) {
+        if (client == null || !client.getFidelityCard().getIsValid()){
             card.add(labelValue("Fidelity card", LABEL_NO_DATA));
             return card;
         }
@@ -99,27 +103,13 @@ public class ClientView extends JPanel {
     private JPanel buildAddressInfo() {
         JPanel card = createCard("Address");
 
-        String street = LABEL_NO_DATA;
-        String streetNb = LABEL_NO_DATA;
-        String postalCode = LABEL_NO_DATA;
-        String city = LABEL_NO_DATA;
+        Address address = client.getAddress();
+        Locality locality = address != null ? address.getLocality() : null;
 
-        if (client.getAddress() != null) {
-            street = client.getAddress().getStreetName() != null
-                    ? client.getAddress().getStreetName() : LABEL_NO_DATA;
-            streetNb = String.valueOf(client.getAddress().getStreetNumber());
-
-            if (client.getAddress().getLocality() != null) {
-                postalCode = String.valueOf(client.getAddress().getLocality().getPostalCode());
-            }
-            city = client.getAddress().getLocality().getCity() != null
-                    ? client.getAddress().getLocality().getCity() : LABEL_NO_DATA;
-            card.add(labelValue("City", city));
-        }
-
-        card.add(labelValue("Street", street));
-        card.add(labelValue("Street nb", streetNb));
-        card.add(labelValue("Postal code", postalCode));
+        card.add(labelValue("Street", address != null ? address.getStreetName() : "N/A"));
+        card.add(labelValue("Street nb", address != null ? String.valueOf(address.getStreetNumber()) : "N/A"));
+        card.add(labelValue("Postal code", locality != null ? String.valueOf(locality.getPostalCode()) : "N/A"));
+        card.add(labelValue("City", locality != null ? locality.getCity() : "N/A"));
         return card;
     }
 
@@ -142,6 +132,7 @@ public class ClientView extends JPanel {
 
     /**
      * Creates a bordered card container with a title.
+     *
      * @param title the title of the section
      * @return a styled panel
      */
@@ -154,6 +145,7 @@ public class ClientView extends JPanel {
 
     /**
      * Creates a key-value label row.
+     *
      * @param label the field name
      * @param value the field value
      * @return a horizontal panel displaying the label and value
@@ -161,7 +153,7 @@ public class ClientView extends JPanel {
     private JPanel labelValue(String label, String value) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.add(new JLabel(label + " : "));
-        panel.add(new JLabel(value != null ? value : LABEL_NO_DATA));
+        panel.add(new JLabel(ViewUtils.safeText(value, LABEL_NO_DATA)));
         return panel;
     }
 }
