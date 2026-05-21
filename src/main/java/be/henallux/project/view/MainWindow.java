@@ -43,7 +43,7 @@ public class MainWindow extends JFrame {
         cardLayout = new CardLayout();
         container = new JPanel(cardLayout);
 
-        addPage(new MainPanel(), "MAIN");
+        addPage(new HomePanel(this), "MAIN");
 
         addPage(new DocumentTable(this), "DOCUMENT");
         documentForm = new DocumentForm(this);
