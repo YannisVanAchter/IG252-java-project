@@ -13,7 +13,7 @@ import java.util.*;
 import java.util.List;
 
 /**
- * ReceiptView allow user to create a receipt my managing product selection
+ * ReceiptCreateView allow user to create a receipt my managing product selection
  * and receipt (shopping cart) workflow in the application.
  *
  * <p>This view provides a dual-pane interface with {@code JSplitPane}:
@@ -31,7 +31,7 @@ import java.util.List;
  * @see ReceiptClientInfoDialog
  * @see java.util.LinkedHashMap
  */
-public class ReceiptView extends JPanel {
+public class ReceiptCreateView extends JPanel {
     private static final Font FONT_REG = new Font("SansSerif", Font.PLAIN, 16);
     private static final Font FONT_BOLD = new Font("SansSerif", Font.BOLD, 16);
     private static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 18);
@@ -54,7 +54,7 @@ public class ReceiptView extends JPanel {
     private JTable productTable, receiptTable;
     private JLabel lblTotal;
 
-    public ReceiptView(MainWindow mainWindow) {
+    public ReceiptCreateView(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         this.productController = new ProductController();
         this.allProducts = productController.getAllProduct();
@@ -201,18 +201,30 @@ public class ReceiptView extends JPanel {
      */
     private JPanel buildReceiptFooter() {
         JPanel footer = new JPanel(new BorderLayout());
-        lblTotal = new JLabel("Total: 0.00€");
+        lblTotal = new JLabel("Total: 0.00€ ");
         lblTotal.setFont(FONT_TOTAL);
         lblTotal.setHorizontalAlignment(SwingConstants.RIGHT);
         footer.add(lblTotal, BorderLayout.NORTH);
 
-        JPanel btnBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        JPanel btnBar = new JPanel(new BorderLayout());
         btnBar.setBorder(new EmptyBorder(16, 0, 0, 0));
 
         btnClearAll = new JButton("Clear all");
         ViewUtils.setCursor(btnClearAll);
         btnClearAll.setPreferredSize(new Dimension(150, 44));
-        btnClearAll.addActionListener(e -> clearAll());
+        btnClearAll.setEnabled(false);
+        btnClearAll.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to clear all items?",
+                    "Clear Receipt",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+            if (confirm == JOptionPane.YES_OPTION) {
+                clearAll();
+            }
+        });
 
         btnDelete = new JButton("Delete Last Item");
         ViewUtils.setCursor(btnDelete);
@@ -232,9 +244,15 @@ public class ReceiptView extends JPanel {
             }
         });
 
-        btnBar.add(btnClearAll);
-        btnBar.add(btnDelete);
-        btnBar.add(btnNext);
+        JPanel leftBtns = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        leftBtns.add(btnClearAll);
+
+        JPanel rightBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        rightBtns.add(btnDelete);
+        rightBtns.add(btnNext);
+
+        btnBar.add(leftBtns, BorderLayout.WEST);
+        btnBar.add(rightBtns, BorderLayout.EAST);
         footer.add(btnBar, BorderLayout.SOUTH);
         return footer;
     }
@@ -266,9 +284,11 @@ public class ReceiptView extends JPanel {
                 addToReceipt(product);
                 found = true;
             }
+            i++;
         }
-
-        JOptionPane.showMessageDialog(this, "No product found", "Information", JOptionPane.INFORMATION_MESSAGE);
+        if (!found){
+            JOptionPane.showMessageDialog(this, "No product found", "Information", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 
     /**
@@ -325,6 +345,7 @@ public class ReceiptView extends JPanel {
         boolean hasItems = !receipt.isEmpty();
         btnDelete.setEnabled(hasItems);
         btnNext.setEnabled(hasItems);
+        btnClearAll.setEnabled(hasItems);
     }
 
     /**

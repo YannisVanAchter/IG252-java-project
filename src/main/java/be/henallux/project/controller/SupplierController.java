@@ -23,21 +23,18 @@ public class SupplierController {
      * @return liste de fournisseurs
      */
     public ArrayList<ClientSupplier> getAllSuppliers() {
+        ArrayList<ClientSupplier> allClients = clientSupplierController.getAllClientSupplier();
+        ArrayList<ClientSupplier> suppliers = new ArrayList<>();
 
-        try {
-            ArrayList<ClientSupplier> allClients = clientSupplierController.getAllClientSupplier();
-            ArrayList<ClientSupplier> suppliers = new ArrayList<>();
-
-            for (ClientSupplier cs : allClients) {
-                if (cs.getIsSupplier()) {
-                    suppliers.add(cs);
-                }
+        for (ClientSupplier cs : allClients) {
+            if (cs.getIsSupplier()) {
+                suppliers.add(cs);
             }
-            return suppliers;
-        } catch (DataValidationException e) {
-            return new ArrayList<>();
         }
+        return suppliers;
+
     }
+
     /**
      * Retourne tous les produits d'un fournisseur (mock data)
      *

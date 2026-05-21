@@ -23,11 +23,20 @@ public class DocumentDetails implements Model {
 
     public Document getDocument() { return doc; }
 
-    public List<Detail> getDetails() { return Collections.unmodifiablelist(details); }
+    public List<Detail> getDetails() { return Collections.unmodifiableList(details); }
 
     public void addDetail(Detail detail) {
         if (!details.contains(detail))
             details.add(detail);
+    }
+
+    @Override
+    public String getLabel() {
+        StringBuilder out = new StringBuilder(doc.getLabel());
+        for (Detail detail : details){
+            out.append(" - ").append(detail.getLabel());
+        }
+        return out.toString();
     }
 
     @Override

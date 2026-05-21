@@ -44,7 +44,7 @@ public class StockOrderTableModel extends AbstractTableModel {
     public void setProducts(ArrayList<Product> products) {
         rows.clear();
         for (Product p : products) {
-            int suggested = p.getMinStockQuantity() - p.getTotalQuantity();
+            int suggested = Math.max(0, p.getMinStockQuantity() - p.getTotalQuantity());
             rows.add(new ProductRow(p.getName(), suggested, suggested));
         }
         fireTableDataChanged();

@@ -435,7 +435,7 @@ public class ClientSupplierForm extends JPanel {
         }
 
         txtIdLoyaltyCard.setText(String.valueOf(cs.getFidelityCard().getId()));
-        spnLoyaltyPoint.setValue(String.valueOf(cs.getFidelityCard().getTotalPoint()));
+        spnLoyaltyPoint.setValue(cs.getFidelityCard().getTotalPoint());
 
         chkIsClient.setSelected(cs.getIsClient());
         chkIsSupplier.setSelected(cs.getIsSupplier());

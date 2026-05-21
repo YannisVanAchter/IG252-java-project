@@ -22,7 +22,7 @@ public class ClientSupplierController {
      * @return une liste de clients/fournisseurs en ArrayList
      * @throws DataValidationException a supprimé, je pense. (j'en avais besoin ici, car création d'objet)
      */
-    public ArrayList<ClientSupplier> getAllClientSupplier() throws DataValidationException {
+    public ArrayList<ClientSupplier> getAllClientSupplier() {
         ArrayList<ClientSupplier> clients = new ArrayList<>();
 
         try {

@@ -62,7 +62,7 @@ public class Recipe implements Model {
     }
 
     public List<RecipeComposition> getComposition() {
-        return Collections.unmodifiablelist(composition);
+        return Collections.unmodifiableList(composition);
     }
 
     private void setComposition(List<RecipeComposition> composition) {

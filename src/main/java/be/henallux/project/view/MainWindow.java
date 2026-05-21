@@ -1,6 +1,5 @@
 package main.java.be.henallux.project.view;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.*;
 import main.java.be.henallux.project.controller.*;
 
@@ -44,7 +43,7 @@ public class MainWindow extends JFrame {
         cardLayout = new CardLayout();
         container = new JPanel(cardLayout);
 
-        addPage(new MainPanel(), "MAIN");
+        addPage(new HomePanel(this), "MAIN");
 
         addPage(new DocumentTable(this), "DOCUMENT");
         documentForm = new DocumentForm(this);
@@ -66,7 +65,7 @@ public class MainWindow extends JFrame {
         recipeView = new RecipeView(this);
         addPage(recipeView, "RECIPE_VIEW");
 
-        addPage(new ReceiptView(this), "RECEIPT");
+        addPage(new ReceiptCreateView(this), "RECEIPT");
         addPage(new StockAlertView(this), "STOCK");
         orderView = new StockOrderCreation(this);
         addPage(orderView, "ORDER_CREATION");

@@ -16,13 +16,15 @@ import java.util.stream.Stream;
  */
 public class ProductController {
 
-    ArrayList<Product> products = null;
+    private ArrayList<Product> products = new ArrayList<>();
 
     public ArrayList<Product> getAllProduct() {
 
-        try {
-            products = new ArrayList<>();
+        if (!products.isEmpty()) {
+            return products;
+        }
 
+        try {
             ProductCategory fruit    = new ProductCategory(1, "fruit");
             ProductCategory boisson  = new ProductCategory(3, "Boisson");
 
@@ -120,11 +122,15 @@ public class ProductController {
         return products;
     }
 
-
     public String[] getAllCategory() {
+        if (products.isEmpty()) {
+            getAllProduct();
+        }
+
         return Stream.concat(
                 Stream.of("All"),
                 products.stream()
+                        .filter(product -> product.getCategory() != null)
                         .map(product -> product.getCategory().getName())
                         .distinct()
         ).toArray(String[]::new);

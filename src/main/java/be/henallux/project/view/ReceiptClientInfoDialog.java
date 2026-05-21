@@ -26,12 +26,12 @@ import java.util.LinkedHashMap;
  * @see ClientSupplierController
  * @see ClientSupplier
  * @see Product
- * @see ReceiptView
+ * @see ReceiptCreateView
  * @see ReceiptPayment
  */
 public class ReceiptClientInfoDialog extends JPanel {
     private final MainWindow mainWindow;
-    private final ReceiptView receiptView;
+    private final ReceiptCreateView receiptCreateView;
     private final ClientSupplierController controller;
     private ArrayList<ClientSupplier> allClients;
     private LinkedHashMap<Product, Integer> receipt;
@@ -40,9 +40,9 @@ public class ReceiptClientInfoDialog extends JPanel {
     private JButton btnNew, btnScan, btnCancel, btnNext;
     private JPanel infoPanel;
 
-    public ReceiptClientInfoDialog(MainWindow mainWindow, ReceiptView receiptView, LinkedHashMap<Product, Integer> receipt) throws DataValidationException {
+    public ReceiptClientInfoDialog(MainWindow mainWindow, ReceiptCreateView receiptCreateView, LinkedHashMap<Product, Integer> receipt) throws DataValidationException {
         this.mainWindow = mainWindow;
-        this.receiptView = receiptView;
+        this.receiptCreateView = receiptCreateView;
         this.receipt = receipt;
         this.controller = new ClientSupplierController();
         this.allClients = controller.getAllClientSupplier();
@@ -258,7 +258,7 @@ public class ReceiptClientInfoDialog extends JPanel {
      */
     private void onNextClick() {
         SwingUtilities.getWindowAncestor(this).dispose();
-        mainWindow.addPage(new ReceiptPayment(mainWindow, receiptView, selectedClient, receipt), "RECEIPT_PAYEMENT");
+        mainWindow.addPage(new ReceiptPayment(mainWindow, receiptCreateView, selectedClient, receipt), "RECEIPT_PAYEMENT");
         mainWindow.setPage("RECEIPT_PAYEMENT");
     }
 
