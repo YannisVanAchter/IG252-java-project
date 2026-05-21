@@ -28,18 +28,16 @@ import java.util.ArrayList;
  */
 public class ProductSearchTable extends JPanel {
 
-    private MainWindow mainWindow;
-    private ProductSearchController productSearchController;
-    private ProductController productController;
+    private final MainWindow mainWindow;
+    private final ProductSearchController productSearchController;
+    private final ProductController productController;
     private ProductSearchTableModel model;
-    private ArrayList<Product> products;
+    private ArrayList<Product> allProducts;
     private ArrayList<Product> displayProducts;
 
-    private JPanel searchPanel, tablePanel;
     private JTextField txtProductName;
     private JComboBox<String> comboCategory;
     private JCheckBox chkPromotion;
-    private JButton btnSearch;
 
     private JTable table;
 
@@ -79,7 +77,7 @@ public class ProductSearchTable extends JPanel {
 
         comboCategory = new JComboBox<>(productController.getAllCategory());
         ViewUtils.setCursor(comboCategory);
-        comboCategory = ViewUtils.addFilterListener(comboCategory, this::onSearchClick);
+        ViewUtils.addFilterListener(comboCategory, this::onSearchClick);
         JPanel categoryFields = new JPanel(new BorderLayout(0, 4));
         categoryFields.add(new JLabel("Category"), BorderLayout.NORTH);
         categoryFields.add(comboCategory, BorderLayout.CENTER);
@@ -87,7 +85,7 @@ public class ProductSearchTable extends JPanel {
         chkPromotion = ViewUtils.addFilterListener(new JCheckBox("Promotion only"), this::onSearchClick);
         ViewUtils.setCursor(chkPromotion);
 
-        btnSearch = new JButton("Search");
+        JButton btnSearch = new JButton("Search");
         ViewUtils.setCursor(btnSearch);
         btnSearch.addActionListener(e -> onSearchClick());
 
@@ -120,7 +118,6 @@ public class ProductSearchTable extends JPanel {
         table.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                int row = table.rowAtPoint(e.getPoint());
                 int col = table.columnAtPoint(e.getPoint());
 
                 if (col == ProductSearchTableModel.TBL_BTN_SEE) {

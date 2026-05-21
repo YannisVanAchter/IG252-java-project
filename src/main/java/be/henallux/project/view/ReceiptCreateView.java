@@ -33,11 +33,8 @@ import java.util.List;
  * @see java.util.LinkedHashMap
  */
 public class ReceiptCreateView extends JPanel {
-    private static final Font FONT_REG = new Font("SansSerif", Font.PLAIN, 16);
-    private static final Font FONT_BOLD = new Font("SansSerif", Font.BOLD, 16);
     private static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 18);
     private static final Font FONT_TOTAL = new Font("SansSerif", Font.BOLD, 18);
-
 
     private final MainWindow mainWindow;
     private final ProductController productController;
@@ -273,15 +270,15 @@ public class ReceiptCreateView extends JPanel {
             }
         });
 
-        JPanel leftBtns = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        leftBtns.add(btnClearAll);
+        JPanel leftBtnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        leftBtnPanel.add(btnClearAll);
 
-        JPanel rightBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
-        rightBtns.add(btnDelete);
-        rightBtns.add(btnNext);
+        JPanel rightBtnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        rightBtnPanel.add(btnDelete);
+        rightBtnPanel.add(btnNext);
 
-        btnBar.add(leftBtns, BorderLayout.WEST);
-        btnBar.add(rightBtns, BorderLayout.EAST);
+        btnBar.add(leftBtnPanel, BorderLayout.WEST);
+        btnBar.add(rightBtnPanel, BorderLayout.EAST);
         footer.add(btnBar, BorderLayout.SOUTH);
         return footer;
     }
@@ -431,7 +428,7 @@ public class ReceiptCreateView extends JPanel {
     /**
      * Opens a modal dialog allowing the user to attach a client to the current receipt.
      */
-    public void openDialog() throws DataValidationException {
+    public void openDialog() {
         JDialog dialog = new JDialog(mainWindow, "Add new Client", true);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 

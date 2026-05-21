@@ -27,7 +27,6 @@ import java.util.ArrayList;
  */
 public class StockAlertView extends JPanel {
     private static final Font FONT_REG = new Font("SansSerif", Font.PLAIN, 12);
-    private static final Font FONT_BOLD = new Font("SansSerif", Font.BOLD, 16);
     private static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 18);
     private static final Color SELECTED_BG = new Color(0xE6, 0xE6, 0xE6);
     private static final Color HOVER_BG = new Color(245, 245, 245);
@@ -43,7 +42,7 @@ public class StockAlertView extends JPanel {
     private JPanel supplierListPanel;
     private StockAlertTableModel tableModel;
 
-    private JSplitPane split;
+    private JSplitPane splitPane;
     private JTable productTable;
     private JLabel lblSupplierTitle;
     private JButton btnOrder;
@@ -61,21 +60,21 @@ public class StockAlertView extends JPanel {
         add(buildBody(), BorderLayout.CENTER);
 
         if (!suppliers.isEmpty()) {
-            selectSupplier(suppliers.get(0));
+            selectSupplier(suppliers.getFirst());
         }
     }
 
     /**
-     * Builds the main split layout.
-     * @return the main split pane
+     * Builds the main splitPane layout.
+     * @return the main splitPane pane
      */
     private JSplitPane buildBody() {
-        split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, buildLeftPanel(), buildRightPanel());
-        split.setDividerLocation(300);
-        split.setResizeWeight(0.5);
-        split.setDividerSize(0);
-        split.setBorder(null);
-        return split;
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, buildLeftPanel(), buildRightPanel());
+        splitPane.setDividerLocation(300);
+        splitPane.setResizeWeight(0.5);
+        splitPane.setDividerSize(0);
+        splitPane.setBorder(null);
+        return splitPane;
     }
 
     /**
@@ -207,7 +206,6 @@ public class StockAlertView extends JPanel {
         productTable.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                int row = productTable.rowAtPoint(e.getPoint());
                 int col = productTable.columnAtPoint(e.getPoint());
 
                 if (col == 0) {
@@ -228,7 +226,7 @@ public class StockAlertView extends JPanel {
         productTable.getTableHeader().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                toogleCheckBox(e);
+                toggleCheckBox(e);
             }
         });
 
@@ -265,7 +263,7 @@ public class StockAlertView extends JPanel {
      * <p>All table rows are selected or unselected depending on the current state.
      * @param e the mouse event triggered on the table header
      */
-    private void toogleCheckBox(MouseEvent e) {
+    private void toggleCheckBox(MouseEvent e) {
         int column = productTable.columnAtPoint(e.getPoint());
         if (column == 0) {
             tableModel.toggleAll();

@@ -27,9 +27,6 @@ public class DocumentForm extends JPanel {
     private final ArrayList<ClientSupplier> allClients;
     private final ArrayList<ComboBoxItem<ClientSupplier>> allClientItems = new ArrayList<>();
 
-
-    private JPanel leftPanel, rightPanel;
-
     private JTextArea commentary;
     private JCheckBox checkIsChecked;
 
@@ -129,7 +126,7 @@ public class DocumentForm extends JPanel {
      * @return the left panel of the document form
      */
     private JPanel buildLeftPanel() {
-        leftPanel = ViewUtils.createColumnPanel();
+        JPanel leftPanel = ViewUtils.createColumnPanel();
         JPanel leftContent = ViewUtils.createColumnPanel();
         leftContent.setBorder(BorderFactory.createTitledBorder("Document"));
 
@@ -200,7 +197,7 @@ public class DocumentForm extends JPanel {
      * @return the right form panel
      */
     private JPanel buildRightPanel() {
-        rightPanel = ViewUtils.createColumnPanel();
+        JPanel rightPanel = ViewUtils.createColumnPanel();
         JPanel workflowPanel = ViewUtils.createColumnPanel();
         workflowPanel.setBorder(BorderFactory.createTitledBorder("Workflow"));
 

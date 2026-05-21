@@ -17,15 +17,15 @@ import java.util.Stack;
  * It also contains the {@link JMenuBar} to display navigation buttons between views.
  */
 public class MainWindow extends JFrame {
-    private Stack<String> history = new Stack<>();
+    private final Stack<String> history = new Stack<>();
     private String currentPage;
     private final NotificationController notificationController;
-    private DocumentForm documentForm;
-    private ClientSupplierForm clientSupplierForm;
-    private ClientSearchView clientSearchView;
-    private ProductSearchView productSearchView;
-    private RecipeSearchView recipeSearchView;
-    private StockOrderCreation orderView;
+    private final DocumentForm documentForm;
+    private final ClientSupplierForm clientSupplierForm;
+    private final ClientSearchView clientSearchView;
+    private final ProductSearchView productSearchView;
+    private final RecipeSearchView recipeSearchView;
+    private final StockOrderCreation orderView;
 
     private CardLayout cardLayout;
     private JPanel container;
@@ -131,8 +131,8 @@ public class MainWindow extends JFrame {
         setPage("RECIPE_VIEW");
     }
 
-    public void openOrderView(ArrayList seletedProduct, ClientSupplier selectedSupplier){
-        orderView.loadOrder(seletedProduct, selectedSupplier);
+    public void openOrderView(ArrayList<Product> selectedProduct, ClientSupplier selectedSupplier){
+        orderView.loadOrder(selectedProduct, selectedSupplier);
         setPage("ORDER_CREATION");
     }
 

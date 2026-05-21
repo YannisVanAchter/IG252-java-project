@@ -19,12 +19,10 @@ import main.java.be.henallux.project.model.*;
  * <p>The form communicates with {@link ClientSupplierController} to perform creation and update operations.
  */
 public class ClientSupplierForm extends JPanel {
-    private MainWindow mainWindow;
-    private Boolean isOpenInModal;
-    private ClientSupplierController controller;
+    private final MainWindow mainWindow;
+    private final Boolean isOpenInModal;
+    private final ClientSupplierController controller;
     private ClientSupplier currentClientSupplier;
-
-    private JPanel appPanel, panelContent, leftPanel, rightPanel;
 
     private JTextField txtName;
     private JTextField txtFirstName;
@@ -49,7 +47,6 @@ public class ClientSupplierForm extends JPanel {
     private JTextField txtCountry;
 
     private JButton btnSave;
-    private JButton btnClear;
 
     /**
      * Constructs a new instance of the ClientSupplierForm.
@@ -134,7 +131,7 @@ public class ClientSupplierForm extends JPanel {
      * @return the left form panel containing identity-related fields
      */
     private JPanel buildLeftPanel() {
-        leftPanel = ViewUtils.createColumnPanel();
+        JPanel leftPanel = ViewUtils.createColumnPanel();
         JPanel leftContent = ViewUtils.createColumnPanel();
         leftContent.setBorder(BorderFactory.createTitledBorder("Identity"));
 
@@ -202,7 +199,7 @@ public class ClientSupplierForm extends JPanel {
      * @return the right form panel containing address and loyalty information
      */
     private JPanel buildRightPanel() {
-        rightPanel = ViewUtils.createColumnPanel();
+        JPanel rightPanel = ViewUtils.createColumnPanel();
         JPanel addressPanel = ViewUtils.createColumnPanel();
         addressPanel.setBorder(BorderFactory.createTitledBorder("Address"));
 
@@ -256,7 +253,7 @@ public class ClientSupplierForm extends JPanel {
         btnSave.addActionListener(e -> saveEditForm());
         ViewUtils.setCursor(btnSave);
 
-        btnClear = new JButton("Clear");
+        JButton btnClear = new JButton("Clear");
         btnClear.addActionListener(e -> clearForm());
         ViewUtils.setCursor(btnClear);
 
@@ -462,7 +459,6 @@ public class ClientSupplierForm extends JPanel {
      *         or {@code null} if no client/supplier is loaded
      */
     public ClientSupplier getCurrentClientSupplier() {
-        System.out.println("getCurrentClientSupplier: " + currentClientSupplier);
         return currentClientSupplier;
     }
 }

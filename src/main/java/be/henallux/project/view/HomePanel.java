@@ -82,8 +82,7 @@ public class HomePanel extends JPanel {
      * @see #createCard(String[])
      */
     private JPanel buildContent() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        JPanel panel = ViewUtils.createColumnPanel();
         panel.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
 
         panel.add(createSection("Management", new String[][]{
@@ -123,8 +122,7 @@ public class HomePanel extends JPanel {
      * @return a {@link JPanel} representing the complete section
      */
     private JPanel createSection(String sectionTitle, String[][] items) {
-        JPanel section = new JPanel();
-        section.setLayout(new BoxLayout(section, BoxLayout.Y_AXIS));
+        JPanel section = ViewUtils.createColumnPanel();
 
         JLabel labelPanel = new JLabel(sectionTitle.toUpperCase());
         labelPanel.setFont(FONT_TITLE_SECTION);

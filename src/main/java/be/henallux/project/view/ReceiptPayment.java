@@ -512,7 +512,7 @@ public class ReceiptPayment extends JPanel {
      * @param value the percentage or decimal rate value
      * @return the normalized decimal rate
      */
-     private BigDecimal toRate(BigDecimal value) {
-        return value.compareTo(BigDecimal.ONE) >= 1 ? value.divide(BigDecimal.valueOf(100)) : value;
+    private BigDecimal toRate(BigDecimal value) {
+        return value.compareTo(BigDecimal.ONE) >= 0 ? value.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP) : value;
     }
 }

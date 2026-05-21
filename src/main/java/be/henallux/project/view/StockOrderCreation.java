@@ -2,6 +2,7 @@ package main.java.be.henallux.project.view;
 
 import main.java.be.henallux.project.model.Address;
 import main.java.be.henallux.project.model.ClientSupplier;
+import main.java.be.henallux.project.model.Product;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -40,7 +41,7 @@ public class StockOrderCreation extends JPanel {
 
     private JTable table;
 
-    private ArrayList selectedProduct;
+    private ArrayList<Product> selectedProduct;
     private ClientSupplier selectedSupplier;
 
     private boolean hasChanges = false;
@@ -88,11 +89,11 @@ public class StockOrderCreation extends JPanel {
      * <p>If no product is provided, a warning dialog is displayed and the previous
      * screen is restored.
      *
-     * @param seletedProduct   the selected products
+     * @param selectedProduct   the selected products
      * @param selectedSupplier the supplier linked to the order
      */
-    public void loadOrder(ArrayList seletedProduct, ClientSupplier selectedSupplier) {
-        this.selectedProduct = seletedProduct;
+    public void loadOrder(ArrayList<Product> selectedProduct, ClientSupplier selectedSupplier) {
+        this.selectedProduct = selectedProduct;
         this.selectedSupplier = selectedSupplier;
         hasChanges = false;
 
@@ -170,7 +171,6 @@ public class StockOrderCreation extends JPanel {
         table.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                int row = table.rowAtPoint(e.getPoint());
                 int col = table.columnAtPoint(e.getPoint());
 
                 if (col == StockOrderTableModel.TBL_SPN_INDEX) {

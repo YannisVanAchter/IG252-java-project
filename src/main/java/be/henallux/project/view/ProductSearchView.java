@@ -25,7 +25,7 @@ public class ProductSearchView extends JPanel {
     private static final String LABEL_NO_DATA = "N/A";
     private static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 20);
 
-    private MainWindow mainWindow;
+    private final MainWindow mainWindow;
     private Product product;
 
 

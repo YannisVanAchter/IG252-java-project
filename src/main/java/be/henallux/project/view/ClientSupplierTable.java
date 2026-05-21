@@ -9,8 +9,6 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 
 import main.java.be.henallux.project.model.*;
 
@@ -19,23 +17,21 @@ import main.java.be.henallux.project.model.*;
  * This class extends {@link JPanel} to provide a table view and search functionality for
  * filtering client/supplier data based on various parameters such as ID, first name, last name,
  * and type (client, supplier, or staff member).
- * <p>
- * The table is populated via a custom model, {@link ClientSupplierTableModel}, and provides
+ * <p>The table is populated via a custom model, {@link ClientSupplierTableModel}, and provides
  * ease of navigation with interactive search fields and filter checkboxes.
- * <p>
- * Clicking on a row opens a detailed Form Client/Supplier view through the main application window.
+ * <p>Clicking on a row opens a detailed Form Client/Supplier view through the main application window.
  *
  * @see MainWindow#openClientSupplierForm(ClientSupplier)
  */
 public class ClientSupplierTable extends JPanel {
 
-    private MainWindow mainWindow;
-    private ClientSupplierController controller;
+    private final MainWindow mainWindow;
+    private final ClientSupplierController controller;
+    private final ArrayList<ClientSupplier> clientSuppliers;
     private ClientSupplierTableModel model;
-    private ArrayList<ClientSupplier> clientSuppliers;
     private ArrayList<ClientSupplier> displayClientSupplier;
 
-    private JTextField txtLoyalityCard;
+    private JTextField txtLoyaltyCard;
     private JTextField txtLastName;
     private JTextField txtFirstName;
     private JCheckBox chkIsClient;
@@ -81,36 +77,34 @@ public class ClientSupplierTable extends JPanel {
      * @return the configured search panel
      */
     private JPanel buildSearchPanel() {
-        txtLoyalityCard = new JTextField(10);
-        ViewUtils.setCursor(txtLoyalityCard);
-        txtLoyalityCard = ViewUtils.addFilterListener(txtLoyalityCard, this::onFilterClick);
-        txtLoyalityCard = ViewUtils.digitsOnly(txtLoyalityCard);
+        txtLoyaltyCard = new JTextField(10);
+        ViewUtils.setCursor(txtLoyaltyCard);
+        ViewUtils.addFilterListener(txtLoyaltyCard, this::onFilterClick);
+        ViewUtils.digitsOnly(txtLoyaltyCard);
         JPanel idFields = new JPanel(new BorderLayout(0, 4));
         idFields.add(new JLabel("Client ID"), BorderLayout.NORTH);
-        idFields.add(txtLoyalityCard, BorderLayout.CENTER);
+        idFields.add(txtLoyaltyCard, BorderLayout.CENTER);
 
         txtLastName = new JTextField(10);
         ViewUtils.setCursor(txtLastName);
-        txtLastName = ViewUtils.addFilterListener(txtLastName, this::onFilterClick);
+        ViewUtils.addFilterListener(txtLastName, this::onFilterClick);
         JPanel lastNameFields = new JPanel(new BorderLayout(0, 4));
         lastNameFields.add(new JLabel("Last name"), BorderLayout.NORTH);
         lastNameFields.add(txtLastName, BorderLayout.CENTER);
 
         txtFirstName = new JTextField(10);
         ViewUtils.setCursor(txtFirstName);
-        txtFirstName = ViewUtils.addFilterListener(txtFirstName, this::onFilterClick);
+        ViewUtils.addFilterListener(txtFirstName, this::onFilterClick);
         JPanel firstNameFields = new JPanel(new BorderLayout(0, 4));
         firstNameFields.add(new JLabel("First name"), BorderLayout.NORTH);
         firstNameFields.add(txtFirstName, BorderLayout.CENTER);
 
         chkIsClient = new JCheckBox("Client");
-        chkIsClient = ViewUtils.addFilterListener(chkIsClient, this::onFilterClick);
+        ViewUtils.addFilterListener(chkIsClient, this::onFilterClick);
         chkIsSupplier = new JCheckBox("Supplier");
-        chkIsSupplier = ViewUtils.addFilterListener(chkIsSupplier, this::onFilterClick);
+        ViewUtils.addFilterListener(chkIsSupplier, this::onFilterClick);
         chkIsMember = new JCheckBox("Staff member");
-        chkIsMember = ViewUtils.addFilterListener(chkIsMember, this::onFilterClick);
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        ViewUtils.addFilterListener(chkIsMember, this::onFilterClick);
 
         JButton btnSearch = new JButton("Search");
         ViewUtils.setCursor(btnSearch);
@@ -129,8 +123,7 @@ public class ClientSupplierTable extends JPanel {
         leftColumn.add(Box.createVerticalStrut(8));
         leftColumn.add(ViewUtils.makeRow(btnCreate));
 
-        JPanel rightColumn = new JPanel();
-        rightColumn.setLayout(new BoxLayout(rightColumn, BoxLayout.Y_AXIS));
+        JPanel rightColumn = ViewUtils.createColumnPanel();
         rightColumn.setBorder(BorderFactory.createTitledBorder("Type"));
         rightColumn.add(ViewUtils.makeRow(chkIsClient));
         rightColumn.add(Box.createVerticalStrut(2));
@@ -208,7 +201,7 @@ public class ClientSupplierTable extends JPanel {
      * The table is reload in {@link ClientSupplierTableModel#setClientSuppliers(ArrayList)}
      */
     public void onFilterClick() {
-        String idText = txtLoyalityCard.getText().trim();
+        String idText = txtLoyaltyCard.getText().trim();
         String lastNameText = txtLastName.getText().trim().toLowerCase();
         String firstNameText = txtFirstName.getText().trim().toLowerCase();
 

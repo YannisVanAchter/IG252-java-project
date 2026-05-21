@@ -80,7 +80,7 @@ public class RecipeSearchTable extends JPanel {
 
         txtRecipeName = new JTextField();
         ViewUtils.setCursor(txtRecipeName);
-        txtRecipeName = ViewUtils.addFilterListener(txtRecipeName, this::onSearchClick);
+        ViewUtils.addFilterListener(txtRecipeName, this::onSearchClick);
 
         JButton btnSearch = new JButton("Search");
         ViewUtils.setCursor(btnSearch);
@@ -222,7 +222,7 @@ public class RecipeSearchTable extends JPanel {
 
         ArrayList<Recipe> results = controller.searchRecipes(
                 name.isBlank() ? null : name,
-                ingredients.isEmpty() ? null : ingredients.get(0)
+                ingredients.isEmpty() ? null : ingredients.getFirst()
         );
 
         for (int i = 1; i < ingredients.size(); i++) {

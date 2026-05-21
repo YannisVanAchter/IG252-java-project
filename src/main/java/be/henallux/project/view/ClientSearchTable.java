@@ -21,11 +21,11 @@ import java.util.List;
 public class ClientSearchTable extends JPanel {
     private static final int TBL_BTN_SEE = ClientSearchTableModel.TBL_BTN_SEE;
 
-    private MainWindow mainWindow;
-    private ClientSupplierSearchController controller;  // ← nouveau controller
+    private final MainWindow mainWindow;
+    private final ClientSupplierSearchController controller;  // ← nouveau controller
     private ClientSearchTableModel model;
 
-    private List<ClientSupplier> displayClients;
+    private final List<ClientSupplier> displayClients;
 
     private JTextField txtName;
     private JTextField txtEmail;
@@ -81,7 +81,7 @@ public class ClientSearchTable extends JPanel {
         emailPanel.add(txtEmail, BorderLayout.CENTER);
 
         txtFidelityCard = new JTextField(10);
-        txtFidelityCard = ViewUtils.digitsOnly(txtFidelityCard);
+        ViewUtils.digitsOnly(txtFidelityCard);
         ViewUtils.setCursor(txtFidelityCard);
         JPanel fidelityPanel = new JPanel(new BorderLayout(0, 4));
         fidelityPanel.add(new JLabel("Fidelity card number"), BorderLayout.NORTH);

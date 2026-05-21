@@ -130,9 +130,7 @@ public class ClientSearchView extends JPanel {
 
         JButton edit = new JButton("Edit");
         ViewUtils.setCursor(edit);
-        edit.addActionListener(e -> {
-            mainWindow.openClientSupplierForm(client);
-        });
+        edit.addActionListener(e -> mainWindow.openClientSupplierForm(client));
         JButton back = new JButton("Back");
         ViewUtils.setCursor(back);
         back.addActionListener(e -> mainWindow.goBack());

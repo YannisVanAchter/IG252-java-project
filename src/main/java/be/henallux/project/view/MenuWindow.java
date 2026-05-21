@@ -112,11 +112,11 @@ public class MenuWindow extends JMenuBar {
             dialog.setSize(600, 500);
             dialog.add(helpPanel);
             dialog.setVisible(true);
-            SwingUtilities.invokeLater(() ->
-                    helpPanel.scrollToTop()
-            );
+            SwingUtilities.invokeLater(() -> helpPanel.scrollToTop());
         });
         helpMenu.add(helpItem);
+
+        btnBell = new NotifBellButton(controller);
 
         add(fileMenu);
         add(managementMenu);
@@ -124,7 +124,6 @@ public class MenuWindow extends JMenuBar {
         add(businessMenu);
         add(Box.createHorizontalGlue());
         add(helpMenu);
-        btnBell = new NotifBellButton(controller);
         add(btnBell);
     }
 }

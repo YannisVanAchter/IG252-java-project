@@ -14,7 +14,7 @@ import java.util.ArrayList;
  */
 public class ClientSupplierTableModel extends AbstractTableModel {
     private static final String[] COLUMNS = {
-            "id", "Name & First Name", "Email", "TVA", "Type", "Loyality", "", ""
+            "id", "Name & First Name", "Email", "TVA", "Type", "Loyalty", "", ""
     };
 
     public static final int TBL_BTN_DEL = 7;
@@ -29,7 +29,7 @@ public class ClientSupplierTableModel extends AbstractTableModel {
     /**
      * Load the ClientSupplier list in the table and allow refresh with new data.
      * @see AbstractTableModel#fireTableDataChanged();
-     * @param clientSuppliers
+     * @param clientSuppliers to display
      */
     public void setClientSuppliers(ArrayList<ClientSupplier> clientSuppliers) {
         this.clientSuppliers = clientSuppliers;

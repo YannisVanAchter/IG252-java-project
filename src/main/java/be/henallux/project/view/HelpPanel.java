@@ -24,8 +24,7 @@ public class HelpPanel extends JPanel {
     private static final Font FONT_SMALL = new Font("SansSerif", Font.PLAIN, 11);
 
     private static final Color COLOR_TEXT_DESC = Color.GRAY;
-    private static final Color COLOR_BG = Color.WHITE;
-    private JScrollPane scrollPane;
+    private final JScrollPane scrollPane;
 
     public HelpPanel() {
         setLayout(new BorderLayout());
@@ -46,8 +45,7 @@ public class HelpPanel extends JPanel {
      * @return a {@link JPanel} with all help sections stacked vertically
      */
     private JPanel buildContent() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        JPanel panel = ViewUtils.createColumnPanel();
         panel.setBorder(BorderFactory.createEmptyBorder(28, 32, 28, 32));
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 

@@ -41,7 +41,7 @@ public class ReceiptClientInfoDialog extends JPanel {
     private JButton btnNew, btnScan, btnCancel, btnNext;
     private JPanel infoPanel;
 
-    public ReceiptClientInfoDialog(MainWindow mainWindow, ReceiptCreateView receiptCreateView, LinkedHashMap<Product, Integer> receipt) throws DataValidationException {
+    public ReceiptClientInfoDialog(MainWindow mainWindow, ReceiptCreateView receiptCreateView, LinkedHashMap<Product, Integer> receipt) {
         this.mainWindow = mainWindow;
         this.receiptCreateView = receiptCreateView;
         this.receipt = receipt;
@@ -69,9 +69,7 @@ public class ReceiptClientInfoDialog extends JPanel {
      */
     private JPanel build() {
         JPanel panel = ViewUtils.createColumnPanel();
-
-        JPanel comboPanel = new JPanel();
-        comboPanel.setLayout(new BoxLayout(comboPanel, BoxLayout.Y_AXIS));
+        JPanel comboPanel = ViewUtils.createColumnPanel();
 
         JLabel lblClient = new JLabel("Client:");
         comboPanel.add(lblClient);

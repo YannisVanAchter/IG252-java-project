@@ -30,7 +30,7 @@ public class DocumentTableModel extends AbstractTableModel {
     /**
      * Load the Documents list in the table and allow refresh with new data.
      * @see AbstractTableModel#fireTableDataChanged()
-     * @param documents
+     * @param documents list to display in table
      */
     public void setDocuments(ArrayList<Document> documents) {
         this.documents = documents;
