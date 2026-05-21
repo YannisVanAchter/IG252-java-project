@@ -280,101 +280,129 @@ public class ViewUtils {
     }
 
     /**
-     * Attaches a real-time autocomplete filter to an editable {@link JComboBox}.
-     * <p>Filters the combobox items as the user types (case-insensitive). The displayed
-     * text is automatically capitalized (first letter uppercase only).
-     * <ul><li><b>TYPING:</b> filters the list and opens/closes the popup accordingly.</li>
-     *   <li><b>ENTER:</b> confirms the best match and restores the full list.</li>
-     *   <li><b>ESCAPE:</b> resets the list, clears the selection and the editor.</li></ul>
+     * Enables dynamic autocomplete behavior on an editable {@link JComboBox}.
+     * <p>The combo box content is filtered in real time according to the text entered by the user.
+     * Matching is case-insensitive and based on the textual representation of each {@link ComboBoxItem}.
      *
-     * @param <T>      the type wrapped inside each {@link ComboBoxItem}
-     * @param comboBox the target editable combo box
-     * @param allItems the full reference list, never modified
+     * <p>Supported keyboard behavior:
+     * <ul><li><b>Typing:</b> filters the available items and automatically displays the popup when matches exist.</li>
+     * <li><b>ENTER:</b> validates the current value.
+     *     <ul><li>If an exact match exists, the corresponding item is selected.</li>
+     *       <li>Otherwise, the typed text is preserved without selection.</li></ul></li>
+     *   <li><b>ESCAPE:</b> restores the original list, clears the editor,
+     *   removes the current selection, and closes the popup.</li>
+     *   <li><b>Navigation keys</b> (arrows, shift, control) are ignored to avoid
+     *   interfering with standard combo box navigation behavior.</li></ul>
+     *
+     * <p>The original item list provided in {@code allItems} is never modified.
+     * Filtering only affects the temporary combo box model displayed to the user.
+     *
+     * @param <T> the type wrapped by each {@link ComboBoxItem}
+     * @param comboBox the editable combo box to enhance with autocomplete
+     * @param allItems the complete immutable reference list used for filtering
      */
-    public static <T> void setupAutoComplete(JComboBox<ComboBoxItem<T>> comboBox, ArrayList<ComboBoxItem<T>> allItems) {
+    public static <T> void setupAutoComplete(
+            JComboBox<ComboBoxItem<T>> comboBox,
+            ArrayList<ComboBoxItem<T>> allItems) {
+
         JTextField editor = (JTextField) comboBox.getEditor().getEditorComponent();
+
         editor.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
                 int key = e.getKeyCode();
+
                 if (key == KeyEvent.VK_UP || key == KeyEvent.VK_DOWN ||
                         key == KeyEvent.VK_LEFT || key == KeyEvent.VK_RIGHT ||
                         key == KeyEvent.VK_SHIFT || key == KeyEvent.VK_CONTROL) {
                     return;
                 }
 
-                if (key == KeyEvent.VK_ENTER) {
-                    String currentText = editor.getText().trim();
-                    ComboBoxItem<T> match = null;
-                    for (int i = 0; i < comboBox.getItemCount(); i++) {
-                        ComboBoxItem<T> item = comboBox.getItemAt(i);
-                        if (item.toString().equalsIgnoreCase(currentText) && match == null) match = item;
-                    }
-
-                    if (match == null && comboBox.getItemCount() > 0) {
-                        ComboBoxItem<T> first = comboBox.getItemAt(0);
-                        if (first.toString().toLowerCase().contains(currentText.toLowerCase())) match = first;
-                    }
-
-                    comboBox.removeAllItems();
-                    for (ComboBoxItem<T> item : allItems) {
-                        comboBox.addItem(item);
-                    }
-
-                    if (match != null) {
-                        comboBox.setSelectedItem(match);
-                        editor.setText(match.toString());
-                    } else {
-                        comboBox.setSelectedIndex(-1);
-                        editor.setText(currentText);
-                    }
-                    comboBox.hidePopup();
-                    return;
-                }
-
                 if (key == KeyEvent.VK_ESCAPE) {
-                    comboBox.removeAllItems();
-                    for (ComboBoxItem<T> item : allItems) {
-                        comboBox.addItem(item);
-                    }
+                    rebuildModel(comboBox, allItems);
                     comboBox.setSelectedIndex(-1);
                     editor.setText("");
                     comboBox.hidePopup();
                     return;
                 }
 
+                if (key == KeyEvent.VK_ENTER) {
+
+                    String currentText = editor.getText().trim();
+                    String lowerText = currentText.toLowerCase();
+
+                    ComboBoxItem<T> exactMatch = null;
+                    ComboBoxItem<T> prefixMatch = null;
+
+                    for (ComboBoxItem<T> item : allItems) {
+                        String value = item.toString();
+
+                        if (value.equalsIgnoreCase(currentText)) {
+                            exactMatch = item;
+                        }
+
+                        if (prefixMatch == null && value.toLowerCase().startsWith(lowerText)) {
+                            prefixMatch = item;
+                        }
+                    }
+
+                    rebuildModel(comboBox, allItems);
+
+                    if (exactMatch != null) {
+                        comboBox.setSelectedItem(exactMatch);
+                        editor.setText(exactMatch.toString());
+                    } else if (prefixMatch != null) {
+                        comboBox.setSelectedItem(prefixMatch);
+                        editor.setText(prefixMatch.toString());
+                    } else {
+                        comboBox.setSelectedIndex(-1);
+                        editor.setText(currentText);
+                    }
+
+                    comboBox.hidePopup();
+                    return;
+                }
                 String texte = editor.getText();
                 String texteLower = texte.toLowerCase();
 
-                comboBox.removeAllItems();
+                DefaultComboBoxModel<ComboBoxItem<T>> model = new DefaultComboBoxModel<>();
                 if (texte.isEmpty()) {
-                    for (ComboBoxItem<T> item : allItems) {
-                        comboBox.addItem(item);
-                    }
+                    for (ComboBoxItem<T> item : allItems) model.addElement(item);
                 } else {
                     for (ComboBoxItem<T> item : allItems) {
-                        if (item.toString().toLowerCase().contains(texteLower)) comboBox.addItem(item);
+                        if (item.toString().toLowerCase().contains(texteLower))
+                            model.addElement(item);
                     }
                 }
 
-                if (!texte.isEmpty()) {
-                    String texteCapitalize = texte.substring(0, 1).toUpperCase() + texte.substring(1).toLowerCase();
-                    int caretPos = editor.getCaretPosition();
-                    editor.setText(texteCapitalize);
-                    try {
-                        editor.setCaretPosition(Math.min(caretPos, texteCapitalize.length()));
-                    } catch (IllegalArgumentException ex) {
-                        editor.setCaretPosition(texteCapitalize.length());
-                    }
-                }
+                comboBox.setModel(model);
                 editor.setText(texte);
 
-                if (comboBox.getItemCount() > 0) comboBox.showPopup();
+                int caretPos = Math.min(texte.length(), editor.getText().length());
+                editor.setCaretPosition(caretPos);
+
+                if (model.getSize() > 0) comboBox.showPopup();
                 else comboBox.hidePopup();
             }
         });
     }
 
+    /**
+     * Rebuilds the combo box model using the complete reference item list.
+     * <p>This method restores the original state of the combo box after filtering
+     * operations by replacing the current model with a new model containing all available items.
+     *
+     * @param <T> the type wrapped by each {@link ComboBoxItem}
+     * @param comboBox the target combo box whose model must be rebuilt
+     * @param allItems the full list of items to reinsert into the model
+     */
+    private static <T> void rebuildModel(JComboBox<ComboBoxItem<T>> comboBox, ArrayList<ComboBoxItem<T>> allItems) {
+        DefaultComboBoxModel<ComboBoxItem<T>> model = new DefaultComboBoxModel<>();
+        for (ComboBoxItem<T> item : allItems) {
+            model.addElement(item);
+        }
+        comboBox.setModel(model);
+    }
 
     /**
      * Adjusts the preferred width of each column in the specified {@link JTable} based on the content of its cells and headers.

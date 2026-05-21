@@ -7,10 +7,9 @@ import main.java.be.henallux.project.model.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.time.*;
 import java.util.*;
+import java.util.List;
 
 //TODO : nettoyer quand controller sera près
 
@@ -28,7 +27,7 @@ public class DocumentForm extends JPanel {
     private Document currentDocument;
 
     private final ArrayList<ClientSupplier> allClients;
-    ArrayList<ComboBoxItem<ClientSupplier>> allClientItems = new ArrayList<>();
+    private final ArrayList<ComboBoxItem<ClientSupplier>> allClientItems = new ArrayList<>();
 
 
     private JPanel leftPanel, rightPanel;
@@ -287,7 +286,9 @@ public class DocumentForm extends JPanel {
         ViewUtils.setCursor(txtCountry);
         txtCountry.setEditable(false);
         txtCountry.setFocusable(false);
-        addressPanel.add(ViewUtils.labeled("Country", txtCountry));
+        txtCountry.setBackground(Color.LIGHT_GRAY);
+        txtCountry.setForeground(Color.DARK_GRAY);
+        addressPanel.add(ViewUtils.horizontalRowGroup(ViewUtils.labeled("Country", txtCountry), new JPanel()));
 
         workflowPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         clientPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -323,7 +324,7 @@ public class DocumentForm extends JPanel {
     /**
      * Validates the form fields before submission.
      * Checks that all required fields are filled and follow the rules imposed to correctly fill out the database.
-     * The planned sent date is only required for "Delivery" document type, in coherence with {@link Document} model constraints.
+     * The check requirement use {@link #typeRequirement(List, String)}
      * If a validation rule fails, a warning dialog is displayed and the method returns {@code false}.
      *
      * @return {@code true} if all validation rules pass; {@code false} otherwise
@@ -342,47 +343,70 @@ public class DocumentForm extends JPanel {
             return false;
         }
         if (!(comboClientSupplier.getSelectedItem() instanceof ComboBoxItem)) {
-            JOptionPane.showMessageDialog(this, "Client/Supplier is required.", "Validation", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "A client/supplier is required. Select or create a new one.", "Validation", JOptionPane.WARNING_MESSAGE);
             return false;
         }
 
         String typeName = getSelectedTypeName();
 
-        if ("Delivery".equalsIgnoreCase(typeName)) {
+        if (typeRequirement(Document.TYPES_REQUIRING_PLANNED_SEND_DATE, typeName)) {
             if (!chkPlannedSendDate.isSelected()) {
                 JOptionPane.showMessageDialog(this, "Planned send date is required for Delivery type.", "Validation", JOptionPane.WARNING_MESSAGE);
                 return false;
             }
+        }
+
+        if (typeRequirement(Document.TYPES_REQUIRING_RECEPTION_DATE, typeName)) {
             if (!chkPlannedReceptionDate.isSelected()) {
                 JOptionPane.showMessageDialog(this, "Planned reception date is required for Delivery type.", "Validation", JOptionPane.WARNING_MESSAGE);
                 return false;
             }
+        }
+
+        if (typeRequirement(Document.TYPES_REQUIRING_ADDRESS, typeName)) {
             if (txtStreet.getText().trim().isEmpty() || txtCity.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Address (street, city, country) is required for Delivery type.", "Validation", JOptionPane.WARNING_MESSAGE);
                 return false;
             }
         }
 
-        if ("Command".equalsIgnoreCase(typeName)) {
+        if (typeRequirement(Document.TYPES_REQUIRING_PAYMENT_DELAY, typeName)) {
             int paymentDelay = (int) spnPaymentDelay.getValue();
-            if (paymentDelay < 0) {
+            if (paymentDelay <= 0) {
                 JOptionPane.showMessageDialog(this, "Payment delay is required and must be >= 0 for Command type.", "Validation", JOptionPane.WARNING_MESSAGE);
                 return false;
             }
         }
 
-        if ("Preparation Order".equalsIgnoreCase(typeName)) {
-            if (!chkPlannedSendDate.isSelected()) {
-                JOptionPane.showMessageDialog(this, "Planned send date is required for Preparation Order type.", "Validation", JOptionPane.WARNING_MESSAGE);
-                return false;
-            }
+        if (typeRequirement(Document.TYPES_REQUIRING_COMMENTARY, typeName)) {
             if (commentary.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Commentary is required for Preparation Order type.", "Validation", JOptionPane.WARNING_MESSAGE);
                 return false;
             }
         }
-
         return true;
+    }
+
+    /**
+     * Checks the list of document types contains an element whose name matches the specified type name.
+     * The comparison is case-insensitive.
+     *
+     * @param list     the list of {@link DocumentType} to search through
+     * @param typeName the name of the document type to look for
+     * @return {@code true} if a matching document type is found, {@code false} otherwise
+     */
+    private boolean typeRequirement(List<DocumentType> list, String typeName) {
+        int i = 0;
+        boolean found = false;
+
+        while (i < list.size() && !found) {
+            DocumentType dt = list.get(i);
+            if (dt.getName().equalsIgnoreCase(typeName)) {
+                found = true;
+            }
+            i++;
+        }
+        return found;
     }
 
     /**
@@ -535,7 +559,7 @@ public class DocumentForm extends JPanel {
 
         workflowGroup.clearSelection();
 
-        spnStreetNumber.setValue(1);
+        spnStreetNumber.setValue(0);
         spnPostalCode.setValue(1000);
 
         txtStreet.setText("");
@@ -664,6 +688,12 @@ public class DocumentForm extends JPanel {
         if (newClient != null) {
             allClients.add(newClient);
             setClientSuppliers(allClients);
+
+            allClientItems.clear();
+            for (int i = 0; i < comboClientSupplier.getItemCount(); i++) {
+                allClientItems.add(comboClientSupplier.getItemAt(i));
+            }
+
             ComboBoxItem<ClientSupplier> newItem = comboClientSupplier.getItemAt(comboClientSupplier.getItemCount() - 1);
             comboClientSupplier.setSelectedItem(newItem);
         }

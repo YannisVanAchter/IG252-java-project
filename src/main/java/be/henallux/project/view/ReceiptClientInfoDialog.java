@@ -33,7 +33,8 @@ public class ReceiptClientInfoDialog extends JPanel {
     private final MainWindow mainWindow;
     private final ReceiptCreateView receiptCreateView;
     private final ClientSupplierController controller;
-    private ArrayList<ClientSupplier> allClients;
+    private final ArrayList<ClientSupplier> allClients;
+    private final ArrayList<ComboBoxItem<ClientSupplier>> allClientItems = new ArrayList<>();
     private LinkedHashMap<Product, Integer> receipt;
     private ClientSupplier selectedClient;
     private JComboBox<ComboBoxItem<ClientSupplier>> comboClientSupplier;
@@ -79,6 +80,12 @@ public class ReceiptClientInfoDialog extends JPanel {
         ViewUtils.setCursor(comboClientSupplier);
         comboClientSupplier.setEditable(true);
         setComboClients(allClients);
+
+        for (int i = 0; i < comboClientSupplier.getItemCount(); i++) {
+            allClientItems.add(comboClientSupplier.getItemAt(i));
+        }
+        ViewUtils.setupAutoComplete(comboClientSupplier, allClientItems);
+
         comboClientSupplier.setMaximumSize(new Dimension(Integer.MAX_VALUE, comboClientSupplier.getPreferredSize().height));
         comboClientSupplier.addActionListener(e -> {
             if (comboClientSupplier.getSelectedIndex() <= 0) {
@@ -92,6 +99,7 @@ public class ReceiptClientInfoDialog extends JPanel {
                 refreshInfoPanel();
             } else {
                 selectedClient = null;
+                refreshInfoPanel();
             }
         });
         comboPanel.add(comboClientSupplier);
@@ -203,9 +211,7 @@ public class ReceiptClientInfoDialog extends JPanel {
      */
     private void onScanClick() {
         String input = JOptionPane.showInputDialog("Enter the card number");
-        if (input == null || input.trim().isEmpty()) {
-            return;
-        }
+        if (input == null || input.trim().isEmpty()) return;
 
         int cardNumber;
         try {
@@ -215,17 +221,22 @@ public class ReceiptClientInfoDialog extends JPanel {
             return;
         }
 
-        for (ClientSupplier client : allClients) {
-            FidelityCard card = client.getFidelityCard();
+        boolean found = false;
+        int i = 0;
+        while (i < allClients.size() && !found) {
+            FidelityCard card = allClients.get(i).getFidelityCard();
             if (card != null && card.getId() == cardNumber) {
-                selectedClient = client;
-                setComboClient(client);
+                selectedClient = allClients.get(i);
+                setComboClient(selectedClient);
                 refreshInfoPanel();
-                return;
+                found = true;
             }
+            i++;
         }
 
-        JOptionPane.showMessageDialog(this, "No customers found", "Information", JOptionPane.INFORMATION_MESSAGE);
+        if (!found) {
+            JOptionPane.showMessageDialog(this, "No customers found", "Information", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 
     /**
@@ -249,7 +260,9 @@ public class ReceiptClientInfoDialog extends JPanel {
         if (newClient == null) return;
         allClients.add(newClient);
         String label = newClient.getName() + " " + newClient.getFirstname();
-        comboClientSupplier.addItem(new ComboBoxItem<>(newClient, label));
+        ComboBoxItem<ClientSupplier> newItem = new ComboBoxItem<>(newClient, label);
+        comboClientSupplier.addItem(newItem);
+        allClientItems.add(newItem);
         setComboClient(newClient);
     }
 
@@ -304,12 +317,12 @@ public class ReceiptClientInfoDialog extends JPanel {
      * @param client the client to select in the combo box
      */
     public void setComboClient(ClientSupplier client) {
-        for (int i = 0; i < comboClientSupplier.getItemCount(); i++) {
-            ComboBoxItem<ClientSupplier> item = comboClientSupplier.getItemAt(i);
-            ClientSupplier current = item.getObject();
-            if (current != null && current.equals(client)) {
+        boolean found = false;
+        for (int i = 0; i < comboClientSupplier.getItemCount() && !found; i++) {
+            ClientSupplier current = comboClientSupplier.getItemAt(i).getObject();
+            if (current != null && current.getId() == client.getId()) {
                 comboClientSupplier.setSelectedIndex(i);
-                return;
+                found = true;
             }
         }
     }
