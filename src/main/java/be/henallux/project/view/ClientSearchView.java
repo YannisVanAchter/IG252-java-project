@@ -2,6 +2,7 @@ package main.java.be.henallux.project.view;
 
 import main.java.be.henallux.project.model.Address;
 import main.java.be.henallux.project.model.ClientSupplier;
+import main.java.be.henallux.project.model.FidelityCard;
 import main.java.be.henallux.project.model.Locality;
 
 import javax.swing.*;
@@ -167,15 +168,15 @@ public class ClientSearchView extends JPanel {
     private JPanel buildFidelityInfo() {
         JPanel card = createCard("Fidelity Card");
 
-        if (client == null || !client.getFidelityCard().getIsValid()) {
+        FidelityCard fidelityCard = client != null ? client.getFidelityCard() : null;
+        if (fidelityCard == null || !fidelityCard.getIsValid()) {
             card.add(labelValue("Fidelity card", LABEL_NO_DATA));
             return card;
         }
-        card.add(labelValue("Card Number", String.valueOf(client.getFidelityCard().getId())));
-        card.add(labelValue("Total points", String.valueOf(client.getFidelityCard().getTotalPoint())));
+        card.add(labelValue("Card Number", String.valueOf(fidelityCard.getId())));
+        card.add(labelValue("Total points", String.valueOf(fidelityCard.getTotalPoint())));
         return card;
     }
-
     /**
      * Builds the section displaying address and locality information.
      *
@@ -189,10 +190,10 @@ public class ClientSearchView extends JPanel {
         Address address = client.getAddress();
         Locality locality = address != null ? address.getLocality() : null;
 
-        card.add(labelValue("Street", address != null ? address.getStreetName() : "N/A"));
-        card.add(labelValue("Street nb", address != null ? String.valueOf(address.getStreetNumber()) : "N/A"));
-        card.add(labelValue("Postal code", locality != null ? String.valueOf(locality.getPostalCode()) : "N/A"));
-        card.add(labelValue("City", locality != null ? locality.getCity() : "N/A"));
+        card.add(labelValue("Street", address != null ? address.getStreetName() : LABEL_NO_DATA));
+        card.add(labelValue("Street nb", address != null ? String.valueOf(address.getStreetNumber()) : LABEL_NO_DATA));
+        card.add(labelValue("Postal code", locality != null ? String.valueOf(locality.getPostalCode()) : LABEL_NO_DATA));
+        card.add(labelValue("City", locality != null ? locality.getCity() : LABEL_NO_DATA));
         return card;
     }
 

@@ -269,7 +269,7 @@ public class DocumentForm extends JPanel {
 
         txtStreet = new JTextField(10);
         ViewUtils.setCursor(txtStreet);
-        spnStreetNumber = ViewUtils.createNumberSpinner(1, 1, 10000, 1);
+        spnStreetNumber = ViewUtils.createNumberSpinner(0, 0, 10000, 1);
         addressPanel.add(ViewUtils.horizontalRowGroup(
                 ViewUtils.labeledRequired("Street", txtStreet),
                 ViewUtils.labeledRequired("Street Number", spnStreetNumber)
@@ -277,7 +277,7 @@ public class DocumentForm extends JPanel {
 
         addressPanel.add(Box.createVerticalStrut(8));
 
-        spnPostalCode = ViewUtils.createNumberSpinner(1000, 1, 9999, 1000);
+        spnPostalCode = ViewUtils.createNumberSpinner(0, 0, 9999, 1000);
         txtCity = new JTextField(10);
         ViewUtils.setCursor(txtCity);
         addressPanel.add(ViewUtils.horizontalRowGroup(
@@ -369,7 +369,9 @@ public class DocumentForm extends JPanel {
         }
 
         if (typeRequirement(Document.TYPES_REQUIRING_ADDRESS, typeName)) {
-            if (txtStreet.getText().trim().isEmpty() || txtCity.getText().trim().isEmpty()) {
+            int streetNumber = (int) spnStreetNumber.getValue();
+            int postalCode = (int) spnPostalCode.getValue();
+            if (txtStreet.getText().trim().isEmpty() || txtCity.getText().trim().isEmpty() || streetNumber < 0 || postalCode < 0) {
                 JOptionPane.showMessageDialog(this, "Address (street, city, country) is required for Delivery type.", "Validation", JOptionPane.WARNING_MESSAGE);
                 return false;
             }
@@ -377,7 +379,7 @@ public class DocumentForm extends JPanel {
 
         if (typeRequirement(Document.TYPES_REQUIRING_PAYMENT_DELAY, typeName)) {
             int paymentDelay = (int) spnPaymentDelay.getValue();
-            if (paymentDelay <= 0) {
+            if (paymentDelay < 0) {
                 JOptionPane.showMessageDialog(this, "Payment delay is required and must be >= 0 for Command type.", "Validation", JOptionPane.WARNING_MESSAGE);
                 return false;
             }
@@ -482,8 +484,12 @@ public class DocumentForm extends JPanel {
             }
         }
 
-        ComboBoxItem<ClientSupplier> clientItem = (ComboBoxItem<ClientSupplier>) comboClientSupplier.getSelectedItem();
-        ClientSupplier clientSupplier = clientItem.getObject();
+        Object selected = comboClientSupplier.getSelectedItem();
+        if (!(selected instanceof ComboBoxItem<?> item)) {
+            JOptionPane.showMessageDialog(this, "Invalid client/supplier.");
+            return;
+        }
+        ClientSupplier clientSupplier = (ClientSupplier) item.getObject();
 
         boolean isBuySelected = isBuy.isSelected();
         boolean isSellSelected = isSell.isSelected();
@@ -565,7 +571,7 @@ public class DocumentForm extends JPanel {
         workflowGroup.clearSelection();
 
         spnStreetNumber.setValue(0);
-        spnPostalCode.setValue(1000);
+        spnPostalCode.setValue(0);
 
         txtStreet.setText("");
         txtCity.setText("");
@@ -622,13 +628,15 @@ public class DocumentForm extends JPanel {
             spnPaymentDelay.setValue(doc.getPaymentDelay());
         }
 
-        isBuy.setSelected(doc.getWorkflow().getWorkflowType().getIsBuy());
-        isSell.setSelected(doc.getWorkflow().getWorkflowType().getIsSell());
-        isInternal.setSelected(doc.getWorkflow().getWorkflowType().getIsInternal());
+        if (doc.getWorkflow() != null && doc.getWorkflow().getWorkflowType() != null) {
+            isBuy.setSelected(doc.getWorkflow().getWorkflowType().getIsBuy());
+            isSell.setSelected(doc.getWorkflow().getWorkflowType().getIsSell());
+            isInternal.setSelected(doc.getWorkflow().getWorkflowType().getIsInternal());
 
-        ComboBoxItem.selectComboItem(comboWorkflowStatus, doc.getWorkflow().getStatus());
-        ComboBoxItem.selectComboItem(comboDocumentType, doc.getDocumentType());
-        ComboBoxItem.selectComboItem(comboClientSupplier, doc.getWorkflow().getOtherParty());
+            ComboBoxItem.selectComboItem(comboWorkflowStatus, doc.getWorkflow().getStatus());
+            ComboBoxItem.selectComboItem(comboDocumentType, doc.getDocumentType());
+            ComboBoxItem.selectComboItem(comboClientSupplier, doc.getWorkflow().getOtherParty());
+        }
 
         if (doc.getAddress() != null) {
             spnStreetNumber.setValue(doc.getAddress().getStreetNumber());

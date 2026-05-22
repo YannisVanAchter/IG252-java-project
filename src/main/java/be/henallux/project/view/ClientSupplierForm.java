@@ -225,11 +225,11 @@ public class ClientSupplierForm extends JPanel {
         ViewUtils.setCursor(txtStreet);
         addressPanel.add(ViewUtils.labeledRequired("Street", txtStreet));
 
-        spnStreetNumber = ViewUtils.createNumberSpinner(1, 1, 10000, 1);
+        spnStreetNumber = ViewUtils.createNumberSpinner(0, 0, 10000, 1);
         ViewUtils.setCursor(spnStreetNumber);
         addressPanel.add(ViewUtils.labeled("Street Number", spnStreetNumber));
 
-        spnPostalCode = ViewUtils.createNumberSpinner(1000, 1, 99999, 1);
+        spnPostalCode = ViewUtils.createNumberSpinner(0, 0, 99999, 1);
         ViewUtils.setCursor(spnPostalCode);
         addressPanel.add(ViewUtils.labeled("Postal Code", spnPostalCode));
 
@@ -392,6 +392,11 @@ public class ClientSupplierForm extends JPanel {
                 );
             }
 
+            if (currentClientSupplier == null) {
+                JOptionPane.showMessageDialog(this, "Unable to save client/supplier.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             JOptionPane.showMessageDialog(this, "Client/Supplier saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
 
             if (isOpenInModal != null && isOpenInModal) {
@@ -426,11 +431,11 @@ public class ClientSupplierForm extends JPanel {
         chkIsMember.setSelected(false);
 
         spnStreetNumber.setValue(0);
-        spnPostalCode.setValue(1000);
+        spnPostalCode.setValue(0);
 
         txtStreet.setText("");
         txtCity.setText("");
-        txtCountry.setText("Belgique");
+        txtCountry.setText("Belgium");
 
         currentClientSupplier = null;
     }
@@ -463,20 +468,39 @@ public class ClientSupplierForm extends JPanel {
             becameClientDate.setValue(ViewUtils.toDate(cs.getBecameClientDate()));
         }
 
-        txtIdLoyaltyCard.setText(String.valueOf(cs.getFidelityCard().getId()));
-        spnLoyaltyPoint.setValue(cs.getFidelityCard().getTotalPoint());
+        FidelityCard fidelityCard = cs.getFidelityCard();
+
+        if (fidelityCard != null && fidelityCard.getIsValid()) {
+            txtIdLoyaltyCard.setText(String.valueOf(fidelityCard.getId()));
+            spnLoyaltyPoint.setValue(fidelityCard.getTotalPoint());
+        } else {
+            txtIdLoyaltyCard.setText("");
+            spnLoyaltyPoint.setValue(0);
+        }
 
         chkIsClient.setSelected(cs.getIsClient());
         chkIsSupplier.setSelected(cs.getIsSupplier());
         chkIsMember.setSelected(cs.getIsUs());
 
-        spnStreetNumber.setValue(cs.getAddress().getStreetNumber());
-        spnPostalCode.setValue(cs.getAddress().getLocality().getPostalCode());
-
         Address address = cs.getAddress();
-        txtStreet.setText(address != null ? address.getStreetName() : "");
-        txtCity.setText(address != null && address.getLocality() != null ? cs.getAddress().getLocality().getCity() : "");
-        txtCountry.setText("Belgium");
+        if (address != null) {
+            spnStreetNumber.setValue(address.getStreetNumber());
+
+            if (address.getLocality() != null) {
+                spnPostalCode.setValue(address.getLocality().getPostalCode());
+                txtCity.setText(address.getLocality().getCity());
+            } else {
+                spnPostalCode.setValue(0);
+                txtCity.setText("");
+            }
+
+            txtStreet.setText(address.getStreetName());
+        } else {
+            spnStreetNumber.setValue(1);
+            spnPostalCode.setValue(0);
+            txtStreet.setText("");
+            txtCity.setText("");
+        }
 
         btnSave.setText("Edit");
     }
