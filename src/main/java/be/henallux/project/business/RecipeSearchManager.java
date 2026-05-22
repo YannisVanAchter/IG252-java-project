@@ -2,6 +2,7 @@ package main.java.be.henallux.project.business;
 
 import main.java.be.henallux.project.data.*;
 import main.java.be.henallux.project.data.exception.DataBaseException;
+import main.java.be.henallux.project.business.exception.BusinessException;
 import main.java.be.henallux.project.model.*;
 import java.util.List;
 
@@ -14,8 +15,12 @@ public class RecipeSearchManager {
         this.product = product;
     }
 
-    public List<Recipe> searchRecipes() throws DataBaseException {
+    public List<Recipe> searchRecipes() throws BusinessException {
         RecipeData recipeData = new RecipeData();
-        return recipeData.searchRecipes(name, product);
+        try {
+            return recipeData.searchRecipes(name, product);
+        } catch (DataBaseException e) {
+            throw new BusinessException("Erreur lors de la recherche de recettes.", e);
+        }
     }
 }
