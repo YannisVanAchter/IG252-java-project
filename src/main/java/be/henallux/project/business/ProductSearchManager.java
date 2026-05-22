@@ -4,8 +4,6 @@ import main.java.be.henallux.project.data.*;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.model.*;
 import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
 
 public class ProductSearchManager {
     private String name;
@@ -18,8 +16,8 @@ public class ProductSearchManager {
         this.discount = discount;
     }
 
-    public List<Product> searchProducts(String name, String category, Boolean discount) throws DataBaseException {
+    public List<Product> searchProducts() throws DataBaseException {
         ProductData productData = new ProductData();
-        return productData.search(name, category, discount);
+        return productData.search(this.name, this.category, this.discount);
     }
 }

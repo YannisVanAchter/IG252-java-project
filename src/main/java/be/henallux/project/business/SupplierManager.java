@@ -4,25 +4,32 @@ import main.java.be.henallux.project.data.*;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.model.*;
 import java.util.List;
-import java.util.Map;
 
-import com.mysql.cj.xdevapi.Client;
+public class SupplierManager extends ClientSupplierManager {
 
-import java.util.ArrayList;
+    private final ClientSupplierData clientSupplierData;
+    private final ProductData productData;
 
-public class SupplierManager {
+    public SupplierManager(ClientSupplierData clientSupplierData, ProductData productData) {
+        super(clientSupplierData);
+        this.clientSupplierData = clientSupplierData;
+        this.productData = productData;
+    }
+
     public List<ClientSupplier> getAllSuppliers() throws DataBaseException {
-        ClientSupplierData data = new ClientSupplierData();
-        return data.getAllSuppliers();
+        return clientSupplierData.getAllSuppliers();
     }
 
     public List<Product> getAllProducts(int supplierId) throws DataBaseException {
-        ProductData data = new ProductData();
-        return data.getAllProducts(supplierId);
+        return productData.getAllProducts(supplierId);
     }
 
     public void changeVATNumber(int supplierId, String VATNumber) throws DataBaseException {
-        ClientSupplierData data = new ClientSupplierData();
-        data.changeVATNumber(supplierId, VATNumber);
+        clientSupplierData.changeVATNumber(supplierId, VATNumber);
+    }
+
+    @Override
+    public void placeOrder(int clientSupplierId, List<Product> products) throws DataBaseException {
+        // logique commande fournisseur
     }
 }

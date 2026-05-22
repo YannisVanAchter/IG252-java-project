@@ -4,8 +4,6 @@ import main.java.be.henallux.project.data.*;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.model.*;
 import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
 
 public class ClientSupplierSearchManager {
     private String name;

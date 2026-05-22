@@ -17,6 +17,7 @@ package business {
         +receiveDelivery(documentId: int, date: LocalDate): void
         +sendDelivery(documentId: int, date: LocalDate): void
         +deleteDocument(id : int) : void
+        +getDeliveryOrders(): List<Document>
     }
 
     class PreparationOrderManager {
@@ -59,7 +60,6 @@ package business {
         +addCheckout(products: List<Product>, clientID: int, fidelityCard: FidelityCard): void
         +deleteClientAccount(clientID: int)
         +deleteClientAccount(clientID: int, cardID: int): void
-        +getDeliveryOrders(): List<Document>
     }
 
     class SupplierManager {
