@@ -14,8 +14,7 @@ import java.awt.*;
  * It does not handle click actions or events. To make the button interactive,
  * a corresponding editor (such as a custom {@code TableCellEditor}) must also be used.
  *
- * <p>
- * Typical use case:
+ * <p>Typical use case:
  * <pre>{@code
  * table.getColumn("Action").setCellRenderer(new ButtonRenderer("Delete"));
  * }</pre>

@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
  * <p>The panel interacts with {@link ClientSupplierController} to retrieve available clients
  * and maintains the currently selected {@link ClientSupplier}.
  * <p>When the workflow is validated, the view transitions to {@link ReceiptPayment} to finalize the transaction.
+ *
  * @see ClientSupplierController
  * @see ClientSupplier
  * @see Product
@@ -33,14 +34,15 @@ public class ReceiptClientInfoDialog extends JPanel {
     private final MainWindow mainWindow;
     private final ReceiptCreateView receiptCreateView;
     private final ClientSupplierController controller;
-    private ArrayList<ClientSupplier> allClients;
+    private final ArrayList<ClientSupplier> allClients;
+    private final ArrayList<ComboBoxItem<ClientSupplier>> allClientItems = new ArrayList<>();
     private LinkedHashMap<Product, Integer> receipt;
     private ClientSupplier selectedClient;
     private JComboBox<ComboBoxItem<ClientSupplier>> comboClientSupplier;
     private JButton btnNew, btnScan, btnCancel, btnNext;
     private JPanel infoPanel;
 
-    public ReceiptClientInfoDialog(MainWindow mainWindow, ReceiptCreateView receiptCreateView, LinkedHashMap<Product, Integer> receipt) throws DataValidationException {
+    public ReceiptClientInfoDialog(MainWindow mainWindow, ReceiptCreateView receiptCreateView, LinkedHashMap<Product, Integer> receipt) {
         this.mainWindow = mainWindow;
         this.receiptCreateView = receiptCreateView;
         this.receipt = receipt;
@@ -68,9 +70,7 @@ public class ReceiptClientInfoDialog extends JPanel {
      */
     private JPanel build() {
         JPanel panel = ViewUtils.createColumnPanel();
-
-        JPanel comboPanel = new JPanel();
-        comboPanel.setLayout(new BoxLayout(comboPanel, BoxLayout.Y_AXIS));
+        JPanel comboPanel = ViewUtils.createColumnPanel();
 
         JLabel lblClient = new JLabel("Client:");
         comboPanel.add(lblClient);
@@ -79,6 +79,12 @@ public class ReceiptClientInfoDialog extends JPanel {
         ViewUtils.setCursor(comboClientSupplier);
         comboClientSupplier.setEditable(true);
         setComboClients(allClients);
+
+        for (int i = 0; i < comboClientSupplier.getItemCount(); i++) {
+            allClientItems.add(comboClientSupplier.getItemAt(i));
+        }
+        ViewUtils.setupAutoComplete(comboClientSupplier, allClientItems);
+
         comboClientSupplier.setMaximumSize(new Dimension(Integer.MAX_VALUE, comboClientSupplier.getPreferredSize().height));
         comboClientSupplier.addActionListener(e -> {
             if (comboClientSupplier.getSelectedIndex() <= 0) {
@@ -92,6 +98,7 @@ public class ReceiptClientInfoDialog extends JPanel {
                 refreshInfoPanel();
             } else {
                 selectedClient = null;
+                refreshInfoPanel();
             }
         });
         comboPanel.add(comboClientSupplier);
@@ -126,9 +133,7 @@ public class ReceiptClientInfoDialog extends JPanel {
     private JPanel buildInfoPanel() {
         infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-        infoPanel.setBorder(
-                BorderFactory.createTitledBorder("Client information")
-        );
+        infoPanel.setBorder(BorderFactory.createTitledBorder("Client information"));
 
         if (selectedClient == null) {
             JPanel noClientPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
@@ -141,7 +146,7 @@ public class ReceiptClientInfoDialog extends JPanel {
 
             JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
             JLabel lblName = new JLabel("Name:");
-            lblName.setPreferredSize(new Dimension(labelSize));
+            lblName.setPreferredSize(labelSize);
             JLabel lblNameValue = new JLabel(selectedClient.getFirstname() + " " + selectedClient.getName());
             namePanel.add(lblName);
             namePanel.add(lblNameValue);
@@ -149,7 +154,7 @@ public class ReceiptClientInfoDialog extends JPanel {
 
             JPanel emailPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
             JLabel lblEmail = new JLabel("Email:");
-            lblEmail.setPreferredSize(new Dimension(labelSize));
+            lblEmail.setPreferredSize(labelSize);
             JLabel lblEmailValue = new JLabel(selectedClient.getEmail());
             emailPanel.add(lblEmail);
             emailPanel.add(lblEmailValue);
@@ -157,7 +162,7 @@ public class ReceiptClientInfoDialog extends JPanel {
 
             JPanel loyaltyPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
             JLabel lblLoyalty = new JLabel("Loyalty points:");
-            lblLoyalty.setPreferredSize(new Dimension(labelSize));
+            lblLoyalty.setPreferredSize(labelSize);
 
             FidelityCard card = selectedClient.getFidelityCard();
             String loyaltyValue = (card != null)
@@ -179,6 +184,7 @@ public class ReceiptClientInfoDialog extends JPanel {
      * Builds the bottom action panel containing navigation buttons.
      * Cancel: closes the dialog without proceeding
      * Next: validates selection and proceeds to the payment step
+     *
      * @return the constructed button {@code JPanel}
      */
     private JPanel buildBtnPanel() {
@@ -203,9 +209,7 @@ public class ReceiptClientInfoDialog extends JPanel {
      */
     private void onScanClick() {
         String input = JOptionPane.showInputDialog("Enter the card number");
-        if (input == null || input.trim().isEmpty()) {
-            return;
-        }
+        if (input == null || input.trim().isEmpty()) return;
 
         int cardNumber;
         try {
@@ -215,17 +219,22 @@ public class ReceiptClientInfoDialog extends JPanel {
             return;
         }
 
-        for (ClientSupplier client : allClients) {
-            FidelityCard card = client.getFidelityCard();
+        boolean found = false;
+        int i = 0;
+        while (i < allClients.size() && !found) {
+            FidelityCard card = allClients.get(i).getFidelityCard();
             if (card != null && card.getId() == cardNumber) {
-                selectedClient = client;
-                setComboClient(client);
+                selectedClient = allClients.get(i);
+                setComboClient(selectedClient);
                 refreshInfoPanel();
-                return;
+                found = true;
             }
+            i++;
         }
 
-        JOptionPane.showMessageDialog(this, "No customers found", "Information", JOptionPane.INFORMATION_MESSAGE);
+        if (!found) {
+            JOptionPane.showMessageDialog(this, "No customers found", "Information", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 
     /**
@@ -249,12 +258,15 @@ public class ReceiptClientInfoDialog extends JPanel {
         if (newClient == null) return;
         allClients.add(newClient);
         String label = newClient.getName() + " " + newClient.getFirstname();
-        comboClientSupplier.addItem(new ComboBoxItem<>(newClient, label));
+        ComboBoxItem<ClientSupplier> newItem = new ComboBoxItem<>(newClient, label);
+        comboClientSupplier.addItem(newItem);
+        allClientItems.add(newItem);
         setComboClient(newClient);
     }
 
     /**
-     * Confirms the selection and navigates to the payment view.
+     * Validates the current selection and proceeds to the payment step.
+     * <p>Closes the current window and navigates to {@link ReceiptPayment},passing the selected client and receipt data.
      */
     private void onNextClick() {
         SwingUtilities.getWindowAncestor(this).dispose();
@@ -285,6 +297,7 @@ public class ReceiptClientInfoDialog extends JPanel {
     /**
      * Add client/supplier {@code JComboBox} with available entries.
      * <p>A default "-- No client --" option is always added at index 0.
+     *
      * @param clientSupplier list of available {@link ClientSupplier} entries
      */
     public void setComboClients(ArrayList<ClientSupplier> clientSupplier) {
@@ -301,15 +314,16 @@ public class ReceiptClientInfoDialog extends JPanel {
     /**
      * Selects a specific client in the {@code JComboBox} if present.
      * <p>Iterates through all combo box items and selects the one matching the provided client instance.
+     *
      * @param client the client to select in the combo box
      */
     public void setComboClient(ClientSupplier client) {
-        for (int i = 0; i < comboClientSupplier.getItemCount(); i++) {
-            ComboBoxItem<ClientSupplier> item = comboClientSupplier.getItemAt(i);
-            ClientSupplier current = item.getObject();
-            if (current != null && current.equals(client)) {
+        boolean found = false;
+        for (int i = 0; i < comboClientSupplier.getItemCount() && !found; i++) {
+            ClientSupplier current = comboClientSupplier.getItemAt(i).getObject();
+            if (current != null && current.getId() == client.getId()) {
                 comboClientSupplier.setSelectedIndex(i);
-                return;
+                found = true;
             }
         }
     }

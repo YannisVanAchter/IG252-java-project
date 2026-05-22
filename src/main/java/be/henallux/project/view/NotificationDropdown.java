@@ -31,8 +31,6 @@ public class NotificationDropdown extends JPanel {
 
     private JPanel listPanel;
     private JLabel title;
-    private JPanel headerPanel;
-    private JScrollPane scrollPane;
 
     private final Runnable onClose;
 
@@ -69,14 +67,14 @@ public class NotificationDropdown extends JPanel {
     private void build() {
         setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 
-        headerPanel = buildHeader();
+        JPanel headerPanel = buildHeader();
         add(headerPanel, BorderLayout.NORTH);
 
         listPanel = new JPanel();
         listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
         listPanel.setBackground(Color.WHITE);
 
-        scrollPane = new JScrollPane(listPanel);
+        JScrollPane scrollPane = new JScrollPane(listPanel);
         scrollPane.setBorder(null);
 
         add(scrollPane, BorderLayout.CENTER);

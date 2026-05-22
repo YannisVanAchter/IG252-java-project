@@ -15,6 +15,7 @@ import java.util.ArrayList;
  *
  * @see javax.swing.JTable
  * @see Product
+ * @see StockOrderCreation
  */
 public class StockOrderTableModel extends AbstractTableModel {
 
@@ -24,6 +25,7 @@ public class StockOrderTableModel extends AbstractTableModel {
 
     private final ArrayList<ProductRow> rows = new ArrayList<>();
 
+    public final static int TBL_SPN_INDEX = 2;
 
     /**
      * Creates a new table model from a list of products.
@@ -45,7 +47,7 @@ public class StockOrderTableModel extends AbstractTableModel {
         rows.clear();
         for (Product p : products) {
             int suggested = Math.max(0, p.getMinStockQuantity() - p.getTotalQuantity());
-            rows.add(new ProductRow(p.getName(), suggested, suggested));
+            rows.add(new ProductRow(ViewUtils.safeText(p.getName(), "Unknown"), suggested, suggested));
         }
         fireTableDataChanged();
     }
@@ -68,8 +70,19 @@ public class StockOrderTableModel extends AbstractTableModel {
         return COLUMNS[col];
     }
 
-    /**{@inheritDoc}*/
-    @Override
+    /**
+     * Returns the value displayed at a specific cell.
+     * <p>Column mapping:
+     * <ul>
+     *   <li>product name</li>
+     *   <li>suggested quantity</li>
+     *   <li>ordered quantity</li>
+     * </ul>
+     *
+     * @param row the row index
+     * @param col the column index
+     * @return the value stored in the specified cell
+     */    @Override
     public Object getValueAt(int row, int col) {
         ProductRow r = rows.get(row);
 

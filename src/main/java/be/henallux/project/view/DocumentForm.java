@@ -7,20 +7,20 @@ import main.java.be.henallux.project.model.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.time.*;
 import java.util.*;
-
-//TODO : nettoyer quand controller sera près
+import java.util.List;
 
 /**
  * DocumentForm represents the Form panel for creating and modifying a Document.
- * <p>
- * This form allows the user to enter all required information related to a document
+ * <p>This form allows the user to enter all required information related to a document
  * (dates, workflow, client/supplier, address, etc.).
- * <p>
- * The form communicates with {@link DocumentController} to perform creation and update operations.
+ * <p>The form communicates with {@link DocumentController} to perform creation and update operations.
+ *
+ * @see MainWindow
+ * @see DocumentController
+ * @see Document
+ * @see ClientSupplier
  */
 public class DocumentForm extends JPanel {
     private final MainWindow mainWindow;
@@ -28,10 +28,7 @@ public class DocumentForm extends JPanel {
     private Document currentDocument;
 
     private final ArrayList<ClientSupplier> allClients;
-    ArrayList<ComboBoxItem<ClientSupplier>> allClientItems = new ArrayList<>();
-
-
-    private JPanel leftPanel, rightPanel;
+    private final ArrayList<ComboBoxItem<ClientSupplier>> allClientItems = new ArrayList<>();
 
     private JTextArea commentary;
     private JCheckBox checkIsChecked;
@@ -105,14 +102,21 @@ public class DocumentForm extends JPanel {
     /**
      * Constructs and returns the main form panel containing two subpanels.
      * The panel is organized using a {@code GridLayout} with two columns and a horizontal gap of 20 pixels.
+     * Using a {@code JScrollPane} for automatic adaptation to window resizing
      *
-     * @return the constructed {@code JPanel} containing all elements.
+     * @return a {@code JScrollPanel} containing all elements.
      */
-    private JPanel buildFormPanel() {
+    private JScrollPane buildFormPanel() {
         JPanel form = new JPanel(new GridLayout(1, 2, 20, 0));
         form.add(buildLeftPanel());
         form.add(buildRightPanel());
-        return form;
+
+        JScrollPane scrollPane = new JScrollPane(form);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setPreferredSize(new Dimension(0, 250));
+        return scrollPane;
     }
 
     /**
@@ -125,7 +129,7 @@ public class DocumentForm extends JPanel {
      * @return the left panel of the document form
      */
     private JPanel buildLeftPanel() {
-        leftPanel = ViewUtils.createColumnPanel();
+        JPanel leftPanel = ViewUtils.createColumnPanel();
         JPanel leftContent = ViewUtils.createColumnPanel();
         leftContent.setBorder(BorderFactory.createTitledBorder("Document"));
 
@@ -188,7 +192,7 @@ public class DocumentForm extends JPanel {
     /**
      * Builds and returns the right section of the form.
      * This panel contains two grouped sections:
-     * <ul><li>Workflox information: Workflow status, Workflow type.</li>
+     * <ul><li>Workflow information: Workflow status, Workflow type.</li>
      *   <li>Address information: street, street number, postal code, city, and country.</li></ul>
      * Some fields include predefined values, such as the non-editable country field
      * or restrictions such as numeric spinners for address and loyalty data.
@@ -196,7 +200,7 @@ public class DocumentForm extends JPanel {
      * @return the right form panel
      */
     private JPanel buildRightPanel() {
-        rightPanel = ViewUtils.createColumnPanel();
+        JPanel rightPanel = ViewUtils.createColumnPanel();
         JPanel workflowPanel = ViewUtils.createColumnPanel();
         workflowPanel.setBorder(BorderFactory.createTitledBorder("Workflow"));
 
@@ -227,17 +231,13 @@ public class DocumentForm extends JPanel {
 
         JPanel radioPanel = new JPanel();
         radioPanel.setLayout(new BoxLayout(radioPanel, BoxLayout.X_AXIS));
+        radioPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         radioPanel.add(isBuy);
         radioPanel.add(Box.createHorizontalStrut(5));
         radioPanel.add(isSell);
         radioPanel.add(Box.createHorizontalStrut(5));
         radioPanel.add(isInternal);
-
         workflowPanel.add(ViewUtils.labeled("Workflow Type *", radioPanel));
-
-        workflowPanel.setMaximumSize(
-                new Dimension(Integer.MAX_VALUE, workflowPanel.getPreferredSize().height)
-        );
 
         JPanel clientPanel = ViewUtils.createColumnPanel();
         clientPanel.setBorder(BorderFactory.createTitledBorder("Client / Supplier"));
@@ -258,23 +258,18 @@ public class DocumentForm extends JPanel {
 
         JPanel clientRow = new JPanel();
         clientRow.setLayout(new BoxLayout(clientRow, BoxLayout.X_AXIS));
+        clientRow.setAlignmentX(Component.LEFT_ALIGNMENT);
         clientRow.add(comboClientSupplier);
         clientRow.add(Box.createHorizontalStrut(10));
         clientRow.add(btnNewClient);
-
         clientPanel.add(clientRow);
-
-        clientPanel.setMaximumSize(
-                new Dimension(Integer.MAX_VALUE, clientPanel.getPreferredSize().height)
-        );
 
         JPanel addressPanel = ViewUtils.createColumnPanel();
         addressPanel.setBorder(BorderFactory.createTitledBorder("Address"));
 
         txtStreet = new JTextField(10);
         ViewUtils.setCursor(txtStreet);
-        spnStreetNumber = ViewUtils.createNumberSpinner(1, 1, 10000, 1);
-
+        spnStreetNumber = ViewUtils.createNumberSpinner(0, 0, 10000, 1);
         addressPanel.add(ViewUtils.horizontalRowGroup(
                 ViewUtils.labeledRequired("Street", txtStreet),
                 ViewUtils.labeledRequired("Street Number", spnStreetNumber)
@@ -282,10 +277,9 @@ public class DocumentForm extends JPanel {
 
         addressPanel.add(Box.createVerticalStrut(8));
 
-        spnPostalCode = ViewUtils.createNumberSpinner(1000, 1, 9999, 1000);
+        spnPostalCode = ViewUtils.createNumberSpinner(0, 0, 9999, 1000);
         txtCity = new JTextField(10);
         ViewUtils.setCursor(txtCity);
-
         addressPanel.add(ViewUtils.horizontalRowGroup(
                 ViewUtils.labeledRequired("Postal Code", spnPostalCode),
                 ViewUtils.labeledRequired("City", txtCity)
@@ -297,11 +291,16 @@ public class DocumentForm extends JPanel {
         ViewUtils.setCursor(txtCountry);
         txtCountry.setEditable(false);
         txtCountry.setFocusable(false);
-        addressPanel.add(ViewUtils.labeled("Country", txtCountry));
+        txtCountry.setBackground(Color.LIGHT_GRAY);
+        txtCountry.setForeground(Color.DARK_GRAY);
+        addressPanel.add(ViewUtils.horizontalRowGroup(ViewUtils.labeled("Country", txtCountry), new JPanel()));
 
-        addressPanel.setMaximumSize(
-                new Dimension(Integer.MAX_VALUE, addressPanel.getPreferredSize().height)
-        );
+        workflowPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        clientPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        addressPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        workflowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, workflowPanel.getPreferredSize().height));
+        clientPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, clientPanel.getPreferredSize().height));
+        addressPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, addressPanel.getPreferredSize().height));
 
         rightPanel.add(workflowPanel);
         rightPanel.add(Box.createVerticalStrut(15));
@@ -330,7 +329,7 @@ public class DocumentForm extends JPanel {
     /**
      * Validates the form fields before submission.
      * Checks that all required fields are filled and follow the rules imposed to correctly fill out the database.
-     * The planned sent date is only required for "Delivery" document type, in coherence with {@link Document} model constraints.
+     * The check requirement use {@link #typeRequirement(List, String)}
      * If a validation rule fails, a warning dialog is displayed and the method returns {@code false}.
      *
      * @return {@code true} if all validation rules pass; {@code false} otherwise
@@ -349,28 +348,36 @@ public class DocumentForm extends JPanel {
             return false;
         }
         if (!(comboClientSupplier.getSelectedItem() instanceof ComboBoxItem)) {
-            JOptionPane.showMessageDialog(this, "Client/Supplier is required.", "Validation", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "A client/supplier is required. Select or create a new one.", "Validation", JOptionPane.WARNING_MESSAGE);
             return false;
         }
 
         String typeName = getSelectedTypeName();
 
-        if ("Delivery".equalsIgnoreCase(typeName)) {
+        if (typeRequirement(Document.TYPES_REQUIRING_PLANNED_SEND_DATE, typeName)) {
             if (!chkPlannedSendDate.isSelected()) {
                 JOptionPane.showMessageDialog(this, "Planned send date is required for Delivery type.", "Validation", JOptionPane.WARNING_MESSAGE);
                 return false;
             }
+        }
+
+        if (typeRequirement(Document.TYPES_REQUIRING_RECEPTION_DATE, typeName)) {
             if (!chkPlannedReceptionDate.isSelected()) {
                 JOptionPane.showMessageDialog(this, "Planned reception date is required for Delivery type.", "Validation", JOptionPane.WARNING_MESSAGE);
                 return false;
             }
-            if (txtStreet.getText().trim().isEmpty() || txtCity.getText().trim().isEmpty()) {
+        }
+
+        if (typeRequirement(Document.TYPES_REQUIRING_ADDRESS, typeName)) {
+            int streetNumber = (int) spnStreetNumber.getValue();
+            int postalCode = (int) spnPostalCode.getValue();
+            if (txtStreet.getText().trim().isEmpty() || txtCity.getText().trim().isEmpty() || streetNumber < 0 || postalCode < 0) {
                 JOptionPane.showMessageDialog(this, "Address (street, city, country) is required for Delivery type.", "Validation", JOptionPane.WARNING_MESSAGE);
                 return false;
             }
         }
 
-        if ("Command".equalsIgnoreCase(typeName)) {
+        if (typeRequirement(Document.TYPES_REQUIRING_PAYMENT_DELAY, typeName)) {
             int paymentDelay = (int) spnPaymentDelay.getValue();
             if (paymentDelay < 0) {
                 JOptionPane.showMessageDialog(this, "Payment delay is required and must be >= 0 for Command type.", "Validation", JOptionPane.WARNING_MESSAGE);
@@ -378,18 +385,35 @@ public class DocumentForm extends JPanel {
             }
         }
 
-        if ("Preparation Order".equalsIgnoreCase(typeName)) {
-            if (!chkPlannedSendDate.isSelected()) {
-                JOptionPane.showMessageDialog(this, "Planned send date is required for Preparation Order type.", "Validation", JOptionPane.WARNING_MESSAGE);
-                return false;
-            }
+        if (typeRequirement(Document.TYPES_REQUIRING_COMMENTARY, typeName)) {
             if (commentary.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Commentary is required for Preparation Order type.", "Validation", JOptionPane.WARNING_MESSAGE);
                 return false;
             }
         }
-
         return true;
+    }
+
+    /**
+     * Checks the list of document types contains an element whose name matches the specified type name.
+     * The comparison is case-insensitive.
+     *
+     * @param list     the list of {@link DocumentType} to search through
+     * @param typeName the name of the document type to look for
+     * @return {@code true} if a matching document type is found, {@code false} otherwise
+     */
+    private boolean typeRequirement(List<DocumentType> list, String typeName) {
+        int i = 0;
+        boolean found = false;
+
+        while (i < list.size() && !found) {
+            DocumentType dt = list.get(i);
+            if (dt.getName().equalsIgnoreCase(typeName)) {
+                found = true;
+            }
+            i++;
+        }
+        return found;
     }
 
     /**
@@ -460,8 +484,12 @@ public class DocumentForm extends JPanel {
             }
         }
 
-        ComboBoxItem<ClientSupplier> clientItem = (ComboBoxItem<ClientSupplier>) comboClientSupplier.getSelectedItem();
-        ClientSupplier clientSupplier = clientItem.getObject();
+        Object selected = comboClientSupplier.getSelectedItem();
+        if (!(selected instanceof ComboBoxItem<?> item)) {
+            JOptionPane.showMessageDialog(this, "Invalid client/supplier.");
+            return;
+        }
+        ClientSupplier clientSupplier = (ClientSupplier) item.getObject();
 
         boolean isBuySelected = isBuy.isSelected();
         boolean isSellSelected = isSell.isSelected();
@@ -542,8 +570,8 @@ public class DocumentForm extends JPanel {
 
         workflowGroup.clearSelection();
 
-        spnStreetNumber.setValue(1);
-        spnPostalCode.setValue(1000);
+        spnStreetNumber.setValue(0);
+        spnPostalCode.setValue(0);
 
         txtStreet.setText("");
         txtCity.setText("");
@@ -561,8 +589,8 @@ public class DocumentForm extends JPanel {
      * If {@code doc} is {@code null}, the form is reset and switched to create mode.
      * Otherwise, all document data is displayed in the form and the interface is updated to edit mode.
      *
-     * @param doc the document to display;
-     *            {@code null} to initialize the form in creation mode
+     * @param doc the document to display; {@code null} to initialize the form in creation mode
+     * @see #clearForm()
      */
     public void loadDocument(Document doc) {
         if (doc == null) {
@@ -600,13 +628,15 @@ public class DocumentForm extends JPanel {
             spnPaymentDelay.setValue(doc.getPaymentDelay());
         }
 
-        isBuy.setSelected(doc.getWorkflow().getWorkflowType().getIsBuy());
-        isSell.setSelected(doc.getWorkflow().getWorkflowType().getIsSell());
-        isInternal.setSelected(doc.getWorkflow().getWorkflowType().getIsInternal());
+        if (doc.getWorkflow() != null && doc.getWorkflow().getWorkflowType() != null) {
+            isBuy.setSelected(doc.getWorkflow().getWorkflowType().getIsBuy());
+            isSell.setSelected(doc.getWorkflow().getWorkflowType().getIsSell());
+            isInternal.setSelected(doc.getWorkflow().getWorkflowType().getIsInternal());
 
-        ComboBoxItem.selectComboItem(comboWorkflowStatus, doc.getWorkflow().getStatus());
-        ComboBoxItem.selectComboItem(comboDocumentType, doc.getDocumentType());
-        // ComboBoxItem.selectComboItem(comboClientSupplier, doc.getDetails().getClientSupplier()); // TODO : doc.getDetails().getClientSupplier() — client/supplier not yet available
+            ComboBoxItem.selectComboItem(comboWorkflowStatus, doc.getWorkflow().getStatus());
+            ComboBoxItem.selectComboItem(comboDocumentType, doc.getDocumentType());
+            ComboBoxItem.selectComboItem(comboClientSupplier, doc.getWorkflow().getOtherParty());
+        }
 
         if (doc.getAddress() != null) {
             spnStreetNumber.setValue(doc.getAddress().getStreetNumber());
@@ -664,13 +694,22 @@ public class DocumentForm extends JPanel {
     }
 
     /**
-     * Opens a modal dialog for creating a new client/supplier and adds it to the combo.
+     * Opens a modal dialog to create a new Client/Supplier and updates the combo box.
+     * <p>If a new client is created, it is added to the internal list and immediately selected in the combo box.
+     *
+     * @see #openDialog()
      */
     public void onNewClientClicked() {
         ClientSupplier newClient = openDialog();
         if (newClient != null) {
             allClients.add(newClient);
             setClientSuppliers(allClients);
+
+            allClientItems.clear();
+            for (int i = 0; i < comboClientSupplier.getItemCount(); i++) {
+                allClientItems.add(comboClientSupplier.getItemAt(i));
+            }
+
             ComboBoxItem<ClientSupplier> newItem = comboClientSupplier.getItemAt(comboClientSupplier.getItemCount() - 1);
             comboClientSupplier.setSelectedItem(newItem);
         }
@@ -678,7 +717,7 @@ public class DocumentForm extends JPanel {
 
     /**
      * Opens a modal dialog for creating a new client/supplier.
-     *
+     * <p>The dialog is displayed modally using {@link JDialog} and contains a {@link ClientSupplierForm}.
      * @return The newly created {@code ClientSupplier}, or {@code null} if the dialog was closed without saving.
      */
     public ClientSupplier openDialog() {

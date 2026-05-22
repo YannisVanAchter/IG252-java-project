@@ -2,10 +2,13 @@ package main.java.be.henallux.project.view;
 
 import main.java.be.henallux.project.model.Address;
 import main.java.be.henallux.project.model.ClientSupplier;
+import main.java.be.henallux.project.model.Product;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 
 /**
@@ -31,8 +34,6 @@ public class StockOrderCreation extends JPanel {
     private static final Font FONT_BOLD = new Font("SansSerif", Font.BOLD, 16);
     private static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 18);
 
-    private static final int TBL_SPN_INDEX = 2;
-
     private final MainWindow mainWindow;
     private StockOrderTableModel model;
     private JLabel lblSupplier;
@@ -40,8 +41,10 @@ public class StockOrderCreation extends JPanel {
 
     private JTable table;
 
-    private ArrayList selectedProduct;
+    private ArrayList<Product> selectedProduct;
     private ClientSupplier selectedSupplier;
+
+    private boolean hasChanges = false;
 
     public StockOrderCreation(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
@@ -72,27 +75,27 @@ public class StockOrderCreation extends JPanel {
 
         JScrollPane pane = new JScrollPane(center);
         pane.setBorder(BorderFactory.createEmptyBorder());
-        panel.add(pane, BorderLayout.NORTH);
+        pane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         add(buildTitle(), BorderLayout.NORTH);
-        add(panel, BorderLayout.CENTER);
+        add(pane, BorderLayout.CENTER);
         add(buildButtons(), BorderLayout.SOUTH);
 
         return panel;
     }
-
     /**
      * Loads a purchase order into the view.
      * <p>The current content is rebuilt using the selected supplier and products.
      * <p>If no product is provided, a warning dialog is displayed and the previous
      * screen is restored.
      *
-     * @param seletedProduct   the selected products
+     * @param selectedProduct   the selected products
      * @param selectedSupplier the supplier linked to the order
      */
-    public void loadOrder(ArrayList seletedProduct, ClientSupplier selectedSupplier) {
-        this.selectedProduct = seletedProduct;
+    public void loadOrder(ArrayList<Product> selectedProduct, ClientSupplier selectedSupplier) {
+        this.selectedProduct = selectedProduct;
         this.selectedSupplier = selectedSupplier;
+        hasChanges = false;
 
         if (this.selectedProduct == null) {
             JOptionPane.showMessageDialog(this, "Please select product.");
@@ -164,21 +167,41 @@ public class StockOrderCreation extends JPanel {
         model = new StockOrderTableModel(selectedProduct);
         table = new JTable(model);
         table.setRowHeight(28);
-        table.getColumnModel().getColumn(TBL_SPN_INDEX).setCellEditor(new SpinnerEditor());
+        table.getColumnModel().getColumn(StockOrderTableModel.TBL_SPN_INDEX).setCellEditor(new SpinnerEditor());
+        table.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int col = table.columnAtPoint(e.getPoint());
+
+                if (col == StockOrderTableModel.TBL_SPN_INDEX) {
+                    table.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+                } else {
+                    table.setCursor(Cursor.getDefaultCursor());
+                }
+            }
+        });
 
         JLabel hint = new JLabel("✏ Click on 'Quantity Ordered' to edit");
         hint.setFont(FONT_COMMENT);
         hint.setForeground(Color.GRAY);
-        card.add(hint);
-        table.getTableHeader().setToolTipText("Click on 'Quantity Ordered' to edit");
+        JPanel hintPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        hintPanel.setOpaque(false);
+        hintPanel.add(hint);
+        card.add(hintPanel);
 
-        model.addTableModelListener(e -> updateTotal());
+        model.addTableModelListener(e -> {
+            updateTotal();
+            hasChanges = true;
+        });
         int rowCount = Math.max(3, model.getRowCount());
         int tableHeight = Math.min(rowCount * table.getRowHeight() + table.getTableHeader().getPreferredSize().height + 4, 200);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setPreferredSize(new Dimension(0, tableHeight));
         scrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, tableHeight));
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
 
         card.add(scrollPane, BorderLayout.CENTER);
 
@@ -239,12 +262,17 @@ public class StockOrderCreation extends JPanel {
 
     /**
      * Handles the cancel action.
-     * <p> A confirmation dialog is displayed before leaving the page.
+     * <p> A confirmation dialog box is displayed before leaving the page if any changes have been made.
      * <p>If confirmed, the application navigates back to the previous view.
      *
      * @see MainWindow#goBack()
      */
     private void onCancelClick() {
+        if (!hasChanges) {
+            mainWindow.goBack();
+            return;
+        }
+
         int confirm = JOptionPane.showConfirmDialog(
                 this,
                 "Are you sure you want to cancel? All changes will be lost.",
@@ -329,6 +357,13 @@ public class StockOrderCreation extends JPanel {
         }        return panel;
     }
 
+    /**
+     * Creates a key-value display row using a preconfigured JLabel for the label part.
+     *
+     * @param label the prebuilt label component
+     * @param value the value associated with the label
+     * @return a horizontal panel showing the label-value pair
+     */
     private JPanel labelValue(JLabel label, String value) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         panel.add(label);

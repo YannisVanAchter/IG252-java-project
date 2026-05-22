@@ -10,8 +10,8 @@ import javax.swing.*;
  * @param <T> the type of the object associated with this item
  */
 public class ComboBoxItem<T> {
-    private T object;
-    private String label;
+    private final T object;
+    private final String label;
 
     public ComboBoxItem(T object, String label) {
         this.object = object;

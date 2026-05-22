@@ -2,7 +2,6 @@ package main.java.be.henallux.project.view;
 
 import main.java.be.henallux.project.controller.ProductController;
 import main.java.be.henallux.project.controller.SupplierController;
-import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.Product;
 
@@ -11,27 +10,33 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 
 /**
- * View displaying stock alerts grouped by supplier.
- * <p>This panel allows the user to:
- * <ul><li>browse suppliers</li><li>view products requiring restocking</li><li>select products to order</li><li>create a purchase order</li></ul>
- * <p>The view is divided into two sections using a {@link JSplitPane}:
- * <ul><li>the supplier list</li><li>the product reorder table</li></ul>
+ * StockAlertView displays supplier-based stock alerts and allows creation of purchase orders in a Swing interface.
+ * <p>This view is split into two main areas using a {@link JSplitPane}:
+ * <ul><li>a supplier selection panel (left side)</li>
+ *   <li>a product restocking panel for the selected supplier (right side)</li></ul>
+ * <p>The view is typically opened from the stock management workflow in {@link MainWindow} and acts as a coordination
+ * screen between suppliers and low-stock products.
+ * <p>It interacts with:
+ * <ul><li>{@link SupplierController} to retrieve suppliers and their products</li>
+ *   <li>{@link ProductController} for product-related data access</li>
+ *   <li>{@link StockAlertTableModel} to manage selectable restocking items</li></ul>
+ * <p>User interactions include selecting a supplier, selecting products to reorder, and triggering purchase order creation.
  *
  * @see StockAlertTableModel
- * @see JTable
  * @see ClientSupplier
  * @see Product
+ * @see MainWindow
  */
 public class StockAlertView extends JPanel {
     private static final Font FONT_REG = new Font("SansSerif", Font.PLAIN, 12);
-    private static final Font FONT_BOLD = new Font("SansSerif", Font.BOLD, 16);
     private static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 18);
     private static final Color SELECTED_BG = new Color(0xE6, 0xE6, 0xE6);
     private static final Color HOVER_BG = new Color(245, 245, 245);
-    private static final Color BORDER = new Color(230,230,230);
+    private static final Color BORDER = new Color(230, 230, 230);
 
     private final MainWindow mainWindow;
     private final SupplierController supplierController;
@@ -43,7 +48,7 @@ public class StockAlertView extends JPanel {
     private JPanel supplierListPanel;
     private StockAlertTableModel tableModel;
 
-    private JSplitPane split;
+    private JSplitPane splitPane;
     private JTable productTable;
     private JLabel lblSupplierTitle;
     private JButton btnOrder;
@@ -61,26 +66,31 @@ public class StockAlertView extends JPanel {
         add(buildBody(), BorderLayout.CENTER);
 
         if (!suppliers.isEmpty()) {
-            selectSupplier(suppliers.get(0));
+            selectSupplier(suppliers.getFirst());
         }
     }
 
     /**
-     * Builds the main split layout.
-     * @return the main split pane
+     * Builds the main split-pane layout of the view.
+     * <p>The layout is divided into supplier navigation (left) and product selection (right).
+     *
+     * @return the configured {@link JSplitPane} containing the full view layout
      */
     private JSplitPane buildBody() {
-        split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, buildLeftPanel(), buildRightPanel());
-        split.setDividerLocation(300);
-        split.setResizeWeight(0.5);
-        split.setDividerSize(0);
-        split.setBorder(null);
-        return split;
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, buildLeftPanel(), buildRightPanel());
+        splitPane.setDividerLocation(300);
+        splitPane.setResizeWeight(0.5);
+        splitPane.setDividerSize(0);
+        splitPane.setBorder(null);
+        return splitPane;
     }
 
     /**
-     * Builds the left panel containing a list of supplier.
-     * @return the supplier panel
+     * Builds the left panel containing the list of suppliers.
+     * <p>Each supplier is rendered as an interactive row that allows selection and refresh of the product list.
+     *
+     * @return the supplier list panel
+     * @see #refreshSupplierList()
      */
     private JPanel buildLeftPanel() {
         JPanel suppliersPanel = new JPanel(new BorderLayout());
@@ -105,13 +115,14 @@ public class StockAlertView extends JPanel {
     }
 
     /**
-     * Refreshes the supplier list displayed on screen.
-     * <p>A visual row is created for each supplier.
+     * Refreshes the supplier list displayed in the left panel.
+     * <p>Each supplier row is rebuilt based on the latest data from {@link SupplierController}.
      */
     private void refreshSupplierList() {
         supplierListPanel.removeAll();
         for (ClientSupplier s : suppliers) {
-            int count = supplierController.getAllProduct(s.getId()).size();            supplierListPanel.add(buildSupplierRow(s, count));
+            int count = supplierController.getAllProduct(s.getId()).size();
+            supplierListPanel.add(buildSupplierRow(s, count));
             supplierListPanel.add(Box.createVerticalStrut(8));
         }
         supplierListPanel.revalidate();
@@ -122,14 +133,15 @@ public class StockAlertView extends JPanel {
      * Creates a clickable row representing a supplier.
      * The {@code mouseListener} lister on click and on hover
      * <p>Click trigger {@link #selectSupplier(ClientSupplier)}
-     * @param supplier the supplier to display
+     *
+     * @param supplier     the supplier to display
      * @param productCount the number of products linked to the supplier
      * @return the supplier row component
      */
     private JPanel buildSupplierRow(ClientSupplier supplier, int productCount) {
         JPanel row = new JPanel(new BorderLayout());
         row.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createEmptyBorder(0,0,0,0),
+                BorderFactory.createEmptyBorder(0, 0, 0, 0),
                 BorderFactory.createLineBorder(BORDER)
         ));
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -175,12 +187,14 @@ public class StockAlertView extends JPanel {
     }
 
     /**
-     * Builds the right panel containing reorderable products for the selected supplier.
-     * <p>A {@code CheckBox} handle the selection of product to reorder.
-     * <p>Handle color with the status of the product stock.
-     * @see SpinnerEditor
+     * Builds the right panel containing the product restocking table for the selected supplier.
+     * <p>This panel allows users to select products and define a purchase order based on stock alerts.
+     * <p>It also includes selection controls such as a header checkbox for bulk selection.
+     *
+     * @return the product selection panel
+     * @see StockAlertTableModel
      * @see RowColorRenderer
-     * @return the product panel
+     * @see SpinnerEditor
      */
     private JPanel buildRightPanel() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -200,9 +214,22 @@ public class StockAlertView extends JPanel {
         panel.add(headerPanel, BorderLayout.NORTH);
 
         tableModel = new StockAlertTableModel(new ArrayList<>());
+        tableModel.addTableModelListener(e -> updateButtonState());
         productTable = new JTable(tableModel);
         productTable.getColumnModel().getColumn(0).setMaxWidth(50);
         productTable.getColumnModel().getColumn(0).setMinWidth(50);
+        productTable.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int col = productTable.columnAtPoint(e.getPoint());
+
+                if (col == 0) {
+                    productTable.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                } else {
+                    productTable.setCursor(Cursor.getDefaultCursor());
+                }
+            }
+        });
 
         headerCheckBox = new JCheckBox();
         ViewUtils.setCursor(headerPanel);
@@ -214,7 +241,7 @@ public class StockAlertView extends JPanel {
         productTable.getTableHeader().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                toogleCheckBox(e);
+                toggleCheckBox(e);
             }
         });
 
@@ -225,34 +252,53 @@ public class StockAlertView extends JPanel {
         JScrollPane scroll = new JScrollPane(productTable);
         panel.add(scroll, BorderLayout.CENTER);
 
+        panel.add(buildButtonFooter(), BorderLayout.SOUTH);
 
+        return panel;
+    }
+
+    /**
+     * Builds the footer containing the purchase order creation button.
+     * <p>The button is enabled only when at least one product is selected in the table model.
+     *
+     * @return the footer panel containing the order button
+     */
+    private JPanel buildButtonFooter() {
         btnOrder = new JButton("Create purchase order");
         btnOrder.addActionListener(e -> onCreateOrder());
+        btnOrder.setPreferredSize(new Dimension(150, 44));
+        btnOrder.setOpaque(false);
+        btnOrder.setEnabled(false);
+
         ViewUtils.setCursor(btnOrder);
+
         JPanel btnBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-        btnBar.setOpaque(false);
+        btnBar.setBorder(new EmptyBorder(10, 10, 10, 10));
         btnBar.add(btnOrder);
-        panel.add(btnBar, BorderLayout.SOUTH);
-        return panel;
+
+        return btnBar;
     }
 
     /**
      * Toggles the state of the header checkbox.
      * <p>All table rows are selected or unselected depending on the current state.
+     *
      * @param e the mouse event triggered on the table header
      */
-    private void toogleCheckBox(MouseEvent e) {
+    private void toggleCheckBox(MouseEvent e) {
         int column = productTable.columnAtPoint(e.getPoint());
         if (column == 0) {
             tableModel.toggleAll();
             boolean allSelected = tableModel.getSelectedProducts().size() == tableModel.getRowCount();
             headerCheckBox.setSelected(allSelected);
             productTable.getTableHeader().repaint();
+            updateButtonState();
         }
     }
 
     /**
      * Selects a supplier and refreshes the product table.
+     *
      * @param supplier the selected supplier
      */
     private void selectSupplier(ClientSupplier supplier) {
@@ -261,12 +307,14 @@ public class StockAlertView extends JPanel {
         headerCheckBox.setSelected(true);
         ArrayList<Product> products = supplierController.getAllProduct(supplier.getId());
         tableModel.setProducts(products);
+        updateButtonState();
         refreshSupplierList();
     }
 
     /**
      * Creates a purchase order from selected products.
      * <p>If no product is selected, a warning dialog is displayed.
+     *
      * @see MainWindow#openOrderView(ArrayList, ClientSupplier)
      * @see StockOrderCreation
      */
@@ -277,6 +325,14 @@ public class StockAlertView extends JPanel {
             return;
         }
         mainWindow.openOrderView(selectedProducts, selectedSupplier);
+    }
+
+    /**
+     * Updates the state of the order button based on product selection.
+     * <p>The button is enabled only when at least one product is selected in the table model.
+     */
+    private void updateButtonState() {
+        btnOrder.setEnabled(!tableModel.getSelectedProducts().isEmpty());
     }
 
 }

@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 /**
  * HomePanel represents the main dashboard of the application.
@@ -18,7 +19,7 @@ import java.awt.event.MouseEvent;
  */
 public class HomePanel extends JPanel {
     private static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 20);
-    private static final Font FONT_TITLE_SECTION = new Font("Arial", Font.BOLD, 11);
+    private static final Font FONT_TITLE_SECTION = new Font("SansSerif", Font.BOLD, 11);
     private static final Font FONT_CARD_TITLE = new Font("SansSerif", Font.BOLD, 13);
     private static final Font FONT_REG = new Font("SansSerif", Font.PLAIN, 11);
 
@@ -81,8 +82,7 @@ public class HomePanel extends JPanel {
      * @see #createCard(String[])
      */
     private JPanel buildContent() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        JPanel panel = ViewUtils.createColumnPanel();
         panel.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
 
         panel.add(createSection("Management", new String[][]{
@@ -122,8 +122,7 @@ public class HomePanel extends JPanel {
      * @return a {@link JPanel} representing the complete section
      */
     private JPanel createSection(String sectionTitle, String[][] items) {
-        JPanel section = new JPanel();
-        section.setLayout(new BoxLayout(section, BoxLayout.Y_AXIS));
+        JPanel section = ViewUtils.createColumnPanel();
 
         JLabel labelPanel = new JLabel(sectionTitle.toUpperCase());
         labelPanel.setFont(FONT_TITLE_SECTION);
@@ -166,7 +165,8 @@ public class HomePanel extends JPanel {
         JPanel card = new JPanel();
         card.setBackground(COLOR_BG);
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-        card.addMouseListener(new MouseAdapter() {
+
+        MouseListener listener = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 mainWindow.setPage(pageName);
@@ -187,9 +187,9 @@ public class HomePanel extends JPanel {
                         BorderFactory.createEmptyBorder(10, 12, 10, 12)
                 ));
             }
-        });
-        card.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        };
 
+        card.setCursor(new Cursor(Cursor.HAND_CURSOR));
         card.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.GRAY, 1, true),
                 BorderFactory.createEmptyBorder(10, 12, 10, 12)
@@ -220,9 +220,13 @@ public class HomePanel extends JPanel {
         card.add(Box.createVerticalStrut(4));
         card.add(descArea);
 
+        card.addMouseListener(listener);
+        accent.addMouseListener(listener);
+        titleLbl.addMouseListener(listener);
+        descArea.addMouseListener(listener);
+
         return card;
     }
-
     /**
      * Builds the footer of the home panel.
      * <p>The footer contains a horizontal separator followed by a centered label

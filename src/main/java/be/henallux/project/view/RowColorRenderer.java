@@ -12,6 +12,7 @@ import java.awt.*;
  * <p>Supported visual states:
  * <ul><li>critical stock</li><li>low stock</li><li>normal selection highlight</li></ul>
  * <p>This renderer extends {@link DefaultTableCellRenderer} and is applied tothe stock alert product table.
+ *
  * @see JTable
  * @see StockAlertTableModel
  */
@@ -35,12 +36,12 @@ public class RowColorRenderer extends DefaultTableCellRenderer {
      * <ul><li>critical rows use a red background</li><li>low stock rows use an orange background</li><li>normal rows use a white background</li></ul>
      * <p>Selected rows override the default status colors with a blue selection highlight.
      *
-     * @param table the parent table
-     * @param value the cell value
+     * @param table      the parent table
+     * @param value      the cell value
      * @param isSelected indicates whether the row is selected
-     * @param hasFocus indicates whether the cell has focus
-     * @param row the row index
-     * @param column the column index
+     * @param hasFocus   indicates whether the cell has focus
+     * @param row        the row index
+     * @param column     the column index
      * @return the rendered cell component
      */
     @Override

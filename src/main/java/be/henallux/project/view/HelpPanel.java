@@ -24,19 +24,19 @@ public class HelpPanel extends JPanel {
     private static final Font FONT_SMALL = new Font("SansSerif", Font.PLAIN, 11);
 
     private static final Color COLOR_TEXT_DESC = Color.GRAY;
-    private static final Color COLOR_BG = Color.WHITE;
+    private final JScrollPane scrollPane;
 
     public HelpPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.decode("#EEEEEE"));
 
-        JScrollPane scroll = new JScrollPane();
-        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scroll.setBorder(BorderFactory.createEmptyBorder());
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-        scroll.setViewportView(buildContent());
+        scrollPane = new JScrollPane(buildContent());
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.getVerticalScrollBar().setValue(0);
 
-        add(scroll, BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     /**
@@ -45,8 +45,7 @@ public class HelpPanel extends JPanel {
      * @return a {@link JPanel} with all help sections stacked vertically
      */
     private JPanel buildContent() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        JPanel panel = ViewUtils.createColumnPanel();
         panel.setBorder(BorderFactory.createEmptyBorder(28, 32, 28, 32));
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 
@@ -57,6 +56,7 @@ public class HelpPanel extends JPanel {
         panel.add(buildSectionDescriptions());
         panel.add(Box.createVerticalStrut(12));
         panel.add(buildProjectInfo());
+        panel.add(Box.createVerticalGlue());
 
         return panel;
     }
@@ -96,7 +96,7 @@ public class HelpPanel extends JPanel {
      * Builds the keyboard shortcuts section.
      * <p>Displays a non-editable {@link JTable} listing all menu accelerators grouped by menu name.
      *
-     * @return a {@link JPanel} containing the shortcuts table
+     * @return a {@link JPanel} containing the shortcut table
      */
     private JPanel buildShortcuts() {
         JPanel panel = new JPanel();
@@ -288,5 +288,17 @@ public class HelpPanel extends JPanel {
         row.add(keyLabel);
         row.add(valueLabel);
         return row;
+    }
+
+    /**
+     * Scrolls to the top of the documentation.
+     * <p>This operation directly resets the vertical scroll bar position of the internal
+     * {@link JScrollPane} without modifying the content or layout.
+     * <p>Fix a bug of the central ScrollPane at opening.
+     *
+     * @see JScrollPane#getVerticalScrollBar()
+     */
+    public void scrollToTop() {
+        scrollPane.getVerticalScrollBar().setValue(0);
     }
 }

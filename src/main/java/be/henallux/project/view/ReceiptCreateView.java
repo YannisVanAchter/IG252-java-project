@@ -9,6 +9,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.*;
 import java.util.List;
 
@@ -32,12 +33,8 @@ import java.util.List;
  * @see java.util.LinkedHashMap
  */
 public class ReceiptCreateView extends JPanel {
-    private static final Font FONT_REG = new Font("SansSerif", Font.PLAIN, 16);
-    private static final Font FONT_BOLD = new Font("SansSerif", Font.BOLD, 16);
     private static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 18);
     private static final Font FONT_TOTAL = new Font("SansSerif", Font.BOLD, 18);
-
-    private static final int TBL_BTN_ADD = ReceiptProductTableModel.TBL_BTN_ADD;
 
     private final MainWindow mainWindow;
     private final ProductController productController;
@@ -79,12 +76,20 @@ public class ReceiptCreateView extends JPanel {
     private JPanel buildSearchPanel() {
         searchPanel = new JPanel(new BorderLayout(8, 0));
 
+        JPanel search = ViewUtils.createColumnPanel();
+
+        JLabel label = new JLabel("Search for a product by name or scan the barcode");
+
         txtSearch = new JTextField();
         ViewUtils.setCursor(txtSearch);
-        txtSearch.setPreferredSize(new Dimension(0, 44));
+        txtSearch.setPreferredSize(new Dimension(250, 20));
         txtSearch = ViewUtils.addFilterListener(txtSearch, this::onFilterClick);
 
+        search.add(label);
+        search.add(txtSearch);
+
         JPanel btnPanel = new JPanel();
+
         btnClear = new JButton("Clear");
         ViewUtils.setCursor(btnClear);
         btnClear.setPreferredSize(new Dimension(89, 44));
@@ -97,7 +102,7 @@ public class ReceiptCreateView extends JPanel {
         btnScan.addActionListener(e -> onScanClick());
         btnPanel.add(btnScan);
 
-        searchPanel.add(txtSearch, BorderLayout.CENTER);
+        searchPanel.add(search, BorderLayout.CENTER);
         searchPanel.add(btnPanel, BorderLayout.EAST);
 
         return searchPanel;
@@ -145,13 +150,26 @@ public class ReceiptCreateView extends JPanel {
         productTable.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 int row = productTable.rowAtPoint(e.getPoint());
-                if (productTable.columnAtPoint(e.getPoint()) == TBL_BTN_ADD) {
+                if (productTable.columnAtPoint(e.getPoint()) == ReceiptProductTableModel.TBL_BTN_ADD) {
                     addToReceipt(displayProducts.get(row));
                 }
             }
         });
+        productTable.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int row = productTable.rowAtPoint(e.getPoint());
+                int col = productTable.columnAtPoint(e.getPoint());
 
-        productTable.getColumnModel().getColumn(TBL_BTN_ADD).setCellRenderer(new ButtonRenderer());
+                if (col == ReceiptProductTableModel.TBL_BTN_ADD) {
+                    productTable.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                } else {
+                    productTable.setCursor(Cursor.getDefaultCursor());
+                }
+            }
+        });
+
+        productTable.getColumnModel().getColumn(ReceiptProductTableModel.TBL_BTN_ADD).setCellRenderer(new ButtonRenderer());
 
         JScrollPane scroll = new JScrollPane(productTable);
         scroll.setBorder(null);
@@ -183,6 +201,14 @@ public class ReceiptCreateView extends JPanel {
         receiptTable = new JTable(receiptModel);
         receiptTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         receiptTable.getSelectionModel().addListSelectionListener(e -> updateDeleteButtonText());
+        ViewUtils.resizeColumnWidth(receiptTable);
+        receiptTable.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                receiptTable.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+        });
+
         JScrollPane scroll = new JScrollPane(receiptTable);
         panel.add(scroll, BorderLayout.CENTER);
 
@@ -244,15 +270,15 @@ public class ReceiptCreateView extends JPanel {
             }
         });
 
-        JPanel leftBtns = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        leftBtns.add(btnClearAll);
+        JPanel leftBtnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        leftBtnPanel.add(btnClearAll);
 
-        JPanel rightBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
-        rightBtns.add(btnDelete);
-        rightBtns.add(btnNext);
+        JPanel rightBtnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        rightBtnPanel.add(btnDelete);
+        rightBtnPanel.add(btnNext);
 
-        btnBar.add(leftBtns, BorderLayout.WEST);
-        btnBar.add(rightBtns, BorderLayout.EAST);
+        btnBar.add(leftBtnPanel, BorderLayout.WEST);
+        btnBar.add(rightBtnPanel, BorderLayout.EAST);
         footer.add(btnBar, BorderLayout.SOUTH);
         return footer;
     }
@@ -402,7 +428,7 @@ public class ReceiptCreateView extends JPanel {
     /**
      * Opens a modal dialog allowing the user to attach a client to the current receipt.
      */
-    public void openDialog() throws DataValidationException {
+    public void openDialog() {
         JDialog dialog = new JDialog(mainWindow, "Add new Client", true);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 

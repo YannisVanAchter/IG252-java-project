@@ -32,3 +32,5 @@ build/
 *.ignore.*
 *.env
 *.properties
+.DS_Store
+*.iml

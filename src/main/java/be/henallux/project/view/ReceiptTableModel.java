@@ -9,11 +9,11 @@ import java.util.List;
 
 /**
  * Table model used to display a list of {@link Product} in the receipt in a JTable.
- * Provides column definitions and maps document attributes to table cells,
+ * <p>Provides column definitions and maps document attributes to table cells,
  * including action columns for editing and deleting.
- * The model is read-only and must be refreshed using
+ * <p>The model is read-only and must be refreshed using
  * {@link #setProducts(LinkedHashMap)} when the data changes.
- * @see RecipeView
+ * @see RecipeSearchView
  */
 public class ReceiptTableModel extends AbstractTableModel {
 
@@ -28,6 +28,13 @@ public class ReceiptTableModel extends AbstractTableModel {
         setProducts(products);
     }
 
+    /**
+     * Replaces the current receipt dataset and rebuilds the internal row index.
+     * <p>The product order is preserved using the insertion order of the provided {@link LinkedHashMap}.
+     * <p>This method triggers a full table refresh via {@link AbstractTableModel#fireTableDataChanged()}.
+     *
+     * @param products a map associating each {@link Product} with its ordered quantity
+     */
     public void setProducts(LinkedHashMap<Product, Integer> products) {
         this.products = products;
         this.productList = new ArrayList<>(products.keySet());
@@ -56,12 +63,22 @@ public class ReceiptTableModel extends AbstractTableModel {
         return COLUMNS[column];
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Returns the value displayed in a specific cell of the receipt table.
+     * <p>Column mapping:
+     * <ul><li>product name</li>
+     *     <li>quantity ordered</li>
+     *     <li>total price (quantity × unit price)</li></ul>
+     *
+     * @param rowIndex the row index of the product
+     * @param columnIndex the column index to evaluate
+     * @return the value displayed in the table cell
+     */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         Product p = productList.get(rowIndex);
         return switch (columnIndex) {
-            case 0 -> p.getName();
+            case 0 -> ViewUtils.safeText(p.getName());
             case 1 -> products.get(p);
             case 2 -> String.format("%.2f €", p.getPrice() * products.get(p));
             default -> null;

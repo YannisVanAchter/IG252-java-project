@@ -5,6 +5,7 @@ import main.java.be.henallux.project.model.Product;
 import main.java.be.henallux.project.model.QuantityProduct;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.List;
 
@@ -19,17 +20,37 @@ import java.util.List;
  * @see ProductSearchTable
  * @see MainWindow
  */
-public class ProductView extends JPanel {
+public class ProductSearchView extends JPanel {
 
     private static final String LABEL_NO_DATA = "N/A";
+    private static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 20);
 
-    private MainWindow mainWindow;
+    private final MainWindow mainWindow;
     private Product product;
 
 
-    public ProductView(MainWindow mainWindow) {
+    public ProductSearchView(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(0, 12));
+        setBorder(new EmptyBorder(8, 16, 8, 16));
+    }
+
+    private void build() {
+        removeAll();
+
+        JPanel top = new JPanel(new BorderLayout());
+        top.add(buildContent(), BorderLayout.NORTH);
+
+        JScrollPane scrollPane = new JScrollPane(top);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setPreferredSize(new Dimension(0, 250));
+
+        add(scrollPane, BorderLayout.CENTER);
+        add(buildFooter(), BorderLayout.SOUTH);
+        revalidate();
+        repaint();
     }
 
     /**
@@ -42,7 +63,9 @@ public class ProductView extends JPanel {
      * title, product information, stock section, promotion section, and footer.
      * <p>The main content layout is generated in {@link #buildContent()}.
      *
-     * @param product the product to display
+     * @param product the {@link Product} to display, or {@code null} if no selection was made
+     * @see MainWindow#openProductView(Product)
+     * @see MainWindow#goBack()
      */
     public void loadProduct(Product product) {
         this.product = product;
@@ -53,36 +76,37 @@ public class ProductView extends JPanel {
             return;
         }
 
-        removeAll();
-        add(new JScrollPane(buildContent()), BorderLayout.CENTER);
-        add(buildFooter(), BorderLayout.SOUTH);
-        revalidate();
-        repaint();
+        build();
     }
 
     private JPanel buildContent() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(new EmptyBorder(0, 0, 8, 0));
         panel.add(buildTitle());
+        panel.add(Box.createVerticalStrut(8));
         panel.add(buildProductInfo());
+        panel.add(Box.createVerticalStrut(8));
         panel.add(buildStockInfo());
+        panel.add(Box.createVerticalStrut(8));
         panel.add(buildPromotion());
         return panel;
     }
 
     private JPanel buildTitle() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JLabel label = new JLabel(product.getName());
-        label.setFont(new Font("Arial", Font.BOLD, 20));
+        JLabel label = new JLabel(ViewUtils.safeText(product.getName()));
+        label.setFont(FONT_TITLE);
         panel.add(label);
         return panel;
     }
 
+
     private JPanel buildProductInfo() {
         JPanel card = createCard("Product Information");
         card.add(labelValue("Product label", product.getName()));
-        card.add(labelValue("Category", product.getCategory().getLabel()));
-        card.add(labelValue("Price (Excl. Tax)", formatPrice(product.getPriceEVAT().floatValue())));
+        card.add(labelValue("Category", product.getCategory() != null ? product.getCategory().getLabel() : LABEL_NO_DATA));
+        card.add(labelValue("Price (Excl. Tax)", product.getPriceEVAT() != null ? formatPrice(product.getPriceEVAT().floatValue()) : "N/A"));
         card.add(labelValue("Price (Incl. Tax)", formatPrice(product.getPrice())));
         card.add(labelValue("VAT", product.getVat() + "%"));
         card.add(labelValue("Loyalty points", product.getFidelityPoint() + " pts"));
@@ -106,7 +130,7 @@ public class ProductView extends JPanel {
         card.add(labelValue("Minimum threshold", String.valueOf(product.getMinStockQuantity())));
 
         for (QuantityProduct qp : locations) {
-            JPanel locationCard = createCard("Location " + qp.getLocationProduct().getLabel());
+            JPanel locationCard = createCard("Location " + (qp.getLocationProduct() != null ? qp.getLocationProduct().getLabel() : LABEL_NO_DATA));
             locationCard.add(labelValue("Quantity", String.valueOf(qp.getQuantity())));
             card.add(locationCard);
         }
@@ -125,16 +149,13 @@ public class ProductView extends JPanel {
 
         Discount current = product.getCurrentDiscount();
         if (current != null) {
-            card.add(labelValue("Discount", product.getCurrentDiscount().getDiscountPercentage() + "%"));
-            card.add(labelValue("Required quantity", String.valueOf(product.getCurrentDiscount().getRequiredQuantity())));
-            card.add(labelValue("Start date", ViewUtils.formatDate(product.getCurrentDiscount().getStartDate())));
-            card.add(labelValue("End date", ViewUtils.formatDate(product.getCurrentDiscount().getEndDate())));
+            card.add(labelValue("Discount", current.getDiscountPercentage() + "%"));
+            card.add(labelValue("Required quantity", String.valueOf(current.getRequiredQuantity())));
+            card.add(labelValue("Start date", ViewUtils.formatDate(current.getStartDate())));
+            card.add(labelValue("End date", ViewUtils.formatDate(current.getEndDate())));
         }
-        System.out.println("ok");
         for (Discount discount : discounts) {
-            System.out.println("boucle");
             if (current != null && !current.equals(discount)) {
-                System.out.println("test 1");
                 JPanel promoCard = createCard("Previous");
                 promoCard.add(labelValue("Date", ViewUtils.formatDate(discount.getStartDate()) + " - " + ViewUtils.formatDate(discount.getEndDate())));
                 promoCard.add(labelValue("Discount", discount.getDiscountPercentage() + "%"));
@@ -178,7 +199,7 @@ public class ProductView extends JPanel {
     private JPanel labelValue(String label, String value) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.add(new JLabel(label + " : "));
-        panel.add(new JLabel(value));
+        panel.add(new JLabel(ViewUtils.safeText(value, LABEL_NO_DATA)));
         return panel;
     }
 

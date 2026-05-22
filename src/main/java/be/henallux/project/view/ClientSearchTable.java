@@ -1,9 +1,7 @@
 package main.java.be.henallux.project.view;
 
 import main.java.be.henallux.project.controller.ClientSupplierSearchController;
-import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.Product;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -15,19 +13,20 @@ import java.util.List;
 /**
  * A Swing panel that displays and manages a searchable table of clients.
  * <p>This view allows users to filter clients by name, email, and fidelity card number
- * and displays the results in a table format.</p>
+ * and displays the results in a table format.
  * <p>Users can click on a row action button to open a detailed client view
- * in the main application window.</p>
+ * in the main application window.
+ *
  * @see MainWindow#openClientView(ClientSupplier)
  */
 public class ClientSearchTable extends JPanel {
     private static final int TBL_BTN_SEE = ClientSearchTableModel.TBL_BTN_SEE;
 
-    private MainWindow mainWindow;
-    private ClientSupplierSearchController controller;  // ← nouveau controller
+    private final MainWindow mainWindow;
+    private final ClientSupplierSearchController controller;
     private ClientSearchTableModel model;
 
-    private List<ClientSupplier> displayClients;
+    private final List<ClientSupplier> displayClients;
 
     private JTextField txtName;
     private JTextField txtEmail;
@@ -35,6 +34,17 @@ public class ClientSearchTable extends JPanel {
 
     private JTable table;
 
+    /**
+     * Creates the client search table view.
+     * <p>This constructor builds all visual sections, including:
+     * <ul><li>The header section</li>
+     *     <li>The search filter form</li>
+     *     <li>The client result table</li></ul>
+     * <p>The initial table content is populated with an unfiltered search.
+     *
+     * @param mainWindow the parent {@link MainWindow} used to open detailed client views
+     * @see ClientSupplierSearchController#search(String, String, String)
+     */
     public ClientSearchTable(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         this.controller = new ClientSupplierSearchController();
@@ -54,7 +64,8 @@ public class ClientSearchTable extends JPanel {
 
     /**
      * Builds the header section containing the title.
-     * @return a JPanel representing the header
+     *
+     * @return a {@link JPanel} representing the header
      */
     private JPanel buildHeader() {
         JLabel title = new JLabel("Client Search");
@@ -67,7 +78,9 @@ public class ClientSearchTable extends JPanel {
     /**
      * Builds the search/filter panel containing input fields and the search button.
      * Contains: Name, email, card number.
+     *
      * @return a {@code JPanel} containing search filters
+     * @see #onSearchClick()
      */
     private JPanel buildSearchPanel() {
         txtName = new JTextField(10);
@@ -83,7 +96,7 @@ public class ClientSearchTable extends JPanel {
         emailPanel.add(txtEmail, BorderLayout.CENTER);
 
         txtFidelityCard = new JTextField(10);
-        txtFidelityCard = ViewUtils.digitsOnly(txtFidelityCard);
+        ViewUtils.digitsOnly(txtFidelityCard);
         ViewUtils.setCursor(txtFidelityCard);
         JPanel fidelityPanel = new JPanel(new BorderLayout(0, 4));
         fidelityPanel.add(new JLabel("Fidelity card number"), BorderLayout.NORTH);
@@ -109,7 +122,14 @@ public class ClientSearchTable extends JPanel {
 
     /**
      * Builds the table panel that displays the list of clients.
+     * <p>The table uses {@link ClientSearchTableModel} as its data model and configures custom interactions for the action column.
+     * <p>The action column is rendered using {@link ButtonRenderer} and allows the user to open the selected client view.
+     *
      * @return a {@code JScrollPane} containing the JTable
+     * @see ClientSearchView
+     * @see ButtonRenderer
+     * @see ClientSearchTableModel
+     * @see #onSeeClick()
      */
     private JScrollPane buildTablePanel() {
         model = new ClientSearchTableModel(new ArrayList<>(displayClients));
@@ -129,7 +149,7 @@ public class ClientSearchTable extends JPanel {
                 int row = table.rowAtPoint(e.getPoint());
                 int col = table.columnAtPoint(e.getPoint());
 
-                if (row >= 0 && col == TBL_BTN_SEE) {
+                if (row >= 0 && col == ClientSearchTableModel.TBL_BTN_SEE) {
                     table.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 } else {
                     table.setCursor(Cursor.getDefaultCursor());
@@ -138,6 +158,7 @@ public class ClientSearchTable extends JPanel {
         });
 
         table.getColumnModel().getColumn(TBL_BTN_SEE).setCellRenderer(new ButtonRenderer());
+        ViewUtils.resizeColumnWidth(table);
 
         JScrollPane scroll = new JScrollPane(table);
         scroll.setPreferredSize(new Dimension(0, 250));
@@ -146,9 +167,13 @@ public class ClientSearchTable extends JPanel {
 
     /**
      * Handles the search action triggered by the user.
-     * <p>Calls the controller with filter values. Empty fields are converted to {@code null}
-     * to indicate no filtering for that criterion.</p>
-     * @see ClientSearchTableModel#setClients(List) 
+     * <p>Empty input fields are converted to {@code null} before being sent to {@link ClientSupplierSearchController}
+     * to disable the corresponding filter criterion.
+     * <p>After the search is completed, the table model is updated with the retrieved results.
+     *
+     * @see ClientSupplierSearchController#search(String, String, String)
+     * @see ClientSearchTableModel#setClients(List)
+     *
      */
     public void onSearchClick() {
         String name = txtName.getText().trim();
@@ -165,9 +190,11 @@ public class ClientSearchTable extends JPanel {
 
     /**
      * Opens the detailed view for the selected client.
-     * <p>If no row is selected, this method does nothing.</p>
-     * @see MainWindow#openClientView(ClientSupplier) 
-     * @see ClientView
+     * If no row is selected, this method does nothing.
+     * <p>The selected {@link ClientSupplier} is opened through {@link MainWindow#openClientView(ClientSupplier)}.
+     *
+     * @see MainWindow#openClientView(ClientSupplier)
+     * @see ClientSearchView
      */
     public void onSeeClick() {
         int selectedRow = table.getSelectedRow();

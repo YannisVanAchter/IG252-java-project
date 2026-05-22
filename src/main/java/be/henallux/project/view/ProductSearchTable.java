@@ -2,7 +2,6 @@ package main.java.be.henallux.project.view;
 
 import main.java.be.henallux.project.controller.ProductController;
 import main.java.be.henallux.project.controller.ProductSearchController;
-import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.*;
 
 import javax.swing.*;
@@ -10,11 +9,12 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 
 /**
  * A Swing panel that provides a searchable table of products.
- * <p>This view allows users to filter products by name, category, and promotion status,
+ * <p>This view allows users to filter products by name, category, and promotion status
  * and displays the filtered results in a table format.
  * <p>This view allows users to filter clients by name, category, and promotion
  * and displays the results in a table format.</p>
@@ -24,23 +24,20 @@ import java.util.ArrayList;
  * @see MainWindow#openProductView(Product)
  * @see ProductSearchController
  * @see ProductController
- * @see ProductTableModel
+ * @see ProductSearchTableModel
  */
 public class ProductSearchTable extends JPanel {
-    private static final int TBL_BTN_SEE = 9;
 
-    private MainWindow mainWindow;
-    private ProductSearchController productSearchController;
-    private ProductController productController;
-    private ProductTableModel model;
-    private ArrayList<Product> products;
+    private final MainWindow mainWindow;
+    private final ProductSearchController productSearchController;
+    private final ProductController productController;
+    private ProductSearchTableModel model;
+    private ArrayList<Product> allProducts;
     private ArrayList<Product> displayProducts;
 
-    private JPanel searchPanel, tablePanel;
     private JTextField txtProductName;
     private JComboBox<String> comboCategory;
     private JCheckBox chkPromotion;
-    private JButton btnSearch;
 
     private JTable table;
 
@@ -80,7 +77,7 @@ public class ProductSearchTable extends JPanel {
 
         comboCategory = new JComboBox<>(productController.getAllCategory());
         ViewUtils.setCursor(comboCategory);
-        comboCategory = ViewUtils.addFilterListener(comboCategory, this::onSearchClick);
+        ViewUtils.addFilterListener(comboCategory, this::onSearchClick);
         JPanel categoryFields = new JPanel(new BorderLayout(0, 4));
         categoryFields.add(new JLabel("Category"), BorderLayout.NORTH);
         categoryFields.add(comboCategory, BorderLayout.CENTER);
@@ -88,7 +85,7 @@ public class ProductSearchTable extends JPanel {
         chkPromotion = ViewUtils.addFilterListener(new JCheckBox("Promotion only"), this::onSearchClick);
         ViewUtils.setCursor(chkPromotion);
 
-        btnSearch = new JButton("Search");
+        JButton btnSearch = new JButton("Search");
         ViewUtils.setCursor(btnSearch);
         btnSearch.addActionListener(e -> onSearchClick());
 
@@ -108,19 +105,32 @@ public class ProductSearchTable extends JPanel {
     }
 
     private JScrollPane buildTablePanel() {
-        model = new ProductTableModel(displayProducts);
+        model = new ProductSearchTableModel(displayProducts);
         table = new JTable(model);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if (table.columnAtPoint(e.getPoint()) == TBL_BTN_SEE) {
+                if (table.columnAtPoint(e.getPoint()) == ProductSearchTableModel.TBL_BTN_SEE) {
                     onRowClick();
                 }
             }
         });
+        table.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int col = table.columnAtPoint(e.getPoint());
 
-        table.getColumnModel().getColumn(TBL_BTN_SEE).setCellRenderer(new ButtonRenderer());
+                if (col == ProductSearchTableModel.TBL_BTN_SEE) {
+                    table.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                } else {
+                    table.setCursor(Cursor.getDefaultCursor());
+                }
+            }
+        });
 
+        table.getColumnModel().getColumn(ProductSearchTableModel.TBL_BTN_SEE).setCellRenderer(new ButtonRenderer());
+
+        ViewUtils.resizeColumnWidth(table);
 
         JScrollPane scroll = new JScrollPane(table);
         scroll.setPreferredSize(new Dimension(0, 250));
@@ -132,7 +142,7 @@ public class ProductSearchTable extends JPanel {
      * <p>Calls the controller with filter values. Empty fields are converted to {@code null}
      * to indicate no filtering for that criterion.
      * <p>The result updates both the internal {@code displayProducts} list
-     * and the table model via {@code ProductTableModel#setProducts(List)}.
+     * and the table model via {@code ProductSearchTableModel#setProducts(List)}.
      * @see ProductSearchController
      */
     public void onSearchClick()  {
@@ -154,7 +164,7 @@ public class ProductSearchTable extends JPanel {
      * Opens the detailed view for the selected product.
      * <p>If no row is selected, this method does nothing.</p>
      * @see MainWindow#openProductView(Product)
-     * @see ProductView
+     * @see ProductSearchView
      */
     public void onRowClick() {
         int selectedRow = table.getSelectedRow();

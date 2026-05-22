@@ -180,6 +180,6 @@ public class ToastWindow {
         window.dispose();
         if (activeCount > 0) {
             activeCount--;
-        };
+        }
     }
 }
