@@ -290,6 +290,14 @@ public class HelpPanel extends JPanel {
         return row;
     }
 
+    /**
+     * Scrolls to the top of the documentation.
+     * <p>This operation directly resets the vertical scroll bar position of the internal
+     * {@link JScrollPane} without modifying the content or layout.
+     * <p>Fix a bug of the central ScrollPane at opening.
+     *
+     * @see JScrollPane#getVerticalScrollBar()
+     */
     public void scrollToTop() {
         scrollPane.getVerticalScrollBar().setValue(0);
     }

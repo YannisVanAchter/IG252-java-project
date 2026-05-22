@@ -34,6 +34,13 @@ public class RecipeSearchView extends JPanel {
     private JTable table;
 
 
+    /**
+     * Creates a new recipe detail view bound to the application main window.
+     * <p>This view is intended to be embedded and managed by {@link MainWindow},
+     * which controls navigation and view switching.
+     *
+     * @param mainWindow the main application window used for navigation actions such as going back
+     */
     public RecipeSearchView(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         setLayout(new BorderLayout(0, 12));

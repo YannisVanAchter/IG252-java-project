@@ -8,13 +8,19 @@ import java.awt.event.KeyEvent;
 
 /**
  * Main application menu bar.
- * <p>This class builds the {@link JMenuBar} of the application, containing the different sections:
- * Application, Management, Search, and Business.
- * It also defines keyboard shortcuts (accelerators) that are compatible across
- * Windows, Linux, and macOS using {@link Toolkit#getMenuShortcutKeyMaskEx()}.*
- * <p>Each menu item triggers a page change in the main window via {@link MainWindow#setPage(String)}.
+ * Main application menu bar.
+ * <p>This class builds the {@link JMenuBar} of the application and organizes navigation
+ * across the different functional areas: application control, management, search,
+ * business operations, and help.
+ * <p>Each menu item is linked to a view switch handled by {@link MainWindow#setPage(String)},
+ * allowing centralized navigation through the {@link CardLayout} system.
+ * <p>Keyboard accelerators are defined using {@link Toolkit#getMenuShortcutKeyMaskEx()}
+ * to ensure compatibility across Windows, Linux, and macOS.
+ * <p>The menu bar also integrates a notification access component via {@link NotifBellButton},
+ * allowing the user to access system notifications from any screen.
  *
  * @see MainWindow
+ * @see NotifBellButton
  */
 public class MenuWindow extends JMenuBar {
     private JMenu fileMenu, managementMenu, searchMenu, businessMenu, helpMenu;

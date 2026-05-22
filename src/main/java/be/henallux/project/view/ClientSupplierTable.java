@@ -14,14 +14,16 @@ import main.java.be.henallux.project.model.*;
 
 /**
  * This view allows users to manage and search through a list of clients and suppliers.
- * This class extends {@link JPanel} to provide a table view and search functionality for
+ * <p>This class extends {@link JPanel} to provide a table view and search functionality for
  * filtering client/supplier data based on various parameters such as ID, first name, last name,
  * and type (client, supplier, or staff member).
  * <p>The table is populated via a custom model, {@link ClientSupplierTableModel}, and provides
  * ease of navigation with interactive search fields and filter checkboxes.
  * <p>Clicking on a row opens a detailed Form Client/Supplier view through the main application window.
  *
- * @see MainWindow#openClientSupplierForm(ClientSupplier)
+ * @see ClientSupplierTableModel
+ * @see ClientSupplierController
+ * @see MainWindow
  */
 public class ClientSupplierTable extends JPanel {
 
@@ -58,6 +60,11 @@ public class ClientSupplierTable extends JPanel {
         add(buildTablePanel(), BorderLayout.CENTER);
     }
 
+    /**
+     * Builds the header section containing the title.
+     *
+     * @return a {@link JPanel} representing the header
+     */
     private JPanel buildHeader() {
         JLabel title = new JLabel("Client or Supplier Search");
         title.setFont(new Font("Inter", Font.BOLD, 20));
@@ -69,8 +76,8 @@ public class ClientSupplierTable extends JPanel {
 
     /**
      * Builds the search and filter panel.
-     * The panel is divided into two sections, each wrapped in Border.
-     * This panel contains input fields for filtering clients/suppliers:
+     * <p>The panel is divided into two sections, each wrapped in Border.
+     * <p>This panel contains input fields for filtering clients/suppliers:
      * ID, last name, first name, and type selection (client, supplier, staff member),
      * as well as action buttons create.
      *
@@ -145,9 +152,9 @@ public class ClientSupplierTable extends JPanel {
 
     /**
      * Builds the panel containing the client/supplier table.
-     * The table uses {@link ClientSupplierTableModel} as its data model
+     * <p>The table uses {@link ClientSupplierTableModel} as its data model
      * and is configured to allow single row selection only.
-     * A mouse listener is added to detect clicks on specific columns:
+     * <p>A mouse listener is added to detect clicks on specific columns:
      * <ul><li>Column 8: triggers the delete action via {@code onDeleteClick()}.</li>
      *  <li>Other Column: triggers the update action via {@code onUpdateClick()}.</li></ul>
      *
@@ -191,12 +198,12 @@ public class ClientSupplierTable extends JPanel {
 
     /**
      * Applies filters to the client/supplier list and refreshes live table.
-     * Filtering is performed on:
+     * <p>Filtering is performed on:
      * <ul><li>Client ID (partial match)</li>
      *   <li>Last name (case-insensitive partial match)</li>
      *   <li>First name (case-insensitive partial match)</li>
      *   <li>Type (client, supplier, staff member)</li></ul>
-     * If no type filter is selected, all types are included.
+     * <p>If no type filter is selected, all types are included.
      * All Client/Supplier in {@code clientSupplier}s are filter and add in {@code displayClientSupplier}
      * The table is reload in {@link ClientSupplierTableModel#setClientSuppliers(ArrayList)}
      */
@@ -254,13 +261,13 @@ public class ClientSupplierTable extends JPanel {
 
     /**
      * Opens the selected client/supplier in edit mode.
-     * The selected row from the table is converted into a
+     * <p>The selected row from the table is converted into a
      * {@link ClientSupplier} and passed to
      * {@link MainWindow#openClientSupplierForm(ClientSupplier)}.
-     * Important:
-     * - If no row is selected → show an error message.
-     * - If an object is passed → form is in EDIT mode.
-     * - If null was passed → form would be in CREATE mode.
+     * <p>Depend on the selection state:
+     * <ul><li>If no row is selected, an error message is displayed and the operation is aborted</li>
+     *     <li>If a {@link ClientSupplier} is provided, the form is opened in EDIT mode</li>
+     *     <li>If {@code null} is provided, the form would be opened in CREATE mode</li></ul>
      */
     public void onUpdateClick() {
         int selectedRow = table.getSelectedRow();
@@ -280,6 +287,7 @@ public class ClientSupplierTable extends JPanel {
      * <p>Retrieves the currently selected row in the table, asks for user confirmation,
      * and delegates the deletion to the overloaded {@link #onDeleteClick(ClientSupplier)} method.
      * <p>If no row is selected, a warning dialog is shown and the operation is canceled.
+     * @see JOptionPane#showMessageDialog(Component, Object) 
      */
     public void onDeleteClick() {
         int selectedRow = table.getSelectedRow();

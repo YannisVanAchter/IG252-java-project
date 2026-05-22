@@ -9,10 +9,16 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
- * ClientSearchView displays detailed information about a single Client.
+ * ClientSearchView displays detailed information about a {@link ClientSupplier}.
  * This view is dynamically rebuilt every time a client is loaded using {@link #loadClient(ClientSupplier)}.
- * It organizes data into logical sections matching the search output columns:
+ * <p>This view is generally opened from {@link ClientSearchTable} through {@link MainWindow#openClientView(ClientSupplier)}
+ * after the user selects a client from the search results table.
+ * <p>It organizes data into logical sections matching the search output columns:
  * ClientSupplier, FidelityCard, Address, Locality.
+ *
+ * @see ClientSupplier
+ * @see ClientSearchTable
+ * @see MainWindow
  */
 public class ClientSearchView extends JPanel {
 
@@ -22,12 +28,34 @@ public class ClientSearchView extends JPanel {
     private final MainWindow mainWindow;
     private ClientSupplier client;
 
+    /**
+     * Creates the detailed client view panel.
+     * <p>The displayed client content remains empty until {@link #loadClient(ClientSupplier)}
+     * is called by {@link MainWindow#openClientView(ClientSupplier)}
+     *
+     * @param mainWindow the parent {@link MainWindow} used for navigation actions
+     * @see #loadClient(ClientSupplier)
+     */
     public ClientSearchView(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         setLayout(new BorderLayout(0, 12));
         setBorder(new EmptyBorder(8, 16, 8, 16));
     }
 
+    /**
+     * Builds the complete visual content of the view.
+     * <p>This method clears all existing components and recreates the different information sections associated
+     * with the currently loaded {@link ClientSupplier}.
+     * <p>The rebuilt interface contains:
+     * <ul><li>The client title section</li>
+     *     <li>The client information card</li>
+     *     <li>The fidelity card section</li>
+     *     <li>The address section</li>
+     *     <li>The footer navigation actions</li></ul>
+     * <p>Create a {@link JScrollPane} to allow scrolling when the window is resized.
+     *
+     * @see #loadClient(ClientSupplier)
+     */
     private void build() {
         removeAll();
 
@@ -47,10 +75,15 @@ public class ClientSearchView extends JPanel {
     }
 
     /**
-     * Loads a client into the view and rebuilds the UI.
-     * If the client is null, the user is notified and the view navigates back.
+     * Loads and displays a {@link ClientSupplier} inside the view.
+     * <p>If the provided client is {@code null}, a warning dialog is displayed
+     * and the navigation returns to the previous screen using {@link MainWindow#goBack()}.
+     * <p>When a valid client is provided, the entire interface is rebuilt with {@link #build()}
      *
-     * @param client the ClientSupplier to display
+     * @param client the {@link ClientSupplier} to display
+     * @see MainWindow#openClientView(ClientSupplier)
+     * @see MainWindow#goBack()
+     *
      */
     public void loadClient(ClientSupplier client) {
         this.client = client;
@@ -64,6 +97,16 @@ public class ClientSearchView extends JPanel {
         build();
     }
 
+    /**
+     * Builds the main content container of the client view.
+     * <p>This container assembles all information sections displayed in the detailed client screen.
+     * <ul><li>Client title</li>
+     *     <li>Client information</li>
+     *     <li>Fidelity card information</li>
+     *     <li>Address information</li></ul>
+     *
+     * @return a {@link JPanel} containing the complete client information layout
+     */
     private JPanel buildContent() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -78,6 +121,12 @@ public class ClientSearchView extends JPanel {
         return panel;
     }
 
+    /**
+     * Builds the title section displaying the client label.
+     *
+     * @return a {@link JPanel} containing the client title
+     * @see ClientSupplier#getLabel()
+     */
     private JPanel buildTitle() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel label = new JLabel(ViewUtils.safeText(client.getLabel(), LABEL_NO_DATA));
@@ -86,6 +135,16 @@ public class ClientSearchView extends JPanel {
         return panel;
     }
 
+    /**
+     * Builds the section containing general client information.*
+     * <ul><li>Name and first name</li>
+     *     <li>Email address</li>
+     *     <li>Phone number</li>
+     *     <li>Client registration date</li>
+     *     <li>Staff member status</li></ul>
+     *
+     * @return a {@link JPanel} containing the client information section
+     */
     private JPanel buildClientInfo() {
         JPanel card = createCard("Client Information");
 
@@ -100,10 +159,15 @@ public class ClientSearchView extends JPanel {
         return card;
     }
 
+    /**
+     * Builds the section displaying fidelity card information.
+     *
+     * @return a {@link JPanel} containing the fidelity card information
+     */
     private JPanel buildFidelityInfo() {
         JPanel card = createCard("Fidelity Card");
 
-        if (client == null || !client.getFidelityCard().getIsValid()){
+        if (client == null || !client.getFidelityCard().getIsValid()) {
             card.add(labelValue("Fidelity card", LABEL_NO_DATA));
             return card;
         }
@@ -112,6 +176,13 @@ public class ClientSearchView extends JPanel {
         return card;
     }
 
+    /**
+     * Builds the section displaying address and locality information.
+     *
+     * @return a {@link JPanel} containing the address information section
+     * @see Address
+     * @see Locality
+     */
     private JPanel buildAddressInfo() {
         JPanel card = createCard("Address");
 
@@ -125,6 +196,16 @@ public class ClientSearchView extends JPanel {
         return card;
     }
 
+    /**
+     * Builds the footer section containing navigation actions.
+     * <p>The footer provides buttons allowing the user to:
+     * <ul><li>Open the client edition form</li>
+     *     <li>Return to the previous screen</li></ul>
+     *
+     * @return a {@link JPanel} containing footer action buttons
+     * @see MainWindow#openClientSupplierForm(ClientSupplier)
+     * @see MainWindow#goBack()
+     */
     private JPanel buildFooter() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
@@ -141,10 +222,10 @@ public class ClientSearchView extends JPanel {
     }
 
     /**
-     * Creates a bordered card container with a title.
+     * Creates a bordered container used to group related information.
      *
-     * @param title the title of the section
-     * @return a styled panel
+     * @param title the displayed title of the card section
+     * @return a {@link JPanel} configured as an information card
      */
     private JPanel createCard(String title) {
         JPanel card = new JPanel();
@@ -154,11 +235,13 @@ public class ClientSearchView extends JPanel {
     }
 
     /**
-     * Creates a key-value label row.
+     * Creates a horizontal row displaying a label and its associated value.
+     * <p>If the provided value is {@code null} or empty, {@link #LABEL_NO_DATA} is displayed instead.
      *
-     * @param label the field name
-     * @param value the field value
-     * @return a horizontal panel displaying the label and value
+     * @param label the displayed field name
+     * @param value the displayed field value
+     * @return a {@link JPanel} containing the formatted label/value pair
+     * @see ViewUtils#safeText(String, String)
      */
     private JPanel labelValue(String label, String value) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));

@@ -12,7 +12,7 @@ import java.util.List;
  * including action columns for editing and deleting.
  * The model is read-only and must be refreshed using
  * {@link #setProducts(List)} when the data changes.
- * @see RecipeSearchView
+ * @see ReceiptCreateView
  */
 public class ReceiptProductTableModel extends AbstractTableModel {
 
@@ -28,6 +28,12 @@ public class ReceiptProductTableModel extends AbstractTableModel {
         this.products = products;
     }
 
+    /**
+     * Updates the list of products displayed in the table model.
+     * <p>This method replaces the current dataset and triggers a full table refresh via {@link  AbstractTableModel#fireTableDataChanged()}.
+     *
+     * @param products the new list of {@link Product} to display
+     */
     public void setProducts(List<Product> products) {
         this.products = products;
         fireTableDataChanged();
@@ -55,7 +61,19 @@ public class ReceiptProductTableModel extends AbstractTableModel {
         return COLUMNS[column];
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Returns the value displayed in a specific cell of the table.
+     * <p>Column mapping:
+     * <ul><li>product name</li>
+     *     <li>formatted product price</li>
+     *     <li>action label ("Add")</li></ul>
+     *
+     * @param rowIndex the row index of the product
+     * @param columnIndex the column index to evaluate
+     * @return the value to display in the table cell
+     * 
+     * @see ViewUtils#safeText(String)
+     */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         Product p = products.get(rowIndex);

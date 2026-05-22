@@ -29,10 +29,28 @@ public class ClientSearchTableModel extends AbstractTableModel {
 
     private List<ClientSupplier> clients;
 
+    /**
+     * Creates a table model used to display client search results in a {@link javax.swing.JTable}.
+     * <p>This model stores the list of {@link ClientSupplier} displayed inside the {@link ClientSearchTable}.
+     * <p>The table content is entirely driven by the provided list and is intended
+     * to be refreshed through {@link #setClients(List)} after each search operation.
+     *
+     * @param clients the initial list of {@link ClientSupplier} displayed in the table
+     * @see #setClients(List)
+     * @see ClientSearchTable
+     */
     public ClientSearchTableModel(List<ClientSupplier> clients) {
         this.clients = clients;
     }
 
+    /**
+     * Replaces the currently displayed client list.
+     * <p>After updating the data source, the {@link javax.swing.JTable} is refresh by {@link AbstractTableModel#fireTableDataChanged}.
+     * <p>This method is typically called after a new search performed by {@link ClientSearchTable#onSearchClick()}.
+     *
+     * @param clients the new list of {@link ClientSupplier} to display
+     * @see ClientSearchTable#onSearchClick()
+     */
     public void setClients(List<ClientSupplier> clients) {
         this.clients = clients;
         fireTableDataChanged();
@@ -46,6 +64,22 @@ public class ClientSearchTableModel extends AbstractTableModel {
     @Override public String getColumnName(int col) { return COLUMNS[col]; }
 
     /** {@inheritDoc} */
+    /**
+     * Returns the value displayed for a specific table cell.
+     * <p>The returned value depends on the requested column and formatted information from the corresponding {@link ClientSupplier}.
+     * <ul><li>Identity and contact information</li>
+     *     <li>Client registration date</li>
+     *     <li>Fidelity card information</li>
+     *     <li>Address and locality information</li>
+     *     <li>Action label for the detail view button</li></ul>
+     * <p>Missing values ({@code null}) are replaced with {@code "-"}.
+     *
+     * @param row the row index corresponding to the displayed {@link ClientSupplier}
+     * @param col the column index identifying the requested field
+     * @return the value displayed inside the requested table cell
+     * @see ClientSupplier
+     * @see ViewUtils#safeText(String) 
+     */
     @Override
     public Object getValueAt(int row, int col) {
         ClientSupplier cs = clients.get(row);

@@ -3,14 +3,17 @@ package main.java.be.henallux.project.view;
 import main.java.be.henallux.project.model.Document;
 
 import javax.swing.table.AbstractTableModel;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 /**
  * Table model used to display a list of {@link Document} in a JTable.
- * Provides column definitions and maps document attributes to table cells,
+ * <p>Provides column definitions and maps document attributes to table cells,
  * including action columns for editing and deleting.
- * The model is read-only and must be refreshed using
+ * <p>The model is read-only and must be refreshed using
  * {@link #setDocuments(ArrayList)} when the data changes.
+ * @see DocumentTable
+ * @see Document
  */
 public class DocumentTableModel extends AbstractTableModel {
 
@@ -23,12 +26,19 @@ public class DocumentTableModel extends AbstractTableModel {
 
     private ArrayList<Document> documents;
 
+    /**
+     * Initializes the table model with an initial list of documents.
+     *
+     * @param documents the initial list of {@link Document} to display in the table
+     */
     public DocumentTableModel(ArrayList<Document> documents) {
         this.documents = documents;
     }
 
     /**
      * Load the Documents list in the table and allow refresh with new data.
+     * <p>This method is used when the underlying document list is modified (filtering, deletion, or reload from controller).
+     *
      * @see AbstractTableModel#fireTableDataChanged()
      * @param documents list to display in table
      */
@@ -55,7 +65,28 @@ public class DocumentTableModel extends AbstractTableModel {
         return COLUMNS[column];
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Returns the value displayed in a specific table cell.
+     * <p>The returned value is computed based on the column index and the corresponding
+     * {@link Document} located at the given row.
+     *
+     * <p>Columns include:
+     * <ul><li>Document identifier</li>
+     *   <li>Workflow label (or "N/A" if not available)</li>
+     *   <li>Date of creation</li>
+     *   <li>Send date if available, otherwise receipt date</li>
+     *   <li>Edit & Delete action label</li></ul>
+     *
+     * <p>Date values are formatted for display using {@link ViewUtils#formatDate(LocalDate)}.
+     * Missing workflow labels are replaced using {@link ViewUtils#safeText(String, String)}.
+     *
+     * @param rowIndex the row index corresponding to a {@link Document} in the table model
+     * @param columnIndex the column index defining which attribute of the document is displayed
+     * @return the formatted value to display in the table cell, or {@code null} if the column index is invalid
+     * @see Document
+     * @see ViewUtils#formatDate(LocalDate)
+     * @see ViewUtils#safeText(String, String)
+     */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         Document doc = documents.get(rowIndex);

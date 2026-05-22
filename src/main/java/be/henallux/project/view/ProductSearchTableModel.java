@@ -66,6 +66,33 @@ public class ProductSearchTableModel extends AbstractTableModel {
         return COLUMNS[column];
     }
 
+    /**
+     * Returns the value displayed in a specific table cell.
+     * <p>The value is computed based on the column index and the corresponding
+     * {@link Product} instance located at the given row.
+     * <p>Displayed columns include:
+     * <ul><li>Product name</li>
+     *   <li>Category name (or "-" if not defined)</li>
+     *   <li>Fidelity points</li>
+     *   <li>Base price</li>
+     *   <li>VAT percentage (defaulting to 21% if not specified)</li>
+     *   <li>Total stock quantity</li>
+     *   <li>Discount status flag</li>
+     *   <li>Current discount percentage (if available)</li>
+     *   <li>Promotion start date (if available)</li>
+     *   <li>Action column to trigger the product detail view</li></ul>
+     *
+     * <p>Promotion-related values are derived from {@link Product#getCurrentDiscount()}.
+     * Missing or undefined values are represented using "-" or default fallbacks.
+     *
+     * @param row the row index corresponding to a {@link Product}
+     * @param col the column index defining which product attribute is displayed
+     * @return the value to display in the table cell, or {@code null} if the column index is invalid
+     * @see Product
+     * @see Discount
+     * @see ViewUtils#formatDate(java.time.LocalDate)
+     * @see ViewUtils#safeText(String)
+     */
     public Object getValueAt(int row, int col) {
         Product product = products.get(row);
         Discount promo = product.getCurrentDiscount();
@@ -91,6 +118,16 @@ public class ProductSearchTableModel extends AbstractTableModel {
         return false;
     }
 
+    /**
+     * Returns the Java type used to render a given column in the table.
+     * <p>This information is used by {@link javax.swing.JTable} to choose the appropriate
+     * renderer and editor for each column.
+     * <p>In this model, the "Promo" column is explicitly typed as {@link Boolean} to ensure
+     * correct checkbox rendering, while all other columns use the default {@link Object} type.
+     *
+     * @param columnIndex the index of the column whose type is requested
+     * @return the {@link Class} representing the type of data stored in the column
+     */
     @Override
     public Class<?> getColumnClass(int columnIndex) {
         if (columnIndex == 6) {

@@ -10,11 +10,16 @@ import java.util.Stack;
 
 /**
  * This class acts as the central frame of the application.
- * <p>
- * It uses a {@link CardLayout} to manage the different screens (views),
- * and allowing simple navigation between different panels such as MAIN, DOCUMENT, and CLIENT.
- * <p>
- * It also contains the {@link JMenuBar} to display navigation buttons between views.
+ * <p>It provides the main window structure and manages navigation between all application views
+ * using a {@link CardLayout}. Each screen (home, tables, forms, detail views) is registered
+ * under a unique identifier and can be displayed on demand.
+ * <p>The navigation system is complemented by a history stack allowing basic back navigation.
+ * <p>This frame also exposes high-level navigation methods used by views and controllers to open
+ * specific forms or detail screens such as {@link DocumentForm} or {@link ClientSupplierForm}.
+ * <p>It integrates the {@link JMenuBar} implementation via {@link MenuWindow} and acts as the
+ * central entry point for user interactions in the Swing application.
+ *
+ * @see MenuWindow
  */
 public class MainWindow extends JFrame {
     private final Stack<String> history = new Stack<>();
@@ -98,6 +103,12 @@ public class MainWindow extends JFrame {
         cardLayout.show(container, name);
     }
 
+    /**
+     * Navigates back to the previous page in the navigation history if available.
+     * <p>If the history is empty, the current page remains unchanged.
+     *
+     * @see #setPage(String)
+     */
     public void goBack() {
         if (!history.isEmpty()) {
             String previous = history.pop();
@@ -106,36 +117,88 @@ public class MainWindow extends JFrame {
         }
     }
 
+    /**
+     * Opens the document form in creation or edition mode depending on the provided document.
+     * <p>If {@code doc} is {@code null}, the form is initialized in creation mode.
+     * Otherwise, the form is populated with the given {@link Document} for editing.
+     *
+     * @param doc the {@link Document} to edit, or {@code null} to create a new document
+     * @see DocumentForm#loadDocument(Document)
+     */
     public void openDocumentForm(Document doc) {
         documentForm.loadDocument(doc);
         setPage("DOCUMENT_FORM");
     }
 
+    /**
+     * Opens the client/supplier form in creation or edition mode.
+     * <p>If the provided {@link ClientSupplier} is {@code null}, the form is reset to creation mode.
+     * Otherwise, the form is populated with the selected entity for modification.
+     *
+     * @param cs the {@link ClientSupplier} to edit, or {@code null} for creation mode
+     * @see ClientSupplierForm#loadClientSupplier(ClientSupplier)
+     */
     public void openClientSupplierForm(ClientSupplier cs) {
         clientSupplierForm.loadClientSupplier(cs);
         setPage("CLIENT_SUPPLIER_FORM");
     }
 
+    /**
+     * Opens the client detail view for the selected client.
+     * <p>The view is populated using the provided {@link ClientSupplier}
+     *
+     * @param client the {@link ClientSupplier} to edit, or {@code null} for creation mode
+     * @see ClientSupplierForm#loadClientSupplier(ClientSupplier)
+     */
     public void openClientView(ClientSupplier client) {
         clientSearchView.loadClient(client);
         setPage("CLIENT_VIEW");
     }
 
+    /**
+     * Opens the product detail view for the selected product.
+     * <p>The view is populated using the provided {@link Product}
+     *
+     * @param product the {@link Product} to display in detail
+     * @see ProductSearchView#loadProduct(Product)
+     */
     public void openProductView(Product product) {
         productSearchView.loadProduct(product);
         setPage("PRODUCT_VIEW");
     }
 
+    /**
+     * Opens the recipe detail view for the selected recipe.
+     * <p>The view is populated using the provided {@link Recipe}
+     *
+     * @param recipe the {@link Recipe} to display
+     * @see RecipeSearchView#loadRecipe(Recipe)
+     */
     public void openRecipeView(Recipe recipe) {
         recipeSearchView.loadRecipe(recipe);
         setPage("RECIPE_VIEW");
     }
 
+    /**
+     * Opens the stock order creation view with a predefined selection.
+     * <p>The view is initialized using a list of selected {@link Product} items and an optional
+     * supplier {@link ClientSupplier}, allowing the user to prepare a stock order.
+     *
+     * @param selectedProduct the list of products included in the order
+     * @param selectedSupplier the supplier associated with the order
+     * @see StockOrderCreation#loadOrder(ArrayList, ClientSupplier)
+     */
     public void openOrderView(ArrayList<Product> selectedProduct, ClientSupplier selectedSupplier){
         orderView.loadOrder(selectedProduct, selectedSupplier);
         setPage("ORDER_CREATION");
     }
 
+    /**
+     * Returns the notification controller.
+     * <p>This controller is shared across all views to display success, error, and informational messages.
+     *
+     * @return the shared {@link NotificationController} instance
+     */
     public NotificationController getNotificationController() {
         return notificationController;
     }

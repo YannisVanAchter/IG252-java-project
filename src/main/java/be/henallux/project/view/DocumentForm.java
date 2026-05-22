@@ -11,13 +11,16 @@ import java.time.*;
 import java.util.*;
 import java.util.List;
 
-//TODO : nettoyer quand controller sera près
-
 /**
  * DocumentForm represents the Form panel for creating and modifying a Document.
-This form allows the user to enter all required information related to a document
+ * <p>This form allows the user to enter all required information related to a document
  * (dates, workflow, client/supplier, address, etc.).
-The form communicates with {@link DocumentController} to perform creation and update operations.
+ * <p>The form communicates with {@link DocumentController} to perform creation and update operations.
+ *
+ * @see MainWindow
+ * @see DocumentController
+ * @see Document
+ * @see ClientSupplier
  */
 public class DocumentForm extends JPanel {
     private final MainWindow mainWindow;
@@ -580,8 +583,8 @@ public class DocumentForm extends JPanel {
      * If {@code doc} is {@code null}, the form is reset and switched to create mode.
      * Otherwise, all document data is displayed in the form and the interface is updated to edit mode.
      *
-     * @param doc the document to display;
-     *            {@code null} to initialize the form in creation mode
+     * @param doc the document to display; {@code null} to initialize the form in creation mode
+     * @see #clearForm()
      */
     public void loadDocument(Document doc) {
         if (doc == null) {
@@ -625,7 +628,7 @@ public class DocumentForm extends JPanel {
 
         ComboBoxItem.selectComboItem(comboWorkflowStatus, doc.getWorkflow().getStatus());
         ComboBoxItem.selectComboItem(comboDocumentType, doc.getDocumentType());
-        // ComboBoxItem.selectComboItem(comboClientSupplier, doc.getDetails().getClientSupplier()); // TODO : doc.getDetails().getClientSupplier() — client/supplier not yet available
+        ComboBoxItem.selectComboItem(comboClientSupplier, doc.getWorkflow().getOtherParty());
 
         if (doc.getAddress() != null) {
             spnStreetNumber.setValue(doc.getAddress().getStreetNumber());
@@ -683,7 +686,10 @@ public class DocumentForm extends JPanel {
     }
 
     /**
-     * Opens a modal dialog for creating a new client/supplier and adds it to the combo.
+     * Opens a modal dialog to create a new Client/Supplier and updates the combo box.
+     * <p>If a new client is created, it is added to the internal list and immediately selected in the combo box.
+     *
+     * @see #openDialog()
      */
     public void onNewClientClicked() {
         ClientSupplier newClient = openDialog();
@@ -703,7 +709,7 @@ public class DocumentForm extends JPanel {
 
     /**
      * Opens a modal dialog for creating a new client/supplier.
-     *
+     * <p>The dialog is displayed modally using {@link JDialog} and contains a {@link ClientSupplierForm}.
      * @return The newly created {@code ClientSupplier}, or {@code null} if the dialog was closed without saving.
      */
     public ClientSupplier openDialog() {

@@ -357,6 +357,13 @@ public class StockOrderCreation extends JPanel {
         }        return panel;
     }
 
+    /**
+     * Creates a key-value display row using a preconfigured JLabel for the label part.
+     *
+     * @param label the prebuilt label component
+     * @param value the value associated with the label
+     * @return a horizontal panel showing the label-value pair
+     */
     private JPanel labelValue(JLabel label, String value) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         panel.add(label);

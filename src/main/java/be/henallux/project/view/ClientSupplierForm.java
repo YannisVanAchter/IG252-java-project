@@ -17,6 +17,11 @@ import main.java.be.henallux.project.model.*;
  * <p>This view can be open with {@link CardLayout} in JPanel via {@link ClientSupplierTable}
  * This view can be open with {@link JDialog} in modal via {@link DocumentForm}
  * <p>The form communicates with {@link ClientSupplierController} to perform creation and update operations.
+ *
+ * @see ClientSupplierController
+ * @see ClientSupplier
+ * @see ClientSupplierTable
+ * @see DocumentForm
  */
 public class ClientSupplierForm extends JPanel {
     private final MainWindow mainWindow;
@@ -50,8 +55,10 @@ public class ClientSupplierForm extends JPanel {
 
     /**
      * Constructs a new instance of the ClientSupplierForm.
-     * @param mainWindow the main application window associated with this form.
+     *
+     * @param mainWindow    the main application window associated with this form.
      * @param isOpenInModal a flag indicating if the form is open in a modal window.
+     * @see MainWindow
      */
     public ClientSupplierForm(MainWindow mainWindow, Boolean isOpenInModal) {
         this.mainWindow = mainWindow;
@@ -68,7 +75,9 @@ public class ClientSupplierForm extends JPanel {
 
     /**
      * The main Constructor for a new instance which is not open in modal.
+     *
      * @param mainWindow the main application window associated with this form.
+     * @see #ClientSupplierForm(MainWindow, Boolean)
      */
     public ClientSupplierForm(MainWindow mainWindow) {
         this(mainWindow, false);
@@ -76,10 +85,14 @@ public class ClientSupplierForm extends JPanel {
 
     /**
      * Builds the header panel containing the title and the back button.
-     * If the view is opened in a modal window, clicking the back button closes
-     * the modal. Otherwise, it navigates back to the previous view using
-     * {@link MainWindow#goBack()}.
-     * @return the header {@code JPanel}
+     * Builds the header section of the form containing navigation controls and title.
+     * <p>The header provides a back button whose behavior depends on the current
+     * display mode:
+     * <ul><li>closes the dialog if the form is opened in modal mode</li>
+     *     <li>navigates back using {@link MainWindow#goBack()} otherwise</li>/ul>
+     *
+     * @return a {@link JPanel} representing the form header
+     * @see MainWindow#goBack()
      */
     private JPanel buildHeader() {
         JButton btnBack = new JButton("←");
@@ -103,9 +116,10 @@ public class ClientSupplierForm extends JPanel {
 
     /**
      * Constructs and returns the main form panel containing two subpanels.
-     * The panel is organized using a {@code GridLayout} with two columns and a horizontal gap of 20 pixels.
-     * Using a {@code JScrollPane} for automatic adaptation to window resizing
-     * @return a {@code JScrollPanel} containing all elements.
+     * <p>The panel is organized using a {@link  GridLayout} with two columns.
+     * <p>Using a {@link JScrollPane} for automatic adaptation to window resizing
+     *
+     * @return a {@code JScrollPane} containing all elements.
      */
     private JScrollPane buildFormPanel() {
         JPanel form = new JPanel(new GridLayout(1, 2, 20, 0));
@@ -123,12 +137,16 @@ public class ClientSupplierForm extends JPanel {
 
     /**
      * Builds and returns the left section of the form.
-     * This panel contains the identity and contact information fields:
-     * name, first name, email, phone number, VAT number, client since date, contact types.
-     * Required fields are marked by a {@code *} using {@link ViewUtils#labeledRequired(String, JComponent)}.
-     * Numeric JTexfild contains numeric-only constraints such on keyboard input. {@link ViewUtils#digitsOnly(JTextField)}
+     * <p>This panel contains the identity and contact information fields:
+     * <ul><li>Name and first name</li>
+     *     <li>Email and phone number</li>
+     *     <li>VAT number</li>
+     *     <li>Client since date</li>
+     *     <li>Client/supplier/staff type selection</li></ul>
+     * <p>Required fields are marked by a {@code *} using {@link ViewUtils#labeledRequired(String, JComponent)}.
+     * <p>Numeric JTexfild contains numeric-only constraints such on keyboard input. {@link ViewUtils#digitsOnly(JTextField)}
      *
-     * @return the left form panel containing identity-related fields
+     * @return a {@link JPanel} containing identity-related form fields
      */
     private JPanel buildLeftPanel() {
         JPanel leftPanel = ViewUtils.createColumnPanel();
@@ -188,15 +206,14 @@ public class ClientSupplierForm extends JPanel {
 
     /**
      * Builds and returns the right section of the form.
-     * This panel contains two grouped sections:
-     * <ul>
-     *   <li>Address information: street, street number, postal code, city, and country.</li>
-     *   <li>Loyalty information: loyalty card identifier and loyalty points.</li>
-     * </ul>
-     * Some fields include predefined values, such as the non-editable country field
+     * <p>This panel contains two grouped sections:
+     * <ul><li>Address information: street, street number, postal code, city, and country.</li>
+     *   <li>Loyalty information: loyalty card identifier and loyalty points.</li></ul>
+     * <p>Some fields include predefined values, such as the non-editable country field
      * or restrictions such as numeric spinners for address and loyalty data.
      *
      * @return the right form panel containing address and loyalty information
+     * @see ViewUtils#labeledRequired(String, JComponent)
      */
     private JPanel buildRightPanel() {
         JPanel rightPanel = ViewUtils.createColumnPanel();
@@ -248,6 +265,14 @@ public class ClientSupplierForm extends JPanel {
         return rightPanel;
     }
 
+    /**
+     * Builds the action panel containing form validation controls.
+     * <p>This panel provides actions allowing the user to:
+     * <ul><li>save or update the current {@link ClientSupplier}</li>
+     *     <li>clear all input fields</li></ul>
+     *
+     * @return a {@link JPanel} containing form action buttons
+     */
     private JPanel buildButtonPanel() {
         btnSave = new JButton("Save");
         btnSave.addActionListener(e -> saveEditForm());
@@ -265,10 +290,10 @@ public class ClientSupplierForm extends JPanel {
 
     /**
      * Validates the form fields before submission.
-     * This method checks that all required fields are filled and follow the rules imposed to correctly fill out the database.
-     * If a validation rule fails, a warning dialog is displayed and the method immediately returns {@code false}.
-     * @return {@code true} if all validation rules pass;
-     *         {@code false} otherwise
+     * <p>This method checks that all required fields are filled and follow the rules imposed to correctly fill out the database.
+     * <p>If a validation rule fails, a warning dialog is displayed and the method immediately returns {@code false}.
+     *
+     * @return {@code true} if all validation rules pass; {@code false} otherwise
      */
     private Boolean validateForm() {
         if (txtName.getText().trim().isEmpty()) {
@@ -309,14 +334,16 @@ public class ClientSupplierForm extends JPanel {
     }
 
     /**
-     * Validates the form data and saves the client/supplier information.
-     * The methode ask to {@link #validateForm()} to control the user input.
-     * If the form is valid, this method collects all user inputs and sends them
+     * Validates the form data and saves the {@link ClientSupplier} information.
+     * <p>The methode ask to {@link #validateForm()} to control the user input.
+     * <p>If the form is valid, this method collects all user inputs and sends them
      * to the controller to create a new client/supplier or update the existing one, depending on {@code currentClientSupplier} is {@code null}.
-     * If the view is opened in a modal window, the modal is closed; otherwise,
-     * the application navigates back to the previous view using
+     * <p>If the view is opened in a modal window, the modal is closed; otherwise, the application navigates back to the previous view using
      * {@link MainWindow#goBack()}.
      * If an unexpected error occurs during the save operation, an error dialog is displayed containing the exception message.
+     * @see #validateForm()
+     * @see ClientSupplierController#createClientSupplier(String, String, String, String, String, LocalDate, String, int, boolean, boolean, boolean, int, int, String, String, String) (...)
+     * @see ClientSupplierController#updateClientSupplier(int, String, String, String, String, String, LocalDate, String, int, boolean, boolean, boolean, int, int, String, String, String) (...)
      */
     private void saveEditForm() {
         if (!validateForm()) return;
@@ -379,6 +406,7 @@ public class ClientSupplierForm extends JPanel {
 
     /**
      * Resets all input fields in the form to their default values.
+     * @see #loadClientSupplier(ClientSupplier)
      */
     public void clearForm() {
 
@@ -409,9 +437,10 @@ public class ClientSupplierForm extends JPanel {
 
     /**
      * Loads data from a Client/Supplier into the form.
-     * If {@code cs} is {@code null}, the form is cleared and switched to creation mode.
+     * <p>If {@code cs} is {@code null}, the form is cleared and switched to creation mode.
      * Otherwise, all available data from the given {@link ClientSupplier} is displayed in the form
      * and the save button label is updated to indicate edit mode.
+     *
      * @param cs the client/supplier to load into the form;
      *           {@code null} to initialize the form in creation mode
      */
@@ -454,9 +483,10 @@ public class ClientSupplierForm extends JPanel {
 
     /**
      * Returns the currently loaded client/supplier.
-     * This method is used by {@link DocumentForm#openDialog()} to recover the new client/supplier created in the form.
+     * <p>This method is used by {@link DocumentForm#openDialog()} to recover the new client/supplier created in the form.
+     *
      * @return the currently loaded {@link ClientSupplier},
-     *         or {@code null} if no client/supplier is loaded
+     * or {@code null} if no client/supplier is loaded
      */
     public ClientSupplier getCurrentClientSupplier() {
         return currentClientSupplier;

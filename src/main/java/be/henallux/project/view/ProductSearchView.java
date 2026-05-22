@@ -63,7 +63,9 @@ public class ProductSearchView extends JPanel {
      * title, product information, stock section, promotion section, and footer.
      * <p>The main content layout is generated in {@link #buildContent()}.
      *
-     * @param product the product to display
+     * @param product the {@link Product} to display, or {@code null} if no selection was made
+     * @see MainWindow#openProductView(Product)
+     * @see MainWindow#goBack()
      */
     public void loadProduct(Product product) {
         this.product = product;

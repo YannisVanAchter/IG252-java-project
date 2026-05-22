@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
  * <p>The panel interacts with {@link ClientSupplierController} to retrieve available clients
  * and maintains the currently selected {@link ClientSupplier}.
  * <p>When the workflow is validated, the view transitions to {@link ReceiptPayment} to finalize the transaction.
+ *
  * @see ClientSupplierController
  * @see ClientSupplier
  * @see Product
@@ -183,6 +184,7 @@ public class ReceiptClientInfoDialog extends JPanel {
      * Builds the bottom action panel containing navigation buttons.
      * Cancel: closes the dialog without proceeding
      * Next: validates selection and proceeds to the payment step
+     *
      * @return the constructed button {@code JPanel}
      */
     private JPanel buildBtnPanel() {
@@ -263,7 +265,8 @@ public class ReceiptClientInfoDialog extends JPanel {
     }
 
     /**
-     * Confirms the selection and navigates to the payment view.
+     * Validates the current selection and proceeds to the payment step.
+     * <p>Closes the current window and navigates to {@link ReceiptPayment},passing the selected client and receipt data.
      */
     private void onNextClick() {
         SwingUtilities.getWindowAncestor(this).dispose();
@@ -294,6 +297,7 @@ public class ReceiptClientInfoDialog extends JPanel {
     /**
      * Add client/supplier {@code JComboBox} with available entries.
      * <p>A default "-- No client --" option is always added at index 0.
+     *
      * @param clientSupplier list of available {@link ClientSupplier} entries
      */
     public void setComboClients(ArrayList<ClientSupplier> clientSupplier) {
@@ -310,6 +314,7 @@ public class ReceiptClientInfoDialog extends JPanel {
     /**
      * Selects a specific client in the {@code JComboBox} if present.
      * <p>Iterates through all combo box items and selects the one matching the provided client instance.
+     *
      * @param client the client to select in the combo box
      */
     public void setComboClient(ClientSupplier client) {

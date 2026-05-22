@@ -15,6 +15,7 @@ import java.util.ArrayList;
  *
  * @see javax.swing.JTable
  * @see Product
+ * @see StockOrderCreation
  */
 public class StockOrderTableModel extends AbstractTableModel {
 
@@ -69,8 +70,19 @@ public class StockOrderTableModel extends AbstractTableModel {
         return COLUMNS[col];
     }
 
-    /**{@inheritDoc}*/
-    @Override
+    /**
+     * Returns the value displayed at a specific cell.
+     * <p>Column mapping:
+     * <ul>
+     *   <li>product name</li>
+     *   <li>suggested quantity</li>
+     *   <li>ordered quantity</li>
+     * </ul>
+     *
+     * @param row the row index
+     * @param col the column index
+     * @return the value stored in the specified cell
+     */    @Override
     public Object getValueAt(int row, int col) {
         ProductRow r = rows.get(row);
 

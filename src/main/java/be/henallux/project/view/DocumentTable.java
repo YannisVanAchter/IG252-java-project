@@ -42,6 +42,14 @@ public class DocumentTable extends JPanel {
 
     private JTable table;
 
+    /**
+     * Initializes the document table view and loads all documents from the controller.
+     * <p>This view is typically instantiated from {@link MainWindow} and integrated into the
+     * main application layout. It builds the search panel and the table panel, and initializes
+     * the internal document lists used for filtering and display.
+     *
+     * @param mainWindow the main application window associated with this view.
+     */
     public DocumentTable(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         this.controller = new DocumentController();
@@ -60,6 +68,13 @@ public class DocumentTable extends JPanel {
         add(buildTablePanel(), BorderLayout.CENTER);
     }
 
+    /**
+     * Builds the header panel of the view.
+     * <p>Displays the title of the document management section and provides a visual
+     * separation from the search and table components.
+     *
+     * @return a {@link JPanel} containing the header
+     */
     private JPanel buildHeader() {
         JLabel title = new JLabel("Document Search");
         title.setFont(new Font("Inter", Font.BOLD, 20));
@@ -194,14 +209,13 @@ public class DocumentTable extends JPanel {
     }
 
     /**
-     * Applies filters to the document list and refreshes live table.
+     * Applies filters to the document list and refreshes the table content.
      * <p>Filtering is performed on:
-     * <ul><li>Document ID (partial match)</li>
+     * <ul><li>Document ID (exact numeric match if provided)</li>
      *   <li>Document type</li>
-     *   <li>Creation date (start and end range)</li></ul>
-     * <p>If no filters are selected, all documents are displayed.
-     * <p>The filtered results are stored in {@code displayDocuments} and the table model is refreshed using
-     * {@link ClientSupplierTableModel#setClientSuppliers(java.util.ArrayList)}.
+     *   <li>Creation date range (start and/or end date)</li></ul>
+     * <p>If no filter is active, all documents are displayed.
+     * <p>The resulting list is stored in {@code displayDocuments} and used to refresh the {@link DocumentTableModel}.
      */
     public void onFilterClick() {
 
@@ -257,6 +271,13 @@ public class DocumentTable extends JPanel {
         model.setDocuments(displayDocuments);
     }
 
+    /**
+     * Opens the document creation form.
+     * <p>The form is opened in creation mode by passing {@code null} to the main window,
+     * which results in an empty document form being displayed.
+     *
+     * @see MainWindow#openDocumentForm(Document)
+     */
     public void onCreateClick() {
         mainWindow.openDocumentForm(null);
     }

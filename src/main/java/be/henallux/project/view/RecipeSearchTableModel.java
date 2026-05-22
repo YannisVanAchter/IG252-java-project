@@ -29,9 +29,10 @@ public class RecipeSearchTableModel extends AbstractTableModel {
     }
 
     /**
-     * Replaces the current recipe list and refreshes the table view.
+     * Replaces the current list of recipes and refreshes the table view.
+     * <p>This method triggers a full refresh of the JTable via {@link  AbstractTableModel#fireTableDataChanged()}.
      *
-     * @param recipes the new list of recipes
+     * @param recipes the new list of {@link Recipe} to display
      */
     public void setRecipes(List<Recipe> recipes) {
         this.recipes = recipes;
@@ -66,7 +67,19 @@ public class RecipeSearchTableModel extends AbstractTableModel {
         return COLUMNS[column];
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Returns the value displayed in a specific cell of the recipe table.
+     * <p>Column mapping:
+     * <ul><li>recipe name</li>
+     *     <li>recipe document ID</li>
+     *     <li>comma-separated list of product names in the recipe composition</li>
+     *     <li>action label ("See Recipe")</li></ul>
+     *
+     * @param rowIndex the row index of the recipe
+     * @param columnIndex the column index to evaluate
+     * @return the value displayed in the table cell
+     * @see ViewUtils#safeText(String, String)
+     */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         Recipe r = recipes.get(rowIndex);
@@ -79,6 +92,16 @@ public class RecipeSearchTableModel extends AbstractTableModel {
         };
     }
 
+    /**
+     * Builds a human-readable label representing the composition of a recipe.
+     * <p>The label is created by concatenating all product names contained in the
+     * {@link RecipeComposition} list, separated by commas.
+     * <p>If no valid product names are available, a fallback "-" is returned.
+     *
+     * @param compositions the list of recipe composition entries
+     * @return a formatted string representing the recipe contents
+     * @see StringBuilder
+     */
     public String getCompositionLabel(List<RecipeComposition> compositions) {
         StringBuilder out = new StringBuilder();
         for (RecipeComposition compo : compositions) {
