@@ -13,26 +13,26 @@ package business {
         +getDocument(id: int): Document
         +getDocumentTypes(): List<DocumentType>
         +addDocumentType(docType: DocumentType): void
-        +createDocument(newDocument: Document) : void
+        +createDocument(document: Document) : void
         +receiveDelivery(documentId: int, date: LocalDate): void
         +sendDelivery(documentId: int, date: LocalDate): void
         +deleteDocument(id : int) : void
     }
 
     class PreparationOrderManager {
-        +getAllRecipe(): List<Recipe>
+        +getAllRecipes(): List<Recipe>
         +getRecipe(recipeName: String): Recipe
         +getIngredient(recipeName: String): List<Pair<Product, Integer>>
-        +createNewRecipe(newRecipe: Recipe, ingredients: List<Pair<Product, Integer>>): void
+        +createRecipe(newRecipe: Recipe, ingredients: List<Pair<Product, Integer>>): void
     }
 
     class WorkFlowManager {
-        +getAllWorkFlow(): List<WorkFlow>
+        +getAllWorkFlows(): List<WorkFlow>
         +getAllBuying(): List<WorkFlow>
         +getAllInternal(): List<WorkFlow>
         +getAllSelling(): List<WorkFlow>
         +getWorkFlowType(): List<WorkFlowType>
-        +addWorkFlowType(newWorkFlowType: WorkFlowType): void
+        +addWorkFlowType(workFlowType: WorkFlowType): void
         +addWorkFlow(workflow: WorkFlow): void
         +changeStatus(workflowId: int, status: Status): void
         +addDocument(workflowId: int, document: Document): void
@@ -41,10 +41,10 @@ package business {
     abstract class ClientSupplierManager {
         +getAllClientsSuppliers() : List<ClientSupplier>
         +getClientSupplier(id: int): ClientSupplier
-        +createClientSupplier(newClient: ClientSupplier) : void
-        +changeAddress(id : int, newAddress: Address) : void
-        +changePhoneNumber(id: int, newPhoneNumber: int): void
-        +changeEmail(id: int, newEmail: String) : void
+        +createClientSupplier(client: ClientSupplier) : void
+        +changeAddress(id : int, address: Address) : void
+        +changePhoneNumber(id: int, phoneNumber: int): void
+        +changeEmail(id: int, email: String) : void
         +deleteClientSupplier(id : int) : void
         {abstract} + placeOrder(clientSupplierID: int, products: List<Product>): void
     }
@@ -64,35 +64,35 @@ package business {
 
     class SupplierManager {
         +getAllSuppliers(): List<ClientSupplier>
-        +getAllProduct(supplierID: int): List<Product>
-        +changeVATNumber(supplierID: int, newVATNumber): void
+        +getAllProducts(supplierID: int): List<Product>
+        +changeVATNumber(supplierID: int, VATNumber: String): void
     }
 
     class ProductManager {
-        +getAllProduct(): List<Product>
+        +getAllProducts(): List<Product>
         +getProduct(productID: int): Product
         +getAllProductCategory(): List<Category>
-        +createNewProduct(newProduct: Product): void
-        +changeProductPrice(productID: int, newPrice: double): void
-        +changeProductVAT(productID, newVAT: double): void
-        +changeFidelityPoint(productID, newPoints: int): void
-        +changeMinimalQuantity(productID: int, newQuantity: int): void
+        +createProduct(Product: Product): void
+        +changeProductPrice(productID: int, price: double): void
+        +changeProductVAT(productID, vat: double): void
+        +changeFidelityPoint(productID, points: int): void
+        +changeMinimalQuantity(productID: int, quantity: int): void
         +deleteProductOffer(productID: int): void
         +createNewProductCategory(name: String): void
 
-        +addDiscount(newDiscount: Discount): void
+        +addDiscount(discount: Discount): void
         +deleteDiscount(discount: Discount): void
     }
 
     class EmployeeManager {
-        +getAllEmployee(): List<Employee>
+        +getAllEmployees(): List<Employee>
         +getEmployee(employeeID: int): Employee
-        +changeAddress(employeeID: int, newAddress: Address): void
-        +changePassword(employeeID: int, newPassword: String): void
-        +changeManager(employeeID: int, newManager: Employee): void
-        +changeBankAccount(employeeID: int, newIBAN: String): void
-        +changeHoursSalary(employeeID: int, newSalary: double): void
-        +changeHalfDayBreak(employeeID: int, newNbHalfDay: int): void
+        +changeAddress(employeeID: int, address: Address): void
+        +changePassword(employeeID: int, password: String): void
+        +changeManager(employeeID: int, manager: Employee): void
+        +changeBankAccount(employeeID: int, IBAN: String): void
+        +changeHoursSalary(employeeID: int, salary: double): void
+        +changeHalfDayBreak(employeeID: int, nbHalfDay: int): void
 
         +assignPosition(employeeID: int, position: Position): void
         +addPosition(position: Position): void
@@ -105,11 +105,11 @@ package business {
         +changeNonAttendance(employeeID: int, startDate: LocalDate, endDate: LocalDate): void
     }
 
-    class AddresseManager {
-        +getAllAddresse(): List<Addresse>
-        +createAddresse(addresse: Addresse): void
+    class AddressManager {
+        +getAllAddresses(): List<Address>
+        +createAddress(address: Address): void
         +createLocality(locality: Locality): void
-        +deleteAddresse(addresse: Addresse): void
+        +deleteAddress(address: Address): void
     }
 
     class ProductSearchManager {
@@ -125,11 +125,11 @@ package business {
     }
 
     class StockManager {
-        +addStockLocation(newLocation: Location): void
+        +addStockLocation(Location: Location): void
         +addToStocks(productID: int, quantity: int, storeLocation: Location): void
         +subtractFromStock(productID: int, quantity: int, storeLocation: Location): void
         +deleteStockLocation(location: Location): void
-        +getAllShortSuppliedProduct(): List<Product>
+        +getAllShortSuppliedProducts(): List<Product>
     }
 
     DocumentManager <|-- PreparationOrderManager
@@ -140,9 +140,9 @@ package business {
     ClientSupplierManager ..> DocumentManager: use
     ClientSupplierManager ..> WorkFlowManager: use
 
-    EmployeeManager ..> AddresseManager: use
-    ClientSupplierManager ..> AddresseManager: use
-    DocumentManager ..> AddresseManager: use
+    EmployeeManager ..> AddressManager: use
+    ClientSupplierManager ..> AddressManager: use
+    DocumentManager ..> AddressManager: use
 
     DocumentManager ..> StockManager: use
     DocumentManager ..> ProductManager: use
