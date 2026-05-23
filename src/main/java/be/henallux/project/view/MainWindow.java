@@ -35,7 +35,7 @@ public class MainWindow extends JFrame {
     private CardLayout cardLayout;
     private JPanel container;
 
-    public MainWindow(NotificationController notificationController) {
+    public MainWindow(NotificationController notificationController, StockManagementController stockManagementController) {
         super("Magasin du Grand Bazard");
         this.notificationController = notificationController;
 
@@ -43,8 +43,11 @@ public class MainWindow extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        setJMenuBar(new MenuWindow(this, notificationController));
-        notificationController.setMainWindow(this);
+        notificationController.addListener(notif -> {
+            new ToastWindow(this, notif);
+        });
+
+        setJMenuBar(new MenuWindow(this));
         cardLayout = new CardLayout();
         container = new JPanel(cardLayout);
 

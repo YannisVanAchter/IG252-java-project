@@ -30,7 +30,7 @@ public class MenuWindow extends JMenuBar {
             receiptItem, stockItem;
     private NotifBellButton btnBell;
 
-    public MenuWindow(MainWindow window, NotificationController controller) {
+    public MenuWindow(MainWindow window) {
         int shortcut = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
 
         // Application
@@ -122,7 +122,7 @@ public class MenuWindow extends JMenuBar {
         });
         helpMenu.add(helpItem);
 
-        btnBell = new NotifBellButton(controller);
+        btnBell = new NotifBellButton(window.getNotificationController());
 
         add(fileMenu);
         add(managementMenu);

@@ -1,8 +1,6 @@
 package main.java.be.henallux.project.controller;
 
 import main.java.be.henallux.project.model.NotificationItem;
-import main.java.be.henallux.project.view.MainWindow;
-import main.java.be.henallux.project.view.ToastWindow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,52 +10,35 @@ import java.util.function.Consumer;
  * Controller managing the notification lifecycle.
  * <p>Responsibilities:
  * <ul><li>storing the notification history;</li>
- *   <li>triggering a {@link ToastWindow} on every new notification;</li>
- *   <li>notifying registered listeners so the UI (badge, dropdown) stays in sync.</li></ul>
- * <p>The {@link MainWindow} reference is injected after construction via {@link #setMainWindow(MainWindow)}
- * to avoid circular dependencies at startup.
+ *     <li>notifying registered listeners so the UI (toast, badge, dropdown) stays in sync.</li></ul>
+ * <p>The toast display is delegated to a listener registered externally via {@link #addListener(Consumer)},
+ * keeping this controller decoupled from any Swing dependency.
  */
 public class NotificationController {
 
     private final List<NotificationItem> notifications = new ArrayList<>();
     private final List<Consumer<NotificationItem>> listeners = new ArrayList<>();
-    private MainWindow mainWindow;
-
-    /**
-     * Injects the {@link MainWindow} reference required to display {@link ToastWindow} instances.
-     * <p>Must be called before the first {@link #push(NotificationItem)};
-     * no toast will appear as long as this is {@code null}.
-     *
-     * @param mainWindow the application's main window
-     */
-    public void setMainWindow(MainWindow mainWindow) {
-        this.mainWindow = mainWindow;
-    }
 
     /**
      * Pushes a new notification into the controller.
      * <p>If {@code notif} is not {@code null}, this method:
      * <ol><li>wraps the notification's original action so that clicking the toast
-     *       also triggers {@link #notifyListeners(NotificationItem)};</li>
-     *   <li>adds the notification to the history;</li>
-     *   <li>shows a {@link ToastWindow} if {@link #mainWindow} is set;</li>
-     *   <li>notifies all registered listeners immediately.</li></ol>
+     *         also triggers {@link #notifyListeners(NotificationItem)};</li>
+     *     <li>adds the notification to the history;</li>
+     *     <li>notifies all registered listeners immediately, including the toast display listener.</li></ol>
      *
      * @param notif the notification to push; ignored if {@code null}
      */
     public void push(NotificationItem notif) {
-        if (notif != null) {
-            Runnable originalAction = notif.getAction();
-            notif.setAction(() -> {
-                if (originalAction != null) originalAction.run();
-                notifyListeners(notif);
-            });
-            notifications.add(notif);
-            if (mainWindow != null) {
-                new ToastWindow(mainWindow, notif).show();
-            }
+        if (notif == null) return;
+        Runnable originalAction = notif.getAction();
+        notif.setAction(() -> {
+            if (originalAction != null) originalAction.run();
             notifyListeners(notif);
-        }
+        });
+
+        notifications.add(notif);
+        notifyListeners(notif);
     }
 
     /**
