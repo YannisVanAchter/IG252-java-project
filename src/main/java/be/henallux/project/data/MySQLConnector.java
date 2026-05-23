@@ -1,7 +1,5 @@
 package main.java.be.henallux.project.data;
 
-import io.github.cdimascio.dotenv.Dotenv;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -21,10 +19,9 @@ public class MySQLConnector {
      */
     private MySQLConnector() {
         try {
-            Dotenv dotenv = Dotenv.load();
-            String url = String.format("jdbc:mysql://%s:%S/%s", dotenv.get("MYSQL_ADDRESS"), dotenv.get("MYSQL_PORT"), dotenv.get("MYSQL_DATABASE"));
-            String user = dotenv.get("MYSQL_USER");
-            String password = dotenv.get("MYSQL_PASSWORD");
+            String url = String.format("jdbc:mysql://%s:%S/%s", System.getenv("MYSQL_ADDRESS"), System.getenv("MYSQL_PORT"), System.getenv("MYSQL_DATABASE"));
+            String user = System.getenv("MYSQL_USER");
+            String password = System.getenv("MYSQL_PASSWORD");
             this.connection = DriverManager.getConnection(url, user, password);
 
         } catch (Exception e) {
@@ -33,7 +30,7 @@ public class MySQLConnector {
     }
 
     @SuppressWarnings("DoubleCheckedLocking") //  I would rather check two times than fuck up my DB !
-    public MySQLConnector getInstance() {
+    public static MySQLConnector getInstance() {
         if (instance == null ) {
             synchronized (MySQLConnector.class) {
                 if (instance == null) {

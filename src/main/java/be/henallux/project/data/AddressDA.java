@@ -9,36 +9,33 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
 
-import main.java.be.henallux.project.data.*;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.model.Address;
 import main.java.be.henallux.project.model.Locality;
 
-public class AddressDA implements CRUD<Address> {
+public class AddressDA extends CRUD<Address> {
     private static volatile AddressDA instance;
     private final String TABLE_NAME = "Address_";
     private Map<Integer, Address> dataMappingObject;
+    private LocalityDA locality;
 
     private AddressDA() {
         super();
 
-        this.dataMappingModel.entry(
-            Address.class, this
-        );
-
+        this.locality = LocalityDA.getInstance();
         this.dataMappingObject = new HashMap<>();
     }
 
     public static synchronized  AddressDA getInstance() {
-        if (instance == null) {
+        if (this.instance == null) {
             setInstance(new AddressDA());
         }
-        return instance;
+        return this.instance;
     }
 
-    private static synchronized void setInstance(AddressDA localityDA) {
+    private static synchronized void setInstance(AddressDA addressDA) {
         if (instance == null) {
-            instance = localityDA;
+            instance = addressDA;
         }
     }
     
@@ -51,7 +48,7 @@ public class AddressDA implements CRUD<Address> {
                     id,
                     data.getInt("streetNumber"),
                     data.getString("streetName"),
-                    LocalityDA.getInstance().getById(data.getInt("postalId"), mapping)
+                    locality.getById(data.getInt("postalId"), mapping)
                 );
                 dataMappingObject.put(id, address);
             }
@@ -63,10 +60,10 @@ public class AddressDA implements CRUD<Address> {
 
     public List<Address> getAll() throws DataBaseException {
         String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " ORDER BY name";
-        Connection connection = MySQLConnector.getInstance().getConnection();
         List<Address> addresses = new ArrayList<>();
 
-        try (PreparedStatement statement = connection.prepareStatement(SQLInstruction)) {
+        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(SQLInstruction);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 addresses.add(mapDataToObject(resultSet));
@@ -97,9 +94,9 @@ public class AddressDA implements CRUD<Address> {
 
         String placeholders = String.join(",", java.util.Collections.nCopies(ids.size(), "?"));
         String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " WHERE id IN (" + placeholders + ") ORDER BY name";
-        Connection connection = MySQLConnector.getInstance().getConnection();
 
-        try (PreparedStatement statement = connection.prepareStatement(SQLInstruction)) {
+        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(SQLInstruction);
             for (int i = 1; i <= ids.size(); i++) {
                 statement.setInt(i, ids.get(i));
             }
@@ -125,9 +122,9 @@ public class AddressDA implements CRUD<Address> {
             return addresse;
 
         String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " WHERE id=?;";
-        Conneciton conneciton = MySQLConnector.getInstance().getConnection();
 
-        try (PreparedStatement statement = connection.prepareStatement(SQLInstruction)) {
+        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(SQLInstruction);
             statement.setInt(1, id);
 
             ResultSet result = statement.executeQuery();
@@ -146,14 +143,42 @@ public class AddressDA implements CRUD<Address> {
         return getById(id, true);
     }
 
+    public List<Address> getByLocality(Locality locality, boolean mapping) throws DataValidationException {
+        ArrayList<Address> addresses = new ArrayList<>();
+
+        String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " WHERE postalId=? AND city=?;";
+
+        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(SQLInstruction);
+
+            statement.setInt(1, locality.getPostalCode());
+            statement.setString(2, locality.getCity());
+
+            ResultSet results = statement.executeQuery();
+
+            while (results.next()) {
+                addresses.add(mapDataToObject(results, mapping));
+            }
+        } catch (SQLException e) {
+            throw new DataBaseException("Impossible to get address by locality", e);
+        }
+
+        return addresses;
+    }
+
+    public List<Address> getByLocality(Locality locality) throws DataBaseException {
+        return getByLocality(locality, true);
+    }
+
     public boolean insert (Address newAddress) throws DataBaseException {
-        LocalityDA.getInstance().checkExist(newAddress.getLocation());
+        this.locality.checkExist(newAddress.getLocation());
         boolean inserted = false;
         String SQLInstruction = "INSERT INTO " + TABLE_NAME + " (streetName, streetNumber, postalId, city VALUES (?, ?, ?, ?);";
 
-        Connection connection = MySQLConnector.getInstance().getConnection();
+        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(SQLInstruction);
+            this.locality.chechExist(newAddress.getLocation());
 
-        try (PreparedStatement statement connection.prepareStatement(SQLInstruction);) {
             statement.setString(1, newAddress.getStreetName());
             statement.setInt(2, newAddress.getStreetNumber());
             statement.setInt(3, newAddress.getLocation().getPostalCode());
@@ -161,10 +186,100 @@ public class AddressDA implements CRUD<Address> {
 
             inserted = 0 < statement.executeUpdate();
 
-            // TODO update newAddress to include the ID set by the DB
+            // update newAddress to include the ID set by the DBMS
+            SQLInstruction = "SELECT id_ FROM " + TABLE_NAME + " WHERE streetName=? AND streetNumber=? AND postalId=? AND city=?;";
+            statement = connection.prepareStatement(SQLInstruction);
+
+            statement.setString(1, newAddress.getStreetName());
+            statement.setInt(2, newAddress.getStreetNumber());
+            statement.setInt(3, newAddress.getLocation().getPostalCode());
+            statement.setString(4, newAddress.getLocation().getCity());
+
+            ResultSet result = statement.executeQuery();
+
+            if (result.next()) {
+                newAddress.setId(result.getInt("id_"));
+                dataMappingObject.put(newAddress.getId(), newAddress);
+            }
+
         } catch (SQLException e) {
             throw new DataBaseException("Insert address imposible", e);
         }
         return inserted;
+    }
+
+    public boolean update(Address address, Address newAddress) {
+        String SQLInstruction = "UPDATE " + TABLE_NAME + " SET streetName=?, streetNumber=?, postalId=?, city=? WHERE id_=?";
+
+
+        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(SQLInstruction);
+            locality.chechExist(newAddress.getLocation());
+
+            statement.setString(1, newAddress.getStreetName());
+            statement.setString(2, newAddress.getStreetNumber());
+            statement.setString(3, newAddress.getLocation().getPostalCode());
+            statement.setString(4, newAddress.getLocation().getCity());
+            
+            statement.setString(5, address.getId());
+
+            int affectedRows = statement.executeUpdate();
+
+            dataMappingObject.remove(address.getId());
+            dataMappingObject.put(newAddress.getId(), newAddress);
+
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            throw new DataBaseException("Update impossible", e);
+        }
+        return false;
+    }
+
+    public boolean delete(Address address) throws DataBaseException {
+        String SQLInstruction = "DELETE FROM " + TABLE_NAME + " WHERE id_=?;";
+
+        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(SQLInstruction);
+
+            statement.setInt(1, address.getId());
+
+            int affectedRows = statement.executeUpdate();
+
+            if (affectedRows > 0) {
+                if (getByLocality(address.getLocality()).size() == 0)
+                    this.locality.delete(address.getLocality());
+            }
+
+            dataMappingObject.remove(address.getId());
+
+            return true;
+        } catch (SQLException e) {
+            throw new DataBaseException("Delete impossible", e);
+        }
+    }
+
+    public boolean checkExist(Address address) throws DataBaseException {
+        boolean exist = false;
+
+        if (address != null) {
+            String  SQLInstruction = "SELECT COUNT(*) as nbAddress FROM " + TABLE_NAME + 
+                    " WHERE id_=?";
+
+            try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+                PreparedStatement statement = connection.prepareStatement(SQLInstruction);
+
+                statement.setInt(address.getId());
+
+                ResultSet result = statement.executeQuerry();
+
+                if ( !result.next() )
+                    insert(address);
+                exist = true;
+            } catch (SQLException e) {
+                throw new DataBaseException("Check impossible", e);
+            }
+        }
+
+        return exist;
     }
 }

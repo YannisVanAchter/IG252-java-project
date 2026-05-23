@@ -666,3 +666,11 @@ AND d.workflowId = w.id_
 AND w.workFlowTypeId = wt.id_
 AND wt.isSupplier = TRUE
 AND w.otherId = s.id_;
+
+-- Insert
+
+INSERT INTO ProductCategory (name_) VALUES ('Ménager');
+INSERT INTO ProductCategory (name_) VALUES ('Electro-ménager');
+INSERT INTO ProductCategory (name_) VALUES ('fruits et légumes');
+INSERT INTO ProductCategory (name_) VALUES ('Viandes');
+INSERT INTO ProductCategory (name_) VALUES ('Produits laitier');

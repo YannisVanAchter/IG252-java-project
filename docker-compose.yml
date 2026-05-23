@@ -34,7 +34,7 @@ services:
             - app-network
         depends_on:
             - database
-        restart: always
+        # restart: always
 
     database:
         build:
@@ -50,7 +50,7 @@ services:
             - app-network
         ports:
             - "${MYSQL_PORT}:${MYSQL_PORT}"
-        restart: always
+        # restart: always
 
 networks:
     app-network:

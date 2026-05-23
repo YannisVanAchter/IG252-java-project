@@ -2,22 +2,26 @@ package main.java.be.henallux.project.business;
 
 import main.java.be.henallux.project.data.*;
 import main.java.be.henallux.project.data.exception.DataBaseException;
+import main.java.be.henallux.project.business.exception.BusinessException;
 import main.java.be.henallux.project.model.*;
 import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
 
 public class RecipeSearchManager {
-    private String name;
-    private String product;
+    private final String name;
+    private final String product;
+    private final RecipeData recipeData;
 
     public RecipeSearchManager(String name, String product) {
         this.name = name;
         this.product = product;
+        this.recipeData = new RecipeData();
     }
 
-    public List<Recipe> searchRecipes() throws DataBaseException {
-        RecipeData recipeData = new RecipeData();
-        return recipeData.searchRecipes(name, product);
+    public List<Recipe> searchRecipes() throws BusinessException {
+        try {
+            return recipeData.searchRecipes(name, product);
+        } catch (DataBaseException e) {
+            throw new BusinessException("Erreur lors de la recherche de recettes.", e);
+        }
     }
 }

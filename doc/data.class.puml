@@ -7,162 +7,161 @@ skinparam linetype ortho
 skinparam linetype polyline
 
 ' TODO: finish diagram before implementing this layer (deadline: may 15th 2026)
-package data {
 
-    class SingletonConnection {
-        {static} {volatile} -instance : Connection
-        -url : String
-        -username : String
-        -password : String
-        +getInstance() : Connection
-        +resetConnection(): void
-        +closeConnection(): void
-    }
-
-    abstract class CRUD<model.M> {
-        {abstract} - tableName: String
-        {abstract} - tableAttributeToModel: HashMap<String, class|model.M.class>
-        {abstract} - createdObject: HashMap<model.M.ID, model.M.class>
-        - modelMappingDataAccess: HashMap<model.M.class, class> 
-
-        {abstract} +getAll(): List<model.M>
-        {abstract} +get(id: String): model.M
-        {abstract} +gets(ids: List<String>): List<model.M>
-        {abstract} +insert(new: model.M): void
-        {abstract} +update(old: model.M, new: model.M): void
-        {abstract} +delete(old: model.M): void
-        #getDBAccessClass(class): class ' Might not be necessary depending on modelMappingDataAccess '
-    }
-
-    class LocalityDA {
-    }
-
-    class AddressDA {
-    }
-
-    class EmployeeDA {
-    }
-
-    class PointingDA {
-    }
-
-    class RoleDA {
-    }
-
-    class PositionDA {
-    }
-
-    class AbsenceTypeDA {
-    }
-
-    class AbsenceDA {
-    }
-
-    class ProductCategoryDA {
-    }
-
-    class ProductDA {
-    }
-
-    class DiscountDA {
-    }
-
-    class LocationProductDA {
-    }
-
-    class QuantityProductDA {
-    }
-
-    class ClientSupplierDA {
-    }
-
-    class FidelityCardDA {
-    }
-
-    class WorkflowTypeDA {
-    }
-
-    class StatusDA {
-    }
-
-    class WorkflowDA {
-    }
-
-    class DocumentTypeDA {
-    }
-
-    class DocumentDA {
-    }
-
-    class RecipeDA {
-    }
-
-    class RecipeCompositionDA {
-    }
-
-    class PreparationOrderDA {
-    }
-
-    class DetailDA {
-    }
-
-    class BatchDA {
-    }
-
-    SingletonConnection <.. LocalityDA: use 
-    SingletonConnection <.. AddressDA: use 
-    SingletonConnection <.. EmployeeDA: use 
-    SingletonConnection <.. PointingDA: use 
-    SingletonConnection <.. RoleDA: use 
-    SingletonConnection <.. PositionDA: use 
-    SingletonConnection <.. AbsenceTypeDA: use 
-    SingletonConnection <.. AbsenceDA: use 
-    SingletonConnection <.. ProductCategoryDA: use 
-    SingletonConnection <.. ProductDA: use 
-    SingletonConnection <.. DiscountDA: use 
-    SingletonConnection <.. LocationProductDA: use 
-    SingletonConnection <.. QuantityProductDA: use 
-    SingletonConnection <.. ClientSupplierDA: use 
-    SingletonConnection <.. FidelityCardDA: use 
-    SingletonConnection <.. WorkflowTypeDA: use 
-    SingletonConnection <.. StatusDA: use 
-    SingletonConnection <.. WorkflowDA: use 
-    SingletonConnection <.. DocumentTypeDA: use 
-    SingletonConnection <.. DocumentDA: use 
-    SingletonConnection <.. RecipeDA: use 
-    SingletonConnection <.. RecipeCompositionDA: use 
-    SingletonConnection <.. PreparationOrderDA: use 
-    SingletonConnection <.. DetailDA: use 
-    SingletonConnection <.. BatchDA: use 
-    SingletonConnection <.. ProductSearchManager: use 
-    SingletonConnection <.. RecipeSearchManager: use 
-    SingletonConnection <.. ClientSupplierSearchManager: use
-
-    LocalityDA ..|> CRUD: implement
-    AddressDA ..|> CRUD: implement
-    EmployeeDA ..|> CRUD: implement
-    PointingDA ..|> CRUD: implement
-    RoleDA ..|> CRUD: implement
-    PositionDA ..|> CRUD: implement
-    AbsenceTypeDA ..|> CRUD: implement
-    AbsenceDA ..|> CRUD: implement
-    ProductCategoryDA ..|> CRUD: implement
-    ProductDA ..|> CRUD: implement
-    DiscountDA ..|> CRUD: implement
-    LocationProductDA ..|> CRUD: implement
-    QuantityProductDA ..|> CRUD: implement
-    ClientSupplierDA ..|> CRUD: implement
-    FidelityCardDA ..|> CRUD: implement
-    WorkflowTypeDA ..|> CRUD: implement
-    StatusDA ..|> CRUD: implement
-    WorkflowDA ..|> CRUD: implement
-    DocumentTypeDA ..|> CRUD: implement
-    DocumentDA ..|> CRUD: implement
-    RecipeDA ..|> CRUD: implement
-    RecipeCompositionDA ..|> CRUD: implement
-    PreparationOrderDA ..|> CRUD: implement
-    DetailDA ..|> CRUD: implement
-    BatchDA ..|> CRUD: implement
+class SingletonConnection {
+    {static} {volatile} -instance : Connection
+    -url : String
+    -username : String
+    -password : String
+    +getInstance() : Connection
+    +resetConnection(): void
+    +closeConnection(): void
 }
+
+abstract class CRUD<model.M> {
+    {abstract} - tableName: String
+    {abstract} - tableAttributeToModel: HashMap<String, class|model.M.class>
+    {abstract} - createdObject: HashMap<model.M.ID, model.M.class>
+    - modelMappingDataAccess: HashMap<model.M.class, class> 
+
+    {abstract} +getAll(): List<model.M>
+    {abstract} +get(id: String): model.M
+    {abstract} +gets(ids: List<String>): List<model.M>
+    {abstract} +insert(new: model.M): void
+    {abstract} +update(old: model.M, new: model.M): void
+    {abstract} +delete(old: model.M): void
+    #getDBAccessClass(class): class ' Might not be necessary depending on modelMappingDataAccess '
+}
+
+class LocalityDA {
+}
+
+class AddressDA {
+}
+
+class EmployeeDA {
+}
+
+class PointingDA {
+}
+
+class RoleDA {
+}
+
+class PositionDA {
+}
+
+class AbsenceTypeDA {
+}
+
+class AbsenceDA {
+}
+
+class ProductCategoryDA {
+}
+
+class ProductDA {
+}
+
+class DiscountDA {
+}
+
+class LocationProductDA {
+}
+
+class QuantityProductDA {
+}
+
+class ClientSupplierDA {
+}
+
+class FidelityCardDA {
+}
+
+class WorkflowTypeDA {
+}
+
+class StatusDA {
+}
+
+class WorkflowDA {
+}
+
+class DocumentTypeDA {
+}
+
+class DocumentDA {
+}
+
+class RecipeDA {
+}
+
+class RecipeCompositionDA {
+}
+
+class PreparationOrderDA {
+}
+
+class DetailDA {
+}
+
+class BatchDA {
+}
+
+SingletonConnection <.. LocalityDA: use 
+SingletonConnection <.. AddressDA: use 
+SingletonConnection <.. EmployeeDA: use 
+SingletonConnection <.. PointingDA: use 
+SingletonConnection <.. RoleDA: use 
+SingletonConnection <.. PositionDA: use 
+SingletonConnection <.. AbsenceTypeDA: use 
+SingletonConnection <.. AbsenceDA: use 
+SingletonConnection <.. ProductCategoryDA: use 
+SingletonConnection <.. ProductDA: use 
+SingletonConnection <.. DiscountDA: use 
+SingletonConnection <.. LocationProductDA: use 
+SingletonConnection <.. QuantityProductDA: use 
+SingletonConnection <.. ClientSupplierDA: use 
+SingletonConnection <.. FidelityCardDA: use 
+SingletonConnection <.. WorkflowTypeDA: use 
+SingletonConnection <.. StatusDA: use 
+SingletonConnection <.. WorkflowDA: use 
+SingletonConnection <.. DocumentTypeDA: use 
+SingletonConnection <.. DocumentDA: use 
+SingletonConnection <.. RecipeDA: use 
+SingletonConnection <.. RecipeCompositionDA: use 
+SingletonConnection <.. PreparationOrderDA: use 
+SingletonConnection <.. DetailDA: use 
+SingletonConnection <.. BatchDA: use 
+SingletonConnection <.. ProductSearchManager: use 
+SingletonConnection <.. RecipeSearchManager: use 
+SingletonConnection <.. ClientSupplierSearchManager: use
+
+LocalityDA ..|> CRUD: implement
+AddressDA ..|> CRUD: implement
+EmployeeDA ..|> CRUD: implement
+PointingDA ..|> CRUD: implement
+RoleDA ..|> CRUD: implement
+PositionDA ..|> CRUD: implement
+AbsenceTypeDA ..|> CRUD: implement
+AbsenceDA ..|> CRUD: implement
+ProductCategoryDA ..|> CRUD: implement
+ProductDA ..|> CRUD: implement
+DiscountDA ..|> CRUD: implement
+LocationProductDA ..|> CRUD: implement
+QuantityProductDA ..|> CRUD: implement
+ClientSupplierDA ..|> CRUD: implement
+FidelityCardDA ..|> CRUD: implement
+WorkflowTypeDA ..|> CRUD: implement
+StatusDA ..|> CRUD: implement
+WorkflowDA ..|> CRUD: implement
+DocumentTypeDA ..|> CRUD: implement
+DocumentDA ..|> CRUD: implement
+RecipeDA ..|> CRUD: implement
+RecipeCompositionDA ..|> CRUD: implement
+PreparationOrderDA ..|> CRUD: implement
+DetailDA ..|> CRUD: implement
+BatchDA ..|> CRUD: implement
+
 
 @enduml
