@@ -6,40 +6,40 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
+import javax.print.attribute.PrintServiceAttributeSet;
+
 import main.java.be.henallux.project.data.exception.DataBaseException;
 
 import main.java.be.henallux.project.model.Model;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
 public abstract class CRUD<Model> {
-    public CRUD<Model> instance;
-    public String tableName;
-    public Map<String, Model> dataMappingObject;
-    static public final Map<Class<Model>, CRUD<Model>> dataMappingModel;
+    CRUD<Model> instance;
+    String TABLE_NAME;
+    Map<Object, Model> IDS_MAPPING_OBJECT;
 
-    public CRUD() {
-        if (this.dataMappingModel == null)
-            this.dataMappingModel = new HashMap<>();
-    }
+    abstract Model mapDataToObject(ResultSet data, boolean mapping) throws DataBaseException, DataValidationException;
 
-    abstract public CRUD<Model> getInstance();
+    abstract List<Model> getAll() throws DataBaseException, DataValidationException;
 
-    abstract public Model mapDataToObject(ResultSet data, boolean mapping);
+    abstract Model getById(int id, boolean mapping) throws DataBaseException, DataValidationException;
 
-    abstract public List<Model> getAll() throws DataBaseException;
+    abstract Model getById(int id) throws DataBaseException, DataValidationException;
 
-    abstract public Model getById(int id, boolean mapping) throws DataBaseException;
+    abstract List<Model> getsByIds(List<Integer> ids, boolean mapping) throws DataBaseException, DataValidationException;
 
-    abstract public Model getById(int id) throws DataBaseException;
+    abstract List<Model> getsByIds(List<Integer> ids) throws DataBaseException, DataValidationException;
 
-    abstract public List<Model> getsByIds(List<Integer> ids, boolean mapping) throws DataBaseException;
+    abstract boolean insert(Model model) throws DataBaseException, DataValidationException;
 
-    abstract public List<Model> getsByIds(List<Integer> ids) throws DataBaseException;
+    abstract boolean update(Model model) throws DataBaseException;
 
-    abstract public boolean insert(Model model) throws DataBaseException;
+    abstract boolean delete(Model model) throws DataBaseException;
 
-    abstract public boolean update(Model model) throws DataBaseException;
-
-    abstract public boolean delete(Model model) throws DataBaseException;
-
-    abstract public boolean checkExist(Model model) throws DataBaseException;
+    /**
+     * Check if a given instance of a Model exist in the database
+     * @param model the model to evaluate
+     * @effect If the model does not exist in the DB, it will insert the object
+     */
+    abstract boolean checkExist(Model model) throws DataBaseException, DataValidationException;
 }

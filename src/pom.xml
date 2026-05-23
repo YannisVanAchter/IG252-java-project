@@ -53,7 +53,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>be.henallux.project.Main</mainClass>
+                                    <mainClass>main.java.be.henallux.project.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

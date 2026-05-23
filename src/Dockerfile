@@ -37,8 +37,12 @@ RUN wget -q https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binar
 COPY ./pom.xml ./pom.xml
 COPY . .
 
-RUN mvn -B package
-RUN mvn -B test
+RUN mvn clean
+RUN mvn compile
+RUN mvn test 
+RUN mvn package 
+RUN mvn install 
+RUN mvn dependency:copy-dependencies 
 
 CMD ["/bin/sh", "-c", "\ 
     Xvfb :0 -screen 0 1024x768x24 -ac & \ 
@@ -47,13 +51,6 @@ CMD ["/bin/sh", "-c", "\
     sleep 1 && \ 
     x11vnc -forever -shared -display :0 -nopw -listen 0.0.0.0 -bg && \ 
     sleep 1 && \ 
-    websockify --web=/usr/share/novnc 6901 localhost:5900 & \ 
-    mvn clean && \
-    mvn compile && \
-    mvn test && \
-    mvn package && \
-    mvn install && \
-    mvn dependency:copy-dependencies && \
-    javac main/java/be/henallux/project/Main.java && \
+    websockify --web=/usr/share/novnc 6901 localhost:5900 && \ 
     java -jar target/project-1.0-SNAPSHOT.jar  \
     "]

@@ -13,7 +13,7 @@ public class ProductCategory implements Model {
 
     public int getId() { return id; }
 
-    private void setId(int id) throws DataValidationException {
+    public final void setId(int id) throws DataValidationException {
         if (id < 0)
             throw new DataValidationException("Product category must posses a positive id");
         this.id = id;
