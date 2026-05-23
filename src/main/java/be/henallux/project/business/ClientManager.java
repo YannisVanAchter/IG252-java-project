@@ -7,19 +7,19 @@ import main.java.be.henallux.project.model.*;
 import java.util.List;
 public class ClientManager extends ClientSupplierManager {
 
-    protected final ClientSupplierData clientSupplierData;
-    private final FidelityCardData fidelityCardData;
-    private final CheckoutData checkoutData;
-    private final DocumentData documentData;
-
-    public ClientManager(ClientSupplierData clientSupplierData, FidelityCardData fidelityCardData, CheckoutData checkoutData, DocumentData documentData) {
-        this.fidelityCardData = fidelityCardData;
-        this.checkoutData = checkoutData;
-        this.documentData = documentData;
+    private final FidelityCardDA fidelityCardDA;
+    private final CheckoutDA checkoutDA;
+    private final DocumentDA documentDA;
+    
+    public ClientManager(ClientSupplierDA clientSupplierDA, AddressManager addressManager, FidelityCardDA fidelityCardDA, CheckoutDA checkoutDA, DocumentDA documentDA) {
+        super(clientSupplierDA, addressManager);
+        this.fidelityCardDA = fidelityCardDA;
+        this.checkoutDA = checkoutDA;
+        this.documentDA = documentDA;
     }
 
     public List<ClientSupplier> getAllClients() throws BusinessException {
-        return super.getAllClientSuppliers();
+        return getAllClientSuppliers();
     }
 
     public void createFidelityCard(int clientId) throws BusinessException {
@@ -29,10 +29,10 @@ public class ClientManager extends ClientSupplierManager {
         }
         try {
             // Règle métier — un client ne peut avoir qu'une seule carte
-            if (fidelityCardData.hasFidelityCard(clientId)) {
+            if (fidelityCardDA.hasFidelityCard(clientId)) {
                 throw new BusinessException("Ce client possède déjà une carte de fidélité.");
             }
-            fidelityCardData.createFidelityCard(clientId);
+            fidelityCardDA.createFidelityCard(clientId);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la création de la carte de fidélité.", e);
         }
@@ -44,7 +44,7 @@ public class ClientManager extends ClientSupplierManager {
             throw new BusinessException("Les identifiants fournis sont invalides.");
         }
         try {
-            return fidelityCardData.validateFidelityCardOwnership(clientId, cardId);
+            return fidelityCardDA.validateFidelityCardOwnership(clientId, cardId);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la validation de la carte de fidélité.", e);
         }
@@ -56,7 +56,7 @@ public class ClientManager extends ClientSupplierManager {
             throw new BusinessException("La liste de produits ne peut pas être vide.");
         }
         try {
-            checkoutData.addCheckout(products);
+            checkoutDA.addCheckout(products);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de l'enregistrement du checkout.", e);
         }
@@ -72,8 +72,8 @@ public class ClientManager extends ClientSupplierManager {
         }
         try {
             // Règle métier — vérifier que le client existe
-            getClientSupplier(clientId);
-            checkoutData.addCheckout(products, clientId);
+            super.getClientSupplier(clientId);
+            checkoutDA.addCheckout(products, clientId);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de l'enregistrement du checkout.", e);
         }
@@ -92,10 +92,10 @@ public class ClientManager extends ClientSupplierManager {
         }
         try {
             // Règle métier — vérifier que la carte appartient bien au client
-            if (!fidelityCardData.validateFidelityCardOwnership(clientId, fidelityCard.getId())) {
+            if (!fidelityCardDA.validateFidelityCardOwnership(clientId, fidelityCard.getId())) {
                 throw new BusinessException("Cette carte de fidélité n'appartient pas à ce client.");
             }
-            checkoutData.addCheckout(products, clientId, fidelityCard, useFidelityPoint);
+            checkoutDA.addCheckout(products, clientId, fidelityCard, useFidelityPoint);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de l'enregistrement du checkout.", e);
         }
@@ -113,10 +113,10 @@ public class ClientManager extends ClientSupplierManager {
         }
         try {
             // Orchestration — supprimer la carte de fidélité avant le compte
-            if (fidelityCardData.hasFidelityCard(clientId)) {
-                fidelityCardData.deleteFidelityCard(clientId);
+            if (fidelityCardDA.hasFidelityCard(clientId)) {
+                fidelityCardDA.deleteFidelityCard(clientId);
             }
-            clientSupplierData.deleteClientAccount(clientId);
+            super.deleteClientAccount(clientId);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la suppression du compte client.", e);
         }
@@ -128,11 +128,11 @@ public class ClientManager extends ClientSupplierManager {
         }
         try {
             // Règle métier — vérifier que la carte appartient bien au client avant suppression
-            if (!fidelityCardData.validateFidelityCardOwnership(clientId, cardId)) {
+            if (!fidelityCardDA.validateFidelityCardOwnership(clientId, cardId)) {
                 throw new BusinessException("Cette carte de fidélité n'appartient pas à ce client.");
             }
-            fidelityCardData.deleteFidelityCard(clientId);
-            clientSupplierData.deleteClientAccount(clientId, cardId);
+            fidelityCardDA.deleteFidelityCard(clientId);
+            super.deleteClientAccount(clientId, cardId);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la suppression du compte client.", e);
         }
@@ -148,8 +148,8 @@ public class ClientManager extends ClientSupplierManager {
         }
         try {
             // Règle métier — vérifier que le client existe avant de passer commande
-            getClientSupplier(clientSupplierId);
-            checkoutData.addCheckout(products, clientSupplierId);
+            super.getClientSupplier(clientSupplierId);
+            checkoutDA.addCheckout(products, clientSupplierId);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la passation de commande.", e);
         }

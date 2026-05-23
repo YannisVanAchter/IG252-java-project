@@ -9,17 +9,17 @@ import java.util.List;
 
 public class WorkFlowManager {
 
-    private final WorkFlowData workFlowData;
+    private final WorkFlowDA workFlowDA;
     private final DocumentManager documentManager;
 
-    public WorkFlowManager(WorkFlowData workFlowData, DocumentManager documentManager) {
-        this.workFlowData = workFlowData;
+    public WorkFlowManager(WorkFlowDA workFlowDA, DocumentManager documentManager) {
+        this.workFlowDA = workFlowDA;
         this.documentManager = documentManager;
     }
     
     public List<WorkFlow> getAllWorkFlows() throws BusinessException {
         try {
-            return workFlowData.getAllWorkFlows();
+            return workFlowDA.getAllWorkFlows();
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la récupération des flux de travail.", e);
         }
@@ -27,7 +27,7 @@ public class WorkFlowManager {
 
     public List<WorkFlow> getAllBuying() throws BusinessException {
         try {
-            return workFlowData.getAllBuying();
+            return workFlowDA.getAllBuying();
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la récupération des flux d'achat.", e);
         }
@@ -35,7 +35,7 @@ public class WorkFlowManager {
 
     public List<WorkFlow> getAllInternal() throws BusinessException {
         try {
-            return workFlowData.getAllInternal();
+            return workFlowDA.getAllInternal();
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la récupération des flux internes.", e);
         }
@@ -43,7 +43,7 @@ public class WorkFlowManager {
 
     public List<WorkFlow> getAllSelling() throws BusinessException {
         try {
-            return workFlowData.getAllSelling();
+            return workFlowDA.getAllSelling();
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la récupération des flux de vente.", e);
         }
@@ -51,7 +51,7 @@ public class WorkFlowManager {
 
     public List<WorkFlowType> getWorkFlowType() throws BusinessException {
         try {
-            return workFlowData.getWorkFlowType();
+            return workFlowDA.getWorkFlowType();
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la récupération des types de flux.", e);
         }
@@ -63,7 +63,7 @@ public class WorkFlowManager {
         }
         
         try {
-            workFlowData.addWorkFlowType(workFlowType);
+            workFlowDA.addWorkFlowType(workFlowType);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de l'ajout du type de flux.", e);
         }
@@ -75,7 +75,12 @@ public class WorkFlowManager {
         }
 
         try {
-            workFlowData.addWorkFlow(workFlow);
+            workFlowDA.addWorkFlow(workFlow);
+            for (Document doc : workFlow.getDocuments()) {
+                documentManager.createDocument(doc);
+                workFlowDA.addWorkFlow(workFlow);
+    // changez cela en fonction de la manière dont vous gérez les IDs des flux de travail et des documents
+            }
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de l'ajout du flux de travail.", e);
         }
@@ -90,7 +95,7 @@ public class WorkFlowManager {
             throw new BusinessException("Le statut ne peut pas être nul.");
         }
         try {
-            workFlowData.changeStatus(workFlowId, status);
+            workFlowDA.changeStatus(workFlowId, status);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors du changement de statut.", e);
         }
@@ -103,9 +108,9 @@ public class WorkFlowManager {
             throw new BusinessException("L'identifiant du flux de travail doit être un nombre positif.");
         }
 
-        documentManager.getDocument(document.getId());
         try {
-            workFlowData.addDocument(workFlowId, document);
+            documentManager.createDocument(document);
+            workFlowDA.addDocument(workFlowId, document);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de l'ajout du document.", e);
         }

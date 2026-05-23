@@ -8,15 +8,17 @@ import java.util.List;
 
 public abstract class ClientSupplierManager {
 
-    private final ClientSupplierData clientSupplierData;
+    protected final ClientSupplierDA clientSupplierDA;
+    private final AddressManager addressManager;
 
-    public ClientSupplierManager(ClientSupplierData clientSupplierData) {
-        this.clientSupplierData = clientSupplierData;
+    public ClientSupplierManager(ClientSupplierDA clientSupplierDA, AddressManager addressManager) {
+        this.clientSupplierDA = clientSupplierDA;
+        this.addressManager = addressManager;
     }
     
     public List<ClientSupplier> getAllClientSuppliers() throws BusinessException {
         try {
-            return clientSupplierData.getAllClientSuppliers();
+            return clientSupplierDA.getAllClientSuppliers();
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la récupération des fournisseurs clients.", e);
         }
@@ -28,7 +30,7 @@ public abstract class ClientSupplierManager {
         }
         
         try {
-            ClientSupplier result = clientSupplierData.getClientSupplier(id);
+            ClientSupplier result = clientSupplierDA.getClientSupplier(id);
             if (result == null) {
                 throw new BusinessException("Le fournisseur client n'existe pas.");
             }
@@ -46,7 +48,7 @@ public abstract class ClientSupplierManager {
             throw new BusinessException("Le nom du fournisseur client est obligatoire.");
         }
         try {
-            clientSupplierData.createClientSupplier(clientSupplier);
+            clientSupplierDA.createClientSupplier(clientSupplier);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la création du fournisseur client.", e);
         }
@@ -60,7 +62,7 @@ public abstract class ClientSupplierManager {
             throw new BusinessException("L'adresse ne peut pas être nulle.");
         }
         try {
-            clientSupplierData.changeAddress(id, address);
+            addressManager.changeAddress(id, address);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors du changement d'adresse.", e);
         }
@@ -77,7 +79,7 @@ public abstract class ClientSupplierManager {
             throw new BusinessException("Le numéro de téléphone doit comporter entre 7 et 15 chiffres.");
         }
         try {
-            clientSupplierData.changePhoneNumber(id, phoneNumber);
+            clientSupplierDA.changePhoneNumber(id, phoneNumber);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors du changement de numéro de téléphone.", e);
         }
@@ -94,7 +96,7 @@ public abstract class ClientSupplierManager {
             throw new BusinessException("L'e-mail n'est pas dans un format valide.");
         }
         try {
-            clientSupplierData.changeEmail(id, email);
+            clientSupplierDA.changeEmail(id, email);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors du changement d'e-mail.", e);
         }
@@ -105,7 +107,7 @@ public abstract class ClientSupplierManager {
             throw new BusinessException("L'identifiant du fournisseur client doit être un nombre positif.");
         }
         try {
-            clientSupplierData.deleteClientSupplier(id);
+            clientSupplierDA.deleteClientSupplier(id);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la suppression du fournisseur client.", e);
         }

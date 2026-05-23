@@ -10,15 +10,19 @@ import java.util.List;
 
 public class DocumentManager {
 
-    private final DocumentData documentData;
+    private final DocumentDA documentDA;
+    protected final ProductManager productManager;
+    protected final StockManager stockManager;
 
-    public DocumentManager(DocumentData documentData) {
-        this.documentData = documentData;
+    public DocumentManager(DocumentDA documentDA, ProductManager productManager, StockManager stockManager) {
+        this.documentDA = documentDA;
+        this.productManager = productManager;
+        this.stockManager = stockManager;
     }
 
     public List<Document> getAllDocuments() throws BusinessException {
         try {
-            return documentData.getAllDocuments();
+            return documentDA.getAllDocuments();
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la récupération des documents.", e);
         }
@@ -29,7 +33,7 @@ public class DocumentManager {
             throw new BusinessException("L'identifiant du document doit être un nombre positif.");
         }
         try {
-            return documentData.getDocument(id);
+            return documentDA.getDocument(id);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la récupération du document.", e);
         }
@@ -37,7 +41,7 @@ public class DocumentManager {
 
     public List<DocumentType> getDocumentTypes() throws BusinessException {
         try {
-            return documentData.getDocumentTypes();
+            return documentDA.getDocumentTypes();
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la récupération des types de documents.", e);
         }
@@ -48,7 +52,7 @@ public class DocumentManager {
             throw new BusinessException("Le type de document ne peut pas être nul.");
         }
         try {
-            documentData.addDocumentType(docType);
+            documentDA.addDocumentType(docType);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de l'ajout du type de document.", e);
         }
@@ -59,13 +63,13 @@ public class DocumentManager {
             throw new BusinessException("Le document ne peut pas être nul.");
         }
         try {
-            documentData.createDocument(document);
+            documentDA.createDocument(document);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la création du document.", e);
         }
     }
 
-    public void receiveDelivery(int documentId, LocalDate date) throws BusinessException {
+    public void receiveDelivery(int documentId, LocalDate date, LocationProduct locationProduct) throws BusinessException {
         if (documentId <= 0) {
             throw new BusinessException("L'identifiant du document doit être un nombre positif.");
         }
@@ -76,13 +80,13 @@ public class DocumentManager {
             throw new BusinessException("La date de livraison ne peut pas être dans le futur.");
         }
         try {
-            documentData.receiveDelivery(documentId, date);
+            documentDA.receiveDelivery(documentId, date, locationProduct);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la réception de la livraison.", e);
         }
     }
 
-    public void sendDelivery(int documentId, LocalDate date) throws BusinessException {
+    public void sendDelivery(int documentId, LocalDate date, LocationProduct locationProduct) throws BusinessException {
         if (documentId <= 0) {
             throw new BusinessException("L'identifiant du document doit être un nombre positif.");
         }
@@ -94,10 +98,10 @@ public class DocumentManager {
         }
         try {
             // Règle métier — vérifier que le document existe avant d'envoyer la livraison
-            if (!documentData.documentExists(documentId)) {
+            if (!documentDA.documentExists(documentId)) {
                 throw new BusinessException("Le document avec l'identifiant spécifié n'existe pas.");
             }
-            documentData.sendDelivery(documentId, date);
+            documentDA.sendDelivery(documentId, date, locationProduct);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de l'envoi de la livraison.", e);
         }
@@ -108,10 +112,10 @@ public class DocumentManager {
             throw new BusinessException("L'identifiant du document doit être un nombre positif.");
         }
         try {
-            if (!documentData.documentExists(documentId)) {
+            if (!documentDA.documentExists(documentId)) {
                 throw new BusinessException("Le document n'existe pas.");
             }
-            documentData.deleteDocument(documentId);
+            documentDA.deleteDocument(documentId);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la suppression.", e);
         }
@@ -119,7 +123,7 @@ public class DocumentManager {
 
     public List<Document> getDeliveryOrders() throws BusinessException {
         try {
-            return documentData.getDeliveryOrders();
+            return documentDA.getDeliveryOrders();
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la récupération des commandes de livraison.", e);
         }

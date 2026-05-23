@@ -27,7 +27,7 @@ public class StockManager {
         }
     }
 
-    public void addToStocks(int productID, int quantity, Location storeLocation) throws BusinessException {
+    public void addToStocks(int productID, int quantity, LocationProduct storeLocation) throws BusinessException {
         if (productID <= 0) {
             throw new BusinessException("L'identifiant du produit est invalide.");
         }
@@ -44,7 +44,7 @@ public class StockManager {
         }
     }
 
-    public void subtractFromStock(int productID, int quantity, Location storeLocation) throws BusinessException {
+    public void subtractFromStock(int productID, int quantity, LocationProduct storeLocation) throws BusinessException {
         if (productID <= 0) {
             throw new BusinessException("L'identifiant du produit est invalide.");
         }

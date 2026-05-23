@@ -105,6 +105,7 @@ public class WorkFlow implements Model {
 
     public void addDocument(Document doc) {
         documents.addDocument(doc);
+        doc.setWorkFlow(this);
     }
 
     public String getLabel() {

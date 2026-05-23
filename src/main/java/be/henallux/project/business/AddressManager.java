@@ -8,15 +8,15 @@ import java.util.List;
 
 public class AddressManager {
     
-    private final AddressData addressData;
+    private final AddressDA addressDA;
 
-    public AddressManager(AddressData addressData) {
-        this.addressData = addressData;
+    public AddressManager(AddressDA addressDA) {
+        this.addressDA = addressDA;
     }
 
     public List<Address> getAllAddresses() throws BusinessException {
         try {
-            return addressData.getAllAddresses();
+            return addressDA.getAll();
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la récupération des adresses.", e);
         }
@@ -31,12 +31,12 @@ public class AddressManager {
             throw new BusinessException("La rue de l'adresse est obligatoire.");
         }
         try {
-            addressData.createAddress(address);
+            addressDA.insert(address);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la création de l'adresse.", e);
         }
     }
-
+/*/
     public void createLocality(Locality locality) throws BusinessException {
         if (locality == null) {
             throw new BusinessException("La localité ne peut pas être nulle.");
@@ -45,7 +45,7 @@ public class AddressManager {
             throw new BusinessException("Le code postal est obligatoire.");
         }
         try {
-            addressData.createLocality(locality);
+            addressDA.createLocality(locality);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la création de la localité.", e);
         }
@@ -57,12 +57,13 @@ public class AddressManager {
         }
         try {
             // Règle métier — vérifier que l'adresse existe avant de la supprimer
-            if (!addressData.addressExists(address)) {
+            if (!addressDA.addressExists(address)) {
                 throw new BusinessException("L'adresse n'existe pas.");
             }
-            addressData.deleteAddress(address);
+            addressDA.deleteAddress(address);
         } catch (DataBaseException e) {
             throw new BusinessException("Erreur lors de la suppression de l'adresse.", e);
         }
     }
+*/
 }

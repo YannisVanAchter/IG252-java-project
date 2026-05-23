@@ -202,7 +202,7 @@ public class LocalityDA extends CRUD<Locality> {
 
     public boolean checkExist(Locality l) throws DataBaseException {
         boolean exist = false;
-        if (l == null) {
+        if (l != null) {
             String SQLInstruction = "SELECT COUNT(*) as nbLocality FROM " + TABLE_NAME + " WHERE postalId=? AND city=?;";
 
             Connection c = MySQLConnection.getInstance().getConnection();
@@ -214,9 +214,11 @@ public class LocalityDA extends CRUD<Locality> {
 
                 ResultSet result = statement.executeQuery();
 
-                if ( !result.next() )
+                if (!result.next()) {
                     insert(l);
+                }                
                 exist = true;
+                
             } catch (SQLException e) {
                 throw new DataBaseException("Check imposible", e);
             }

@@ -7,18 +7,19 @@ import main.java.be.henallux.project.model.*;
 import java.util.List;
 
 public class ProductSearchManager {
-    private String name;
-    private String category;
-    private Boolean discount;
+    private final String name;
+    private final String category;
+    private final Boolean discount;
+    private final ProductData productData;
 
     public ProductSearchManager(String name, String category, Boolean discount) {
         this.name = name;
         this.category = category;
         this.discount = discount;
+        this.productData = new ProductData();
     }
 
     public List<Product> searchProducts() throws BusinessException {
-        ProductData productData = new ProductData();
         try {
             return productData.search(this.name, this.category, this.discount);
         } catch (DataBaseException e) {
