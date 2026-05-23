@@ -2,10 +2,9 @@ package main.java.be.henallux.project.business;
 
 import main.java.be.henallux.project.data.*;
 import main.java.be.henallux.project.data.exception.DataBaseException;
+import main.java.be.henallux.project.business.exception.BusinessException;
 import main.java.be.henallux.project.model.*;
 import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
 
 public class ClientSupplierSearchManager {
     private String name;
@@ -18,7 +17,7 @@ public class ClientSupplierSearchManager {
         this.fidelityValid = fidelityValid;
     }
 
-    public List<ClientSupplier> search() throws DataBaseException {
+    public List<ClientSupplier> search() throws BusinessException {
         ClientSupplierData data = new ClientSupplierData();
         return data.search(name, email, fidelityValid);
     }

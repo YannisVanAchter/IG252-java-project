@@ -219,6 +219,7 @@ public class LocalityDA extends  CRUD<Locality> {
                 if ( !result.next() )
                     insert(locality);
                 exist = true;
+                
             } catch (SQLException e) {
                 throw new DataBaseException("Check imposible", e);
             }
