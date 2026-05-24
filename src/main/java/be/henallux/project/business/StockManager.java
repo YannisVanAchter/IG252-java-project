@@ -3,6 +3,7 @@ package main.java.be.henallux.project.business;
 import main.java.be.henallux.project.data.StockDA;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.business.exception.BusinessException;
+
 import main.java.be.henallux.project.model.LocationProduct;
 import main.java.be.henallux.project.model.Product;
 import java.util.List;
@@ -17,9 +18,6 @@ public class StockManager {
     public void addStockLocation(LocationProduct location) throws BusinessException {
         if (location == null) {
             throw new BusinessException("The location cannot be null.");
-        }
-        if (location.getName() == null || location.getName().isBlank()) {
-            throw new BusinessException("The location name cannot be null or blank.");
         }
         try {
             stockDA.addStockLocation(location);

@@ -6,16 +6,15 @@ import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.business.exception.BusinessException;
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.Address;
+import main.java.be.henallux.project.model.Product;
 import java.util.List;
 
 public abstract class ClientSupplierManager {
 
     protected final ClientSupplierDA clientSupplierDA;
-    private final AddressManager addressManager;
 
-    public ClientSupplierManager(ClientSupplierDA clientSupplierDA, AddressManager addressManager) {
-        this.clientSupplierDA = clientSupplierDA;
-        this.addressManager = addressManager;
+    public ClientSupplierManager() {
+        this.clientSupplierDA = ClientSupplierDA.getInstance();
     }
     
     public List<ClientSupplier> getAllClientSuppliers() throws BusinessException {
@@ -64,7 +63,7 @@ public abstract class ClientSupplierManager {
             throw new BusinessException("The address cannot be null.");
         }
         try {
-            addressManager.changeAddress(id, address);
+            clientSupplierDA.changeAddress(id, address);
         } catch (DataBaseException e) {
             throw new BusinessException("Error changing the address.", e);
         }

@@ -1,11 +1,11 @@
-package be.henallux.project.business;
+package main.java.be.henallux.project.business;
 
-import be.henallux.project.data.AddressDA;
-import be.henallux.project.data.exception.DataBaseException;
-import be.henallux.project.business.exception.BusinessException;
-import be.henallux.project.model.Address;
-import be.henallux.project.model.Locality;
-import be.henallux.project.model.exception.DataValidationException;
+import main.java.be.henallux.project.data.AddressDA;
+import main.java.be.henallux.project.data.exception.DataBaseException;
+import main.java.be.henallux.project.business.exception.BusinessException;
+import main.java.be.henallux.project.model.Address;
+import main.java.be.henallux.project.model.Locality;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 import java.util.List;
 
 public class AddressManager {
@@ -29,8 +29,8 @@ public class AddressManager {
         if (address == null) {
             throw new BusinessException("Error: Address cannot be null.");
         }
-        if (address.getStreet() == null || address.getStreet().isBlank()) {
-            throw new BusinessException("Error: Street is required.");
+        if (address.getStreetName() == null || address.getStreetName().isBlank()) {
+            throw new BusinessException("Error: Street name is required.");
         }
         try {
             addressDA.insert(address);

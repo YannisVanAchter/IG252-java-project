@@ -1,12 +1,13 @@
-package be.henallux.project.business;
+package main.java.be.henallux.project.business;
 
-import be.henallux.project.data.FidelityCardDA;
-import be.henallux.project.data.CheckoutDA;
-import be.henallux.project.data.DocumentDA;
-import be.henallux.project.data.exception.DataBaseException;
-import be.henallux.project.business.exception.BusinessException;
-import be.henallux.project.model.Product;
-import be.henallux.project.model.FidelityCard;
+import main.java.be.henallux.project.data.FidelityCardDA;
+import main.java.be.henallux.project.data.CheckoutDA;
+import main.java.be.henallux.project.data.DocumentDA;
+import main.java.be.henallux.project.data.exception.DataBaseException;
+import main.java.be.henallux.project.business.exception.BusinessException;
+import main.java.be.henallux.project.model.Product;
+import main.java.be.henallux.project.model.FidelityCard;
+import main.java.be.henallux.project.model.ClientSupplier;
 import java.util.List;
 public class ClientManager extends ClientSupplierManager {
 
@@ -15,7 +16,7 @@ public class ClientManager extends ClientSupplierManager {
     private final DocumentDA documentDA;
     
     public ClientManager() {
-        super(ClientSupplierDA.getInstance(), AddressManager.getInstance());
+        super();
         this.fidelityCardDA = FidelityCardDA.getInstance();
         this.checkoutDA = CheckoutDA.getInstance();
         this.documentDA = DocumentDA.getInstance();
@@ -119,7 +120,7 @@ public class ClientManager extends ClientSupplierManager {
             if (fidelityCardDA.hasFidelityCard(clientId)) {
                 fidelityCardDA.deleteFidelityCard(clientId);
             }
-            super.deleteClientAccount(clientId);
+            super.deleteClientSupplier(clientId);
         } catch (DataBaseException e) {
             throw new BusinessException("Error: Failed to delete client account.", e);
         }
@@ -135,7 +136,7 @@ public class ClientManager extends ClientSupplierManager {
                 throw new BusinessException("Error: This loyalty card does not belong to the specified client.");
             }
             fidelityCardDA.deleteFidelityCard(clientId);
-            super.deleteClientAccount(clientId, cardId);
+            super.deleteClientSupplier(clientId, cardId);
         } catch (DataBaseException e) {
             throw new BusinessException("Error: Failed to delete client account.", e);
         }

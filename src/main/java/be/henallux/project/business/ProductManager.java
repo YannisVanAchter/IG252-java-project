@@ -3,6 +3,7 @@ package main.java.be.henallux.project.business;
 import main.java.be.henallux.project.business.exception.BusinessException;
 import main.java.be.henallux.project.data.ProductDA;
 import main.java.be.henallux.project.data.exception.DataBaseException;
+
 import main.java.be.henallux.project.model.Product;
 import main.java.be.henallux.project.model.ProductCategory;
 import main.java.be.henallux.project.model.Discount;
@@ -33,7 +34,7 @@ public class ProductManager {
         }
         try {
             Product product = productDA.getProduct(productID);
-            // Règle métier
+            // Business rule — check that the product exists before returning it
             if (product == null) {
                 throw new BusinessException("The product does not exist.");
             }
@@ -62,7 +63,7 @@ public class ProductManager {
         if (product.getPrice() < 0) {
             throw new BusinessException("The product price cannot be negative.");
         }
-        if (product.getVAT() < 0 || product.getVAT() > 100) {
+        if ((product.getVat().compareTo(java.math.BigDecimal.ZERO) == -1) || (product.getVat().compareTo(new java.math.BigDecimal("100")) == 1)) {
             throw new BusinessException("The VAT must be between 0 and 100.");
         }
         try {
@@ -92,7 +93,7 @@ public class ProductManager {
         if (productID <= 0) {
             throw new BusinessException("The product ID is invalid.");
         }
-        // Règle métier
+        // Business rule — check that the VAT is within the valid range
         if (VAT < 0 || VAT > 100) {
             throw new BusinessException("The VAT must be between 0 and 100.");
         }
@@ -139,7 +140,7 @@ public class ProductManager {
             throw new BusinessException("The product ID is invalid.");
         }
         try {
-            // Règle métier — vérifier que le produit existe avant de le supprimer
+            // Business rule — check that the product exists before deleting it
             if (productDA.getProduct(productID) == null) {
                 throw new BusinessException("The product does not exist.");
             }
@@ -166,8 +167,8 @@ public class ProductManager {
         if (discount == null) {
             throw new BusinessException("The discount cannot be null.");
         }
-        // Règle métier
-        if (discount.getPercentage() <= 0 || discount.getPercentage() > 100) {
+        // Business rule — check that the discount percentage is within the valid range
+        if ((discount.getDiscountPercentage().compareTo(java.math.BigDecimal.ZERO) == -1) || (discount.getDiscountPercentage().compareTo(new java.math.BigDecimal("100")) == 1)) {
             throw new BusinessException("The discount percentage must be between 1 and 100.");
         }
         if (discount.getStartDate().isAfter(discount.getEndDate())) {

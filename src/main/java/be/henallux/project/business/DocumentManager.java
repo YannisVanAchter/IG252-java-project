@@ -8,7 +8,7 @@ import main.java.be.henallux.project.model.Document;
 import main.java.be.henallux.project.model.DocumentType;
 import main.java.be.henallux.project.model.LocationProduct;
 import main.java.be.henallux.project.model.Product;
-import main.java.be.henallux.project.model.DetailDocument;
+import main.java.be.henallux.project.model.DocumentDetails;
 import main.java.be.henallux.project.model.Recipe;
 import main.java.be.henallux.project.model.WorkFlow;
 import main.java.be.henallux.project.model.Address;
@@ -105,7 +105,7 @@ public class DocumentManager {
             throw new BusinessException("The delivery date cannot be in the future.");
         }
         try {
-            // Règle métier — vérifier que le document existe avant d'envoyer la livraison
+            // Business rule — check that the document exists before sending the delivery
             if (!documentDA.documentExists(documentId)) {
                 throw new BusinessException("The document with the specified ID does not exist.");
             }

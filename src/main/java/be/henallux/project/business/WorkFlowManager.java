@@ -81,7 +81,6 @@ public class WorkFlowManager {
             for (Document doc : workFlow.getDocuments()) {
                 documentManager.createDocument(doc);
                 workFlowDA.addWorkFlow(workFlow);
-    // changez cela en fonction de la manière dont vous gérez les IDs des flux de travail et des documents
             }
         } catch (DataBaseException e) {
             throw new BusinessException("Error when adding the workflow.", e);

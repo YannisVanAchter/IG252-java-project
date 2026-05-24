@@ -1,9 +1,9 @@
 package main.java.be.henallux.project.business;
 
-import main.java.be.henallux.project.data.*;
+import main.java.be.henallux.project.data.ClientSupplierDA;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.model.*;
+import main.java.be.henallux.project.model.ClientSupplier;
 import java.util.List;
 
 public class ClientSupplierSearchManager {

@@ -1,6 +1,7 @@
 package main.java.be.henallux.project.business;
 
 import main.java.be.henallux.project.data.ProductDA;
+import main.java.be.henallux.project.data.ClientSupplierDA;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.business.exception.BusinessException;
 
@@ -13,7 +14,6 @@ import main.java.be.henallux.project.model.ProductCategory;
 import main.java.be.henallux.project.model.Recipe;
 import main.java.be.henallux.project.model.RecipeComposition;
 
-import java.lang.foreign.AddressLayout;
 import java.util.List;
 
 public class SupplierManager extends ClientSupplierManager {
@@ -48,7 +48,7 @@ public class SupplierManager extends ClientSupplierManager {
             throw new BusinessException("The VAT number is required.");
         }
         try {
-            clientSupplierData.changeVATNumber(supplierId, VATNumber);
+            clientSupplierDA.changeVATNumber(supplierId, VATNumber);
         } catch (DataBaseException e) {
             throw new BusinessException("Error when changing the VAT number.", e);
         }
@@ -63,7 +63,7 @@ public class SupplierManager extends ClientSupplierManager {
             throw new BusinessException("The list of products is required.");
         }
         try {
-            // logique commande fournisseur
+            // ? What to do ?
         } catch (DataBaseException e) {
             throw new BusinessException("Error when placing the order.", e);
         }

@@ -3,8 +3,9 @@ package main.java.be.henallux.project.business;
 import main.java.be.henallux.project.data.ProductDA;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.business.exception.BusinessException;
+
 import main.java.be.henallux.project.model.Product;
-import main.java.be.henallux.project.model.Category;
+import main.java.be.henallux.project.model.ProductCategory;
 import main.java.be.henallux.project.model.Discount;
 import java.util.List;
 
