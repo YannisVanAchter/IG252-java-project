@@ -1,12 +1,12 @@
-package be.henallux.project.business;
-import be.henallux.project.data.WorkFlowDA;
-import be.henallux.project.data.exception.DataBaseException;
-import be.henallux.project.business.exception.BusinessException;
+package main.java.be.henallux.project.business;
+import main.java.be.henallux.project.data.WorkFlowDA;
+import main.java.be.henallux.project.data.exception.DataBaseException;
+import main.java.be.henallux.project.business.exception.BusinessException;
 
-import be.henallux.project.model.WorkFlow;
-import be.henallux.project.model.Document;
-import be.henallux.project.model.WorkFlowType;
-import be.henallux.project.model.Status;
+import main.java.be.henallux.project.model.WorkFlow;
+import main.java.be.henallux.project.model.Document;
+import main.java.be.henallux.project.model.WorkFlowType;
+import main.java.be.henallux.project.model.Status;
 import java.util.List;
 
 public class WorkFlowManager {
