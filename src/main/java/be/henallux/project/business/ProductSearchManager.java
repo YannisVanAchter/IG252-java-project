@@ -1,29 +1,25 @@
 package main.java.be.henallux.project.business;
 
-import main.java.be.henallux.project.data.*;
+import main.java.be.henallux.project.data.ProductDA;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.model.*;
+import main.java.be.henallux.project.model.Product;
+import main.java.be.henallux.project.model.Category;
+import main.java.be.henallux.project.model.Discount;
 import java.util.List;
 
 public class ProductSearchManager {
-    private final String name;
-    private final String category;
-    private final Boolean discount;
-    private final ProductData productData;
+    private final ProductDA productDA;
 
-    public ProductSearchManager(String name, String category, Boolean discount) {
-        this.name = name;
-        this.category = category;
-        this.discount = discount;
-        this.productData = new ProductData();
+    public ProductSearchManager() {
+        this.productDA = ProductDA.getInstance();
     }
 
-    public List<Product> searchProducts() throws BusinessException {
+    public List<Product> searchProducts(String name, String category, Boolean discount) throws BusinessException {
         try {
-            return productData.search(this.name, this.category, this.discount);
+            return productDA.search(name, category, discount);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la recherche de produits.", e);
+            throw new BusinessException("Error while searching for products.", e);
         }
     }
 }

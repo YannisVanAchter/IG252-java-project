@@ -1,10 +1,12 @@
-package main.java.be.henallux.project.business;
+package be.henallux.project.business;
+import be.henallux.project.data.WorkFlowDA;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.business.exception.BusinessException;
 
-import main.java.be.henallux.project.data.*;
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.model.*;
-import main.java.be.henallux.project.model.Status;
+import be.henallux.project.model.WorkFlow;
+import be.henallux.project.model.Document;
+import be.henallux.project.model.WorkFlowType;
+import be.henallux.project.model.Status;
 import java.util.List;
 
 public class WorkFlowManager {
@@ -12,16 +14,16 @@ public class WorkFlowManager {
     private final WorkFlowDA workFlowDA;
     private final DocumentManager documentManager;
 
-    public WorkFlowManager(WorkFlowDA workFlowDA, DocumentManager documentManager) {
-        this.workFlowDA = workFlowDA;
-        this.documentManager = documentManager;
+    public WorkFlowManager() {
+        this.workFlowDA = WorkFlowDA.getInstance();
+        this.documentManager = new DocumentManager();
     }
     
     public List<WorkFlow> getAllWorkFlows() throws BusinessException {
         try {
             return workFlowDA.getAllWorkFlows();
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la récupération des flux de travail.", e);
+            throw new BusinessException("Error when retrieving the workflows.", e);
         }
     }
 
@@ -29,7 +31,7 @@ public class WorkFlowManager {
         try {
             return workFlowDA.getAllBuying();
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la récupération des flux d'achat.", e);
+            throw new BusinessException("Error when retrieving the buying workflows.", e);
         }
     }
 
@@ -37,7 +39,7 @@ public class WorkFlowManager {
         try {
             return workFlowDA.getAllInternal();
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la récupération des flux internes.", e);
+            throw new BusinessException("Error when retrieving the internal workflows.", e);
         }
     }
 
@@ -45,7 +47,7 @@ public class WorkFlowManager {
         try {
             return workFlowDA.getAllSelling();
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la récupération des flux de vente.", e);
+            throw new BusinessException("Error when retrieving the selling workflows.", e);
         }
     }
 
@@ -53,25 +55,25 @@ public class WorkFlowManager {
         try {
             return workFlowDA.getWorkFlowType();
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la récupération des types de flux.", e);
+            throw new BusinessException("Error when retrieving the workflow types.", e);
         }
     }
 
     public void addWorkFlowType(WorkFlowType workFlowType) throws BusinessException {
         if (workFlowType == null) {
-            throw new BusinessException("Le type de flux ne peut pas être nul.");
+            throw new BusinessException("The workflow type cannot be null.");
         }
         
         try {
             workFlowDA.addWorkFlowType(workFlowType);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de l'ajout du type de flux.", e);
+            throw new BusinessException("Error when adding the workflow type.", e);
         }
     }
 
     public void addWorkFlow(WorkFlow workFlow) throws BusinessException {
         if (workFlow == null) {
-            throw new BusinessException("Le flux de travail ne peut pas être nul.");
+            throw new BusinessException("The workflow cannot be null.");
         }
 
         try {
@@ -82,37 +84,37 @@ public class WorkFlowManager {
     // changez cela en fonction de la manière dont vous gérez les IDs des flux de travail et des documents
             }
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de l'ajout du flux de travail.", e);
+            throw new BusinessException("Error when adding the workflow.", e);
         }
     }
 
     public void changeStatus(int workFlowId, Status status) throws BusinessException {
         
         if (workFlowId <= 0) {
-            throw new BusinessException("L'identifiant du flux doit être positif.");
+            throw new BusinessException("The workflow ID must be a positive number.");
         }
         if (status == null) {
-            throw new BusinessException("Le statut ne peut pas être nul.");
+            throw new BusinessException("The status cannot be null.");
         }
         try {
             workFlowDA.changeStatus(workFlowId, status);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors du changement de statut.", e);
+            throw new BusinessException("Error when changing the status.", e);
         }
     }
     public void addDocument(int workFlowId, Document document) throws BusinessException {
         if (document == null) {
-                throw new BusinessException("Le document ne peut pas être nul.");
+                throw new BusinessException("The document cannot be null.");
         }
         if (workFlowId <= 0) {
-            throw new BusinessException("L'identifiant du flux de travail doit être un nombre positif.");
+            throw new BusinessException("The workflow ID must be a positive number.");
         }
 
         try {
             documentManager.createDocument(document);
             workFlowDA.addDocument(workFlowId, document);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de l'ajout du document.", e);
+            throw new BusinessException("Error when adding the document.", e);
         }
     }
 }

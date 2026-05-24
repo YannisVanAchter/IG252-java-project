@@ -125,10 +125,10 @@ package business {
     }
 
     class StockManager {
-        +addStockLocation(Location: Location): void
+        +addStockLocation(location: LocationProduct): void
         +addToStocks(productID: int, quantity: int, storeLocation: LocationProduct): void
         +subtractFromStock(productID: int, quantity: int, storeLocation: LocationProduct): void
-        +deleteStockLocation(location: Location): void
+        +deleteStockLocation(location: LocationProduct): void
         +getAllShortSuppliedProducts(): List<Product>
     }
 

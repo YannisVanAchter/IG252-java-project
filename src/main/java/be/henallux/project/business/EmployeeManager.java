@@ -1,98 +1,103 @@
+/*
 package main.java.be.henallux.project.business;
 
-import main.java.be.henallux.project.data.*;
+import main.java.be.henallux.project.data.EmployeeDA;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.model.*;
+import main.java.be.henallux.project.model.Employee;
+import main.java.be.henallux.project.model.Address;
+import main.java.be.henallux.project.model.Position;
+import main.java.be.henallux.project.model.NonAttendanceType;
+import java.time.LocalDate;
 import java.util.List;
 
 public class EmployeeManager {
 
-    private final EmployeeDataAccess employeeDataAccess;
+    private final EmployeeDA employeeDA;
 
-    public EmployeeManager(EmployeeDataAccess employeeDataAccess) {
-        this.employeeDataAccess = employeeDataAccess;
+    public EmployeeManager() {
+        this.employeeDA = EmployeeDA.getInstance();
     }
 
     public List<Employee> getAllEmployees() throws BusinessException {
         try {
-            return employeeDataAccess.getAllEmployees();
+            return employeeDA.getAllEmployees();
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la récupération des employés.", e);
+            throw new BusinessException("Error when retrieving employees.", e);
         }
     }
 
     public Employee getEmployee(int employeeID) throws BusinessException {
         try {
-            return employeeDataAccess.getEmployee(employeeID);
+            return employeeDA.getEmployee(employeeID);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la récupération de l'employé.", e);
+            throw new BusinessException("Error when retrieving the employee.", e);
         }
     }
 
     public void changeAddress(int employeeID, Address address) throws BusinessException {
         if (address == null) {
-            throw new BusinessException("L'adresse ne peut pas être nulle.");
+            throw new BusinessException("The address cannot be null.");
         }
         try {
-            employeeDataAccess.changeAddress(employeeID, address);
+            employeeDA.changeAddress(employeeID, address);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors du changement d'adresse.", e);
+            throw new BusinessException("Error when changing the address.", e);
         }
     }
 
     public void changePassword(int employeeID, String password) throws BusinessException {
         if (password == null || password.isBlank()) {
-            throw new BusinessException("Le mot de passe ne peut pas être nul ou vide.");
+            throw new BusinessException("The password cannot be null or empty.");
         }
         try {
-            employeeDataAccess.changePassword(employeeID, password);
+            employeeDA.changePassword(employeeID, password);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors du changement de mot de passe.", e);
+            throw new BusinessException("Error when changing the password.", e);
         }
     }
 
     public void changeManager(int employeeID, Employee employee) throws BusinessException {
         if (employee == null) {
-            throw new BusinessException("L'employé ne peut pas être nul.");
+            throw new BusinessException("The employee cannot be null.");
         }
         try {
-            employeeDataAccess.changeManager(employeeID, employee);
+            employeeDA.changeManager(employeeID, employee);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors du changement de manager.", e);
+            throw new BusinessException("Error when changing the manager.", e);
         }
     }
 
     public void changeBankAccount(int employeeID, String IBAN) throws BusinessException {
         if (IBAN == null || IBAN.isBlank()) {
-            throw new BusinessException("Le IBAN ne peut pas être nul ou vide.");
+            throw new BusinessException("The IBAN cannot be null or empty.");
         }
         try {
-            employeeDataAccess.changeBankAccount(employeeID, IBAN);
+            employeeDA.changeBankAccount(employeeID, IBAN);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors du changement de compte bancaire.", e);
+            throw new BusinessException("Error when changing the bank account.", e);
         }
     }
 
     public void changeHoursSalary(int employeeID, double Salary) throws BusinessException {
         if (Salary <= 0) {
-            throw new BusinessException("Le salaire horaire doit être un nombre positif.");
+            throw new BusinessException("The hourly salary must be a positive number.");
         }
         try {
-            employeeDataAccess.changeHoursSalary(employeeID, Salary);
+            employeeDA.changeHoursSalary(employeeID, Salary);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors du changement du salaire horaire.", e);
+            throw new BusinessException("Error when changing the hourly salary.", e);
         }
     }
 
     public void changeHalfDayBreak(int employeeID, int nbHalfDay) throws BusinessException {
         if (nbHalfDay < 0) {
-            throw new BusinessException("Le nombre de demi-journées de pause doit être un nombre positif.");
+            throw new BusinessException("The number of half-days off must be a positive number.");
         }
         try {
-            employeeDataAccess.changeHalfDayBreak(employeeID, nbHalfDay);
+            employeeDA.changeHalfDayBreak(employeeID, nbHalfDay);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors du changement du nombre de demi-journées de pause.", e);
+            throw new BusinessException("Error when changing the number of half-days off.", e);
         }
     }
 
@@ -100,74 +105,74 @@ public class EmployeeManager {
 
     public void assignPosition(int employeeID, Position position) throws BusinessException {
         if (position == null) {
-            throw new BusinessException("Le poste ne peut pas être nul.");
+            throw new BusinessException("The position cannot be null.");
         }
         try {
-            employeeDataAccess.assignPosition(employeeID, position);
+            employeeDA.assignPosition(employeeID, position);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de l'attribution du poste.", e);
+            throw new BusinessException("Error when assigning the position.", e);
         }
     }
 
     public void addPosition(Position position) throws BusinessException {
         if (position == null) {
-            throw new BusinessException("Le poste ne peut pas être nul.");
+            throw new BusinessException("The position cannot be null.");
         }
         try {
-            employeeDataAccess.addPosition(position);
+            employeeDA.addPosition(position);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de l'ajout du poste.", e);
+            throw new BusinessException("Error when adding the position.", e);
         }
     }
 
     public void revokePosition(int employeeID, Position position) throws BusinessException {
         if (position == null) {
-            throw new BusinessException("Le poste ne peut pas être nul.");
+            throw new BusinessException("The position cannot be null.");
         }
         try {
-            employeeDataAccess.revokePosition(employeeID, position);
+            employeeDA.revokePosition(employeeID, position);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors du retrait du poste.", e);
+            throw new BusinessException("Error when revoking the position.", e);
         }
     }
 
     public void checkIn(int employeeID) throws BusinessException {
         if (employeeID <= 0) {
-            throw new BusinessException("L'ID de l'employé doit être un nombre positif.");
+            throw new BusinessException("The employee ID must be a positive number.");
         }
         try {
-            if (employeeDataAccess.isCheckedIn(employeeID)) {
-                throw new BusinessException("L'employé est déjà enregistré comme présent.");
+            if (employeeDA.isCheckedIn(employeeID)) {
+                throw new BusinessException("The employee is already checked in.");
             }
-            employeeDataAccess.checkIn(employeeID);
+            employeeDA.checkIn(employeeID);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la validation de la présence.", e);
+            throw new BusinessException("Error when checking in the employee.", e);
         }
     }
 
     public void checkOut(int employeeID) throws BusinessException {
         if (employeeID <= 0) {
-            throw new BusinessException("L'ID de l'employé doit être un nombre positif.");
+            throw new BusinessException("The employee ID must be a positive number.");
         }
-        if (!employeeDataAccess.isCheckedIn(employeeID)) {
-            throw new BusinessException("L'employé n'est pas enregistré comme présent.");
+        if (!employeeDA.isCheckedIn(employeeID)) {
+            throw new BusinessException("The employee is not checked in.");
         }
         try {
-            employeeDataAccess.checkOut(employeeID);
+            employeeDA.checkOut(employeeID);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la validation du départ.", e);
+            throw new BusinessException("Error when checking out the employee.", e);
         }
     }
 
     private void validateNonAttendanceBase(int employeeID, NonAttendanceType type, String description) throws BusinessException {
         if (employeeID <= 0) {
-            throw new BusinessException("L'ID de l'employé doit être un nombre positif.");
+            throw new BusinessException("The employee ID must be a positive number.");
         }
         if (type == null) {
-            throw new BusinessException("Le type d'absence ne peut pas être nul.");
+            throw new BusinessException("The non-attendance type cannot be null.");
         }
         if (description == null || description.isBlank()) {
-            throw new BusinessException("La description ne peut pas être nulle ou vide.");
+            throw new BusinessException("The description cannot be null or blank.");
         }
     }
 
@@ -175,62 +180,63 @@ public class EmployeeManager {
     public void addNonAttendance(int employeeID, NonAttendanceType type, String description) throws BusinessException {
         validateNonAttendanceBase(employeeID, type, description);
         try {
-            employeeDataAccess.addNonAttendance(employeeID, type, description);
+            employeeDA.addNonAttendance(employeeID, type, description);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de l'ajout de l'absence.", e);
+            throw new BusinessException("Error when adding the non-attendance.", e);
         }
     }
 
     public void addNonAttendance(int employeeID, NonAttendanceType type, String description, LocalDate startDate) throws BusinessException {
         validateNonAttendanceBase(employeeID, type, description);
         if (startDate == null) {
-            throw new BusinessException("La date de début ne peut pas être nulle.");
+            throw new BusinessException("The start date cannot be null.");
         }
         try {
-            employeeDataAccess.addNonAttendance(employeeID, type, description, startDate);
+            employeeDA.addNonAttendance(employeeID, type, description, startDate);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de l'ajout de l'absence.", e);
+            throw new BusinessException("Error when adding the non-attendance.", e);
         }
     }
 
     public void addNonAttendance(int employeeID, NonAttendanceType type, String description, LocalDate startDate, LocalDate endDate) throws BusinessException {
         validateNonAttendanceBase(employeeID, type, description);
         if (startDate == null) {
-            throw new BusinessException("La date de début ne peut pas être nulle.");
+            throw new BusinessException("The start date cannot be null.");
         }
         if (endDate == null) {
-            throw new BusinessException("La date de fin ne peut pas être nulle.");
+            throw new BusinessException("The end date cannot be null.");
         }
         if (startDate.isAfter(endDate)) {
-            throw new BusinessException("La date de début doit être antérieure à la date de fin.");
+            throw new BusinessException("The start date must be before the end date.");
         }
         try {
-            employeeDataAccess.addNonAttendance(employeeID, type, description, startDate, endDate);
+            employeeDA.addNonAttendance(employeeID, type, description, startDate, endDate);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de l'ajout de l'absence.", e);
+            throw new BusinessException("Error when adding the non-attendance.", e);
         }
     }
 
     public void changeNonAttendance(int employeeID, LocalDate startDate, LocalDate endDate) throws BusinessException {
         if (employeeID <= 0) {
-            throw new BusinessException("L'ID de l'employé doit être un nombre positif.");
+            throw new BusinessException("The employee ID must be a positive number.");
         }
         if (startDate == null) {
-            throw new BusinessException("La date de début de l'absence ne peut pas être nulle.");
+            throw new BusinessException("The start date cannot be null.");
         }
         if (startDate.isAfter(endDate)) {
-            throw new BusinessException("La date de début doit être antérieure à la date de fin.");
+            throw new BusinessException("The start date must be before the end date.");
         }
         if (endDate == null) {
-            throw new BusinessException("La date de fin de l'absence ne peut pas être nulle.");
+            throw new BusinessException("The end date cannot be null.");
         }
         if (endDate.isBefore(startDate)) {
-            throw new BusinessException("La date de fin doit être postérieure à la date de début.");
+            throw new BusinessException("The end date must be after the start date.");
         }
         try {
-            employeeDataAccess.changeNonAttendance(employeeID, startDate, endDate);
+            employeeDA.changeNonAttendance(employeeID, startDate, endDate);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors du changement de l'absence.", e);
+            throw new BusinessException("Error when changing the non-attendance.", e);
         }
     }
 }
+*/

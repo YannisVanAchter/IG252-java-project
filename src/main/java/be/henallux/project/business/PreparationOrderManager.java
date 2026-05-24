@@ -1,61 +1,67 @@
 package main.java.be.henallux.project.business;
 
-import main.java.be.henallux.project.data.*;
+import main.java.be.henallux.project.data.RecipeDA;
+import main.java.be.henallux.project.data.DocumentDA;
+import main.java.be.henallux.project.data.StockDA;
+import main.java.be.henallux.project.data.ProductDA;
+
 import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.model.*;
+import main.java.be.henallux.project.model.Recipe;
+import main.java.be.henallux.project.model.Product;
+import javafx.util.Pair;
 import java.util.List;
 
 public class PreparationOrderManager extends DocumentManager {
 
 private final RecipeDA recipeDA;
 
-    public PreparationOrderManager(RecipeDA recipeDA, DocumentDA documentDA, ProductManager productManager, StockManager stockManager) {
-        super(documentDA, productManager, stockManager);
-        this.recipeDA = recipeDA;
+    public PreparationOrderManager() {
+        super();
+        this.recipeDA = RecipeDA.getInstance();
     }
 
     public List<Recipe> getAllRecipes() throws BusinessException {
         try {
             return recipeDA.getAllRecipes();
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la récupération des recettes.", e);
+            throw new BusinessException("Error when retrieving all recipes.", e);
         }
     }
 
     public Recipe getRecipe(String recipeName) throws BusinessException {
         if (recipeName == null || recipeName.isBlank()) {
-            throw new BusinessException("Le nom de la recette ne peut pas être vide.");
+            throw new BusinessException("The recipe name cannot be null or blank.");
         }
         try {
             return recipeDA.getRecipe(recipeName);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la récupération de la recette.", e);
+            throw new BusinessException("Error when retrieving the recipe.", e);
         }
     }
 
     public List<Pair<Product, Integer>> getIngredient(String recipeName) throws BusinessException {
         if (recipeName == null || recipeName.isBlank()) {
-            throw new BusinessException("Le nom de la recette ne peut pas être vide.");
+            throw new BusinessException("The recipe name cannot be null or blank.");
         }
         try {
             return recipeDA.getIngredient(recipeName);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la récupération des ingrédients.", e);
+            throw new BusinessException("Error when retrieving the ingredients.", e);
         }
     }
 
     public void createRecipe(Recipe recipe, List<Pair<Product, Integer>> ingredients) throws BusinessException {
         if (recipe == null) {
-            throw new BusinessException("La recette ne peut pas être nulle.");
+            throw new BusinessException("The recipe cannot be null.");
         }
         if (ingredients == null || ingredients.isEmpty()) {
-            throw new BusinessException("Les ingrédients ne peuvent pas être vides.");
+            throw new BusinessException("The ingredients cannot be null or empty.");
         }
         try {
             recipeDA.createRecipe(recipe, ingredients);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la création de la recette.", e);
+            throw new BusinessException("Error when creating the recipe.", e);
         }
     }
 }

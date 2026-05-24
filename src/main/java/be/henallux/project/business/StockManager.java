@@ -1,91 +1,92 @@
 package main.java.be.henallux.project.business;
 
-import main.java.be.henallux.project.data.*;
+import main.java.be.henallux.project.data.StockDA;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.model.*;
+import main.java.be.henallux.project.model.LocationProduct;
+import main.java.be.henallux.project.model.Product;
 import java.util.List;
 public class StockManager {
 
-    private final StockData stockData;
+    private final StockDA stockDA;
 
-    public StockManager(StockData stockData) {
-        this.stockData = stockData;
+    public StockManager() {
+        this.stockDA = StockDA.getInstance();
     }
 
-    public void addStockLocation(Location location) throws BusinessException {
+    public void addStockLocation(LocationProduct location) throws BusinessException {
         if (location == null) {
-            throw new BusinessException("L'emplacement ne peut pas être nul.");
+            throw new BusinessException("The location cannot be null.");
         }
         if (location.getName() == null || location.getName().isBlank()) {
-            throw new BusinessException("Le nom de l'emplacement ne peut pas être vide.");
+            throw new BusinessException("The location name cannot be null or blank.");
         }
         try {
-            stockData.addStockLocation(location);
+            stockDA.addStockLocation(location);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de l'ajout de l'emplacement.", e);
+            throw new BusinessException("Error occurred while adding stock location.", e);
         }
     }
 
     public void addToStocks(int productID, int quantity, LocationProduct storeLocation) throws BusinessException {
         if (productID <= 0) {
-            throw new BusinessException("L'identifiant du produit est invalide.");
+            throw new BusinessException("The product ID is invalid.");
         }
         if (quantity <= 0) {
-            throw new BusinessException("La quantité doit être positive.");
+            throw new BusinessException("The quantity must be positive.");
         }
         if (storeLocation == null) {
-            throw new BusinessException("L'emplacement de stockage est invalide.");
+            throw new BusinessException("The stock location is invalid.");
         }
         try {
-            stockData.addToStocks(productID, quantity, storeLocation);
+            stockDA.addToStocks(productID, quantity, storeLocation);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de l'ajout au stock.", e);
+            throw new BusinessException("Error occurred while adding to stock.", e);
         }
     }
 
     public void subtractFromStock(int productID, int quantity, LocationProduct storeLocation) throws BusinessException {
         if (productID <= 0) {
-            throw new BusinessException("L'identifiant du produit est invalide.");
+            throw new BusinessException("The product ID is invalid.");
         }
         if (quantity <= 0) {
-            throw new BusinessException("La quantité doit être positive.");
+            throw new BusinessException("The quantity must be positive.");
         }
         if (storeLocation == null) {
-            throw new BusinessException("L'emplacement de stockage est invalide.");
+            throw new BusinessException("The stock location is invalid.");
         }
         try {
-            // Règle métier — vérifier AVANT de soustraire
-            int currentStock = stockData.getStockLevel(productID, storeLocation);
+            // Business rule — check if there is enough stock before subtracting
+            int currentStock = stockDA.getStockLevel(productID, storeLocation);
             if (quantity > currentStock) {
-                throw new BusinessException("Stock insuffisant pour effectuer cette opération.");
+                throw new BusinessException("Insufficient stock to perform this operation.");
             }
-            stockData.subtractFromStock(productID, quantity, storeLocation);
+            stockDA.subtractFromStock(productID, quantity, storeLocation);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la soustraction du stock.", e);
+            throw new BusinessException("Error occurred while subtracting from stock.", e);
         }
     }
 
-    public void deleteStockLocation(Location location) throws BusinessException {
+    public void deleteStockLocation(LocationProduct location) throws BusinessException {
         if (location == null) {
-            throw new BusinessException("L'emplacement ne peut pas être nul.");
+            throw new BusinessException("The location cannot be null.");
         }
         try {
-            // Règle métier — vérifier que l'emplacement est vide avant suppression
-            if (stockData.hasProducts(location)) {
-                throw new BusinessException("Impossible de supprimer un emplacement contenant des produits.");
+            // Business rule — check if there are still products in this location before deleting
+            if (stockDA.hasProducts(location)) {
+                throw new BusinessException("Impossible to delete location because it still contains products.");
             }
-            stockData.deleteStockLocation(location);
+            stockDA.deleteStockLocation(location);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la suppression de l'emplacement.", e);
+            throw new BusinessException("Error occurred while deleting stock location.", e);
         }
     }
 
     public List<Product> getAllShortSuppliedProduct() throws BusinessException {
         try {
-            return stockData.getAllShortSuppliedProduct();
+            return stockDA.getAllShortSuppliedProduct();
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la récupération des produits en rupture.", e);
+            throw new BusinessException("Error occurred while retrieving out-of-stock products.", e);
         }
     }
 }

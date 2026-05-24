@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.model;
+package be.henallux.project.model;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.exception.DataValidationException;
 
 public class Product implements Model {
     private int id;

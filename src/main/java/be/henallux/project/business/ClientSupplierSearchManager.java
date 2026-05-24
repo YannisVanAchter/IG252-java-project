@@ -7,18 +7,13 @@ import main.java.be.henallux.project.model.*;
 import java.util.List;
 
 public class ClientSupplierSearchManager {
-    private String name;
-    private String email;
-    private Boolean fidelityValid;
+    private final ClientSupplierDA clientSupplierDA;
 
-    public ClientSupplierSearchManager(String name, String email, Boolean fidelityValid) {
-        this.name = name;
-        this.email = email;
-        this.fidelityValid = fidelityValid;
+    public ClientSupplierSearchManager() {
+        this.clientSupplierDA = ClientSupplierDA.getInstance();
     }
 
-    public List<ClientSupplier> search() throws BusinessException {
-        ClientSupplierData data = new ClientSupplierData();
-        return data.search(name, email, fidelityValid);
+    public List<ClientSupplier> search(String name, String email, Boolean fidelityValid) throws BusinessException {
+        return clientSupplierDA.search(name, email, fidelityValid);
     }
 }

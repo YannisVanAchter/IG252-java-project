@@ -1,20 +1,28 @@
 package main.java.be.henallux.project.business;
 
-import main.java.be.henallux.project.data.*;
+import main.java.be.henallux.project.data.ProductDA;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.model.*;
+
+import main.java.be.henallux.project.model.ClientSupplier;
+import main.java.be.henallux.project.model.Product;
+import main.java.be.henallux.project.model.LocationProduct;
+import main.java.be.henallux.project.model.Discount;
+import main.java.be.henallux.project.model.QuantityProduct;
+import main.java.be.henallux.project.model.ProductCategory;
+import main.java.be.henallux.project.model.Recipe;
+import main.java.be.henallux.project.model.RecipeComposition;
 
 import java.lang.foreign.AddressLayout;
 import java.util.List;
 
 public class SupplierManager extends ClientSupplierManager {
 
-    private final ProductData productData;
+    private final ProductDA productDA;
 
-    public SupplierManager(ClientSupplierData clientSupplierData, AddressManager addressManager, ProductData productData) {
-        super(clientSupplierData, addressManager);
-        this.productData = productData;
+    public SupplierManager() {
+        super();
+        this.productDA = ProductDA.getInstance();
     }
 
     public List<ClientSupplier> getAllSuppliers() throws BusinessException {
@@ -23,41 +31,41 @@ public class SupplierManager extends ClientSupplierManager {
 
     public List<Product> getAllProducts(int supplierId) throws BusinessException {
         if (supplierId <= 0) {
-            throw new BusinessException("L'identifiant du fournisseur doit être un nombre positif.");
+            throw new BusinessException("The supplier ID is invalid.");
         }
         try {
-            return productData.getAllProducts(supplierId);
+            return productDA.getAllProducts(supplierId);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la récupération des produits.", e);
+            throw new BusinessException("Error when retrieving the products.", e);
         }
     }
 
     public void changeVATNumber(int supplierId, String VATNumber) throws BusinessException {
         if (supplierId <= 0) {
-            throw new BusinessException("L'identifiant du fournisseur doit être un nombre positif.");
+            throw new BusinessException("The supplier ID is invalid.");
         }
         if (VATNumber == null || VATNumber.isBlank()) {
-            throw new BusinessException("Le numéro de TVA est obligatoire.");
+            throw new BusinessException("The VAT number is required.");
         }
         try {
             clientSupplierData.changeVATNumber(supplierId, VATNumber);
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors du changement du numéro de TVA.", e);
+            throw new BusinessException("Error when changing the VAT number.", e);
         }
     }
 
     @Override
     public void placeOrder(int clientSupplierId, List<Product> products) throws BusinessException {
         if (clientSupplierId <= 0) {
-            throw new BusinessException("L'identifiant du fournisseur doit être un nombre positif.");
+            throw new BusinessException("The supplier ID is invalid.");
         }
         if (products == null || products.isEmpty()) {
-            throw new BusinessException("La liste des produits est obligatoire.");
+            throw new BusinessException("The list of products is required.");
         }
         try {
             // logique commande fournisseur
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la passation de commande.", e);
+            throw new BusinessException("Error when placing the order.", e);
         }
     }
 }
