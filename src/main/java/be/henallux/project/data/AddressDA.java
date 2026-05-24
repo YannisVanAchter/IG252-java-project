@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.List;
 
 import main.java.be.henallux.project.data.exception.DataBaseException;
+import main.java.be.henallux.project.data.exception.DataValidationException;
 import main.java.be.henallux.project.model.Address;
 import main.java.be.henallux.project.model.Locality;
 
@@ -139,7 +140,7 @@ public class AddressDA extends CRUD<Address> {
         return addresse;
     }
 
-    public Address getById(int id) throws  DataBaseExcepiton {
+    public Address getById(int id) throws  DataBaseException {
         return getById(id, true);
     }
 
