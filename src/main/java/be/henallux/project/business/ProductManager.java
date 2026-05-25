@@ -182,13 +182,13 @@ public class ProductManager {
         }
     }
 
-    public void deleteDiscount(int discountID) throws BusinessException {
+    public void deleteDiscount(Discount discount) throws BusinessException {
         // Validation
-        if (discountID <= 0) {
-            throw new BusinessException("The discount ID is invalid.");
+        if (discount == null) {
+            throw new BusinessException("The discount cannot be null.");
         }
         try {
-            productDA.deleteDiscount(discountID);
+            productDA.deleteDiscount(discount);
         } catch (DataBaseException e) {
             throw new BusinessException("Error when deleting the discount.", e);
         }

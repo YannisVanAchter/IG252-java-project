@@ -14,9 +14,9 @@ public class ClientSupplierSearchManager {
         this.clientSupplierDA = ClientSupplierDA.getInstance();
     }
 
-    public List<ClientSupplier> search(String name, String email, FidelityCard fidelityCard) throws BusinessException {
+    public List<ClientSupplier> search(String name, String email, String fidelityCardNb) throws BusinessException {
         try {
-            return clientSupplierDA.searchInDataBase(name, email, fidelityCard);
+            return clientSupplierDA.searchInDataBase(name, email, fidelityCardNb);
         } catch (DataBaseException e) {
             throw new BusinessException("Error while searching for client/supplier", e);
         }

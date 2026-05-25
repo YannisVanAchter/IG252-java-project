@@ -26,6 +26,17 @@ public class ClientManager extends ClientSupplierManager {
         return getAllClientSuppliers();
     }
 
+    public List<ClientSupplier> getClientByCardID (int cardId) throws BusinessException {
+        if (cardId <= 0) {
+            throw new BusinessException("The card ID is invalid.");
+        }
+        try {
+            return clientSupplierDA.getClientByCardID(cardId);
+        } catch (DataBaseException e) {
+            throw new BusinessException("Error retrieving the client by card ID.", e);
+        }
+    }
+
     public void createFidelityCard(int clientId) throws BusinessException {
         // Validation
         if (clientId <= 0) {

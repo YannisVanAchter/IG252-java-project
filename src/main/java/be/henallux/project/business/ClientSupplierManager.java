@@ -41,7 +41,7 @@ public abstract class ClientSupplierManager {
         }
     }
 
-    public void createClientSupplier(ClientSupplier clientSupplier) throws BusinessException {
+    public ClientSupplier createClientSupplier(ClientSupplier clientSupplier) throws BusinessException {
         if (clientSupplier == null) {
             throw new BusinessException("The client supplier cannot be null.");
         }        
@@ -50,7 +50,7 @@ public abstract class ClientSupplierManager {
         }
         try {
             // TODO - confirm return object of create method
-            clientSupplierDA.createClientSupplier(clientSupplier);
+            return clientSupplierDA.createClientSupplier(clientSupplier);
         } catch (DataBaseException e) {
             throw new BusinessException("Error creating the client supplier.", e);
         }
