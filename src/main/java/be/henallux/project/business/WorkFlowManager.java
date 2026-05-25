@@ -77,10 +77,12 @@ public class WorkFlowManager {
         }
 
         try {
+            // TODO - confirm return object of create method
             workFlowDA.addWorkFlow(workFlow);
             for (Document doc : workFlow.getDocuments()) {
+                // TODO - confirm if document must be created or has been created before adding to workflow
+                // TODO - confirm return object of create method
                 documentManager.createDocument(doc);
-                workFlowDA.addWorkFlow(workFlow);
             }
         } catch (DataBaseException e) {
             throw new BusinessException("Error when adding the workflow.", e);
@@ -110,6 +112,7 @@ public class WorkFlowManager {
         }
 
         try {
+            // TODO - confirm return object of create method
             documentManager.createDocument(document);
             workFlowDA.addDocument(workFlowId, document);
         } catch (DataBaseException e) {

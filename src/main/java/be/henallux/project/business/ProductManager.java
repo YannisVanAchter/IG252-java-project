@@ -67,6 +67,7 @@ public class ProductManager {
             throw new BusinessException("The VAT must be between 0 and 100.");
         }
         try {
+            // TODO - confirm return object of create method
             productDA.createProduct(product);
         } catch (DataBaseException e) {
             throw new BusinessException("Error when creating the product.", e);

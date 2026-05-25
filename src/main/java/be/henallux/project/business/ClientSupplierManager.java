@@ -49,6 +49,7 @@ public abstract class ClientSupplierManager {
             throw new BusinessException("The client supplier name is required.");
         }
         try {
+            // TODO - confirm return object of create method
             clientSupplierDA.createClientSupplier(clientSupplier);
         } catch (DataBaseException e) {
             throw new BusinessException("Error creating the client supplier.", e);

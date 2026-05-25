@@ -18,9 +18,9 @@ public class RecipeSearchManager {
         this.recipeDA = RecipeDA.getInstance();
     }
 
-    public List<Recipe> searchRecipes(String name, String product) throws BusinessException {
+    public List<Recipe> searchRecipes(String name, List<Product> products) throws BusinessException {
         try {
-            return recipeDA.searchRecipes(name, product);
+            return recipeDA.searchRecipes(name, products);
         } catch (DataBaseException e) {
             throw new BusinessException("Error occurred while searching for recipes.", e);
         }

@@ -66,14 +66,44 @@ public class DocumentManager {
         }
     }
 
-    public void createDocument(Document document) throws BusinessException {
+    public Document createDocument(Document document) throws BusinessException {
         if (document == null) {
             throw new BusinessException("The document cannot be null.");
         }
         try {
-            documentDA.createDocument(document);
+            // TODO - confirm return object of create method
+            Document newDoc = documentDA.createDocument(document);
+            return newDoc;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when creating the document.", e);
+        }
+    }
+
+    public void updateDocument(Document document) throws BusinessException {
+        if (document == null) {
+            throw new BusinessException("The document cannot be null.");
+        }
+        try {
+            if (!documentDA.documentExists(document.getId())) {
+                throw new BusinessException("The document with the specified ID does not exist.");
+            }
+            documentDA.updateDocument(document);
+        } catch (DataBaseException e) {
+            throw new BusinessException("Error when updating the document.", e);
+        }
+    }
+
+        public void deleteDocument(int documentId) throws BusinessException {
+        if (documentId <= 0) {
+            throw new BusinessException("The document ID must be a positive number.");
+        }
+        try {
+            if (!documentDA.documentExists(documentId)) {
+                throw new BusinessException("The document does not exist.");
+            }
+            documentDA.deleteDocument(documentId);
+        } catch (DataBaseException e) {
+            throw new BusinessException("Error when deleting the document.", e);
         }
     }
 
@@ -88,6 +118,9 @@ public class DocumentManager {
             throw new BusinessException("The delivery date cannot be in the future.");
         }
         try {
+            if (!documentDA.documentExists(documentId)) {
+                throw new BusinessException("The document with the specified ID does not exist.");
+            }
             documentDA.receiveDelivery(documentId, date, locationProduct);
         } catch (DataBaseException e) {
             throw new BusinessException("Error when receiving the delivery.", e);
@@ -112,20 +145,6 @@ public class DocumentManager {
             documentDA.sendDelivery(documentId, date, locationProduct);
         } catch (DataBaseException e) {
             throw new BusinessException("Error when sending the delivery.", e);
-        }
-    }
-
-    public void deleteDocument(int documentId) throws BusinessException {
-        if (documentId <= 0) {
-            throw new BusinessException("The document ID must be a positive number.");
-        }
-        try {
-            if (!documentDA.documentExists(documentId)) {
-                throw new BusinessException("The document does not exist.");
-            }
-            documentDA.deleteDocument(documentId);
-        } catch (DataBaseException e) {
-            throw new BusinessException("Error when deleting the document.", e);
         }
     }
 
