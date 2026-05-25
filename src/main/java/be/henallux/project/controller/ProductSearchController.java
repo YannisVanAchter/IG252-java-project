@@ -1,41 +1,32 @@
 package main.java.be.henallux.project.controller;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import main.java.be.henallux.project.business.ProductSearchManager;
+import main.java.be.henallux.project.business.exception.BusinessException;
 import main.java.be.henallux.project.model.Product;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Controller fictif pour simuler la recherche de produits via bd.
- * TODO: remplacer par une vraie requête vers db package
+ * @see main.java.be.henallux.project.view.ProductSearchTable
+ * @see ProductSearchManager
  */
 public class ProductSearchController {
 
-    public ArrayList<Product> searchProducts(String name, String category, Boolean promotion) {
-        ArrayList<Product> results = new ArrayList<>();
+    private final ProductSearchManager productSearchManager;
 
-        for (Product p : getAllFakeProducts()) {
-            boolean match = true;
-
-            if (name != null && !p.getName().toLowerCase().contains(name.toLowerCase()))
-                match = false;
-
-            if (category != null && !category.equals("All")
-                    && (p.getCategory() == null
-                    || !p.getCategory().getName().equalsIgnoreCase(category)))
-                match = false;
-
-            if (promotion != null && promotion && !p.getIsDiscounted())
-                match = false;
-
-            if (match) results.add(p);
-        }
-
-        return results;
+    public ProductSearchController() {
+        this.productSearchManager = new ProductSearchManager();
     }
 
-    private List<Product> getAllFakeProducts() {
-        return new ProductController().getAllProduct();
+    /**
+     * Searches for products by name, category, and promotion status.
+     * @param name      the product name to search for, or {@code null} to ignore
+     * @param category  the category name to filter by, or {@code null} to ignore
+     * @param promotion {@code true} to filter products with a discount, {@code null} to ignore
+     * @return list of matching {@link Product}
+     * @see ProductSearchManager#searchProducts(String, String, Boolean)
+     */
+    public ArrayList<Product> searchProducts(String name, String category, Boolean promotion) throws BusinessException {
+        return new ArrayList<>(productSearchManager.searchProducts(name, category, promotion));
     }
 }

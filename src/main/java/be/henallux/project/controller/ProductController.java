@@ -1,138 +1,211 @@
 package main.java.be.henallux.project.controller;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.*;
+import main.java.be.henallux.project.business.ProductManager;
+import main.java.be.henallux.project.business.StockManager;
+import main.java.be.henallux.project.business.exception.BusinessException;
+import main.java.be.henallux.project.model.Product;
+import main.java.be.henallux.project.model.ProductCategory;
+import main.java.be.henallux.project.model.LocationProduct;
+import main.java.be.henallux.project.model.QuantityProduct;
+import main.java.be.henallux.project.model.Discount;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
 
 /**
- * Controller fictif utilisé uniquement pour simuler les vues de l'application.
- * <p>
- * TODO: clean & implement class.
+ * @see ProductManager
+ * @see StockManager
  */
 public class ProductController {
 
-    private ArrayList<Product> products = new ArrayList<>();
+    private final ProductManager productManager;
+    private final StockManager stockManager;
 
-    public ArrayList<Product> getAllProduct() {
-
-        if (!products.isEmpty()) {
-            return products;
-        }
-
-        try {
-            ProductCategory fruit    = new ProductCategory(1, "fruit");
-            ProductCategory boisson  = new ProductCategory(3, "Boisson");
-
-            // --- Pomme ---
-            Product pomme = new Product(
-                    1, "Pomme",
-                    new BigDecimal("1.20"), new BigDecimal("6"),
-                    10, true, 20, fruit, null, null
-            );
-            pomme.setLocation(new ArrayList<>(List.of(
-                    new QuantityProduct(
-                            new LocationProduct("A", "1", false, false),
-                            pomme,
-                            2
-                    ),
-                    new QuantityProduct(
-                            new LocationProduct("A", "2", false, false),
-                            pomme,
-                            2
-                    )
-            )));
-            products.add(pomme);
-
-            // --- Banane ---
-            Product banane = new Product(
-                    2, "Banane",
-                    new BigDecimal("2.00"), new BigDecimal("6"),
-                    8, true, 20, fruit, null, null
-            );
-            banane.setLocation(new ArrayList<>(List.of(new QuantityProduct(
-                    new LocationProduct("A", "2", false, false), banane, 120
-            ))));
-            products.add(banane);
-
-            // --- Chocolat ---
-            Product chocolat = new Product(
-                    3, "Chocolat",
-                    new BigDecimal("5.00"), new BigDecimal("21"),
-                    25, true, 10, fruit, null, null
-            );
-            chocolat.setLocation(new ArrayList<>(List.of(new QuantityProduct(
-                    new LocationProduct("B", "1", false, false), chocolat, 60
-            ))));
-            chocolat.addDiscount(new Discount(
-                    2,
-                    new BigDecimal("20"),
-                    LocalDate.of(2026, 4, 1),
-                    LocalDate.of(2026, 5, 31),
-                    "-20%",
-                    chocolat
-            ));
-            chocolat.addDiscount(new Discount(
-                    4,
-                    new BigDecimal("50"),
-                    LocalDate.of(2026, 2, 1),
-                    LocalDate.of(2026, 3, 31),
-                    "-50%",
-                    chocolat
-            ));
-            products.add(chocolat);
-
-            // --- Lait ---
-            Product lait = new Product(
-                    4, "Lait",
-                    new BigDecimal("1.10"), new BigDecimal("6"),
-                    5, true, 15, boisson, null, null
-            );
-            lait.setLocation(new ArrayList<>(List.of(new QuantityProduct(
-                    new LocationProduct("C", "1", true, true), lait, 80
-            ))));
-            products.add(lait);
-
-            // --- Café ---
-            Product cafe = new Product(
-                    5, "Café",
-                    new BigDecimal("3.00"), new BigDecimal("21"),
-                    15, true, 10, boisson, null, null
-            );
-            cafe.setLocation(new ArrayList<>(List.of(new QuantityProduct(
-                    new LocationProduct("C", "2", false, false), cafe, 40
-            ))));
-            cafe.addDiscount(new Discount(
-                    3,
-                    new BigDecimal("10"),
-                    LocalDate.of(2026, 4, 10),
-                    LocalDate.of(2026, 5, 20),
-                    "-10%",
-                    cafe
-            ));
-            products.add(cafe);
-        } catch (DataValidationException e) {
-            throw new RuntimeException(e);
-        }
-
-        return products;
+    public ProductController() {
+        this.productManager = new ProductManager();
+        this.stockManager = new StockManager();
     }
 
-    public String[] getAllCategory() {
-        if (products.isEmpty()) {
-            getAllProduct();
+    /**
+     * Returns all products.
+     * @return list of all {@link Product}
+     * @see ProductManager#getAllProducts()
+     */
+    public ArrayList<Product> getAllProduct() throws BusinessException {
+        return new ArrayList<>(productManager.getAllProducts());
+    }
+
+    /**
+     * Returns a product by ID.
+     * @param productID the product ID
+     * @return the matching {@link Product}
+     * @see ProductManager#getProduct(int)
+     */
+    public Product getProduct(int productID) throws BusinessException {
+        return productManager.getProduct(productID);
+    }
+
+    /**
+     * Returns all product categories.
+     * @return list of all {@link ProductCategory}
+     * @see ProductManager#getAllProductCategory()
+     */
+    public ArrayList<ProductCategory> getAllProductCategory() throws BusinessException {
+        return new ArrayList<>(productManager.getAllProductCategory());
+    }
+
+    /**
+     * Creates a new product.
+     * @param newProduct the {@link Product} to create
+     * @see ProductManager#createProduct(Product)
+     */
+    public void createNewProduct(Product newProduct) throws BusinessException {
+        productManager.createProduct(newProduct);
+    }
+
+    /**
+     * Changes the price of a product.
+     * @param productID the product ID
+     * @param newPrice  the new price
+     * @see ProductManager#changeProductPrice(int, double)
+     */
+    public void changeProductPrice(int productID, double newPrice) throws BusinessException {
+        productManager.changeProductPrice(productID, newPrice);
+    }
+
+    /**
+     * Changes the VAT rate of a product.
+     * @param productID the product ID
+     * @param newVAT    the new VAT rate (0–100)
+     * @see ProductManager#changeProductVAT(int, double)
+     */
+    public void changeProductVAT(int productID, double newVAT) throws BusinessException {
+        productManager.changeProductVAT(productID, newVAT);
+    }
+
+    /**
+     * Changes the fidelity points awarded for a product.
+     * @param productID the product ID
+     * @param newPoints the new fidelity points value
+     * @see ProductManager#changeFidelityPoint(int, int)
+     */
+    public void changeFidelityPoint(int productID, int newPoints) throws BusinessException {
+        productManager.changeFidelityPoint(productID, newPoints);
+    }
+
+    /**
+     * Changes the minimal stock quantity for a product.
+     * @param productID   the product ID
+     * @param newQuantity the new minimal quantity
+     * @see ProductManager#changeMinimalQuantity(int, int)
+     */
+    public void changeMinimalQuantity(int productID, int newQuantity) throws BusinessException {
+        productManager.changeMinimalQuantity(productID, newQuantity);
+    }
+
+    /**
+     * Deletes a product by ID.
+     * @param productID the product ID
+     * @see ProductManager#deleteProduct(int)
+     */
+    public void deleteProductOffer(int productID) throws BusinessException {
+        productManager.deleteProduct(productID);
+    }
+
+    /**
+     * Creates a new product category.
+     * @param name the category name
+     * @see ProductManager#createProductCategory(String)
+     */
+    public void createNewProductCategory(String name) throws BusinessException {
+        productManager.createProductCategory(name);
+    }
+
+    /**
+     * Adds a new stock location.
+     * @param newLocation the {@link LocationProduct} to add
+     * @see StockManager#addStockLocation(LocationProduct)
+     */
+    public void addStockLocation(LocationProduct newLocation) throws BusinessException {
+        stockManager.addStockLocation(newLocation);
+    }
+
+    /**
+     * Returns the first stock location found in the given products, or creates a default one.
+     * @param products list of {@link Product} to search through
+     * @return an existing or newly created {@link LocationProduct}
+     * @see StockManager#addStockLocation(LocationProduct)
+     */
+    public LocationProduct getOrCreateStockLocation(ArrayList<Product> products) throws BusinessException {
+        LocationProduct stockLocation = null;
+
+        for (Product product : products) {
+            if (stockLocation == null) {
+                for (QuantityProduct quantityProduct : product.getLocation()) {
+                    if (stockLocation == null
+                            && quantityProduct.getLocationProduct().getIsStock()) {
+                        stockLocation = quantityProduct.getLocationProduct();
+                    }
+                }
+            }
         }
 
-        return Stream.concat(
-                Stream.of("All"),
-                products.stream()
-                        .filter(product -> product.getCategory() != null)
-                        .map(product -> product.getCategory().getName())
-                        .distinct()
-        ).toArray(String[]::new);
+        if (stockLocation == null) {
+            try {
+                stockLocation = new LocationProduct("A", "1", true, false);
+                addStockLocation(stockLocation);
+            } catch (Exception e) {
+                throw new BusinessException("Failed to create default stock location: " + e.getMessage());
+            }
+        }
+        return stockLocation;
+    }
+
+    /**
+     * Adds quantity to a product's stock at a given location.
+     * @param productID     the product ID
+     * @param quantity      the quantity to add
+     * @param storeLocation the target {@link LocationProduct}
+     * @see StockManager#addToStocks(int, int, LocationProduct)
+     */
+    public void addToStocks(int productID, int quantity, LocationProduct storeLocation) throws BusinessException {
+        stockManager.addToStocks(productID, quantity, storeLocation);
+    }
+
+    /**
+     * Subtracts quantity from a product's stock at a given location.
+     * @param productID     the product ID
+     * @param quantity      the quantity to subtract
+     * @param storeLocation the target {@link LocationProduct}
+     * @see StockManager#subtractFromStock(int, int, LocationProduct)
+     */
+    public void subtractFromStock(int productID, int quantity, LocationProduct storeLocation) throws BusinessException {
+        stockManager.subtractFromStock(productID, quantity, storeLocation);
+    }
+
+    /**
+     * Deletes a stock location.
+     * @param location the {@link LocationProduct} to delete
+     * @see StockManager#deleteStockLocation(LocationProduct)
+     */
+    public void deleteStockLocation(LocationProduct location) throws BusinessException {
+        stockManager.deleteStockLocation(location);
+    }
+
+    /**
+     * Adds a discount to a product.
+     * @param discount the {@link Discount} to add
+     * @see ProductManager#addDiscount(Discount)
+     */
+    public void addDiscount(Discount discount) throws BusinessException {
+        productManager.addDiscount(discount);
+    }
+
+    /**
+     * Deletes a discount by its ID.
+     * @param discount the {@link Discount} to delete
+     * @see ProductManager#deleteDiscount(Discount)
+     */
+    public void deleteDiscount(Discount discount) throws BusinessException {
+        productManager.deleteDiscount(discount);
     }
 }

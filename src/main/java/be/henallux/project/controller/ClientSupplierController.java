@@ -1,110 +1,104 @@
 package main.java.be.henallux.project.controller;
 
-import main.java.be.henallux.project.model.FidelityCard;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import main.java.be.henallux.project.business.ClientManager;
+import main.java.be.henallux.project.business.ClientSupplierManager;
+import main.java.be.henallux.project.business.SupplierManager;
+import main.java.be.henallux.project.business.exception.BusinessException;
 import main.java.be.henallux.project.model.Address;
 import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.Locality;
+import main.java.be.henallux.project.model.Product;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Controller fictif utilisé uniquement pour simuler les vues de l'application.
- *
- * TODO: clean & implement class.
+ * Abstract controller for client/supplier
+ * @see ClientManager
+ * @see SupplierManager
  */
-public class ClientSupplierController {
+public abstract class ClientSupplierController {
 
-    /**
-     * Retourne la liste des clients/fournisseurs disponible dans la bd
-     *
-     * @return une liste de clients/fournisseurs en ArrayList
-     * @throws DataValidationException a supprimé, je pense. (j'en avais besoin ici, car création d'objet)
-     */
-    public ArrayList<ClientSupplier> getAllClientSupplier() {
-        ArrayList<ClientSupplier> clients = new ArrayList<>();
+    private final ClientManager clientManger;
+    private final SupplierManager supplierManager;
 
-        try {
-            // --- Client 1 : Dupont Jean (isClient=true) ---
-            ClientSupplier dupont = new ClientSupplier(
-                    1, "Dupont", "Jean", "jean.dupont@email.com", "32470000001",
-                    new Address(1, "Avenue Louise", 10, new Locality("Ixelles", 1050)),
-                    true, false, true, "BE0123456789", LocalDate.of(2020, 1, 15), null
-            );
-            dupont.setFidelityCard(new FidelityCard(1, 150, true, dupont));
-            clients.add(dupont);
-
-            // --- Client 2 : Martin Sophie (isClient=true) ---
-            ClientSupplier martin = new ClientSupplier(
-                    2, "Martin", "Sophie", "sophie.clem@email.com", "32470000002",
-                    new Address(2, "Rue de la Loi", 42, new Locality("Bruxelles", 1000)),
-                    true, false, false, "BE0987654321", LocalDate.of(2021, 3, 22), null
-            );
-            martin.setFidelityCard(new FidelityCard(2, 80, true, martin));
-            clients.add(martin);
-
-            // --- Client 3 : Clem Cloum (isClient=false) ---
-            ClientSupplier clem = new ClientSupplier(
-                    3, "Clem", "cloum", "cloum.clem@email.com", "32123456789",
-                    new Address(2, "Rue de ici", 12, new Locality("Namur", 5000)),
-                    true, false, false, "BE0987654321", LocalDate.of(2021, 3, 22)
-            );
-            clients.add(clem);
-
-            // --- Client+Fournisseur 4 : Dubois Marc (isClient=true, isSupplier=true) ---
-            ClientSupplier dubois = new ClientSupplier(
-                    4, "Dubois", "Marc", "marc.dubois@email.com", "32470000004",
-                    new Address(4, "Rue Neuve", 88, new Locality("Schaerbeek", 1030)),
-                    true, true, false, "BE6677889900", LocalDate.of(2022, 5, 5), null
-            );
-            dubois.setFidelityCard(new FidelityCard(4, 320, true, dubois));
-            clients.add(dubois);
-
-            // --- Client 5 : Smith Anna (isClient=true) ---
-            ClientSupplier smith = new ClientSupplier(
-                    5, "Smith", "Anna", "anna.smith@email.com", "32470000005",
-                    new Address(5, "Avenue Fonsny", 20, new Locality("Saint-Gilles", 1060)),
-                    true, false, true, "BE5566778899", LocalDate.of(2018, 11, 30), null
-            );
-            smith.setFidelityCard(new FidelityCard(5, 500, false, smith));
-            clients.add(smith);
-
-            return clients;
-        } catch (DataValidationException e) {
-            return new ArrayList<>();
-        }
+    public ClientSupplierController() {
+        this.clientManger = new ClientManager();
+        this.supplierManager = new SupplierManager();
     }
 
     /**
-     * Suppression d'un ClientSupplier spécifique dans la bd.
-     * La suppression dans la vue est deja gérée dans la vue
-     * @param csToDelete le ClientSupplier objet à supprimer
+     * Returns all clients and suppliers.
+     * @return list of all {@link ClientSupplier}
+     * @see ClientManager#getAllClientSuppliers()
      */
-    public boolean deleteClientSupplier(ClientSupplier csToDelete) {
-        return true;
+    public ArrayList<ClientSupplier> getAllClientsSuppliers() throws BusinessException {
+        return new ArrayList<>(clientManger.getAllClientSuppliers());
     }
 
     /**
-     * Crée un ClientSupplier.
-     * La méthode prend tous les arguments en charge
-     *
-     * @return le nouvel objet ajouté
-     * @throws DataValidationException en cas de problème de validation
+     * Returns a client or supplier by ID.
+     * @param id the client/supplier ID
+     * @return the matching {@link ClientSupplier}
+     * @see ClientManager#getClientSupplier(int)
      */
-    public ClientSupplier createClientSupplier (String name, String firstName, String mail, String phoneNumber, String vatNumber, LocalDate becomeClient, String loyaltyCardId, int loyaltyPoints, boolean isClient, boolean isSupplier, boolean isMember, int streetNumber, int postalCode, String street, String city, String country) throws DataValidationException {
-        return null; //new ClientSupplier( 1,  name,  firstName,  mail,  phoneNumber, new Address(1,street, streetNumber, city, postalCode),  isClient,  isSupplier,  isMember,  vatNumber, becomeClient);
+    public ClientSupplier getClientSupplier(int id) throws BusinessException {
+        return clientManger.getClientSupplier(id);
     }
 
     /**
-     * Update un ClientSupplier.
-     * La méthode prend tous les arguments en charge
-     * @param id fais référence au ClientSup à modifier.
-     *
-     * @return l'état de l'update
-     * @throws DataValidationException en cas de problème de validation
+     * Creates a new client or supplier.
+     * @param newClient the {@link ClientSupplier} to create
+     * @return the created {@link ClientSupplier}
+     * @see ClientManager#createClientSupplier(ClientSupplier)
      */
-    public ClientSupplier updateClientSupplier(int id, String name, String firstName, String mail, String phoneNumber, String vatNumber, LocalDate becomeClient, String loyaltyCardId, int loyaltyPoints, boolean isClient, boolean isSupplier, boolean isMember, int streetNumber, int postalCode, String street, String city, String country) throws DataValidationException {
-        return null; //new ClientSupplier( 1,  name,  firstName,  mail,  phoneNumber, new Address(1,street, streetNumber, city, postalCode),  isClient,  isSupplier,  isMember,  vatNumber, becomeClient);
+    public ClientSupplier createClientSupplier(ClientSupplier newClient) throws BusinessException {
+        return clientManger.createClientSupplier(newClient);
     }
+
+    /**
+     * Changes the address of a client or supplier.
+     * @param id         the client/supplier ID
+     * @param newAddress the new {@link Address}
+     * @see ClientManager#changeAddress(int, Address)
+     */
+    public void changeAddress(int id, Address newAddress) throws BusinessException {
+        clientManger.changeAddress(id, newAddress);
+    }
+
+    /**
+     * Changes the phone number of a client or supplier.
+     * @param id             the client/supplier ID
+     * @param newPhoneNumber the new phone number
+     * @see ClientManager#changePhoneNumber(int, int)
+     */
+    public void changePhoneNumber(int id, int newPhoneNumber) throws BusinessException {
+        clientManger.changePhoneNumber(id, newPhoneNumber);
+    }
+
+    /**
+     * Changes the email of a client or supplier.
+     * @param id       the client/supplier ID
+     * @param newEmail the new email address
+     * @see ClientManager#changeEmail(int, String)
+     */
+    public void changeEmail(int id, String newEmail) throws BusinessException {
+        clientManger.changeEmail(id, newEmail);
+    }
+
+    /**
+     * Deletes a client or supplier by ID.
+     * @param id the client/supplier ID
+     * @return {@code true} if deleted successfully
+     * @see ClientManager#deleteClientSupplier(int)
+     */
+    public boolean deleteClientSupplier(int id) throws BusinessException {
+        return clientManger.deleteClientSupplier(id);
+    }
+
+    /**
+     * Places an order for the given client or supplier.
+     * @param clientSupplierID the client/supplier ID
+     * @param products         list of {@link Product} to order
+     */
+    public abstract void placeOrder(int clientSupplierID, List<Product> products) throws BusinessException;
 }
