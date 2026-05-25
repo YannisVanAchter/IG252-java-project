@@ -1,7 +1,6 @@
 package main.java.be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.ClientSupplierController;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import main.java.be.henallux.project.controller.ClientController;
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.FidelityCard;
 import main.java.be.henallux.project.model.Product;
@@ -9,6 +8,7 @@ import main.java.be.henallux.project.model.Product;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
@@ -20,11 +20,11 @@ import java.util.LinkedHashMap;
  *     <li>Scan a loyalty or membership card</li>
  *     <li>View client information before payment</li>
  *     <li>Continue checkout with or without a linked client</li></ul>
- * <p>The panel interacts with {@link ClientSupplierController} to retrieve available clients
+ * <p>The panel interacts with {@link ClientController} to retrieve available clients
  * and maintains the currently selected {@link ClientSupplier}.
  * <p>When the workflow is validated, the view transitions to {@link ReceiptPayment} to finalize the transaction.
  *
- * @see ClientSupplierController
+ * @see ClientController
  * @see ClientSupplier
  * @see Product
  * @see ReceiptCreateView
@@ -33,7 +33,7 @@ import java.util.LinkedHashMap;
 public class ReceiptClientInfoDialog extends JPanel {
     private final MainWindow mainWindow;
     private final ReceiptCreateView receiptCreateView;
-    private final ClientSupplierController controller;
+    private final ClientController controller;
     private final ArrayList<ClientSupplier> allClients;
     private final ArrayList<ComboBoxItem<ClientSupplier>> allClientItems = new ArrayList<>();
     private LinkedHashMap<Product, Integer> receipt;
@@ -46,8 +46,14 @@ public class ReceiptClientInfoDialog extends JPanel {
         this.mainWindow = mainWindow;
         this.receiptCreateView = receiptCreateView;
         this.receipt = receipt;
-        this.controller = new ClientSupplierController();
-        this.allClients = controller.getAllClientSupplier();
+        this.controller = new ClientController();
+        ArrayList<ClientSupplier> loaded = new ArrayList<>();
+        try {
+            loaded = controller.getAllClientsSuppliers();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        this.allClients = loaded;
         this.selectedClient = null;
 
         setPreferredSize(new Dimension(400, 300));
@@ -208,35 +214,30 @@ public class ReceiptClientInfoDialog extends JPanel {
      * Otherwise, an informational message is displayed.
      */
     private void onScanClick() {
-        String input = JOptionPane.showInputDialog("Enter the card number");
+        String input = JOptionPane.showInputDialog("Enter the card number:");
         if (input == null || input.trim().isEmpty()) return;
 
         int cardNumber;
         try {
             cardNumber = Integer.parseInt(input.trim());
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Le numéro est invalide", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "The number is invalid", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        boolean found = false;
-        int i = 0;
-        while (i < allClients.size() && !found) {
-            FidelityCard card = allClients.get(i).getFidelityCard();
-            if (card != null && card.getId() == cardNumber) {
-                selectedClient = allClients.get(i);
+        try {
+            List<ClientSupplier> clients = controller.getClientByCardID(cardNumber);
+            if (clients != null && !clients.isEmpty()) {
+                ClientSupplier selectedClient = clients.getFirst();
                 setComboClient(selectedClient);
                 refreshInfoPanel();
-                found = true;
+            } else {
+                JOptionPane.showMessageDialog(this, "No customers found", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
-            i++;
-        }
-
-        if (!found) {
-            JOptionPane.showMessageDialog(this, "No customers found", "Information", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
     /**
      * Opens a dialog to create a new client.
      * <p>After successful creation:

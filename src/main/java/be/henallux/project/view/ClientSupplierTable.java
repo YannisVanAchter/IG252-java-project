@@ -28,7 +28,8 @@ import main.java.be.henallux.project.model.*;
 public class ClientSupplierTable extends JPanel {
 
     private final MainWindow mainWindow;
-    private final ClientSupplierController controller;
+    private final ClientSupplierController clientSupplierController;
+    private final ClientController clientController;
     private final ArrayList<ClientSupplier> clientSuppliers;
     private ClientSupplierTableModel model;
     private ArrayList<ClientSupplier> displayClientSupplier;
@@ -44,12 +45,21 @@ public class ClientSupplierTable extends JPanel {
 
     public ClientSupplierTable(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
-        this.controller = new ClientSupplierController();
+        this.clientSupplierController = new ClientController();
+        this.clientController = new ClientController();
 
         setLayout(new BorderLayout(10, 16));
         setBorder(new EmptyBorder(16, 16, 16, 16));
 
-        clientSuppliers = controller.getAllClientSupplier();
+        ArrayList<ClientSupplier> loaded = new ArrayList<>();
+        try {
+            loaded = clientSupplierController.getAllClientsSuppliers();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            mainWindow.goBack();
+        }
+        clientSuppliers = loaded;
+
         displayClientSupplier = new ArrayList<>(clientSuppliers);
 
         JPanel top = new JPanel(new BorderLayout(0, 10));
@@ -59,7 +69,6 @@ public class ClientSupplierTable extends JPanel {
         add(top, BorderLayout.NORTH);
         add(buildTablePanel(), BorderLayout.CENTER);
     }
-
     /**
      * Builds the header section containing the title.
      *
@@ -319,26 +328,41 @@ public class ClientSupplierTable extends JPanel {
      * @param csToDelete the ClientSupplier to delete
      */
     public void onDeleteClick(ClientSupplier csToDelete) {
-        boolean isSuccess = controller.deleteClientSupplier(csToDelete);
-        if (isSuccess) {
-            clientSuppliers.remove(csToDelete);
-            displayClientSupplier.remove(csToDelete);
-            model.setClientSuppliers(displayClientSupplier);
+        try {
+            boolean isSuccess;
+            if (csToDelete.getIsClient() && csToDelete.getFidelityCard() != null) {
+                isSuccess = clientController.deleteClientAccount(csToDelete.getId(), csToDelete.getFidelityCard().getId());
+            } else if (csToDelete.getIsClient()) {
+                isSuccess = clientController.deleteClientAccount(csToDelete.getId());
+            } else {
+                isSuccess = clientSupplierController.deleteClientSupplier(csToDelete.getId());
+            }
 
+            if (isSuccess) {
+                clientSuppliers.remove(csToDelete);
+                displayClientSupplier.remove(csToDelete);
+                model.setClientSuppliers(displayClientSupplier);
+
+                mainWindow.getNotificationController().push(new NotificationItem(
+                        "Delete",
+                        csToDelete.getLabel() + " has been deleted.",
+                        NotificationItem.Type.SUCCESS,
+                        null
+                ));
+            } else {
+                mainWindow.getNotificationController().push(new NotificationItem(
+                        "Delete",
+                        "Failed to delete. Click to retry.",
+                        NotificationItem.Type.ERROR,
+                        () -> onDeleteClick(csToDelete)
+                ));
+            }
+        } catch (Exception e) {
             mainWindow.getNotificationController().push(new NotificationItem(
                     "Delete",
-                    csToDelete.getLabel() + " has been deleted.",
-                    NotificationItem.Type.SUCCESS,
-                    null
-            ));
-
-        } else {
-            mainWindow.getNotificationController().push(new NotificationItem(
-                    "Delete",
-                    "Failed to delete. Click to retry.",
+                    e.getMessage(),
                     NotificationItem.Type.ERROR,
                     () -> onDeleteClick(csToDelete)
             ));
         }
-    }
-}
+    }}

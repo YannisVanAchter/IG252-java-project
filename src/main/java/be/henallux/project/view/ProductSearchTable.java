@@ -45,7 +45,14 @@ public class ProductSearchTable extends JPanel {
         this.mainWindow = mainWindow;
         this.productSearchController = new ProductSearchController();
         this.productController = new ProductController();
-        this.displayProducts = productSearchController.searchProducts(null, null, null);
+
+        ArrayList<Product> loaded = new ArrayList<>();
+        try {
+            loaded = productSearchController.searchProducts(null, null, null);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        this.displayProducts = loaded;
 
         setLayout(new BorderLayout(10, 16));
         setBorder(new EmptyBorder(16, 16, 16, 16));
@@ -75,7 +82,14 @@ public class ProductSearchTable extends JPanel {
         nameFields.add(new JLabel("Product name"), BorderLayout.NORTH);
         nameFields.add(txtProductName, BorderLayout.CENTER);
 
-        comboCategory = new JComboBox<>(productController.getAllCategory());
+        comboCategory = new JComboBox<>();
+        ViewUtils.setCursor(comboCategory);
+        try {
+            setCategory(productController.getAllProductCategory());
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        ViewUtils.addFilterListener(comboCategory, this::onSearchClick);
         ViewUtils.setCursor(comboCategory);
         ViewUtils.addFilterListener(comboCategory, this::onSearchClick);
         JPanel categoryFields = new JPanel(new BorderLayout(0, 4));
@@ -145,21 +159,23 @@ public class ProductSearchTable extends JPanel {
      * and the table model via {@code ProductSearchTableModel#setProducts(List)}.
      * @see ProductSearchController
      */
-    public void onSearchClick()  {
+    public void onSearchClick() {
         String name = txtProductName.getText().trim();
         String category = (String) comboCategory.getSelectedItem();
         Boolean promo = chkPromotion.isSelected() ? true : null;
 
-        ArrayList<Product> results = productSearchController.searchProducts(
-                name.isBlank() ? null : name,
-                category == null || category.equals("All") ? null : category,
-                promo
-        );
-
-        displayProducts = results;
-        model.setProducts(new ArrayList<>(results));
+        try {
+            ArrayList<Product> results = productSearchController.searchProducts(
+                    name.isBlank() ? null : name,
+                    category == null || category.equals("All") ? null : category,
+                    promo
+            );
+            displayProducts = results;
+            model.setProducts(new ArrayList<>(results));
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
-
     /**
      * Opens the detailed view for the selected product.
      * <p>If no row is selected, this method does nothing.</p>
@@ -170,5 +186,17 @@ public class ProductSearchTable extends JPanel {
         int selectedRow = table.getSelectedRow();
         if (selectedRow == -1) return;
         mainWindow.openProductView(model.getProductAt(selectedRow));
+    }
+
+    /**
+     * Add {@code ArrayList<ProductCategory>} into {@code comboCategory} and add a {@code "All"} selection
+     * @param categories from  {@link ProductController#getAllProductCategory()}
+     */
+    private void setCategory(ArrayList<ProductCategory> categories) {
+        comboCategory.removeAllItems();
+        comboCategory.addItem("All");
+        for (ProductCategory category : categories) {
+            comboCategory.addItem(category.getLabel());
+        }
     }
 }

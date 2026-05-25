@@ -24,6 +24,7 @@ import java.util.Stack;
 public class MainWindow extends JFrame {
     private final Stack<String> history = new Stack<>();
     private String currentPage;
+    private final StockManagementController stockManagementController;
     private final NotificationController notificationController;
     private final DocumentForm documentForm;
     private final ClientSupplierForm clientSupplierForm;
@@ -38,6 +39,7 @@ public class MainWindow extends JFrame {
     public MainWindow(NotificationController notificationController, StockManagementController stockManagementController) {
         super("Magasin du Grand Bazard");
         this.notificationController = notificationController;
+        this.stockManagementController = stockManagementController;
 
         setSize(820, 620);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -74,7 +76,7 @@ public class MainWindow extends JFrame {
         addPage(recipeSearchView, "RECIPE_VIEW");
 
         addPage(new ReceiptCreateView(this), "RECEIPT");
-        addPage(new StockAlertView(this), "STOCK");
+        addPage(new StockAlertView(this, stockManagementController), "STOCK");
         orderView = new StockOrderCreation(this);
         addPage(orderView, "ORDER_CREATION");
 

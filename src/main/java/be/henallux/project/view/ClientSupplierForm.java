@@ -26,7 +26,9 @@ import main.java.be.henallux.project.model.*;
 public class ClientSupplierForm extends JPanel {
     private final MainWindow mainWindow;
     private final Boolean isOpenInModal;
-    private final ClientSupplierController controller;
+    private final ClientController clientController;
+    private final SupplierController supplierController;
+    private final AddressController addressController;
     private ClientSupplier currentClientSupplier;
 
     private JTextField txtName;
@@ -37,6 +39,8 @@ public class ClientSupplierForm extends JPanel {
 
     private JSpinner becameClientDate;
 
+    private JPanel loyaltyPanel;
+    private JCheckBox chkCreateFidelityCard;
     private JTextField txtIdLoyaltyCard;
     private JSpinner spnLoyaltyPoint;
 
@@ -63,7 +67,9 @@ public class ClientSupplierForm extends JPanel {
     public ClientSupplierForm(MainWindow mainWindow, Boolean isOpenInModal) {
         this.mainWindow = mainWindow;
         this.isOpenInModal = isOpenInModal;
-        this.controller = new ClientSupplierController();
+        this.clientController = new ClientController();
+        this.supplierController = new SupplierController();
+        this.addressController = new AddressController();
 
         setLayout(new BorderLayout(10, 16));
         setBorder(new EmptyBorder(16, 16, 16, 16));
@@ -248,21 +254,61 @@ public class ClientSupplierForm extends JPanel {
         addressPanel.add(Box.createVerticalStrut(10));
         addressPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, addressPanel.getPreferredSize().height));
 
-        JPanel loyaltyPanel = ViewUtils.createColumnPanel();
-        loyaltyPanel.setBorder(BorderFactory.createTitledBorder("Loyalty"));
-        txtIdLoyaltyCard = new JTextField(10);
-        ViewUtils.setCursor(txtIdLoyaltyCard);
-        loyaltyPanel.add(ViewUtils.labeled("Loyalty card ID", txtIdLoyaltyCard));
-
-        spnLoyaltyPoint = ViewUtils.createNumberSpinner(0, 0, 9999, 1000);
-        ViewUtils.setCursor(spnLoyaltyPoint);
-        loyaltyPanel.add(ViewUtils.labeled("Loyalty points", spnLoyaltyPoint));
-        loyaltyPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, loyaltyPanel.getPreferredSize().height));
+        loyaltyPanel = ViewUtils.createColumnPanel();
+        buildLoyaltyPanel();
 
         rightPanel.add(addressPanel);
         rightPanel.add(Box.createVerticalStrut(15));
         rightPanel.add(loyaltyPanel);
         return rightPanel;
+    }
+
+
+    /**
+     * Affichage des info la carte de fidélité.
+     * Si on est en create le client n'existe pas. La carte est créé apres l'enregistrement.
+     * Si le client existe, mais n'a pas de carte, il peut en générer une
+     * Si le client existe et sa carte est disponible affichage des infos.
+     *
+     * @see ClientController#createFidelityCard(int)
+     */
+    private void buildLoyaltyPanel(FidelityCard newCard) {
+        loyaltyPanel.removeAll();
+        loyaltyPanel.setBorder(BorderFactory.createTitledBorder("Loyalty"));
+
+        FidelityCard card = newCard;
+
+        if (card == null && currentClientSupplier != null) {
+            card = currentClientSupplier.getFidelityCard();
+        }
+
+        if (currentClientSupplier == null && card == null) {
+            JLabel info = new JLabel("A fidelity card will be created after saving.");
+            info.setForeground(Color.GRAY);
+            loyaltyPanel.add(info);
+            chkCreateFidelityCard = new JCheckBox("Create a new fidelity card ?");
+            ViewUtils.setCursor(chkCreateFidelityCard);
+            chkCreateFidelityCard.setSelected(true);
+            loyaltyPanel.add(chkCreateFidelityCard);
+
+        } else if (card == null || !card.getIsValid()) {
+            JButton btnCreateCard = new JButton("Create fidelity card");
+            ViewUtils.setCursor(btnCreateCard);
+            btnCreateCard.addActionListener(e -> onCreateFidelityCard());
+            loyaltyPanel.add(btnCreateCard);
+
+        } else {
+            loyaltyPanel.add(ViewUtils.labeled("Card ID", new JLabel(String.valueOf(card.getId()))));
+            loyaltyPanel.add(ViewUtils.labeled("Points", new JLabel(String.valueOf(card.getTotalPoint()))));
+        }
+
+        loyaltyPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, loyaltyPanel.getPreferredSize().height));
+        loyaltyPanel.revalidate();
+        loyaltyPanel.repaint();
+    }
+
+    private void buildLoyaltyPanel() {
+        buildLoyaltyPanel(null);
     }
 
     /**
@@ -341,9 +387,9 @@ public class ClientSupplierForm extends JPanel {
      * <p>If the view is opened in a modal window, the modal is closed; otherwise, the application navigates back to the previous view using
      * {@link MainWindow#goBack()}.
      * If an unexpected error occurs during the save operation, an error dialog is displayed containing the exception message.
+     *
      * @see #validateForm()
-     * @see ClientSupplierController#createClientSupplier(String, String, String, String, String, LocalDate, String, int, boolean, boolean, boolean, int, int, String, String, String) (...)
-     * @see ClientSupplierController#updateClientSupplier(int, String, String, String, String, String, LocalDate, String, int, boolean, boolean, boolean, int, int, String, String, String) (...)
+     * @see ClientSupplierController#createClientSupplier(ClientSupplier)
      */
     private void saveEditForm() {
         if (!validateForm()) return;
@@ -356,9 +402,6 @@ public class ClientSupplierForm extends JPanel {
 
         LocalDate becameClient = ViewUtils.getDate(becameClientDate);
 
-        String loyaltyCardId = txtIdLoyaltyCard.getText().trim();
-        int loyaltyPoints = (int) spnLoyaltyPoint.getValue();
-
         boolean isClient = chkIsClient.isSelected();
         boolean isSupplier = chkIsSupplier.isSelected();
         boolean isMember = chkIsMember.isSelected();
@@ -368,28 +411,38 @@ public class ClientSupplierForm extends JPanel {
 
         String street = txtStreet.getText().trim();
         String city = txtCity.getText().trim();
-        String country = txtCountry.getText().trim();
 
         try {
             if (currentClientSupplier == null) {
-                currentClientSupplier = controller.createClientSupplier(
-                        name, firstName, mail, phoneNumber, vatNumber,
-                        becameClient,
-                        loyaltyCardId, loyaltyPoints,
-                        isClient, isSupplier, isMember,
-                        streetNumber, postalCode,
-                        street, city, country
-                );
+                Locality locality = new Locality(city, postalCode);
+                Address newAddress = new Address(street, streetNumber, city, postalCode);
+                addressController.createAddress(newAddress);
+
+                ClientSupplier newItem = new ClientSupplier(name, firstName, mail, phoneNumber, newAddress, isClient, isSupplier, isMember, vatNumber, becameClient, null);
+                currentClientSupplier = clientController.createClientSupplier(newItem);
+
+                if (isClient && chkCreateFidelityCard != null && chkCreateFidelityCard.isSelected()) {
+                    clientController.createFidelityCard(currentClientSupplier.getId());
+                    currentClientSupplier = clientController.getClientSupplier(currentClientSupplier.getId());
+                }
             } else {
-                currentClientSupplier = controller.updateClientSupplier(
-                        currentClientSupplier.getId(),
-                        name, firstName, mail, phoneNumber, vatNumber,
-                        becameClient,
-                        loyaltyCardId, loyaltyPoints,
-                        isClient, isSupplier, isMember,
-                        streetNumber, postalCode,
-                        street, city, country
-                );
+                //TODO : pas de changement sur autre champs ?
+                if (!currentClientSupplier.getAddress().equals(new Address(street, streetNumber, city, postalCode))) {
+                    Locality locality = new Locality(city, postalCode);
+                    addressController.createLocality(locality);
+                    Address newAddress = new Address(street, streetNumber, city, postalCode);
+                    addressController.createAddress(newAddress);
+                    clientController.changeAddress(currentClientSupplier.getId(), newAddress);
+                }
+                if (!currentClientSupplier.getPhoneNumber().equals(phoneNumber)) {
+                    clientController.changePhoneNumber(currentClientSupplier.getId(), Integer.parseInt(phoneNumber));
+                }
+                if (!currentClientSupplier.getEmail().equals(mail)) {
+                    clientController.changeEmail(currentClientSupplier.getId(), mail);
+                }
+                if (isSupplier && !currentClientSupplier.getVATNumber().equals(vatNumber)) {
+                    supplierController.changeVATNumber(currentClientSupplier.getId(), vatNumber);
+                }
             }
 
             if (currentClientSupplier == null) {
@@ -411,6 +464,7 @@ public class ClientSupplierForm extends JPanel {
 
     /**
      * Resets all input fields in the form to their default values.
+     *
      * @see #loadClientSupplier(ClientSupplier)
      */
     public void clearForm() {
@@ -423,8 +477,8 @@ public class ClientSupplierForm extends JPanel {
 
         becameClientDate.setValue(new Date());
 
-        txtIdLoyaltyCard.setText("");
-        spnLoyaltyPoint.setValue(0);
+        currentClientSupplier = null;
+        buildLoyaltyPanel();
 
         chkIsClient.setSelected(false);
         chkIsSupplier.setSelected(false);
@@ -436,8 +490,6 @@ public class ClientSupplierForm extends JPanel {
         txtStreet.setText("");
         txtCity.setText("");
         txtCountry.setText("Belgium");
-
-        currentClientSupplier = null;
     }
 
     /**
@@ -468,15 +520,7 @@ public class ClientSupplierForm extends JPanel {
             becameClientDate.setValue(ViewUtils.toDate(cs.getBecameClientDate()));
         }
 
-        FidelityCard fidelityCard = cs.getFidelityCard();
-
-        if (fidelityCard != null && fidelityCard.getIsValid()) {
-            txtIdLoyaltyCard.setText(String.valueOf(fidelityCard.getId()));
-            spnLoyaltyPoint.setValue(fidelityCard.getTotalPoint());
-        } else {
-            txtIdLoyaltyCard.setText("");
-            spnLoyaltyPoint.setValue(0);
-        }
+        buildLoyaltyPanel();
 
         chkIsClient.setSelected(cs.getIsClient());
         chkIsSupplier.setSelected(cs.getIsSupplier());
@@ -514,5 +558,20 @@ public class ClientSupplierForm extends JPanel {
      */
     public ClientSupplier getCurrentClientSupplier() {
         return currentClientSupplier;
+    }
+
+    private void onCreateFidelityCard() {
+        try {
+            FidelityCard newCard = clientController.createFidelityCard(currentClientSupplier.getId());
+            if (newCard != null) {
+                currentClientSupplier.setFidelityCard(newCard);
+                buildLoyaltyPanel(newCard);
+                JOptionPane.showMessageDialog(this, "Fidelity card created successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to create fidelity card.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

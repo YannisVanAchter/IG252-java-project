@@ -1,9 +1,8 @@
 package main.java.be.henallux.project.view;
 
-import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.Discount;
-import main.java.be.henallux.project.model.FidelityCard;
-import main.java.be.henallux.project.model.Product;
+import main.java.be.henallux.project.controller.ClientController;
+import main.java.be.henallux.project.controller.ProductController;
+import main.java.be.henallux.project.model.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -40,17 +39,22 @@ public class ReceiptPayment extends JPanel {
     private static final Color COLOR_PROMO = new Color(0, 140, 0);
 
     private final MainWindow mainWindow;
+    private final ClientController clientController;
+    private final ProductController productController;
     private final ReceiptCreateView receiptCreateView;
     private final ClientSupplier clientSupplier;
     private final LinkedHashMap<Product, Integer> receipt;
     private int pointsUsed;
 
+    private JComboBox<String> paymentMethod;
     private JPanel ticketPanel;
     private JLabel lblPointsUsed;
     private JButton btnPay;
 
     public ReceiptPayment(MainWindow mainWindow, ReceiptCreateView receiptCreateView, ClientSupplier clientSupplier, LinkedHashMap<Product, Integer> receipt) {
         this.mainWindow = mainWindow;
+        this.clientController = new ClientController();
+        this.productController = new ProductController();
         this.receiptCreateView = receiptCreateView;
         this.clientSupplier = clientSupplier;
         this.receipt = receipt;
@@ -154,10 +158,7 @@ public class ReceiptPayment extends JPanel {
         ticketPanel = new JPanel();
         ticketPanel.setLayout(new BoxLayout(ticketPanel, BoxLayout.Y_AXIS));
         ticketPanel.setBackground(Color.WHITE);
-        ticketPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY),
-                new EmptyBorder(12, 12, 12, 12)
-        ));
+        ticketPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY), new EmptyBorder(12, 12, 12, 12)));
         ticketPanel.setAlignmentX(LEFT_ALIGNMENT);
 
         refreshTicket();
@@ -230,9 +231,7 @@ public class ReceiptPayment extends JPanel {
 
         Discount discount = product.getCurrentDiscount();
         if (discount != null && product.getIsDiscounted() && quantity >= discount.getRequiredQuantity()) {
-            BigDecimal discountAmount = lineTotal
-                    .multiply(discount.getDiscountPercentage())
-                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            BigDecimal discountAmount = lineTotal.multiply(discount.getDiscountPercentage()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
             container.add(createLine("   Discount -" + (int) discount.getDiscountPercentage().doubleValue() + "%", String.format("-%.2f€", discountAmount), FONT_PROMO, COLOR_PROMO));
         }
         return container;
@@ -268,16 +267,15 @@ public class ReceiptPayment extends JPanel {
 
     /**
      * Builds the payment selection section.
-     * <p>The section contains a {@code JComboBox}.
+     * <p>The section contains a {@code JComboBox} with available payment methods: Cash and Credit card.
      *
      * @return payment section {@code JPanel}
      */
     private JPanel buildPaymentSection() {
         JPanel section = section("Payment");
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
-        JComboBox<String> paymentMethod = new JComboBox<>(new String[]{"Credit card", "Cash", "Cheque"});
+        paymentMethod = new JComboBox<>(new String[]{"Cash", "Credit card"});
         paymentMethod.setFont(FONT_REG);
-        paymentMethod.setMaximumSize(new Dimension(300, 30));
         panel.add(paymentMethod);
         section.add(panel);
         return section;
@@ -309,17 +307,67 @@ public class ReceiptPayment extends JPanel {
 
     /**
      * Handles payment confirmation.
+     * <p>If the receipt is empty, the transaction does not start and the user is redirected back.
+     * <p>Prompts the user to confirm the total amount and selected payment method before proceeding.
+     * <p>Delegates checkout registration to {@link ClientController} based on the client context:
+     * Client with fidelity card, points used: checkout with card and points
+     * <p>After checkout registration, deducts sold quantities from the first shelf location
+     * ({@link LocationProduct#getIsStock()} = {@code false}) of each product.
+     * <p>All checkout and stock operations are wrapped in a try/catch block.
+     * If an error occurs, the transaction is interrupted and an error message is displayed.
      * <p>When payment succeeds:
      * <ul><li>A success message is displayed</li>
      *     <li>The payment button is disabled</li>
      *     <li>The receipt is cleared {@link ReceiptCreateView#clearAll()}</li>
      *     <li>The application navigates back to the receipt page {@link MainWindow#setPage(String)}</li></ul>
+     *
+     * @see ClientController#addCheckout(LinkedHashMap)
+     * @see ProductController#subtractFromStock(int, int, LocationProduct)
      */
     private void onPayClick() {
-        JOptionPane.showMessageDialog(this, "Payment successful", "Success", JOptionPane.INFORMATION_MESSAGE);
-        btnPay.setEnabled(false);
-        receiptCreateView.clearAll();
-        mainWindow.setPage("RECEIPT");
+        if (receipt.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "The receipt is empty", "Error", JOptionPane.ERROR_MESSAGE);
+            mainWindow.goBack();
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Confirm payment of " + formatPrice(getTotal()) + " by " + paymentMethod.getSelectedItem() + "?",
+                "Confirm payment",
+                JOptionPane.YES_NO_OPTION);
+        if (confirm != JOptionPane.YES_OPTION) return;
+
+        try {
+            if (clientSupplier == null) {
+                clientController.addCheckout(receipt);
+            } else if (clientSupplier.getFidelityCard() == null) {
+                clientController.addCheckout(receipt, clientSupplier.getId());
+            } else if (pointsUsed > 0) {
+                clientController.addCheckout(receipt, clientSupplier.getId(), clientSupplier.getFidelityCard(), true);
+            } else {
+                clientController.addCheckout(receipt, clientSupplier.getId(), clientSupplier.getFidelityCard());
+            }
+
+            for (Map.Entry<Product, Integer> entry : receipt.entrySet()) {
+                Product product = entry.getKey();
+                int quantity = entry.getValue();
+                boolean deducted = false;
+                for (QuantityProduct quantityProduct : product.getLocation()) {
+                    LocationProduct locationProduct = quantityProduct.getLocationProduct();
+                    if (!locationProduct.getIsStock() && !deducted) {
+                        productController.subtractFromStock(product.getId(), quantity, locationProduct);
+                        deducted = true;
+                    }
+                }
+            }
+
+            JOptionPane.showMessageDialog(this, "Payment successful", "Success", JOptionPane.INFORMATION_MESSAGE);
+            btnPay.setEnabled(false);
+            receiptCreateView.clearAll();
+            mainWindow.setPage("RECEIPT");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Payment failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**
@@ -331,8 +379,7 @@ public class ReceiptPayment extends JPanel {
         BigDecimal subTotal = BigDecimal.ZERO;
 
         for (Map.Entry<Product, Integer> entry : receipt.entrySet()) {
-            BigDecimal lineTotal = BigDecimal.valueOf(entry.getKey().getPrice())
-                    .multiply(BigDecimal.valueOf(entry.getValue()));
+            BigDecimal lineTotal = BigDecimal.valueOf(entry.getKey().getPrice()).multiply(BigDecimal.valueOf(entry.getValue()));
             subTotal = subTotal.add(lineTotal);
         }
         return subTotal;
@@ -353,14 +400,14 @@ public class ReceiptPayment extends JPanel {
             Discount d = product.getCurrentDiscount();
 
             if (d != null && product.getIsDiscounted() && quantity >= d.getRequiredQuantity()) {
-                BigDecimal lineTotal = BigDecimal.valueOf(product.getPrice())
-                        .multiply(BigDecimal.valueOf(quantity));
+                BigDecimal lineTotal = BigDecimal.valueOf(product.getPrice()).multiply(BigDecimal.valueOf(quantity));
 
                 discount = discount.add(lineTotal.multiply(toRate(d.getDiscountPercentage())));
             }
         }
         return discount;
     }
+
     /**
      * Calculates the discount amount generated by loyalty points usage.
      * <p>Current conversion: <pre> 1 point = 0.01€ </pre>
@@ -389,15 +436,11 @@ public class ReceiptPayment extends JPanel {
             Discount d = product.getCurrentDiscount();
 
             if (d != null && product.getIsDiscounted() && quantity >= d.getRequiredQuantity()) {
-                BigDecimal discountAmount = lineTotal
-                        .multiply(toRate(d.getDiscountPercentage()))
-                        .setScale(2, RoundingMode.HALF_UP);
+                BigDecimal discountAmount = lineTotal.multiply(toRate(d.getDiscountPercentage())).setScale(2, RoundingMode.HALF_UP);
                 lineTotal = lineTotal.subtract(discountAmount);
             }
             BigDecimal vatRate = toRate(product.getVat());
-            BigDecimal lineVat = lineTotal
-                    .multiply(vatRate)
-                    .divide(BigDecimal.ONE.add(vatRate), 2, RoundingMode.HALF_UP);
+            BigDecimal lineVat = lineTotal.multiply(vatRate).divide(BigDecimal.ONE.add(vatRate), 2, RoundingMode.HALF_UP);
             vat = vat.add(lineVat);
         }
         return vat.setScale(2, RoundingMode.HALF_UP);
@@ -414,10 +457,7 @@ public class ReceiptPayment extends JPanel {
      * @see #getVATTotal()
      */
     private BigDecimal getTotal() {
-        return getSubTotal()
-                .subtract(getProductDiscount())
-                .subtract(getPointDiscount())
-                .setScale(2, RoundingMode.HALF_UP);
+        return getSubTotal().subtract(getProductDiscount()).subtract(getPointDiscount()).setScale(2, RoundingMode.HALF_UP);
     }
 
     /**
@@ -457,12 +497,7 @@ public class ReceiptPayment extends JPanel {
             pointsUsed = 0;
         } else {
             BigDecimal maxDiscountEuros = getSubTotal().subtract(getProductDiscount());
-            pointsUsed = Math.min(
-                    availablePoints,
-                    maxDiscountEuros
-                            .multiply(BigDecimal.valueOf(100))
-                            .intValue()
-            );
+            pointsUsed = Math.min(availablePoints, maxDiscountEuros.multiply(BigDecimal.valueOf(100)).intValue());
         }
         updatePoints();
         refreshTicket();

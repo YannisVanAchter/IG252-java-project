@@ -76,6 +76,10 @@ public class Document implements Model {
         setComment(comment);
         setRecipeOrder(recipeOrder);
     }
+    public Document(LocalDate dateOfCreation, DocumentType documentType, boolean isChecked, LocalDate plannedSendDate, LocalDate plannedDateOfReceipt, LocalDate actualSendDate, LocalDate actualDateOfReceipt, Integer paymentDelay, WorkFlow workflow, Address address, String comment)
+            throws DataValidationException {
+        this(0, dateOfCreation, documentType, null, isChecked, plannedSendDate, plannedDateOfReceipt, actualSendDate, actualDateOfReceipt, paymentDelay, workflow, address, comment, null);
+    }
 
     /**
      * Delivery document constructor without effective dates

@@ -45,6 +45,10 @@ public class WorkFlow implements Model {
         this(id, status, type, us, (ClientSupplier) null);
     }
 
+    public WorkFlow(Status status, WorkFlowType type, ClientSupplier us, ClientSupplier otherParty) throws DataValidationException {
+        this(0, status, type, us, otherParty);
+    }
+
     public int getId() {
         return id;
     }

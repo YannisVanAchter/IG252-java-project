@@ -57,7 +57,14 @@ public class DocumentTable extends JPanel {
         setLayout(new BorderLayout(10, 16));
         setBorder(new EmptyBorder(16, 16, 16, 16));
 
-        documents = controller.getAllDocuments();
+        ArrayList<Document> loaded = new ArrayList<>();
+        try {
+            loaded = controller.getAllDocuments();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        documents = loaded;
+
         displayDocuments = new ArrayList<>(documents);
 
         JPanel top = new JPanel(new BorderLayout(0, 10));
@@ -102,7 +109,11 @@ public class DocumentTable extends JPanel {
 
         comboTypeDocumentFilter = new JComboBox<>();
         ViewUtils.setCursor(comboTypeDocumentFilter);
-        setDocumentTypes(controller.getAllDocumentType());
+        try {
+            setDocumentTypes(controller.getAllDocumentTypes());
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
         ViewUtils.addFilterListener(comboTypeDocumentFilter, this::onFilterClick);
         JPanel typeFields = new JPanel(new BorderLayout(0, 4));
         typeFields.add(new JLabel("Document type"), BorderLayout.NORTH);

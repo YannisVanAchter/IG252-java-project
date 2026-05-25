@@ -31,6 +31,10 @@ public class Address implements Model {
         setLocality(new Locality(localityName, localityPostalCode));
     }
 
+    public Address(String streetName, int streetNumber, String localityName, int localityPostalCode) throws DataValidationException {
+        this(0, streetName, streetNumber, localityName, localityPostalCode);
+    }
+
     public int getAddressId() { return addressId; }
 
     public void setAddressId(int addressId) throws DataValidationException {
