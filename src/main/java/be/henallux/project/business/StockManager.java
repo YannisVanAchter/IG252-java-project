@@ -15,13 +15,13 @@ public class StockManager {
         this.stockDA = StockDA.getInstance();
     }
 
-    public void addStockLocation(LocationProduct location) throws BusinessException {
+    public LocationProduct addStockLocation(LocationProduct location) throws BusinessException {
         if (location == null) {
             throw new BusinessException("The location cannot be null.");
         }
         try {
-            // TODO - confirm return object of create method
             stockDA.addStockLocation(location);
+            return location;
         } catch (DataBaseException e) {
             throw new BusinessException("Error occurred while adding stock location.", e);
         }
@@ -66,7 +66,7 @@ public class StockManager {
         }
     }
 
-    public void deleteStockLocation(LocationProduct location) throws BusinessException {
+    public boolean deleteStockLocation(LocationProduct location) throws BusinessException {
         if (location == null) {
             throw new BusinessException("The location cannot be null.");
         }
@@ -76,6 +76,7 @@ public class StockManager {
                 throw new BusinessException("Impossible to delete location because it still contains products.");
             }
             stockDA.deleteStockLocation(location);
+            return true;
         } catch (DataBaseException e) {
             throw new BusinessException("Error occurred while deleting stock location.", e);
         }

@@ -39,7 +39,25 @@ public class AddressManager {
             throw new BusinessException("Error creating address.", e);
         }
     }
-/*/
+
+    public boolean deleteAddress(Address address) throws BusinessException {
+        if (address == null) {
+            throw new BusinessException("Error: Address cannot be null.");
+        }
+        try {
+            // Règle métier — vérifier que l'adresse existe avant de la supprimer
+            if (!addressDA.addressExists(address)) {
+                throw new BusinessException("Error: Address does not exist.");
+            }
+            addressDA.deleteAddress(address);
+            return true;
+        } catch (DataBaseException e) {
+            throw new BusinessException("Erreur lors de la suppression de l'adresse.", e);
+        }
+    }
+
+
+//TODO : put this method in createAdress with check if locality exist, if not create it
     public void createLocality(Locality locality) throws BusinessException {
         if (locality == null) {
             throw new BusinessException("Error: Locality cannot be null.");
@@ -53,20 +71,4 @@ public class AddressManager {
             throw new BusinessException("Error creating locality.", e);
         }
     }
-
-    public void deleteAddress(Address address) throws BusinessException {
-        if (address == null) {
-            throw new BusinessException("Error: Address cannot be null.");
-        }
-        try {
-            // Règle métier — vérifier que l'adresse existe avant de la supprimer
-            if (!addressDA.addressExists(address)) {
-                throw new BusinessException("Error: Address does not exist.");
-            }
-            addressDA.deleteAddress(address);
-        } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la suppression de l'adresse.", e);
-        }
-    }
-*/
 }

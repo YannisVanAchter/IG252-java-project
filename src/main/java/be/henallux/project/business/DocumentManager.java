@@ -55,12 +55,13 @@ public class DocumentManager {
         }
     }
 
-    public void addDocumentType(DocumentType docType) throws BusinessException {
+    public DocumentType addDocumentType(DocumentType docType) throws BusinessException {
         if (docType == null) {
             throw new BusinessException("The document type cannot be null.");
         }
         try {
             documentDA.addDocumentType(docType);
+            return docType;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when adding the document type.", e);
         }
@@ -71,7 +72,6 @@ public class DocumentManager {
             throw new BusinessException("The document cannot be null.");
         }
         try {
-            // TODO - confirm return object of create method
             Document newDoc = documentDA.createDocument(document);
             return newDoc;
         } catch (DataBaseException e) {
@@ -79,7 +79,7 @@ public class DocumentManager {
         }
     }
 
-    public void updateDocument(Document document) throws BusinessException {
+    public Document updateDocument(Document document) throws BusinessException {
         if (document == null) {
             throw new BusinessException("The document cannot be null.");
         }
@@ -88,12 +88,13 @@ public class DocumentManager {
                 throw new BusinessException("The document with the specified ID does not exist.");
             }
             documentDA.updateDocument(document);
+            return document;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when updating the document.", e);
         }
     }
 
-        public void deleteDocument(int documentId) throws BusinessException {
+        public boolean deleteDocument(int documentId) throws BusinessException {
         if (documentId <= 0) {
             throw new BusinessException("The document ID must be a positive number.");
         }
@@ -102,6 +103,7 @@ public class DocumentManager {
                 throw new BusinessException("The document does not exist.");
             }
             documentDA.deleteDocument(documentId);
+            return true;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when deleting the document.", e);
         }

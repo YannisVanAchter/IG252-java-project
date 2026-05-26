@@ -51,7 +51,7 @@ private final RecipeDA recipeDA;
         }
     }
 
-    public void createRecipe(Recipe recipe, List<Pair<Product, Integer>> ingredients) throws BusinessException {
+    public Recipe createRecipe(Recipe recipe, List<Pair<Product, Integer>> ingredients) throws BusinessException {
         if (recipe == null) {
             throw new BusinessException("The recipe cannot be null.");
         }
@@ -60,6 +60,7 @@ private final RecipeDA recipeDA;
         }
         try {
             recipeDA.createRecipe(recipe, ingredients);
+            return recipe;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when creating the recipe.", e);
         }

@@ -48,7 +48,6 @@ public class ClientManager extends ClientSupplierManager {
             if (fidelityCardDA.hasFidelityCard(clientId)) {
                 throw new BusinessException("Error: This client already has a loyalty card.");
             }
-            // TODO - confirm return object of create method
             fidelityCardDA.createFidelityCard(clientId);
         } catch (DataBaseException e) {
             throw new BusinessException("Error creating loyalty card.", e);
