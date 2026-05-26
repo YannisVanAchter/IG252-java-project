@@ -23,16 +23,20 @@ public class LocalityDA extends  CRUD<Locality> {
         this.IDS_MAPPING_OBJECT = new HashMap<>();
     }
 
-    public static synchronized  LocalityDA getInstance() {
-        if (instance == null) {
-            setInstance(new LocalityDA());
+    public static LocalityDA getInstance() {
+        synchronized (LocalityDA.class) {
+            if (instance == null) {
+                setInstance(new LocalityDA());
+            }
         }
         return instance;
     }
 
-    private static synchronized void setInstance(LocalityDA localityDA) {
-        if (instance == null) {
-            instance = localityDA;
+    private static void setInstance(LocalityDA localityDA) {
+        synchronized (LocalityDA.class) {
+            if (instance == null) {
+                instance = localityDA;
+            }
         }
     }
 

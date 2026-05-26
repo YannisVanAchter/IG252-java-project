@@ -41,7 +41,7 @@ public class QuantityProduct implements Model {
         return quantity;
     }
 
-    private void setQuantity(int quantity) throws DataValidationException {
+    public final void setQuantity(int quantity) throws DataValidationException {
         if (quantity < 0) {
             String message = "Quantity setting error, quantity is lower than 0 when it shouldn't (current value: " + quantity + ")";
             throw new DataValidationException(message);
@@ -68,10 +68,14 @@ public class QuantityProduct implements Model {
                 product.equals(other.getProduct());
     }
 
-    @Override
-    public int hashCode() {
+    public static int hashCode(LocationProduct locationProduct, Product product) {
         int result = locationProduct.hashCode();
         result = 31 * result + product.hashCode();
         return result;
+    }
+
+    @Override
+    public int hashCode() {
+        return hashCode(this.locationProduct, this.product);
     }
 }

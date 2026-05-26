@@ -38,7 +38,7 @@ public class Product implements Model {
         return id;
     }
 
-    private void setId(int id) throws DataValidationException {
+    public final void setId(int id) throws DataValidationException {
         if (id < 0) {
             String message = "ID setting error, ID is lower than 0 when it shouldn't (current value: " + id + ")";
             throw new DataValidationException(message);

@@ -674,3 +674,12 @@ INSERT INTO ProductCategory (name_) VALUES ('Electro-ménager');
 INSERT INTO ProductCategory (name_) VALUES ('fruits et légumes');
 INSERT INTO ProductCategory (name_) VALUES ('Viandes');
 INSERT INTO ProductCategory (name_) VALUES ('Produits laitier');
+
+INSERT INTO LocationProduct (shelf, floor_, isStock, isFreezer) VALUES ("A-a", 1, true, false);
+INSERT INTO LocationProduct (shelf, floor_, isStock, isFreezer) VALUES ("A-a", 2, true, false);
+INSERT INTO LocationProduct (shelf, floor_, isStock, isFreezer) VALUES ("A-a", 3, true, true);
+INSERT INTO LocationProduct (shelf, floor_, isStock, isFreezer) VALUES ("A-b", 1, true, true);
+INSERT INTO LocationProduct (shelf, floor_, isStock, isFreezer) VALUES ("B-a", 1, false, false);
+INSERT INTO LocationProduct (shelf, floor_, isStock, isFreezer) VALUES ("B-a", 2, false, false);
+INSERT INTO LocationProduct (shelf, floor_, isStock, isFreezer) VALUES ("B-a", 3, false, true);
+INSERT INTO LocationProduct (shelf, floor_, isStock, isFreezer) VALUES ("B-b", 1, false, true);

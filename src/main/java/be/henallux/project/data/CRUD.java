@@ -1,7 +1,9 @@
 package main.java.be.henallux.project.data;
 
 import java.sql.ResultSet;
+import java.sql.Date;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -42,4 +44,12 @@ public abstract class CRUD<Model> {
      * @effect If the model does not exist in the DB, it will insert the object
      */
     abstract boolean checkExist(Model model) throws DataBaseException, DataValidationException;
+
+    public LocalDate SQLDateToLocalDate(Date d) {
+        return d.toLocalDate();
+    }
+
+    public Date LocalDateToSQLDate(LocalDate d) {
+        return Date.valueOf(d);
+    }
 }

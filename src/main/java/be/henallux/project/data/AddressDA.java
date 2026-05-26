@@ -27,16 +27,20 @@ public class AddressDA extends CRUD<Address> {
         this.dataMappingObject = new HashMap<>();
     }
 
-    public static synchronized  AddressDA getInstance() {
-        if (this.instance == null) {
-            setInstance(new AddressDA());
+    public static AddressDA getInstance() {
+        synchronized (AddressDA.class) {
+            if (this.instance == null) {
+                setInstance(new AddressDA());
+            }
         }
         return this.instance;
     }
 
-    private static synchronized void setInstance(AddressDA addressDA) {
-        if (instance == null) {
-            instance = addressDA;
+    private static void setInstance(AddressDA addressDA) {
+        synchronized (AddressDA.class) {
+            if (instance == null) {
+                instance = addressDA;
+            }
         }
     }
     
@@ -77,16 +81,18 @@ public class AddressDA extends CRUD<Address> {
 
     public List<Address> getsByIds(List<Integer> ids, boolean mapping) throws DataBaseException {
         // TODO create decorator to automatise this portion of code in the parent class (+- 15 nexts lines)
-        if (ids.isEmpty()) {
+        if (ids == null) {
             return new ArrayList<>();
         }
         List<Address> addresses = new ArrayList<>();
 
-        for (int id: ids) {
+        for (int i = 0; i < ids.size(); i++) {
+            int id = ids.get(i);
             Address a = dataMappingObject.get(id);
             if (a != null) {
-                ids.remove(id);
                 addresses.add(a);
+                ids.remove(i);
+                i--;
             }
         }
 

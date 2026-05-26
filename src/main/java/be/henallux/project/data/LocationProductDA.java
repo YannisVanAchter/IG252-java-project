@@ -23,17 +23,21 @@ public class LocationProductDA extends CRUD<LocationProduct> {
         this.dataMappingObject = new HashMap<>();
     }
 
-    public static synchronized LocationProductDA getInstance() {
-        if (instance == null) {
-            setInstance(new LocationProductDA());
+    public static  LocationProductDA getInstance() {
+        synchronized (LocationProductDA.class) {
+            if (instance == null) {
+                setInstance(new LocationProductDA());
+            }
         }
 
         return instance;
     }
 
-    private static synchronized void setInstance(LocationProductDA locationProductDA) {
-        if (instance == null) {
-            instance = locationProductDA;
+    private static void setInstance(LocationProductDA locationProductDA) {
+        synchronized (LocationProductDA.class) {
+            if (instance == null) {
+                instance = locationProductDA;
+            }
         }
     }
 

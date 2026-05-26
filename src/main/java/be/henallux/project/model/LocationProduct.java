@@ -93,11 +93,15 @@ public class LocationProduct implements Model {
                 isStock == other.getIsStock();
     }
 
-    @Override
-    public int hashCode() {
+    public int hashCode(String shelf, String floor, Boolean isStock) {
         int result = shelf.hashCode();
         result = 31 * result + floor.hashCode();
         result = 31 * result + Boolean.hashCode(isStock);
         return result;
+    }
+
+    @Override
+    public int hashCode() {
+        return hashCode(shelf, floor, isStock);
     }
 }

@@ -129,12 +129,16 @@ public class Discount implements Model {
                 endDate.equals(other.getEndDate());
     }
 
+    public static int hashCode(int quantity, BigDecimal percent, LocalDate start, LocalDate end) {
+        int result = Integer.hashCode(quantity);
+        result = 31 * result + percent.stripTrailingZeros().hashCode();
+        result = 31 * result + start.hashCode();
+        result = 31 * result + end.hashCode();
+        return result;
+    }
+
     @Override
     public int hashCode() {
-        int result = Integer.hashCode(requiredQuantity);
-        result = 31 * result + discountPercentage.stripTrailingZeros().hashCode();
-        result = 31 * result + startDate.hashCode();
-        result = 31 * result + endDate.hashCode();
-        return result;
+        return hashCode(this.requiredQuantity, this.discountPercentage, this.startDate, this.endDate);
     }
 }
