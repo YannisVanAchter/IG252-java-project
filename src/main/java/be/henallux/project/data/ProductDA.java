@@ -1,5 +1,6 @@
 package main.java.be.henallux.project.data;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,19 +12,23 @@ import java.util.List;
 import java.util.Map;
 
 import main.java.be.henallux.project.data.exception.DataBaseException;
+import main.java.be.henallux.project.data.CRUD;
+import main.java.be.henallux.project.data.DiscountDA;
+import main.java.be.henallux.project.data.QuantityProductDA;
+import main.java.be.henallux.project.data.LocationProductDA;
+import main.java.be.henallux.project.data.ProductCategoryDA;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.Product;
 import main.java.be.henallux.project.model.QuantityProduct;
-import main.java.be.henallux.project.model.LocationProduct;
-import main.java.be.henallux.project.model.Discount;
 
 public class ProductDA extends CRUD<Product> {
     private static volatile ProductDA instance;
     private final String TABLE_NAME = "Product";
-    private Map<Integer, Product> dataMappingObject;
-    private DiscountDA discountDA;
-    private QuantityProductDA quantityDA;
-    private LocationProductDA locationDA;
-    private ProductCategoryDA categoryDA;
+    private final Map<Integer, Product> dataMappingObject;
+    private final DiscountDA discountDA;
+    private final QuantityProductDA quantityDA;
+    private final LocationProductDA locationDA;
+    private final ProductCategoryDA categoryDA;
 
     private ProductDA() {
         super();
@@ -55,7 +60,7 @@ public class ProductDA extends CRUD<Product> {
     }
 
     @Override
-    public Product mapDataToObject(ResultSet data, boolean mapping) throws DataBaseException {
+    public Product mapDataToObject(ResultSet data, boolean mapping) throws DataBaseException, DataValidationException {
         int id;
 
         try {
@@ -78,11 +83,11 @@ public class ProductDA extends CRUD<Product> {
 
                 if (mapping) {
                     discountDA.getAll(); // Discounts set by getting all discounts
-                    List<Integer> idsLocation = locationDA.getAll().stream().mapToInt(location -> 
+                    List<Integer> idsLocation = locationDA.getAll().stream().map(location ->
                         QuantityProduct.hashCode(location, product)
-                    );
+                    ).toList();
 
-                    product.setLocation(quantityDA.getByIds(idsLocation));
+                    product.setLocation(quantityDA.getsByIds(idsLocation));
                 }
 
                 dataMappingObject.put(id, product);
@@ -96,11 +101,11 @@ public class ProductDA extends CRUD<Product> {
     }
 
     @Override
-    public List<Product> getAll() throws DataBaseException {
+    public List<Product> getAll() throws DataBaseException, DataValidationException {
         String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " ORDER BY id_";
         List<Product> products = new ArrayList<>();
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
 
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
@@ -118,7 +123,7 @@ public class ProductDA extends CRUD<Product> {
     }
 
     @Override
-    public List<Product> getsByIds(List<Integer> ids, boolean mapping) throws DataBaseException {
+    public List<Product> getsByIds(List<Integer> ids, boolean mapping) throws DataBaseException, DataValidationException {
         List<Product> products = new ArrayList<>();
 
         if (ids == null) {
@@ -151,7 +156,7 @@ public class ProductDA extends CRUD<Product> {
 
         SQLInstruction.append(");");
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
 
             PreparedStatement statement = connection.prepareStatement(SQLInstruction.toString());
 
@@ -173,12 +178,12 @@ public class ProductDA extends CRUD<Product> {
     }
 
     @Override
-    public List<Product> getsByIds(List<Integer> ids) throws DataBaseException {
+    public List<Product> getsByIds(List<Integer> ids) throws DataBaseException, DataValidationException {
         return getsByIds(ids, true);
     }
 
     @Override
-    public Product getById(int id, boolean mapping) throws DataBaseException {
+    public Product getById(int id, boolean mapping) throws DataBaseException, DataValidationException {
 
         Product product = dataMappingObject.get(id);
 
@@ -189,7 +194,7 @@ public class ProductDA extends CRUD<Product> {
         String SQLInstruction =
                 "SELECT * FROM " + TABLE_NAME + " WHERE id_=?;";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
 
             PreparedStatement statement = connection.prepareStatement(
                     SQLInstruction
@@ -212,13 +217,13 @@ public class ProductDA extends CRUD<Product> {
 
     @Override
     public Product getById(int id)
-            throws DataBaseException {
+            throws DataBaseException, DataValidationException {
 
         return getById(id, true);
     }
 
     @Override
-    public boolean insert(Product newProduct) throws DataBaseException {
+    public boolean insert(Product newProduct) throws DataBaseException, DataValidationException {
 
         boolean inserted = false;
 
@@ -227,7 +232,7 @@ public class ProductDA extends CRUD<Product> {
                 " (name_, priceEVAT, VAT, loyaltyPoints, isEdible, minStockQuantity, categoryId) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?);";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
 
             PreparedStatement statement = connection.prepareStatement(
                     SQLInstruction,
@@ -236,7 +241,7 @@ public class ProductDA extends CRUD<Product> {
 
             statement.setString(1, newProduct.getName());
             statement.setBigDecimal(2, newProduct.getPriceEVAT());
-            statement.setBigDecimal(3, newProduct.getVatT());
+            statement.setBigDecimal(3, newProduct.getVat());
             statement.setInt(4, newProduct.getFidelityPoint());
             statement.setBoolean(5, newProduct.getIsEdible());
             statement.setInt(6, newProduct.getMinStockQuantity());
@@ -265,13 +270,13 @@ public class ProductDA extends CRUD<Product> {
     }
 
     @Override
-    public boolean update(Product product, Product newProduct) throws DataBaseException {
+    public boolean update(Product product, Product newProduct) throws DataBaseException, DataValidationException {
 
         String SQLInstruction = "UPDATE " + TABLE_NAME +
                 " SET priceEVAT=?, VAT=?, loyaltyPoints=?, minStockQuantity=? " +
                 "WHERE id_=?;";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
 
             PreparedStatement statement = connection.prepareStatement(
                     SQLInstruction
@@ -281,14 +286,14 @@ public class ProductDA extends CRUD<Product> {
             statement.setBigDecimal(2, newProduct.getVat());
             statement.setInt(3, newProduct.getFidelityPoint());
             statement.setInt(4, newProduct.getMinStockQuantity());
-            statement.setInt(5, product.getProductId());
+            statement.setInt(5, product.getId());
 
             int affectedRows = statement.executeUpdate();
 
-            dataMappingObject.remove(product.getProductId());
+            dataMappingObject.remove(product.getId());
 
             dataMappingObject.put(
-                    newProduct.getProductId(),
+                    newProduct.getId(),
                     newProduct
             );
 
@@ -299,13 +304,13 @@ public class ProductDA extends CRUD<Product> {
         }
     }
 
-    public boolean updatePrice(Product product, BigDecimal newPriceEVAT, BigDecimal newVat) throws DataBaseException {
+    public boolean updatePrice(Product product, BigDecimal newPriceEVAT, BigDecimal newVat) throws DataBaseException, DataValidationException {
 
         String SQLInstruction = "UPDATE " + TABLE_NAME +
                 " SET priceEVAT=?, VAT=? " +
                 "WHERE id_=?;";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
 
             product.setPriceEVAT(newPriceEVAT);
             product.setVat(newVat);
@@ -316,7 +321,7 @@ public class ProductDA extends CRUD<Product> {
 
             statement.setBigDecimal(1, newPriceEVAT);
             statement.setBigDecimal(2, newVat);
-            statement.setInt(3, product.getProductId());
+            statement.setInt(3, product.getId());
 
             int affectedRows = statement.executeUpdate();
 
@@ -327,14 +332,13 @@ public class ProductDA extends CRUD<Product> {
         }
     }
 
-    @Override
-    public boolean updateFidelityPoint(Product product, int newFidelityPoint) throws DataBaseException {
+    public boolean updateFidelityPoint(Product product, int newFidelityPoint) throws DataBaseException, DataValidationException {
 
         String SQLInstruction = "UPDATE " + TABLE_NAME +
                 " SET loyaltyPoints=? " +
-                "WHERE id_=?;";
+                " WHERE id_=?;";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
 
             product.setFidelityPoint(newFidelityPoint);
 
@@ -343,7 +347,7 @@ public class ProductDA extends CRUD<Product> {
             );
 
             statement.setInt(1, newFidelityPoint);
-            statement.setInt(2, product.getProductId());
+            statement.setInt(2, product.getId());
 
             int affectedRows = statement.executeUpdate();
 
@@ -354,14 +358,13 @@ public class ProductDA extends CRUD<Product> {
         }
     }
 
-    @Override
-    public boolean updateQuantity(Product product, int newQuantity) throws DataBaseException {
+    public boolean updateQuantity(Product product, int newQuantity) throws DataBaseException, DataValidationException {
 
         String SQLInstruction = "UPDATE " + TABLE_NAME +
                 " SET minStockQuantity=? " +
                 "WHERE id_=?;";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
 
             product.setMinStockQuantity(newQuantity);
 
@@ -370,7 +373,7 @@ public class ProductDA extends CRUD<Product> {
             );
 
             statement.setInt(1, newQuantity);
-            statement.setInt(2, product.getProductId());
+            statement.setInt(2, product.getId());
 
             int affectedRows = statement.executeUpdate();
 
@@ -383,22 +386,22 @@ public class ProductDA extends CRUD<Product> {
 
     @Override
     public boolean delete(Product product)
-            throws DataBaseException {
+            throws DataBaseException, DataValidationException {
 
         String SQLInstruction =
                 "DELETE FROM " + TABLE_NAME + " WHERE id_=?;";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
 
             PreparedStatement statement = connection.prepareStatement(
                     SQLInstruction
             );
 
-            statement.setInt(1, product.getProductId());
+            statement.setInt(1, product.getId());
 
             int affectedRows = statement.executeUpdate();
 
-            dataMappingObject.remove(product.getProductId());
+            dataMappingObject.remove(product.getId());
 
             return affectedRows > 0;
 
@@ -409,7 +412,7 @@ public class ProductDA extends CRUD<Product> {
 
     @Override
     public boolean checkExist(Product product)
-            throws DataBaseException {
+            throws DataBaseException, DataValidationException {
 
         boolean exist = false;
 
@@ -420,13 +423,13 @@ public class ProductDA extends CRUD<Product> {
                     TABLE_NAME +
                     " WHERE id_=?;";
 
-            try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+            try (Connection connection = connector.getConnection()) {
 
                 PreparedStatement statement = connection.prepareStatement(
                         SQLInstruction
                 );
 
-                statement.setInt(1, product.getProductId());
+                statement.setInt(1, product.getId());
 
                 ResultSet result = statement.executeQuery();
 

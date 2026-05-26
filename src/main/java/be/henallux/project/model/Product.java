@@ -8,6 +8,10 @@ import java.util.Collections;
 import java.util.List;
 
 import main.java.be.henallux.project.model.exception.DataValidationException;
+import main.java.be.henallux.project.model.Model;
+import main.java.be.henallux.project.model.ProductCategory;
+import main.java.be.henallux.project.model.QuantityProduct;
+import main.java.be.henallux.project.model.Discount;
 
 public class Product implements Model {
     private int id;

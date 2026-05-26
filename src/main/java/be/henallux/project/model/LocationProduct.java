@@ -1,6 +1,7 @@
 package main.java.be.henallux.project.model;
 
 import main.java.be.henallux.project.model.exception.DataValidationException;
+import main.java.be.henallux.project.model.Model;
 
 public class LocationProduct implements Model {
     private String locationProductId;
@@ -93,7 +94,7 @@ public class LocationProduct implements Model {
                 isStock == other.getIsStock();
     }
 
-    public int hashCode(String shelf, String floor, Boolean isStock) {
+    static public int hashCode(String shelf, String floor, Boolean isStock) {
         int result = shelf.hashCode();
         result = 31 * result + floor.hashCode();
         result = 31 * result + Boolean.hashCode(isStock);
