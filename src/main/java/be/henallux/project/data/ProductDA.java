@@ -78,7 +78,7 @@ public class ProductDA extends CRUD<Product> {
 
                 if (mapping) {
                     discountDA.getAll(); // Discounts set by getting all discounts
-                    List<Integer> idsLocation = locationDA.getAll().stream().map(location -> 
+                    List<Integer> idsLocation = locationDA.getAll().stream().mapToInt(location -> 
                         QuantityProduct.hashCode(location, product);
                     );
 
