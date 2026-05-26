@@ -1,14 +1,16 @@
 package main.java.be.henallux.project.view;
 
-import main.java.be.henallux.project.model.Address;
-import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.Product;
+import main.java.be.henallux.project.controller.DocumentController;
+import main.java.be.henallux.project.controller.ProductController;
+import main.java.be.henallux.project.controller.WorkFlowController;
+import main.java.be.henallux.project.model.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 /**
@@ -35,6 +37,9 @@ public class StockOrderCreation extends JPanel {
     private static final Font FONT_TITLE = new Font("SansSerif", Font.BOLD, 18);
 
     private final MainWindow mainWindow;
+    private final WorkFlowController workFlowController;
+    private final DocumentController documentController;
+    private final ProductController productController;
     private StockOrderTableModel model;
     private JLabel lblSupplier;
     private JLabel lblTotal;
@@ -48,6 +53,9 @@ public class StockOrderCreation extends JPanel {
 
     public StockOrderCreation(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
+        this.workFlowController = new WorkFlowController();
+        this.documentController = new DocumentController();
+        this.productController = new ProductController();
         setLayout(new BorderLayout(10, 16));
         setBorder(new EmptyBorder(16, 16, 16, 16));
     }
@@ -58,12 +66,8 @@ public class StockOrderCreation extends JPanel {
      * <ul><li>the title section</li><li>supplier information</li>
      * <li>the editable product table</li><li>the total quantity panel</li>
      * <li>action buttons</li></ul>
-     *
-     * @return the assembled content panel
      */
-    private JPanel buildContent() {
-        JPanel panel = new JPanel(new BorderLayout());
-
+    private void buildContent() {
         JPanel center = new JPanel();
         center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
         center.setBorder(new EmptyBorder(0, 0, 8, 0));
@@ -80,16 +84,15 @@ public class StockOrderCreation extends JPanel {
         add(buildTitle(), BorderLayout.NORTH);
         add(pane, BorderLayout.CENTER);
         add(buildButtons(), BorderLayout.SOUTH);
-
-        return panel;
     }
+
     /**
      * Loads a purchase order into the view.
      * <p>The current content is rebuilt using the selected supplier and products.
      * <p>If no product is provided, a warning dialog is displayed and the previous
      * screen is restored.
      *
-     * @param selectedProduct   the selected products
+     * @param selectedProduct  the selected products
      * @param selectedSupplier the supplier linked to the order
      */
     public void loadOrder(ArrayList<Product> selectedProduct, ClientSupplier selectedSupplier) {
@@ -287,9 +290,28 @@ public class StockOrderCreation extends JPanel {
 
     /**
      * Handles the order confirmation action.
-     * <p>Current table editing is stopped before validation.
+     * <p>Before validation, any active cell editor is stopped to ensure spinner values are committed.
      * <p>The order cannot be confirmed if the total quantity equals {@code 0}.
      * <p>A confirmation dialog is displayed before final validation.
+     * <p>On confirmation, the following steps are :
+     * <ol><li>Create a buying {@link WorkFlow} with status {@code Pending} linked to the selected supplier</li>
+     *     <li>Create a {@link Document} of type "Purchase Order" with delivery details</li>
+     *     <li>Send the order via {@link DocumentController#sendDelivery(int, LocalDate, LocationProduct)}</li>
+     *     <li>Register the reception via {@link DocumentController#receiveDelivery(int, LocalDate, LocationProduct)}</li>
+     *     <li>Add ordered quantities to the back stock ({@link LocationProduct#getIsStock()} = {@code true})
+     *         for each product with a quantity greater than 0</li>
+     *     <li>Update the workflow status to {@code Delivered}</li>
+     *     <li>Schedule a success notification via {@link main.java.be.henallux.project.controller.NotificationController}
+     *         displayed 5 seconds after navigation</li></ol>
+     * <p>If any step fails, the entire operation is interrupted and an error dialog is displayed.
+     * <p>On success, the application navigates back to {@code "STOCK"} page.
+     *
+     * @see WorkFlowController#addWorkFlow(WorkFlow)
+     * @see WorkFlowController#changeStatus(int, Status)
+     * @see DocumentController#createDocument
+     * @see DocumentController#sendDelivery(int, LocalDate, LocationProduct)
+     * @see DocumentController#receiveDelivery(int, LocalDate, LocationProduct)
+     * @see ProductController#addToStocks(int, int, LocationProduct)
      */
     private void onConfirmClick() {
         if (table.isEditing()) {
@@ -297,35 +319,100 @@ public class StockOrderCreation extends JPanel {
         }
 
         if (model.getTotal() == 0) {
-            JOptionPane.showMessageDialog(
-                    this,
+            JOptionPane.showMessageDialog(this,
                     "Please order at least one item before confirming.",
-                    "Empty Order",
-                    JOptionPane.WARNING_MESSAGE
-            );
+                    "Empty Order", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        int confirm = JOptionPane.showConfirmDialog(
-                this,
+        int confirm = JOptionPane.showConfirmDialog(this,
                 "Confirm purchase order for " + model.getTotal() + " item(s) from "
                         + selectedSupplier.getName() + "?",
-                "Confirm Order",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE
-        );
+                "Confirm Order", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
-        if (confirm == JOptionPane.YES_OPTION) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "",
-                    "Success",
-                    JOptionPane.INFORMATION_MESSAGE
+        if (confirm != JOptionPane.YES_OPTION) return;
+
+        try {
+            ArrayList<WorkFlowType> allBuyType = workFlowController.getAllBuying();
+            WorkFlowType buyType = null;
+            for (WorkFlowType workFlowType : allBuyType) {
+                if (workFlowType.getIsBuy()) {
+                    buyType = workFlowType;
+                }
+            }
+            if (buyType == null) {
+                throw new Exception("Buying workflow type not found.");
+            }
+            Status pending = new Status("Pending");
+            ClientSupplier us = null; // FIXME: get or create
+            WorkFlow workflow = new WorkFlow(pending, buyType, us, selectedSupplier);
+            workFlowController.addWorkFlow(workflow);
+
+            Address supplierAddress = selectedSupplier.getAddress();
+            DocumentType documentType = new DocumentType("Purchase Order");
+
+            Document newDoc = new Document(
+                    LocalDate.now(),
+                    documentType,
+                    true,
+                    LocalDate.now(), null,
+                    LocalDate.now(), null,
+                    30,
+                    workflow,
+                    supplierAddress,
+                    "Purchase order for " + model.getTotal() + " item(s) from " + selectedSupplier.getName()
             );
+
+            Document createdDoc = documentController.createDocument(newDoc);
+            WorkFlow createdWorkflow = workFlowController.addWorkFlow(workflow);
+            workFlowController.addDocument(createdWorkflow.getId(), createdDoc);
+            if (createdDoc == null) {
+                throw new Exception("Failed to create document.");
+            }
+
+            LocationProduct stockLocation = productController.getOrCreateStockLocation(selectedProduct);
+            documentController.sendDelivery(newDoc.getId(), LocalDate.now(), stockLocation);
+            documentController.receiveDelivery(newDoc.getId(), LocalDate.now(), stockLocation);
+
+            for (int i = 0; i < model.getRowCount(); i++) {
+                Product product = selectedProduct.get(i);
+                int quantity = (int) model.getValueAt(i, StockOrderTableModel.TBL_SPN_INDEX);
+
+                if (quantity > 0) {
+                    boolean added = false;
+                    for (QuantityProduct quantityProduct : product.getLocation()) {
+                        if (quantityProduct.getLocationProduct().getIsStock() && !added) {
+                            productController.addToStocks(product.getId(), quantity, quantityProduct.getLocationProduct());
+                            added = true;
+                        }
+                    }
+                }
+            }
+
+            workFlowController.changeStatus(workflow.getId(), new Status("Delivered"));
+
+            JOptionPane.showMessageDialog(this,
+                    "Purchase order sent and delivery registered successfully.",
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
+
+            Timer timer = new Timer(5000, e ->
+                    mainWindow.getNotificationController().push(new NotificationItem(
+                            "New purchase order received",
+                            "Order received from " + selectedSupplier.getName() + " — " + model.getTotal() + " item(s) added to stock.",
+                            NotificationItem.Type.INFO
+                    ))
+            );
+            timer.setRepeats(false);
+            timer.start();
+
             mainWindow.setPage("STOCK");
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "An error occurred: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
 
     /**
      * Creates a bordered card container with a title.
@@ -354,7 +441,8 @@ public class StockOrderCreation extends JPanel {
             panel.add(new JLabel(value));
         } else {
             panel.add(new JLabel(LABEL_NO_DATA));
-        }        return panel;
+        }
+        return panel;
     }
 
     /**

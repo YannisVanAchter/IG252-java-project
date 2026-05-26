@@ -24,7 +24,7 @@ public class AddressManager {
         }
     }
 
-    public void createAddress(Address address) throws BusinessException {
+    public Address createAddress(Address address) throws BusinessException {
         // Validation
         if (address == null) {
             throw new BusinessException("Error: Address cannot be null.");
@@ -33,7 +33,8 @@ public class AddressManager {
             throw new BusinessException("Error: Street name is required.");
         }
         try {
-            addressDA.insert(address);
+            Address newAddress = addressDA.insert(address);
+            return newAddress;
         } catch (DataBaseException e) {
             throw new BusinessException("Error creating address.", e);
         }

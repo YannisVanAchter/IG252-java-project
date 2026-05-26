@@ -1,345 +1,146 @@
 package main.java.be.henallux.project.controller;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.*;
+import main.java.be.henallux.project.business.AddressManager;
+import main.java.be.henallux.project.business.ClientManager;
+import main.java.be.henallux.project.business.SupplierManager;
+import main.java.be.henallux.project.business.DocumentManager;
+import main.java.be.henallux.project.business.WorkFlowManager;
+import main.java.be.henallux.project.business.exception.BusinessException;
+import main.java.be.henallux.project.model.ClientSupplier;
+import main.java.be.henallux.project.model.Document;
+import main.java.be.henallux.project.model.DocumentType;
+import main.java.be.henallux.project.model.LocationProduct;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 /**
- * Controller fictif utilisé uniquement pour simuler les vues de l'application.
- * <p>
- * TODO: clean & implement class.
+ * @see DocumentManager
+ * @see WorkFlowManager
  */
 public class DocumentController {
 
-    private final ArrayList<Document> documents = new ArrayList<>();
+    private final DocumentManager documentManager;
+    private final WorkFlowManager workFlowManager;
+    private final SupplierManager supplierManager;
+    private final ClientManager clientManager;
+    private final AddressManager addressManager;
 
-    /**
-     * Retourne la liste des documents disponibles.
-     *
-     * @return une liste de documents au format ArrayList
-     * @throws DataValidationException a supprimé, je pense. (j'en avais besoin ici, car création d'objet)
-     */
-    public ArrayList<Document> getAllDocuments() {
-        try {
-            documents.clear();
-
-            ClientSupplier usCompany = new ClientSupplier(
-                    999,
-                    "TerraClic",
-                    "Store",
-                    "contact@terraclic.be",
-                    "3200000000",
-                    new Address(
-                            999,
-                            "Rue Centrale",
-                            1,
-                            "Namur",
-                            5000
-                    ),
-                    true,
-                    true,
-                    true,
-                    "BE0000000001",
-                    LocalDate.now(),
-                    null
-            );
-
-            documents.add(new Document(
-                    1,
-                    LocalDate.of(2020, 12, 2),
-                    new DocumentType(1,"Test"),
-                    null,
-                    true,
-                    LocalDate.of(2020, 12, 2),
-                    LocalDate.of(2020, 12, 2),
-                    LocalDate.of(2020, 12, 2),
-                    LocalDate.of(2020, 12, 2),
-                    20,
-                    new WorkFlow(
-                            1,
-                            new Status("Status"),
-                            new WorkFlowType(1,"Internal", false, false, true),
-                            usCompany
-                    ),
-                    new Address(
-                            1,
-                            "Café route",
-                            12,
-                            "Namur",
-                            5000
-                    ),
-                    null,
-                    null
-            ));
-
-            ClientSupplier martinSophie = new ClientSupplier(
-                    2,
-                    "Martin",
-                    "Sophie",
-                    "sophie.martin@email.com",
-                    "32470000002",
-                    new Address(
-                            2,
-                            "Avenue Louise",
-                            10,
-                            "Bruxelles",
-                            1050
-                    ),
-                    true,
-                    false,
-                    false,
-                    "BE0987654321",
-                    LocalDate.now(),
-                    null
-            );
-
-            documents.add(new Document(
-                    2,
-                    LocalDate.of(2024, 3, 15),
-                    new DocumentType(2, "Quote"),
-                    null,
-                    false,
-                    LocalDate.of(2024, 3, 15),
-                    LocalDate.of(2024, 3, 20),
-                    LocalDate.of(2024, 3, 16),
-                    LocalDate.of(2024, 3, 21),
-                    30,
-                    new WorkFlow(
-                            2,
-                            new Status("Pending"),
-                            new WorkFlowType(2,"Buy", false, false, false),
-                            usCompany,
-                            martinSophie
-                    ),
-                    new Address(
-                            2,
-                            "Avenue Louise",
-                            10,
-                            "Bruxelles",
-                            1050
-                    ),
-                    null,
-                    null
-            ));
-
-            return new ArrayList<>(documents);
-        } catch (DataValidationException e) {
-            return new ArrayList<>();
-        }
+    public DocumentController() {
+        this.documentManager = new DocumentManager();
+        this.workFlowManager = new WorkFlowManager();
+        this.supplierManager = new SupplierManager();
+        this.clientManager = new ClientManager();
+        this.addressManager = new AddressManager();
     }
 
     /**
-     * Supprime un document.
-     *
-     * @param doc le document à supprimer
-     * @return l'état de la suppression
+     * Returns all documents.
+     * @return list of all {@link Document}
+     * @see DocumentManager#getAllDocuments()
+     */
+    public ArrayList<Document> getAllDocuments() throws BusinessException {
+        return new ArrayList<>(documentManager.getAllDocuments());
+    }
+
+    /**
+     * Returns a document by ID.
+     * @param id the document ID
+     * @return the matching {@link Document}
+     * @see DocumentManager#getDocument(int)
+     */
+    public Document getDocument(int id) throws BusinessException {
+        return documentManager.getDocument(id);
+    }
+
+    /**
+     * Returns all document types.
+     * @return list of all {@link DocumentType}
+     * @see DocumentManager#getDocumentTypes()
+     */
+    public ArrayList<DocumentType> getAllDocumentTypes() throws BusinessException {
+        return new ArrayList<>(documentManager.getDocumentTypes());
+    }
+
+    /**
+     * Creates and registers a new document type.
+     * @param name the name of the document type
+     * @return the created {@link DocumentType}
+     * @see DocumentManager#addDocumentType(DocumentType)
+     */
+    public DocumentType addDocumentType(String name) throws BusinessException {
+        DocumentType newType = new DocumentType(name);
+        documentManager.addDocumentType(newType);
+        return newType;
+    }
+
+    /**
+     * Returns all clients and suppliers.
+     * @return list of all {@link ClientSupplier}
+     * @see ClientManager#getAllClientSuppliers()
+     */
+    public ArrayList<ClientSupplier> getAllClientSupplier() throws BusinessException {
+        return new ArrayList<>(clientManager.getAllClientSuppliers());
+    }
+
+    /**
+     * Records a delivery reception for a document.
+     * @param documentId      the document ID
+     * @param date            the reception date
+     * @param locationProduct the stock location
+     * @see DocumentManager#receiveDelivery(int, LocalDate, LocationProduct)
+     */
+    public void receiveDelivery(int documentId, LocalDate date, LocationProduct locationProduct) throws BusinessException {
+        documentManager.receiveDelivery(documentId, date, locationProduct);
+    }
+
+    /**
+     * Records a delivery send for a document.
+     * @param documentId      the document ID
+     * @param date            the send date
+     * @param locationProduct the stock location
+     * @see DocumentManager#sendDelivery(int, LocalDate, LocationProduct)
+     */
+    public void sendDelivery(int documentId, LocalDate date, LocationProduct locationProduct) throws BusinessException {
+        documentManager.sendDelivery(documentId, date, locationProduct);
+    }
+
+    /**
+     * Deletes a document.
+     * @param doc the {@link Document} to delete
+     * @return {@code true} if deleted successfully, {@code false} otherwise
+     * @see DocumentManager#deleteDocument(int)
      */
     public boolean deleteDocument(Document doc) {
-        return true;
-    }
-
-    /**
-     * Retourne la liste des clients/fournisseurs disponible dans la bd
-     *
-     * @return une liste de clients/fournisseurs en ArrayList
-     * @throws DataValidationException a supprimé, je pense. (j'en avais besoin ici, car création d'objet)
-     */
-    public ArrayList<ClientSupplier> getAllClientSupplier() {
         try {
-            ArrayList<ClientSupplier> clients = new ArrayList<>();
-
-            clients.add(new ClientSupplier(
-                    1,
-                    "Dupont",
-                    "Jean",
-                    "jean.dupont@email.com",
-                    "32470000001",
-                    new Address(1, "Avenue Louise", 10, new Locality("Ixelles", 1050)),
-                    true,
-                    false,
-                    true,
-                    "BE0123456789",
-                    LocalDate.now(),
-                    null
-            ));
-
-            clients.add(new ClientSupplier(
-                    2,
-                    "Martin",
-                    "Sophie",
-                    "sophie.martin@email.com",
-                    "32470000002",
-                    new Address(2, "Avenue Louise", 10, new Locality("Ixelles", 1050)),
-                    true,
-                    false,
-                    false,
-                    "BE0987654321",
-                    LocalDate.now(),
-                    null
-            ));
-
-            clients.add(new ClientSupplier(
-                    3,
-                    "Nguyen",
-                    "Linh",
-                    "linh.nguyen@email.com",
-                    "32470000003",
-                    new Address(3, "Avenue Louise", 10, new Locality("Ixelles", 1050)),
-                    true,
-                    false,
-                    true,
-                    "BE1122334455",
-                    LocalDate.now(),
-                    null
-            ));
-
-            clients.add(new ClientSupplier(
-                    4,
-                    "Dubois",
-                    "Marc",
-                    "marc.dubois@email.com",
-                    "32470000004",
-                    new Address(4, "Avenue Louise", 10, new Locality("Ixelles", 1050)),
-                    true,
-                    false,
-                    false,
-                    "BE6677889900",
-                    LocalDate.now(),
-                    null
-            ));
-
-            clients.add(new ClientSupplier(
-                    5,
-                    "Smith",
-                    "Anna",
-                    "anna.smith@email.com",
-                    "32470000005",
-                    new Address(5, "Avenue Louise", 10, new Locality("Ixelles", 1050)),
-                    true,
-                    false,
-                    true,
-                    "BE5566778899",
-                    LocalDate.now(),
-                    null
-            ));
-
-            return clients;
-        } catch (Exception e) {
-            return new ArrayList<>();
+            documentManager.deleteDocument(doc.getId());
+            return true;
+        } catch (BusinessException e) {
+            return false;
         }
     }
 
     /**
-     * Crée un nouveau document.
-     *
-     * @return le nouvel objet
-     * @throws DataValidationException en cas de problème de validation
+     * Creates a document with address, workflow, and document type.
+     * @param document the {@link Document} to create
+     * @return the created {@link Document}
+     * @see DocumentManager#createDocument(Document)
      */
-    public boolean createDocument(
-            DocumentType documentType,
-            String commentaryText,
-            LocalDate plannedSend,
-            LocalDate plannedReception,
-            LocalDate effectiveSend,
-            LocalDate effectiveReception,
-            int paymentDelay,
-            Status workflowStatus,
-            boolean isBuy,
-            boolean isSell,
-            boolean isInternal,
-            ClientSupplier clientSupplier,
-            int streetNumber,
-            int postalCode,
-            String street,
-            String city,
-            String country,
-            boolean isChecked
-    ) throws DataValidationException {
-        System.out.println("Type: " + documentType);
-        System.out.println("Commentaire: " + commentaryText);
-        System.out.println("Client: " + clientSupplier);
-        System.out.println("Adresse: " + streetNumber + " " + street + ", " + postalCode + " " + city + ", " + country);
-        System.out.println("Flags: buy=" + isBuy + ", sell=" + isSell + ", internal=" + isInternal);
-        return true;
+    public Document createDocument(Document document) throws BusinessException {
+        addressManager.createAddress(document.getAddress());
+        workFlowManager.addWorkFlow(document.getWorkflow());
+        documentManager.addDocumentType(document.getDocumentType());
+        return documentManager.createDocument(document);
     }
 
     /**
-     * Update un document.
-     *
-     * @param documentId fais référence au doc à modifier.
-     * @return l'état de l'update
-     * @throws DataValidationException en cas de problème de validation
+     * Updates a document with an address and workflow.
+     * @param document the {@link Document} to update
+     * @see DocumentManager#updateDocument(Document)
      */
-    public boolean updateDocument(
-            int documentId,
-            DocumentType documentType,
-            String commentaryText,
-            LocalDate plannedSend,
-            LocalDate plannedReception,
-            LocalDate effectiveSend,
-            LocalDate effectiveReception,
-            int paymentDelay,
-            Status workflowStatus,
-            boolean isBuy,
-            boolean isSell,
-            boolean isInternal,
-            ClientSupplier clientSupplier,
-            int streetNumber,
-            int postalCode,
-            String street,
-            String city,
-            String country,
-            boolean isChecked
-    ) throws DataValidationException {
-        System.out.println("ID: " + documentId);
-        System.out.println("Type: " + documentType);
-        System.out.println("Commentaire: " + commentaryText);
-        System.out.println("Client: " + clientSupplier);
-        System.out.println("Adresse: " + streetNumber + " " + street + ", " + postalCode + " " + city + ", " + country);
-        System.out.println("Flags: buy=" + isBuy + ", sell=" + isSell + ", internal=" + isInternal);
-        return true;
-    }
-
-    /**
-     * Retourne la liste des types de documents disponibles.
-     *
-     * @return liste de types de documents
-     * @throws DataValidationException à supprimer
-     */
-    public ArrayList<DocumentType> getAllDocumentType() {
-        try {
-            return getAllDocuments().stream()
-                    .map(Document::getDocumentType)
-                    .distinct()
-                    .collect(Collectors.toCollection(ArrayList::new));
-        } catch (Exception e) {
-            return new ArrayList<>();
-        }
-
-    }
-
-    /**
-     * Retourne les statuts des workflows associés aux documents.
-     *
-     * @return liste des statuts de workflow
-     * @throws DataValidationException à supprimer
-     */
-    public ArrayList<Status> getAllWorkflowStatus() {
-
-        return getAllDocuments().stream()
-                .map(doc -> doc.getWorkflow().getStatus())
-                .distinct()
-                .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    public Status createStatus(String value) throws DataValidationException {
-        return new Status(value);
-    }
-
-    public DocumentType createDocumentType(String value) throws DataValidationException {
-        return new DocumentType(1,value);
+    public void updateDocument(Document document) throws BusinessException {
+        addressManager.createAddress(document.getAddress());
+        workFlowManager.addWorkFlow(document.getWorkflow());
+        documentManager.updateDocument(document);
     }
 }

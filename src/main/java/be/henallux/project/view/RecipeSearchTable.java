@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A Swing-based view that provides a recipe search interface.
@@ -41,7 +42,14 @@ public class RecipeSearchTable extends JPanel {
         this.mainWindow = mainWindow;
         this.controller = new RecipeSearchController();
         this.searchIngredients = new ArrayList<>();
-        this.displayRecipes = controller.searchRecipes(null, null);
+
+        ArrayList<Recipe> loaded = new ArrayList<>();
+        try {
+            loaded = controller.searchRecipes(null, null);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        this.displayRecipes = loaded;
 
         setLayout(new BorderLayout(0, 12));
         setBorder(new EmptyBorder(16, 16, 16, 16));
@@ -205,11 +213,14 @@ public class RecipeSearchTable extends JPanel {
         });
     }
     /**
-     * Filters recipes based on user input.
-     * <p>Filtering is applied on:</p>
-     * <ul><li>Recipe name (case-insensitive partial match)</li>
-     *     <li>Ingredient list (all provided ingredients must match)</li></ul>
-     * <p>The resulting list updates {@code displayRecipes} and refreshes the table model.</p>
+     * Filters recipes based on user input and refreshes the table.
+     * <p>Collects the recipe name from {@link #txtRecipeName} and all non-blank ingredient
+     * values from {@link #searchIngredients}, then delegates the search to
+     * {@link RecipeSearchController#searchRecipes(String, List)}.
+     * <p>Filtering is applied on:
+     * <ul><li>Recipe name: {@code null} if blank, or passed as-is</li>
+     *     <li>Ingredient list: {@code null} if empty, or full list passed</li></ul>
+     * <p>Results update {@link #displayRecipes} and refresh the table model.
      */
     public void onSearchClick() {
         String name = txtRecipeName.getText().trim();
@@ -220,19 +231,15 @@ public class RecipeSearchTable extends JPanel {
             if (!val.isBlank()) ingredients.add(val);
         }
 
-        ArrayList<Recipe> results = controller.searchRecipes(
-                name.isBlank() ? null : name,
-                ingredients.isEmpty() ? null : ingredients.getFirst()
-        );
-
-        for (int i = 1; i < ingredients.size(); i++) {
-            String ingredient = ingredients.get(i);
-            ArrayList<Recipe> filtered = controller.searchRecipes(null, ingredient);
-            results.retainAll(filtered);
+        try {
+            displayRecipes = controller.searchRecipes(
+                    name.isBlank() ? null : name,
+                    ingredients.isEmpty() ? null : ingredients
+            );
+            model.setRecipes(displayRecipes);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-
-        displayRecipes = results;
-        model.setRecipes(new ArrayList<>(results));
     }
 
     /**

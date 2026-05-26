@@ -177,6 +177,7 @@ public class ClientSearchView extends JPanel {
         card.add(labelValue("Total points", String.valueOf(fidelityCard.getTotalPoint())));
         return card;
     }
+
     /**
      * Builds the section displaying address and locality information.
      *

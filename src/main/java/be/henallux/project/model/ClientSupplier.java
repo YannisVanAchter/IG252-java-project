@@ -43,9 +43,13 @@ public class ClientSupplier implements Model {
         this(id, name, firstname, email, phoneNumber, address, isClient, isSupplier, isUs, VATNumber, becameClientDate, null);
     }
 
+    public ClientSupplier(String name, String firstname, String email, String phoneNumber, Address address, boolean isClient, boolean isSupplier, boolean isUs, String VATNumber, LocalDate becameClientDate, FidelityCard fidelityCard) throws DataValidationException {
+        this(0, name, firstname, email, phoneNumber, address, isClient, isSupplier, isUs, VATNumber, becameClientDate, fidelityCard);
+    }
+
     public int getId() { return id; }
 
-    private void setId(int id) throws DataValidationException {
+    public void setId(int id) throws DataValidationException {
         if (id < 0) {
             String message = "ID setting error, ID is lower or equal to 0 (zero) when it shouldn't (current value: " + id + ")";
             throw new DataValidationException(message);

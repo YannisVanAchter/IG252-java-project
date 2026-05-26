@@ -1,7 +1,6 @@
 package main.java.be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.ProductController;
-import main.java.be.henallux.project.controller.SupplierController;
+import main.java.be.henallux.project.controller.StockManagementController;
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.Product;
 
@@ -11,7 +10,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.util.ArrayList;
+import java.util.*;
+import java.util.List;
 
 /**
  * StockAlertView displays supplier-based stock alerts and allows creation of purchase orders in a Swing interface.
@@ -20,9 +20,9 @@ import java.util.ArrayList;
  *   <li>a product restocking panel for the selected supplier (right side)</li></ul>
  * <p>The view is typically opened from the stock management workflow in {@link MainWindow} and acts as a coordination
  * screen between suppliers and low-stock products.
+ * <p>When no stock alerts are available, an empty state message is displayed instead of the split layout.
  * <p>It interacts with:
- * <ul><li>{@link SupplierController} to retrieve suppliers and their products</li>
- *   <li>{@link ProductController} for product-related data access</li>
+ * <ul><li>{@link } to retrieve suppliers and their products</li>
  *   <li>{@link StockAlertTableModel} to manage selectable restocking items</li></ul>
  * <p>User interactions include selecting a supplier, selecting products to reorder, and triggering purchase order creation.
  *
@@ -39,8 +39,7 @@ public class StockAlertView extends JPanel {
     private static final Color BORDER = new Color(230, 230, 230);
 
     private final MainWindow mainWindow;
-    private final SupplierController supplierController;
-    private final ProductController productController;
+    private final StockManagementController stockManagementController;
 
     private ArrayList<ClientSupplier> suppliers;
     private ClientSupplier selectedSupplier;
@@ -54,25 +53,93 @@ public class StockAlertView extends JPanel {
     private JButton btnOrder;
     private JCheckBox headerCheckBox;
 
-    public StockAlertView(MainWindow mainWindow) {
+    public StockAlertView(MainWindow mainWindow, StockManagementController stockManagementController) {
         this.mainWindow = mainWindow;
-        this.supplierController = new SupplierController();
-        this.productController = new ProductController();
-        this.suppliers = supplierController.getAllSuppliers();
+        this.stockManagementController = stockManagementController;
+        this.suppliers = new ArrayList<>();
 
         setLayout(new BorderLayout());
         setBorder(new EmptyBorder(16, 16, 16, 16));
 
-        add(buildBody(), BorderLayout.CENTER);
-
-        if (!suppliers.isEmpty()) {
-            selectSupplier(suppliers.getFirst());
-        }
+        loadFromThread();
     }
 
     /**
+     * Loads data from the shared resource and updates the UI accordingly.
+     * <p>If no alerts are available, an empty state panel is shown.
+     * <p>Must be called on the EDT.
+     */
+    private void loadFromThread() {
+        List<Map.Entry<Product, ClientSupplier>> alerts = stockManagementController.getSharedResource();
+
+        LinkedHashMap<ClientSupplier, ArrayList<Product>> bySupplier = new LinkedHashMap<>();
+        for (Map.Entry<Product, ClientSupplier> entry : alerts) {
+            Product product = entry.getKey();
+            ClientSupplier supplier = entry.getValue();
+
+            ArrayList<Product> products = bySupplier.get(supplier);
+            if (products == null) {
+                products = new ArrayList<>();
+                bySupplier.put(supplier, products);
+            }
+            products.add(product);
+        }
+
+        suppliers = new ArrayList<>(bySupplier.keySet());
+
+        removeAll();
+
+        if (suppliers.isEmpty()) {
+            add(buildEmptyState(), BorderLayout.CENTER);
+        } else {
+            add(buildBody(), BorderLayout.CENTER);
+            refreshSupplierList();
+            selectSupplier(suppliers.getFirst());
+        }
+
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * Builds the empty panel shown when no stock alerts are available.
+     * <p>Displayed when {@link StockManagementController#getSharedResource()} returns an empty list,
+     * because the agent has not run yet or because no products are below their minimum stock level.
+     *
+     * @return the empty {@code JPanel}
+     */
+    private JPanel buildEmptyState() {
+
+        JPanel panel = new JPanel();
+        panel.setBackground(Color.WHITE);
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        JLabel icon = new JLabel("✓");
+        icon.setFont(new Font("SansSerif", Font.PLAIN, 48));
+        icon.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel title = new JLabel("No stock alerts");
+        title.setFont(FONT_TITLE);
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel subtitle = new JLabel("All products are sufficiently stocked.");
+        subtitle.setFont(FONT_REG);
+        subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        panel.add(Box.createVerticalGlue());
+        panel.add(icon);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(title);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(subtitle);
+        panel.add(Box.createVerticalGlue());
+
+        return panel;
+    }
+    /**
      * Builds the main split-pane layout of the view.
      * <p>The layout is divided into supplier navigation (left) and product selection (right).
+     * <p>Only called when {@code suppliers} is non-empty.
      *
      * @return the configured {@link JSplitPane} containing the full view layout
      */
@@ -110,19 +177,31 @@ public class StockAlertView extends JPanel {
         scroll.setBorder(null);
         suppliersPanel.add(scroll, BorderLayout.CENTER);
 
-        refreshSupplierList();
         return suppliersPanel;
     }
 
     /**
      * Refreshes the supplier list displayed in the left panel.
-     * <p>Each supplier row is rebuilt based on the latest data from {@link SupplierController}.
+     * <p>Each supplier row is rebuilt based on the current shared resource data.
+     * @see StockManagementController#getSharedResource()
      */
     private void refreshSupplierList() {
+        List<Map.Entry<Product, ClientSupplier>> alerts = stockManagementController.getSharedResource();
+
+        LinkedHashMap<ClientSupplier, Integer> countBySupplier = new LinkedHashMap<>();
+        for (Map.Entry<Product, ClientSupplier> entry : alerts) {
+            ClientSupplier supplier = entry.getValue();
+            Integer count = countBySupplier.get(supplier);
+            if (count == null) {
+                countBySupplier.put(supplier, 1);
+            } else {
+                countBySupplier.put(supplier, count + 1);
+            }        }
+
         supplierListPanel.removeAll();
-        for (ClientSupplier s : suppliers) {
-            int count = supplierController.getAllProduct(s.getId()).size();
-            supplierListPanel.add(buildSupplierRow(s, count));
+        for (ClientSupplier supplier : suppliers) {
+            int count = countBySupplier.getOrDefault(supplier, 0);
+            supplierListPanel.add(buildSupplierRow(supplier, count));
             supplierListPanel.add(Box.createVerticalStrut(8));
         }
         supplierListPanel.revalidate();
@@ -131,8 +210,8 @@ public class StockAlertView extends JPanel {
 
     /**
      * Creates a clickable row representing a supplier.
-     * The {@code mouseListener} lister on click and on hover
-     * <p>Click trigger {@link #selectSupplier(ClientSupplier)}
+     * The {@code mouseListener} listens on click and on hover.
+     * <p>Click triggers {@link #selectSupplier(ClientSupplier)}.
      *
      * @param supplier     the supplier to display
      * @param productCount the number of products linked to the supplier
@@ -169,14 +248,10 @@ public class StockAlertView extends JPanel {
                     row.setBackground(HOVER_BG);
                 }
             }
-
             @Override
             public void mouseExited(MouseEvent e) {
-                row.setBackground(
-                        supplier.equals(selectedSupplier) ? SELECTED_BG : Color.WHITE
-                );
+                row.setBackground(supplier.equals(selectedSupplier) ? SELECTED_BG : Color.WHITE);
             }
-
             @Override
             public void mouseClicked(MouseEvent e) {
                 selectSupplier(supplier);
@@ -222,7 +297,6 @@ public class StockAlertView extends JPanel {
             @Override
             public void mouseMoved(MouseEvent e) {
                 int col = productTable.columnAtPoint(e.getPoint());
-
                 if (col == 0) {
                     productTable.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 } else {
@@ -245,13 +319,10 @@ public class StockAlertView extends JPanel {
             }
         });
 
-        productTable.setDefaultRenderer(Object.class,
-                new RowColorRenderer(tableModel)
-        );
+        productTable.setDefaultRenderer(Object.class, new RowColorRenderer(tableModel));
 
         JScrollPane scroll = new JScrollPane(productTable);
         panel.add(scroll, BorderLayout.CENTER);
-
         panel.add(buildButtonFooter(), BorderLayout.SOUTH);
 
         return panel;
@@ -305,7 +376,12 @@ public class StockAlertView extends JPanel {
         selectedSupplier = supplier;
         lblSupplierTitle.setText(supplier.getName() + " " + supplier.getFirstname());
         headerCheckBox.setSelected(true);
-        ArrayList<Product> products = supplierController.getAllProduct(supplier.getId());
+        ArrayList<Product> products = new ArrayList<>();
+        for (Map.Entry<Product, ClientSupplier> entry : stockManagementController.getSharedResource()) {
+            if (entry.getValue().equals(supplier)) {
+                products.add(entry.getKey());
+            }
+        }
         tableModel.setProducts(products);
         updateButtonState();
         refreshSupplierList();
@@ -321,7 +397,7 @@ public class StockAlertView extends JPanel {
     private void onCreateOrder() {
         ArrayList<Product> selectedProducts = tableModel.getSelectedProducts();
         if (selectedProducts.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No products selectedProducts.", "Warning", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "No products selected.", "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
         mainWindow.openOrderView(selectedProducts, selectedSupplier);
@@ -334,5 +410,4 @@ public class StockAlertView extends JPanel {
     private void updateButtonState() {
         btnOrder.setEnabled(!tableModel.getSelectedProducts().isEmpty());
     }
-
 }

@@ -1,7 +1,7 @@
 package main.java.be.henallux.project.view;
 
 import main.java.be.henallux.project.controller.ProductController;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import main.java.be.henallux.project.controller.ProductSearchController;
 import main.java.be.henallux.project.model.Product;
 
 import javax.swing.*;
@@ -38,6 +38,7 @@ public class ReceiptCreateView extends JPanel {
 
     private final MainWindow mainWindow;
     private final ProductController productController;
+    private final ProductSearchController productSearchController;
     private ReceiptProductTableModel productModel;
     private ReceiptTableModel receiptModel;
     private ArrayList<Product> allProducts;
@@ -54,7 +55,16 @@ public class ReceiptCreateView extends JPanel {
     public ReceiptCreateView(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         this.productController = new ProductController();
-        this.allProducts = productController.getAllProduct();
+        this.productSearchController = new ProductSearchController();
+
+        ArrayList<Product> loaded = new ArrayList<>();
+        try {
+            loaded = productController.getAllProduct();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            mainWindow.goBack();
+        }
+        this.allProducts = loaded;
         this.displayProducts = new ArrayList<>(allProducts);
 
         setLayout(new BorderLayout(10, 16));
@@ -263,11 +273,7 @@ public class ReceiptCreateView extends JPanel {
         btnNext.setPreferredSize(new Dimension(88, 44));
         btnNext.setEnabled(false);
         btnNext.addActionListener(e -> {
-            try {
                 onNext();
-            } catch (DataValidationException ex) {
-                throw new RuntimeException(ex);
-            }
         });
 
         JPanel leftBtnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
@@ -285,39 +291,36 @@ public class ReceiptCreateView extends JPanel {
 
     /**
      * Handles scanning of a product by ID using a {@code showInputDialog}.
-     * <p>Validates an input format and searches for a matching product
-     * in {@link #allProducts}. If found, the product is added to the receipt.
+     * <p>Validates the input format and delegates the product lookup to {@link ProductController#getProduct(int)}.
+     * <p>If a matching product is found, it is added to the receipt via {@link #addToReceipt(Product)}.
+     * Otherwise, an informational message is displayed.
+     *
+     * @see ProductController#getProduct(int)
+     * @see #addToReceipt(Product)
      */
     private void onScanClick() {
         String input = JOptionPane.showInputDialog("Enter the code of product");
-        if (input == null || input.trim().isEmpty()) {
-            return;
-        }
+        if (input == null || input.trim().isEmpty()) return;
 
         int productCode;
         try {
-            productCode = Integer.parseInt(input);
+            productCode = Integer.parseInt(input.trim());
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Code format invalide", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        boolean found = false;
-        int i = 0;
-        while (i < allProducts.size() && !found) {
-            Product product = allProducts.get(i);
-            if (product.getId() == productCode) {
+        try {
+            Product product = productController.getProduct(productCode);
+            if (product != null) {
                 addToReceipt(product);
-                found = true;
+            } else {
+                JOptionPane.showMessageDialog(this, "No product found", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
-            i++;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-        if (!found){
-            JOptionPane.showMessageDialog(this, "No product found", "Information", JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
-
-    /**
+    }    /**
      * Clears the product search input field.
      */
     private void onClearClick() {
@@ -326,17 +329,19 @@ public class ReceiptCreateView extends JPanel {
 
     /**
      * Filters displayed products based on user input in {@link #txtSearch}.
-     * <p>This method is triggered on keyboard input and updates {@link #displayProducts} and refreshes the product table model.
+     * <p>This method is triggered on keyboard input and delegates the search to {@link ProductSearchController#searchProducts(String, String, Boolean)}.
+     * <p>Results are applied to {@link #displayProducts} and the product table model is refreshed.
+     *
+     * @see ProductSearchController#searchProducts(String, String, Boolean)
      */
     private void onFilterClick() {
-        String query = txtSearch.getText().trim().toLowerCase();
-        displayProducts.clear();
-        for (Product product : allProducts) {
-            if (query.isBlank() || product.getName().toLowerCase().contains(query)) {
-                displayProducts.add(product);
-            }
+        String txtQuery = txtSearch.getText().trim();
+        try {
+            displayProducts = productSearchController.searchProducts(txtQuery, null, null);
+            productModel.setProducts(displayProducts);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-        productModel.setProducts(displayProducts);
     }
 
     /**
@@ -347,18 +352,13 @@ public class ReceiptCreateView extends JPanel {
      * @param product product to add to receipt
      */
     private void addToReceipt(Product product) {
-        int stock = product.getTotalQuantity();
+        int stock = product.getNonStockQuantity();
         int alreadyInCart = receipt.getOrDefault(product, 0);
         if (alreadyInCart >= stock) {
-            JOptionPane.showMessageDialog(this, "Insufficient stock for this product", "Erreur", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Insufficient stock for this product", "Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
-        if (receipt.containsKey(product)) {
-            receipt.put(product, alreadyInCart + 1);
-        } else {
-            receipt.put(product, 1);
-        }
+        receipt.put(product, alreadyInCart + 1);
         receiptModel.setProducts(receipt);
         updateButtonStates();
         refreshTotal();
@@ -419,7 +419,7 @@ public class ReceiptCreateView extends JPanel {
         refreshTotal();
     }
 
-    private void onNext() throws DataValidationException {
+    private void onNext() {
         if (!receipt.isEmpty()) {
             openDialog();
         }

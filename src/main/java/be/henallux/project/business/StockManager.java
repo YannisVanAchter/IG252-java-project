@@ -20,6 +20,7 @@ public class StockManager {
             throw new BusinessException("The location cannot be null.");
         }
         try {
+            // TODO - confirm return object of create method
             stockDA.addStockLocation(location);
         } catch (DataBaseException e) {
             throw new BusinessException("Error occurred while adding stock location.", e);

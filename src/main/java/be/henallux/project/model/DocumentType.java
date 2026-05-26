@@ -11,12 +11,15 @@ public class DocumentType implements Model {
         setId(id);
         setName(name);
     }
+    public DocumentType(String name) {
+        this(0, name);
+    }
 
     public int getId() {
         return id;
     }
 
-    private void setId(int id) {
+    public void setId(int id) {
         this.id = id;
     }
 

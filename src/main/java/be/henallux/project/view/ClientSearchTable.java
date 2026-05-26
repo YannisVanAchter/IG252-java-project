@@ -52,7 +52,14 @@ public class ClientSearchTable extends JPanel {
         setLayout(new BorderLayout(10, 16));
         setBorder(new EmptyBorder(16, 16, 16, 16));
 
-        displayClients = controller.search(null, null, null);
+        List<ClientSupplier> loaded = new ArrayList<>();
+        try {
+            loaded = controller.search(null, null, null);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            mainWindow.goBack();
+        }
+        displayClients = loaded;
 
         JPanel top = new JPanel(new BorderLayout(0, 10));
         top.add(buildHeader(), BorderLayout.NORTH);
@@ -61,7 +68,6 @@ public class ClientSearchTable extends JPanel {
         add(top, BorderLayout.NORTH);
         add(buildTablePanel(), BorderLayout.CENTER);
     }
-
     /**
      * Builds the header section containing the title.
      *
@@ -179,13 +185,17 @@ public class ClientSearchTable extends JPanel {
         String name = txtName.getText().trim();
         String email = txtEmail.getText().trim();
         String fidelityCard = txtFidelityCard.getText().trim();
-        List<ClientSupplier> results = controller.search(
-                name.isBlank() ? null : name,
-                email.isBlank() ? null : email,
-                fidelityCard.isBlank() ? null : fidelityCard
-        );
 
-        model.setClients(new ArrayList<>(results));
+        try {
+            List<ClientSupplier> results = controller.search(
+                    name.isBlank() ? null : name,
+                    email.isBlank() ? null : email,
+                    fidelityCard.isBlank() ? null : fidelityCard
+            );
+            model.setClients(new ArrayList<>(results));
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**

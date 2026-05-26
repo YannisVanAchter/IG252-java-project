@@ -37,7 +37,7 @@ public class StockAlertTableModel extends AbstractTableModel {
     }
 
     /**
-     * Replaces the current product dataset and resets selection state.
+     * Replaces the current product dataset and resets the selection state.
      * <p>Each product is automatically marked as selected after the update.
      * <p>This method triggers a full table refresh via {@link AbstractTableModel#fireTableDataChanged()}.
      *

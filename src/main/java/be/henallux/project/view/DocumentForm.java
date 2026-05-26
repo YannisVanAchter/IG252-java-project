@@ -1,7 +1,7 @@
 package main.java.be.henallux.project.view;
 
 import main.java.be.henallux.project.controller.DocumentController;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import main.java.be.henallux.project.controller.WorkFlowController;
 import main.java.be.henallux.project.model.*;
 
 import javax.swing.*;
@@ -24,7 +24,8 @@ import java.util.List;
  */
 public class DocumentForm extends JPanel {
     private final MainWindow mainWindow;
-    private final DocumentController controller;
+    private final DocumentController documentController;
+    private final WorkFlowController workFlowController;
     private Document currentDocument;
 
     private final ArrayList<ClientSupplier> allClients;
@@ -46,6 +47,7 @@ public class DocumentForm extends JPanel {
 
     private JComboBox<ComboBoxItem<DocumentType>> comboDocumentType;
     private JComboBox<ComboBoxItem<ClientSupplier>> comboClientSupplier;
+    private JComboBox<ComboBoxItem<WorkFlowType>> comboWorkflowType;
     private JComboBox<ComboBoxItem<Status>> comboWorkflowStatus;
 
     private JRadioButton isBuy;
@@ -69,8 +71,16 @@ public class DocumentForm extends JPanel {
      */
     public DocumentForm(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
-        this.controller = new DocumentController();
-        this.allClients = controller.getAllClientSupplier();
+        this.documentController = new DocumentController();
+        this.workFlowController = new WorkFlowController();
+
+        ArrayList<ClientSupplier> loaded = new ArrayList<>();
+        try {
+            loaded = documentController.getAllClientSupplier();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        this.allClients = loaded;
 
         setLayout(new BorderLayout(10, 16));
         setBorder(new EmptyBorder(16, 16, 16, 16));
@@ -138,7 +148,12 @@ public class DocumentForm extends JPanel {
         comboDocumentType.setEditable(true);
         comboDocumentType.setToolTipText("Select the type of document");
 
-        setDocumentTypes(controller.getAllDocumentType());
+
+        try {
+            setDocumentTypes(documentController.getAllDocumentTypes());
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
 
         ArrayList<ComboBoxItem<DocumentType>> allTypeItems = new ArrayList<>();
         for (int i = 0; i < comboDocumentType.getItemCount(); i++) {
@@ -204,11 +219,25 @@ public class DocumentForm extends JPanel {
         JPanel workflowPanel = ViewUtils.createColumnPanel();
         workflowPanel.setBorder(BorderFactory.createTitledBorder("Workflow"));
 
+        comboWorkflowType = new JComboBox<>();
+        ViewUtils.setCursor(comboWorkflowType);
+        comboWorkflowType.setEditable(false);
+        try {
+            setWorkflowTypes(workFlowController.getWorkFlowTypes());
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        workflowPanel.add(ViewUtils.labeledRequired("Workflow Type Name", comboWorkflowType));
+
         comboWorkflowStatus = new JComboBox<>();
         ViewUtils.setCursor(comboWorkflowStatus);
         comboWorkflowStatus.setEditable(true);
         comboWorkflowStatus.setToolTipText("Current status of the workflow");
-        setWorkflowStatus(controller.getAllWorkflowStatus());
+        try {
+            setWorkflowStatus(workFlowController.getAllWorkFlows());
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
 
         ArrayList<ComboBoxItem<Status>> allStatusItems = new ArrayList<>();
         for (int i = 0; i < comboWorkflowStatus.getItemCount(); i++) {
@@ -237,7 +266,7 @@ public class DocumentForm extends JPanel {
         radioPanel.add(isSell);
         radioPanel.add(Box.createHorizontalStrut(5));
         radioPanel.add(isInternal);
-        workflowPanel.add(ViewUtils.labeled("Workflow Type *", radioPanel));
+        workflowPanel.add(ViewUtils.labeled("Workflow Type*", radioPanel));
 
         JPanel clientPanel = ViewUtils.createColumnPanel();
         clientPanel.setBorder(BorderFactory.createTitledBorder("Client / Supplier"));
@@ -449,99 +478,84 @@ public class DocumentForm extends JPanel {
         LocalDate effectiveReception = chkEffectiveReceptionDate.isSelected() ? ViewUtils.getDate(pickerEffectiveReceptionDate) : null;
 
         int paymentDelay = (int) spnPaymentDelay.getValue();
-
-        Object workflowSelected = comboWorkflowStatus.getSelectedItem();
-        Status workflowStatus = null;
-
-        if (workflowSelected instanceof ComboBoxItem<?> item) {
-            workflowStatus = (Status) item.getObject();
-        } else if (workflowSelected instanceof String text) {
-            String value = text.trim();
-            if (!value.isEmpty()) {
-                try {
-                    workflowStatus = controller.createStatus(value);
-                } catch (Exception e) {
-                    JOptionPane.showMessageDialog(this, "Unable to create the status : " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-            }
-        }
-
-        Object selectedDocumentType = comboDocumentType.getSelectedItem();
-        DocumentType documentType = null;
-
-        if (selectedDocumentType instanceof ComboBoxItem<?> item) {
-            documentType = (DocumentType) item.getObject();
-        } else if (selectedDocumentType instanceof String text) {
-            String value = text.trim();
-            if (!value.isEmpty()) {
-                try {
-                    documentType = controller.createDocumentType(value);
-                } catch (Exception e) {
-                    JOptionPane.showMessageDialog(this, "Unable to create document type : " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-            }
-        }
-
-        Object selected = comboClientSupplier.getSelectedItem();
-        if (!(selected instanceof ComboBoxItem<?> item)) {
-            JOptionPane.showMessageDialog(this, "Invalid client/supplier.");
-            return;
-        }
-        ClientSupplier clientSupplier = (ClientSupplier) item.getObject();
-
-        boolean isBuySelected = isBuy.isSelected();
-        boolean isSellSelected = isSell.isSelected();
-        boolean isInternalSelected = isInternal.isSelected();
-
-        int streetNumber = (int) spnStreetNumber.getValue();
-        int postalCode = (int) spnPostalCode.getValue();
-
-        String street = txtStreet.getText().trim();
-        String city = txtCity.getText().trim();
-        String country = txtCountry.getText().trim();
-
         boolean isChecked = checkIsChecked.isSelected();
 
+        WorkFlowType workFlowType = (WorkFlowType) ((ComboBoxItem<?>) comboWorkflowType.getSelectedItem()).getObject();
+
+        Status workflowStatus = null;
+        Object workflowStatusSelected = comboWorkflowStatus.getSelectedItem();
+        if (workflowStatusSelected instanceof ComboBoxItem<?> item) {
+            workflowStatus = (Status) item.getObject();
+        } else if (workflowStatusSelected instanceof String text && !text.trim().isEmpty()) {
+            try {
+                workflowStatus = new Status(text.trim());
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Unable to create the status: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+
+        DocumentType documentType = null;
+        Object selectedDocumentType = comboDocumentType.getSelectedItem();
+        if (selectedDocumentType instanceof ComboBoxItem<?> item) {
+            documentType = (DocumentType) item.getObject();
+        } else if (selectedDocumentType instanceof String text && !text.trim().isEmpty()) {
+            try {
+                documentType = new DocumentType(text.trim());
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Unable to create document type: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+
+        if (!(comboClientSupplier.getSelectedItem() instanceof ComboBoxItem<?> clientItem)) {
+            JOptionPane.showMessageDialog(this, "Invalid client/supplier.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         try {
+        ClientSupplier clientSupplier = (ClientSupplier) clientItem.getObject();
+        Address address = new Address(txtStreet.getText().trim(), (int) spnStreetNumber.getValue(),txtCity.getText().trim(), (int) spnPostalCode.getValue());
+
+        WorkFlowType type = new WorkFlowType(
+                workFlowType.getId(),
+                workFlowType.getName(),
+                isBuy.isSelected(),
+                isSell.isSelected(),
+                isInternal.isSelected()
+        );
+        WorkFlow workflow = new WorkFlow(workflowStatus, type, null, clientSupplier); // null = FIXME: us
+        workFlowController.addWorkFlow(workflow);
+
             if (currentDocument == null) {
-                controller.createDocument(
-                        documentType, commentaryText,
+                Document newDoc = new Document(
+                        LocalDate.now(), documentType, isChecked,
                         plannedSend, plannedReception,
                         effectiveSend, effectiveReception,
-                        paymentDelay, workflowStatus,
-                        isBuySelected, isSellSelected, isInternalSelected,
-                        clientSupplier,
-                        streetNumber, postalCode,
-                        street, city, country,
-                        isChecked
+                        paymentDelay, workflow,
+                        address, commentaryText
                 );
+                documentController.createDocument(newDoc);
+
             } else {
-                controller.updateDocument(
-                        currentDocument.getId(), documentType, commentaryText,
+                Document updatedDoc = new Document(
+                        currentDocument.getId(),
+                        LocalDate.now(), documentType, null, isChecked,
                         plannedSend, plannedReception,
                         effectiveSend, effectiveReception,
-                        paymentDelay, workflowStatus,
-                        isBuySelected, isSellSelected, isInternalSelected,
-                        clientSupplier,
-                        streetNumber, postalCode,
-                        street, city, country,
-                        isChecked
+                        paymentDelay, workflow,
+                        address, commentaryText, null
                 );
+                documentController.updateDocument(updatedDoc);
             }
 
             JOptionPane.showMessageDialog(this, "Document saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             clearForm();
             mainWindow.goBack();
 
-        } catch (DataValidationException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Validation", JOptionPane.WARNING_MESSAGE);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Unexpected error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Validation", JOptionPane.WARNING_MESSAGE);
         }
     }
-
     /**
      * Resets all input fields in the form to their default values.
      */
@@ -684,12 +698,25 @@ public class DocumentForm extends JPanel {
     /**
      * Updates the workflow status JComboBox list with available entries.
      *
-     * @param statuses list of available workflow statuses
+     * @param workFlows list of available workflow
      */
-    public void setWorkflowStatus(ArrayList<Status> statuses) {
+    public void setWorkflowStatus(ArrayList<WorkFlow> workFlows) {
         comboWorkflowStatus.removeAllItems();
-        for (Status s : statuses) {
+        for (WorkFlow workFlow : workFlows) {
+            Status s = workFlow.getStatus();
             comboWorkflowStatus.addItem(new ComboBoxItem<>(s, s.getName()));
+        }
+    }
+
+    /**
+     * Updates the workflow type JComboBox list with available entries.
+     *
+     * @param types list of available workflow statuses
+     */
+    public void setWorkflowTypes(ArrayList<WorkFlowType> types) {
+        comboWorkflowType.removeAllItems();
+        for (WorkFlowType wt : types) {
+            comboWorkflowType.addItem(new ComboBoxItem<>(wt, wt.getName()));
         }
     }
 
@@ -718,6 +745,7 @@ public class DocumentForm extends JPanel {
     /**
      * Opens a modal dialog for creating a new client/supplier.
      * <p>The dialog is displayed modally using {@link JDialog} and contains a {@link ClientSupplierForm}.
+     *
      * @return The newly created {@code ClientSupplier}, or {@code null} if the dialog was closed without saving.
      */
     public ClientSupplier openDialog() {

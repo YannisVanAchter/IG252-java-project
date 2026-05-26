@@ -26,6 +26,17 @@ public class ClientManager extends ClientSupplierManager {
         return getAllClientSuppliers();
     }
 
+    public List<ClientSupplier> getClientByCardID (int cardId) throws BusinessException {
+        if (cardId <= 0) {
+            throw new BusinessException("The card ID is invalid.");
+        }
+        try {
+            return clientSupplierDA.getClientByCardID(cardId);
+        } catch (DataBaseException e) {
+            throw new BusinessException("Error retrieving the client by card ID.", e);
+        }
+    }
+
     public void createFidelityCard(int clientId) throws BusinessException {
         // Validation
         if (clientId <= 0) {
@@ -33,9 +44,11 @@ public class ClientManager extends ClientSupplierManager {
         }
         try {
             // Business rule — a client can only have one card
+            
             if (fidelityCardDA.hasFidelityCard(clientId)) {
                 throw new BusinessException("Error: This client already has a loyalty card.");
             }
+            // TODO - confirm return object of create method
             fidelityCardDA.createFidelityCard(clientId);
         } catch (DataBaseException e) {
             throw new BusinessException("Error creating loyalty card.", e);

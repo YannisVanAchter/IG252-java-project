@@ -1,48 +1,72 @@
 package main.java.be.henallux.project.controller;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.Address;
+import main.java.be.henallux.project.business.SupplierManager;
+import main.java.be.henallux.project.business.exception.BusinessException;
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.Product;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Controller fictif utilisé uniquement pour simuler les vues de l'application.
- * <p>
- * TODO: clean & implement class.
+ * @see SupplierManager
+ * @see ClientSupplierController
  */
-public class SupplierController {
+public class SupplierController extends ClientSupplierController {
 
-    private final ClientSupplierController clientSupplierController = new ClientSupplierController();
+    private SupplierManager supplierManager;
 
-    /**
-     * Retourne tous les fournisseurs disponibles (mock data)
-     *
-     * @return liste de fournisseurs
-     */
-    public ArrayList<ClientSupplier> getAllSuppliers() {
-        ArrayList<ClientSupplier> allClients = clientSupplierController.getAllClientSupplier();
-        ArrayList<ClientSupplier> suppliers = new ArrayList<>();
-
-        for (ClientSupplier cs : allClients) {
-            if (cs.getIsSupplier()) {
-                suppliers.add(cs);
-            }
-        }
-        return suppliers;
-
+    public SupplierController() {
+        this.supplierManager = new SupplierManager();
     }
 
     /**
-     * Retourne tous les produits d'un fournisseur (mock data)
-     *
-     * @param supplierID id du fournisseur
-     * @return liste de produits
+     * Returns all suppliers.
+     * @return list of all {@link ClientSupplier} of type supplier
+     * @see SupplierManager#getAllSuppliers()
      */
-    public ArrayList<Product> getAllProduct(int supplierID) {
-        ProductController product = new ProductController();
-        return product.getAllProduct();
+    public ArrayList<ClientSupplier> getAllSuppliers() throws BusinessException {
+        return new ArrayList<>(supplierManager.getAllSuppliers());
+    }
+
+    /**
+     * Returns all products offered by a supplier.
+     * @param supplierID the supplier ID
+     * @return list of {@link Product} from the given supplier
+     * @see SupplierManager#getAllProducts(int)
+     */
+    public ArrayList<Product> getAllProduct(int supplierID) throws BusinessException {
+        return new ArrayList<>(supplierManager.getAllProducts(supplierID));
+    }
+
+    /**
+     * Returns the supplier associated with a given product.
+     * @param productID the product ID
+     * @return the matching {@link ClientSupplier}
+     * @see SupplierManager#getSupplierByProduct(int)
+     */
+    public ClientSupplier getSupplierByProduct(int productID) throws BusinessException {
+        return supplierManager.getSupplierByProduct(productID);
+    }
+
+    /**
+     * Changes the VAT number of a supplier.
+     * @param supplierID    the supplier ID
+     * @param newVATNumber  the new VAT number
+     * @see SupplierManager#changeVATNumber(int, String)
+     */
+    public void changeVATNumber(int supplierID, String newVATNumber) throws BusinessException {
+        supplierManager.changeVATNumber(supplierID, newVATNumber);
+    }
+
+    /**
+     * //TODO quoi faire ?
+     * @param clientSupplierID the supplier ID
+     * @param products         list of {@link Product} to order
+     * @throws BusinessException not thrown
+     */
+    @Override
+    public void placeOrder(int clientSupplierID, List<Product> products) throws BusinessException {
+
     }
 }

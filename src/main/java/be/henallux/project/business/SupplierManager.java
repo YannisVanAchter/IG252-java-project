@@ -40,6 +40,10 @@ public class SupplierManager extends ClientSupplierManager {
         }
     }
 
+    public ClientSupplier getSupplierByProduct(int id) throws BusinessException {
+        return productDA.getSupplierByProduct(id);
+    }
+
     public void changeVATNumber(int supplierId, String VATNumber) throws BusinessException {
         if (supplierId <= 0) {
             throw new BusinessException("The supplier ID is invalid.");
