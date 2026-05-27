@@ -33,7 +33,7 @@ public class ProductController {
      * @return list of all {@link Product}
      * @see ProductManager#getAllProducts()
      */
-    public ArrayList<Product> getAllProduct() throws BusinessException {
+    public ArrayList<Product> getAllProduct() throws BusinessException, DataValidationException {
         return new ArrayList<>(productManager.getAllProducts());
     }
 
@@ -43,7 +43,7 @@ public class ProductController {
      * @return the matching {@link Product}
      * @see ProductManager#getProduct(int)
      */
-    public Product getProduct(int productID) throws BusinessException {
+    public Product getProduct(int productID) throws BusinessException, DataValidationException {
         return productManager.getProduct(productID);
     }
 
@@ -52,7 +52,7 @@ public class ProductController {
      * @return list of all {@link ProductCategory}
      * @see ProductManager#getAllProductCategory()
      */
-    public ArrayList<ProductCategory> getAllProductCategory() throws BusinessException {
+    public ArrayList<ProductCategory> getAllProductCategory() throws BusinessException, DataValidationException {
         return new ArrayList<>(productManager.getAllProductCategory());
     }
 
@@ -61,7 +61,7 @@ public class ProductController {
      * @param newProduct the {@link Product} to create
      * @see ProductManager#createProduct(Product)
      */
-    public void createNewProduct(Product newProduct) throws BusinessException {
+    public void createNewProduct(Product newProduct) throws BusinessException, DataValidationException {
         productManager.createProduct(newProduct);
     }
 
@@ -201,7 +201,7 @@ public class ProductController {
      * @param discount the {@link Discount} to add
      * @see ProductManager#addDiscount(Discount)
      */
-    public void addDiscount(Discount discount) throws BusinessException {
+    public void addDiscount(Discount discount) throws BusinessException, DataValidationException {
         productManager.addDiscount(discount);
     }
 

@@ -1,6 +1,7 @@
 package main.java.be.henallux.project.business;
 
 import main.java.be.henallux.project.business.exception.BusinessException;
+import main.java.be.henallux.project.data.DiscountDA;
 import main.java.be.henallux.project.data.ProductCategoryDA;
 import main.java.be.henallux.project.data.ProductDA;
 import main.java.be.henallux.project.data.exception.DataBaseException;
@@ -19,10 +20,12 @@ public class ProductManager {
 
     private final ProductDA productDA;
     private final ProductCategoryDA productCategoryDA;
+    private final DiscountDA discountDA;
 
     public ProductManager() {
         this.productDA = ProductDA.getInstance();
         this.productCategoryDA = ProductCategoryDA.getInstance();
+        this.discountDA = DiscountDA.getInstance();
     }
 
     public List<Product> getAllProducts() throws BusinessException, DataValidationException {
@@ -175,21 +178,21 @@ public class ProductManager {
         }
     }
 
-    public Discount addDiscount(Discount discount) throws BusinessException {
+    public Discount addDiscount(Discount newDiscount) throws BusinessException, DataValidationException {
         // Validation
-        if (discount == null) {
+        if (newDiscount == null) {
             throw new BusinessException("The discount cannot be null.");
         }
         // Business rule — check that the discount percentage is within the valid range
-        if ((discount.getDiscountPercentage().compareTo(java.math.BigDecimal.ZERO) == -1) || (discount.getDiscountPercentage().compareTo(new java.math.BigDecimal("100")) == 1)) {
+        if ((newDiscount.getDiscountPercentage().compareTo(java.math.BigDecimal.ZERO) == -1) || (newDiscount.getDiscountPercentage().compareTo(new java.math.BigDecimal("100")) == 1)) {
             throw new BusinessException("The discount percentage must be between 1 and 100.");
         }
-        if (discount.getStartDate().isAfter(discount.getEndDate())) {
+        if (newDiscount.getStartDate().isAfter(newDiscount.getEndDate())) {
             throw new BusinessException("The start date must be before the end date.");
         }
         try {
-            productDA.addDiscount(discount);
-            return discount;
+            discountDA.insert(newDiscount);
+            return newDiscount;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when adding the discount.", e);
         }
@@ -201,7 +204,7 @@ public class ProductManager {
             throw new BusinessException("The discount cannot be null.");
         }
         try {
-            productDA.deleteDiscount(discount);
+            discountDA.delete(discount);
             return true;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when deleting the discount.", e);
