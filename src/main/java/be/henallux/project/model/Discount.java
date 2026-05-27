@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import main.java.be.henallux.project.model.exception.DataValidationException;
+import main.java.be.henallux.project.model.Model;
+import main.java.be.henallux.project.model.Product;
 
 public class Discount implements Model {
     private int requiredQuantity;

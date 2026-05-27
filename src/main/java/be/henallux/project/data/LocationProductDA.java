@@ -11,12 +11,14 @@ import java.util.List;
 import java.util.Map;
 
 import main.java.be.henallux.project.data.exception.DataBaseException;
+import main.java.be.henallux.project.data.CRUD;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.LocationProduct;
 
 public class LocationProductDA extends CRUD<LocationProduct> {
     private static volatile LocationProductDA instance;
     private final String TABLE_NAME = "LocationProduct";
-    private Map<String, LocationProduct> dataMappingObject;
+    private final Map<Integer, LocationProduct> dataMappingObject;
 
     private LocationProductDA() {
         super();
@@ -42,18 +44,20 @@ public class LocationProductDA extends CRUD<LocationProduct> {
     }
 
     @Override
-    public LocationProduct mapDataToObject(ResultSet data, boolean mapping) throws DataBaseException {
-        String id;
+    public LocationProduct mapDataToObject(ResultSet data, boolean mapping) throws DataBaseException, DataValidationException {
+        int id;
 
         try {
-            id = data.getString("id_");
+            String shelf = data.getString("shelf_");
+            String floor = String.format("%d", data.getInt("floor_"));
+            Boolean isStock = data.getBoolean("isStock_");
 
+            id = LocationProduct.hashCode(shelf, floor, isStock);
             if (dataMappingObject.get(id) == null) {
                 LocationProduct locationProduct = new LocationProduct(
-                        id,
-                        data.getString("shelf_"),
-                        data.getString("floor_"),
-                        data.getBoolean("isStock_"),
+                        shelf,
+                        floor,
+                        isStock,
                         data.getBoolean("isFreezer_")
                 );
 
@@ -68,11 +72,11 @@ public class LocationProductDA extends CRUD<LocationProduct> {
     }
 
     @Override
-    public List<LocationProduct> getAll() throws DataBaseException {
+    public List<LocationProduct> getAll() throws DataBaseException, DataValidationException {
         String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " ORDER BY id_";
         List<LocationProduct> locationProducts = new ArrayList<>();
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
             ResultSet resultSet = statement.executeQuery();
 
@@ -88,64 +92,35 @@ public class LocationProductDA extends CRUD<LocationProduct> {
     }
 
     @Override
-    public List<LocationProduct> getsByIds(List<Integer> ids, boolean mapping) throws DataBaseException {
-        throw new UnsupportedOperationException("LocationProduct uses String ids");
+    public List<LocationProduct> getsByIds(List<Integer> ids, boolean mapping) throws DataBaseException, DataValidationException {
+        return getAll().stream().filter( l ->
+                ids.contains(l.hashCode())
+                ).toList();
     }
 
     @Override
-    public List<LocationProduct> getsByIds(List<Integer> ids) throws DataBaseException {
+    public List<LocationProduct> getsByIds(List<Integer> ids) throws DataBaseException, DataValidationException {
         return getsByIds(ids, true);
     }
 
-    public LocationProduct getById(String id, boolean mapping) throws DataBaseException {
-        LocationProduct locationProduct = dataMappingObject.get(id);
-
-        if (locationProduct != null) {
-            return locationProduct;
-        }
-
-        String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " WHERE id_=?;";
-
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(SQLInstruction);
-            statement.setString(1, id);
-
-            ResultSet result = statement.executeQuery();
-
-            if (result.next()) {
-                locationProduct = mapDataToObject(result, mapping);
-            }
-
-        } catch (SQLException e) {
-            throw new DataBaseException("SQL Exception", e);
-        }
-
-        return locationProduct;
+    public LocationProduct getById(int id, boolean mapping) throws DataBaseException, DataValidationException {
+        getAll();
+        return dataMappingObject.get(id);
     }
 
-    public LocationProduct getById(String id) throws DataBaseException {
+    public LocationProduct getById(int id) throws DataBaseException, DataValidationException {
         return getById(id, true);
     }
 
     @Override
-    public LocationProduct getById(int id, boolean mapping) throws DataBaseException {
-        return getById(String.valueOf(id), mapping);
-    }
-
-    @Override
-    public LocationProduct getById(int id) throws DataBaseException {
-        return getById(String.valueOf(id), true);
-    }
-
-    @Override
-    public boolean insert(LocationProduct newLocationProduct) throws DataBaseException {
+    public boolean insert(LocationProduct newLocationProduct) throws DataBaseException, DataValidationException {
         boolean inserted = false;
 
         String SQLInstruction =
                 "INSERT INTO " + TABLE_NAME +
                 " (id_, shelf_, floor_, isStock_, isFreezer_) VALUES (?, ?, ?, ?, ?);";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
             statement.setString(1, newLocationProduct.getLocationProductId());
@@ -158,7 +133,7 @@ public class LocationProductDA extends CRUD<LocationProduct> {
 
             if (inserted) {
                 dataMappingObject.put(
-                        newLocationProduct.getLocationProductId(),
+                        newLocationProduct.hashCode(),
                         newLocationProduct
                 );
             }
@@ -171,12 +146,12 @@ public class LocationProductDA extends CRUD<LocationProduct> {
     }
 
     @Override
-    public boolean update(LocationProduct locationProduct) throws DataBaseException {
+    public boolean update(LocationProduct locationProduct, LocationProduct newLocationProduct) throws DataBaseException, DataValidationException {
         String SQLInstruction =
                 "UPDATE " + TABLE_NAME +
                 " SET shelf_=?, floor_=?, isStock_=?, isFreezer_=? WHERE id_=?;";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
             statement.setString(1, locationProduct.getShelf());
@@ -187,9 +162,8 @@ public class LocationProductDA extends CRUD<LocationProduct> {
 
             int affectedRows = statement.executeUpdate();
 
-            dataMappingObject.remove(locationProduct.getLocationProductId());
             dataMappingObject.put(
-                    locationProduct.getLocationProductId(),
+                    locationProduct.hashCode(),
                     locationProduct
             );
 
@@ -201,17 +175,17 @@ public class LocationProductDA extends CRUD<LocationProduct> {
     }
 
     @Override
-    public boolean delete(LocationProduct locationProduct) throws DataBaseException {
+    public boolean delete(LocationProduct locationProduct) throws DataBaseException, DataValidationException {
         String SQLInstruction = "DELETE FROM " + TABLE_NAME + " WHERE id_=?;";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
             statement.setString(1, locationProduct.getLocationProductId());
 
             int affectedRows = statement.executeUpdate();
 
-            dataMappingObject.remove(locationProduct.getLocationProductId());
+            dataMappingObject.remove(locationProduct.hashCode());
 
             return affectedRows > 0;
 
@@ -221,7 +195,7 @@ public class LocationProductDA extends CRUD<LocationProduct> {
     }
 
     @Override
-    public boolean checkExist(LocationProduct locationProduct) throws DataBaseException {
+    public boolean checkExist(LocationProduct locationProduct) throws DataBaseException, DataValidationException {
         boolean exist = false;
 
         if (locationProduct != null) {
@@ -230,7 +204,7 @@ public class LocationProductDA extends CRUD<LocationProduct> {
                     TABLE_NAME +
                     " WHERE id_=?;";
 
-            try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+            try (Connection connection = connector.getConnection()) {
                 PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
                 statement.setString(1, locationProduct.getLocationProductId());

@@ -4,46 +4,49 @@ import java.sql.ResultSet;
 import java.sql.Date;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
-import javax.print.attribute.PrintServiceAttributeSet;
-
 import main.java.be.henallux.project.data.exception.DataBaseException;
+import main.java.be.henallux.project.data.MySQLConnector;
 
 import main.java.be.henallux.project.model.Model;
 import main.java.be.henallux.project.model.exception.DataValidationException;
 
-public abstract class CRUD<Model> {
-    CRUD<Model> instance;
+public abstract class CRUD<M extends Model> {
+    CRUD<M> instance;
     String TABLE_NAME;
-    Map<Object, Model> IDS_MAPPING_OBJECT;
+    Map<Object, M> IDS_MAPPING_OBJECT;
+    public final static MySQLConnector connector = MySQLConnector.getInstance();
 
-    abstract Model mapDataToObject(ResultSet data, boolean mapping) throws DataBaseException, DataValidationException;
+    abstract M mapDataToObject(ResultSet data, boolean mapping) throws DataBaseException, DataValidationException;
 
-    abstract List<Model> getAll() throws DataBaseException, DataValidationException;
+    abstract List<M> getAll() throws DataBaseException, DataValidationException;
 
-    abstract Model getById(int id, boolean mapping) throws DataBaseException, DataValidationException;
+    abstract M getById(int id, boolean mapping) throws DataBaseException, DataValidationException;
 
-    abstract Model getById(int id) throws DataBaseException, DataValidationException;
+    public M getById(int id) throws DataBaseException, DataValidationException {
+        return this.getById(id, true);
+    }
 
-    abstract List<Model> getsByIds(List<Integer> ids, boolean mapping) throws DataBaseException, DataValidationException;
+    abstract List<M> getsByIds(List<Integer> ids, boolean mapping) throws DataBaseException, DataValidationException;
 
-    abstract List<Model> getsByIds(List<Integer> ids) throws DataBaseException, DataValidationException;
+    public List<M> getsByIds(List<Integer> ids) throws DataBaseException, DataValidationException {
+        return this.getsByIds(ids, true);
+    }
 
-    abstract boolean insert(Model model) throws DataBaseException, DataValidationException;
+    abstract boolean insert(M model) throws DataBaseException, DataValidationException;
 
-    abstract boolean update(Model model) throws DataBaseException;
+    abstract boolean update(M model, M newModel) throws DataBaseException, DataValidationException;
 
-    abstract boolean delete(Model model) throws DataBaseException;
+    abstract boolean delete(M model) throws DataBaseException, DataValidationException;
 
     /**
      * Check if a given instance of a Model exist in the database
      * @param model the model to evaluate
      * @effect If the model does not exist in the DB, it will insert the object
      */
-    abstract boolean checkExist(Model model) throws DataBaseException, DataValidationException;
+    abstract boolean checkExist(M model) throws DataBaseException, DataValidationException;
 
     public LocalDate SQLDateToLocalDate(Date d) {
         return d.toLocalDate();

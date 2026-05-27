@@ -1,6 +1,8 @@
 package main.java.be.henallux.project.model;
 
 import main.java.be.henallux.project.model.exception.DataValidationException;
+import main.java.be.henallux.project.model.Locality;
+import main.java.be.henallux.project.model.Model;
 
 /**
  * This class represents an address, which consists of a street name, street number, and a locality.
