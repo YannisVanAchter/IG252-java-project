@@ -1,6 +1,7 @@
 package main.java.be.henallux.project.business;
 
 import main.java.be.henallux.project.business.exception.BusinessException;
+import main.java.be.henallux.project.data.ProductCategoryDA;
 import main.java.be.henallux.project.data.ProductDA;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 
@@ -9,31 +10,36 @@ import main.java.be.henallux.project.model.ProductCategory;
 import main.java.be.henallux.project.model.Discount;
 import main.java.be.henallux.project.model.QuantityProduct;
 import main.java.be.henallux.project.model.LocationProduct;
+import main.java.be.henallux.project.model.exception.DataValidationException;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 public class ProductManager {
 
     private final ProductDA productDA;
+    private final ProductCategoryDA productCategoryDA;
 
     public ProductManager() {
         this.productDA = ProductDA.getInstance();
+        this.productCategoryDA = ProductCategoryDA.getInstance();
     }
 
-    public List<Product> getAllProducts() throws BusinessException {
+    public List<Product> getAllProducts() throws BusinessException, DataValidationException {
         try {
-            return productDA.getAllProducts();
+            return productDA.getAll();
         } catch (DataBaseException e) {
             throw new BusinessException("Error when retrieving all products.", e);
         }
     }
 
-    public Product getProduct(int productID) throws BusinessException {
+    public Product getProduct(int productID) throws BusinessException, DataValidationException {
         // Validation
         if (productID <= 0) {
             throw new BusinessException("The product ID is invalid.");
         }
         try {
-            Product product = productDA.getProduct(productID);
+            Product product = productDA.getById(productID);
             // Business rule — check that the product exists before returning it
             if (product == null) {
                 throw new BusinessException("The product does not exist.");
@@ -44,15 +50,15 @@ public class ProductManager {
         }
     }
 
-    public List<ProductCategory> getAllProductCategory() throws BusinessException {
+    public List<ProductCategory> getAllProductCategory() throws BusinessException, DataValidationException {
         try {
-            return productDA.getAllProductCategory();
+            return productCategoryDA.getAll();
         } catch (DataBaseException e) {
             throw new BusinessException("Error when retrieving the product categories.", e);
         }
     }
 
-    public Product createProduct(Product product) throws BusinessException {
+    public Product createProduct(Product product) throws BusinessException, DataValidationException {
         // Validation
         if (product == null) {
             throw new BusinessException("The product cannot be null.");
@@ -67,29 +73,29 @@ public class ProductManager {
             throw new BusinessException("The VAT must be between 0 and 100.");
         }
         try {
-            productDA.createProduct(product);
+            productDA.insert(product);
             return product;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when creating the product.", e);
         }
     }
 
-    public double changeProductPrice(int productID, double price) throws BusinessException {
+    public boolean changeProductPrice(Product product, BigDecimal newPriceEVAT, BigDecimal newVAT) throws BusinessException, DataValidationException {
         // Validation
-        if (productID <= 0) {
+        if (newPriceEVAT == null) {
             throw new BusinessException("The product ID is invalid.");
         }
-        if (price < 0) {
+        if (newVAT == null) {
             throw new BusinessException("The price cannot be negative.");
         }
         try {
-            productDA.changeProductPrice(productID, price);
-            return price;
+            productDA.updatePrice(product, newPriceEVAT, newVAT);
+            return true;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when changing the price.", e);
         }
     }
-
+/*
     public double changeProductVAT(int productID, double VAT) throws BusinessException {
         // Validation
         if (productID <= 0) {
@@ -106,24 +112,24 @@ public class ProductManager {
             throw new BusinessException("Error when changing the VAT.", e);
         }
     }
-
-    public int changeFidelityPoint(int productID, int points) throws BusinessException {
+*/
+    public int changeFidelityPoint(Product product, int newFidelityPoint) throws BusinessException, DataValidationException, DataBaseException {
         // Validation
-        if (productID <= 0) {
+        if (productDA.checkExist(product)) {
             throw new BusinessException("The product ID is invalid.");
         }
-        if (points < 0) {
+        if (newFidelityPoint < 0) {
             throw new BusinessException("The fidelity points cannot be negative.");
         }
         try {
-            productDA.changeFidelityPoint(productID, points);
-            return points;
+            productDA.updateFidelityPoint(product, newFidelityPoint);
+            return newFidelityPoint;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when changing the fidelity points.", e);
         }
     }
 
-    public int changeMinimalQuantity(int productID, int minimalQuantity) throws BusinessException {
+    public int changeMinimalQuantity(int productID, int minimalQuantity) throws BusinessException, DataValidationException {
         // Validation
         if (productID <= 0) {
             throw new BusinessException("The product ID is invalid.");
@@ -139,31 +145,31 @@ public class ProductManager {
         }
     }
 
-    public boolean deleteProduct(int productID) throws BusinessException {
+    public boolean deleteProduct(Product product, int productID) throws BusinessException, DataValidationException, DataBaseException {
         // Validation
-        if (productID <= 0) {
-            throw new BusinessException("The product ID is invalid.");
+        if (product == null) {
+            throw new BusinessException("The product is empty.");
         }
         try {
             // Business rule — check that the product exists before deleting it
-            if (productDA.getProduct(productID) == null) {
+            if (productDA.getById(productID) == null) {
                 throw new BusinessException("The product does not exist.");
             }
-            productDA.deleteProduct(productID);
+            productDA.delete(product);
             return true;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when deleting the product.", e);
         }
     }
 
-    public ProductCategory createProductCategory(String name) throws BusinessException {
+    public ProductCategory createProductCategory(ProductCategory newProductCategory) throws BusinessException, DataValidationException, DataBaseException {
         // Validation
-        if (name == null || name.isBlank()) {
-            throw new BusinessException("The category name is required.");
+        if (newProductCategory == null) {
+            throw new BusinessException("The product category is null.");
         }
         try {
-            productDA.createProductCategory(name);
-            return productDA.getProductCategory(name);
+            productCategoryDA.insert(newProductCategory);
+            return newProductCategory;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when creating the category.", e);
         }

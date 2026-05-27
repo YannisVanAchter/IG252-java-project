@@ -3,12 +3,15 @@ package main.java.be.henallux.project.controller;
 import main.java.be.henallux.project.business.ProductManager;
 import main.java.be.henallux.project.business.StockManager;
 import main.java.be.henallux.project.business.exception.BusinessException;
+import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.model.Product;
 import main.java.be.henallux.project.model.ProductCategory;
 import main.java.be.henallux.project.model.LocationProduct;
 import main.java.be.henallux.project.model.QuantityProduct;
 import main.java.be.henallux.project.model.Discount;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 /**
@@ -64,12 +67,13 @@ public class ProductController {
 
     /**
      * Changes the price of a product.
-     * @param productID the product ID
-     * @param newPrice  the new price
-     * @see ProductManager#changeProductPrice(int, double)
+     * @param product the chosen product
+     * @param newPriceEVAT  the new priceEVAT
+     * @param newVAT the new priceVAT
+     * @see ProductManager#changeProductPrice(Product, BigDecimal, BigDecimal)
      */
-    public void changeProductPrice(int productID, double newPrice) throws BusinessException {
-        productManager.changeProductPrice(productID, newPrice);
+    public void changeProductPrice(Product product, BigDecimal newPriceEVAT, BigDecimal newVAT) throws BusinessException, DataValidationException {
+        productManager.changeProductPrice(product, newPriceEVAT, newVAT);
     }
 
     /**
@@ -78,18 +82,19 @@ public class ProductController {
      * @param newVAT    the new VAT rate (0–100)
      * @see ProductManager#changeProductVAT(int, double)
      */
-    public void changeProductVAT(int productID, double newVAT) throws BusinessException {
-        productManager.changeProductVAT(productID, newVAT);
-    }
+
+//    public void changeProductVAT(int productID, double newVAT) throws BusinessException {
+//        productManager.changeProductVAT(productID, newVAT);
+//    }
 
     /**
      * Changes the fidelity points awarded for a product.
-     * @param productID the product ID
-     * @param newPoints the new fidelity points value
-     * @see ProductManager#changeFidelityPoint(int, int)
+     * @param product the chosen product
+     * @param newFidelitypoint the new fidelity points value
+     * @see ProductManager#changeFidelityPoint(Product, int)
      */
-    public void changeFidelityPoint(int productID, int newPoints) throws BusinessException {
-        productManager.changeFidelityPoint(productID, newPoints);
+    public void changeFidelityPoint(Product product, int newFidelitypoint) throws BusinessException, DataValidationException, DataBaseException {
+        productManager.changeFidelityPoint(product, newFidelitypoint);
     }
 
     /**
@@ -105,19 +110,19 @@ public class ProductController {
     /**
      * Deletes a product by ID.
      * @param productID the product ID
-     * @see ProductManager#deleteProduct(int)
+     * @see ProductManager#deleteProduct(Product, int)
      */
-    public void deleteProductOffer(int productID) throws BusinessException {
-        productManager.deleteProduct(productID);
+    public void deleteProduct(Product product, int productID) throws BusinessException, DataValidationException, DataBaseException {
+        productManager.deleteProduct(product, productID);
     }
 
     /**
      * Creates a new product category.
-     * @param name the category name
-     * @see ProductManager#createProductCategory(String)
+     * @param newProductCategory the chosen category
+     * @see ProductManager#createProductCategory(ProductCategory)
      */
-    public void createNewProductCategory(String name) throws BusinessException {
-        productManager.createProductCategory(name);
+    public void createProductCategory(ProductCategory newProductCategory) throws BusinessException, DataValidationException, DataBaseException {
+        productManager.createProductCategory(newProductCategory);
     }
 
     /**
