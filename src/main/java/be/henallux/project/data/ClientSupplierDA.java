@@ -22,14 +22,15 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
     private static final volatile ClientSupplierDA instance;
     private final String TABLE_NAME;
     private final AddressDA addressDA;
-    private final FidelityCardDA fidelityCardDA;
+    // TODO: Fidelity card management
+    // private final FidelityCardDA fidelityCardDA;
 
     private ClientSupplierDA() {
         TABLE_NAME = "Client_supplier";
         IDS_MAPPING_OBJECT = new HashMap<>();
 
         addressDA = AddressDA.getInstance();
-        fidelityCardDA = FidelityCardDA.getInstance();
+        // fidelityCardDA = FidelityCardDA.getInstance();
     }
 
     public static ClientSupplierDA getInstance() {
