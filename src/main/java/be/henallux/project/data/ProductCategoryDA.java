@@ -11,13 +11,14 @@ import java.util.List;
 import java.util.Map;
 
 import main.java.be.henallux.project.data.exception.DataBaseException;
+import main.java.be.henallux.project.data.CRUD;
 import main.java.be.henallux.project.model.ProductCategory;
 import main.java.be.henallux.project.model.exception.DataValidationException;
 
 public class ProductCategoryDA extends CRUD<ProductCategory> {
     private static volatile ProductCategoryDA instance;
     private final String TABLE_NAME = "ProductCategory";
-    private Map<Integer, ProductCategory> dataMappingObject;
+    private final Map<Integer, ProductCategory> dataMappingObject;
 
     private ProductCategoryDA() {
         super();
@@ -76,7 +77,7 @@ public class ProductCategoryDA extends CRUD<ProductCategory> {
         String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " ORDER BY name_";
         List<ProductCategory> productCategories = new ArrayList<>();
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
             ResultSet resultSet = statement.executeQuery();
 
@@ -110,7 +111,7 @@ public class ProductCategoryDA extends CRUD<ProductCategory> {
         String placeholders = String.join(",", java.util.Collections.nCopies(ids.size(), "?"));
         String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " WHERE id_ IN (" + placeholders + ") ORDER BY name_";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
             for (int i = 0; i < ids.size(); i++) {
@@ -145,7 +146,7 @@ public class ProductCategoryDA extends CRUD<ProductCategory> {
 
         String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " WHERE id_=?;";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
             statement.setInt(1, id);
 
@@ -173,7 +174,7 @@ public class ProductCategoryDA extends CRUD<ProductCategory> {
 
         String SQLInstruction = "INSERT INTO " + TABLE_NAME + " (name_) VALUES (?);";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
             statement.setString(1, newProductCategory.getName());
@@ -204,18 +205,17 @@ public class ProductCategoryDA extends CRUD<ProductCategory> {
     }
 
     @Override
-    public boolean update(ProductCategory productCategory) throws DataBaseException {
+    public boolean update(ProductCategory productCategory, ProductCategory newProductCategory) throws DataBaseException {
         String SQLInstruction = "UPDATE " + TABLE_NAME + " SET name_=? WHERE id_=?;";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
-            statement.setString(1, productCategory.getName());
+            statement.setString(1, newProductCategory.getName());
             statement.setInt(2, productCategory.getId());
 
             int affectedRows = statement.executeUpdate();
 
-            dataMappingObject.remove(productCategory.getId());
             dataMappingObject.put(productCategory.getId(), productCategory);
 
             return affectedRows > 0;
@@ -229,7 +229,7 @@ public class ProductCategoryDA extends CRUD<ProductCategory> {
     public boolean delete(ProductCategory productCategory) throws DataBaseException {
         String SQLInstruction = "DELETE FROM " + TABLE_NAME + " WHERE id_=?;";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
             statement.setInt(1, productCategory.getId());
@@ -252,7 +252,7 @@ public class ProductCategoryDA extends CRUD<ProductCategory> {
         if (productCategory != null) {
             String SQLInstruction = "SELECT COUNT(*) as nbProductCategory FROM " + TABLE_NAME + " WHERE id_=?;";
 
-            try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+            try (Connection connection = connector.getConnection()) {
                 PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
                 statement.setInt(1, productCategory.getId());

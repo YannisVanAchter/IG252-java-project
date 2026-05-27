@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 import main.java.be.henallux.project.data.exception.DataBaseException;
+import main.java.be.henallux.project.model.exception.DataValidationException;
+import main.java.be.henallux.project.data.CRUD;
 import main.java.be.henallux.project.model.Locality;
 
 public class LocalityDA extends  CRUD<Locality> {
@@ -40,7 +42,7 @@ public class LocalityDA extends  CRUD<Locality> {
         }
     }
 
-    public Locality mapDataToObject(ResultSet data, boolean mapping) throws DataBaseException {
+    public Locality mapDataToObject(ResultSet data, boolean mapping) throws DataBaseException, DataValidationException {
         int id;
         try {
             id = data.getInt("id");
@@ -59,18 +61,17 @@ public class LocalityDA extends  CRUD<Locality> {
         return IDS_MAPPING_OBJECT.get(id);
     }
 
-    public Locality mapDataToObject(ResultSet data) throws DataBaseException {
+    public Locality mapDataToObject(ResultSet data) throws DataBaseException, DataValidationException {
         return mapDataToObject(data, true);
     }
 
-    public List<Locality> getAll() throws DataBaseException {
+    public List<Locality> getAll() throws DataBaseException, DataValidationException {
         String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " ORDER BY name";
+        List<Locality> localities = new ArrayList<>();
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
             ResultSet resultSet = statement.executeQuery();
-
-            List<Locality> localities = new ArrayList<>();
 
             while (resultSet.next()) {
                 localities.add(mapDataToObject(resultSet));
@@ -82,48 +83,24 @@ public class LocalityDA extends  CRUD<Locality> {
         return localities;
     }
 
-    public List<Locality> getsByIds(List<Integer> ids, boolean mapping) throws DataBaseException {
-        List<Locality> localities = new ArrayList<>();
+    public List<Locality> getsByIds(List<Integer> ids, boolean mapping) throws DataBaseException, DataValidationException {
 
-        for (Integer id : ids) {
-            Locality locality = IDS_MAPPING_OBJECT.get(id);
-            if (locality != null) {
-                localities.add(locality);
-                ids.remove(id);
-            }
-        }
+        if (ids == null)
+            return new ArrayList<>();
 
-        if (ids.isEmpty()) {
-            return localities;
-        }
-        
-        String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " WHERE id IN (?) ORDER BY name;";
-
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(SQLInstruction);
-
-            statement.setArray(1, ids.toArray());
-
-            ResultSet resultSet = statement.executeQuery();
-
-            while (resultSet.next()) {
-                localities.add(mapDataToObject(resultSet));
-            }
-        } catch (SQLException e) {
-            throw new DataBaseException("Select of multiple ids impossible", e);
-        }
-
-        return localities;
+        return getAll().stream().filter( l ->
+                ids.contains(l.hashCode())
+            ).toList();
     }
 
-    public List<Locality> getsByIds(List<Integer> postalCodes) throws DataBaseException {
+    public List<Locality> getsByIds(List<Integer> postalCodes) throws DataBaseException, DataValidationException {
         return getsByIds(postalCodes, true);
     }
 
-    public Locality getById(int postalCode, boolean mapping) throws DataBaseException {
+    public Locality getById(int postalCode, boolean mapping) throws DataBaseException, DataValidationException {
         String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " WHERE postalCode = ?;";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
 
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
@@ -141,14 +118,14 @@ public class LocalityDA extends  CRUD<Locality> {
         return null;
     }
 
-    public Locality getById(int postalCode) throws DataBaseException {
+    public Locality getById(int postalCode) throws DataBaseException, DataValidationException {
         return getById(postalCode, true);
     }
 
-    public boolean insert(Locality locality) throws DataBaseException {
+    public boolean insert(Locality locality) throws DataBaseException, DataValidationException {
         String SQLInstruction = "INSERT INTO " + TABLE_NAME + " (city, postalId) VALUES (?, ?);";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
             statement.setString(1, locality.getCity());
@@ -167,7 +144,7 @@ public class LocalityDA extends  CRUD<Locality> {
     public boolean update(Locality locality, Locality newLocality) throws DataBaseException {
         String SQLInstruction = "UPDATE " + TABLE_NAME + " SET city = ?, postalId = ? WHERE city = ? AND postalId = ?;";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
             statement.setString(1, newLocality.getCity());
@@ -189,7 +166,7 @@ public class LocalityDA extends  CRUD<Locality> {
     public boolean delete(Locality locality) throws DataBaseException {
         String SQLInstruction = "DELETE FROM " + TABLE_NAME + " WHERE city = ? AND postalId = ?;";
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+        try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
             statement.setString(1, locality.getCity());
@@ -203,16 +180,15 @@ public class LocalityDA extends  CRUD<Locality> {
         } catch (SQLException e) {
             throw new DataBaseException("Impossible to delete the object", e);
         }
-        return false;
     }
 
-    public boolean checkExist(Locality locality) throws DataBaseException {
+    public boolean checkExist(Locality locality) throws DataBaseException, DataValidationException {
         boolean exist = false;
         
         if (locality != null) {
             String SQLInstruction = "SELECT COUNT(*) as nbLocality FROM " + TABLE_NAME + " WHERE postalId=? AND city=?;";
 
-            try (Connection connection = MySQLConnector.getInstance().getConnection()) {
+            try (Connection connection = connector.getConnection()) {
                 PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
                 statement.setInt(1, locality.getPostalCode());
