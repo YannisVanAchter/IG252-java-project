@@ -59,13 +59,14 @@ public class WorkFlowManager {
         }
     }
 
-    public void addWorkFlowType(WorkFlowType workFlowType) throws BusinessException {
+    public WorkFlowType addWorkFlowType(WorkFlowType workFlowType) throws BusinessException {
         if (workFlowType == null) {
             throw new BusinessException("The workflow type cannot be null.");
         }
         
         try {
             workFlowDA.addWorkFlowType(workFlowType);
+            return workFlowType;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when adding the workflow type.", e);
         }
@@ -77,11 +78,8 @@ public class WorkFlowManager {
         }
 
         try {
-            // TODO - confirm return object of create method
             workFlowDA.addWorkFlow(workFlow);
             for (Document doc : workFlow.getDocuments()) {
-                // TODO - confirm if document must be created or has been created before adding to workflow
-                // TODO - confirm return object of create method
                 documentManager.createDocument(doc);
             }
         } catch (DataBaseException e) {
@@ -103,7 +101,7 @@ public class WorkFlowManager {
             throw new BusinessException("Error when changing the status.", e);
         }
     }
-    public void addDocument(int workFlowId, Document document) throws BusinessException {
+    public Document addDocument(int workFlowId, Document document) throws BusinessException {
         if (document == null) {
                 throw new BusinessException("The document cannot be null.");
         }
@@ -112,11 +110,11 @@ public class WorkFlowManager {
         }
 
         try {
-            // TODO - confirm return object of create method
             documentManager.createDocument(document);
             workFlowDA.addDocument(workFlowId, document);
         } catch (DataBaseException e) {
             throw new BusinessException("Error when adding the document.", e);
         }
+        return document;
     }
 }

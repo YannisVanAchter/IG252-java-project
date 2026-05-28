@@ -17,7 +17,7 @@ public class RecipeSearchManager {
     public RecipeSearchManager() {
         this.recipeDA = RecipeDA.getInstance();
     }
-//TODO : confirm signature of the method (name ?)
+    
     public List<Recipe> searchRecipes(String name, List<String> products) throws BusinessException {
         try {
             return recipeDA.searchRecipes(name, products);

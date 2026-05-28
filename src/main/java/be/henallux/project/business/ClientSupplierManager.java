@@ -7,6 +7,8 @@ import main.java.be.henallux.project.business.exception.BusinessException;
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.Address;
 import main.java.be.henallux.project.model.Product;
+
+import java.lang.foreign.AddressLayout;
 import java.util.List;
 
 public abstract class ClientSupplierManager {
@@ -49,14 +51,13 @@ public abstract class ClientSupplierManager {
             throw new BusinessException("The client supplier name is required.");
         }
         try {
-            // TODO - confirm return object of create method
             return clientSupplierDA.createClientSupplier(clientSupplier);
         } catch (DataBaseException e) {
             throw new BusinessException("Error creating the client supplier.", e);
         }
     }
 
-    public void changeAddress(int id, Address address) throws BusinessException {
+    public Address changeAddress(int id, Address address) throws BusinessException {
         if (id <= 0) {
             throw new BusinessException("The client supplier ID must be a positive number.");
         }
@@ -70,7 +71,7 @@ public abstract class ClientSupplierManager {
         }
     }
 
-    public void changePhoneNumber(int id, int phoneNumber) throws BusinessException {
+    public int changePhoneNumber(int id, int phoneNumber) throws BusinessException {
         if (id <= 0) {
             throw new BusinessException("The client supplier ID must be a positive number.");
         }
@@ -82,12 +83,13 @@ public abstract class ClientSupplierManager {
         }
         try {
             clientSupplierDA.changePhoneNumber(id, phoneNumber);
+            return phoneNumber;
         } catch (DataBaseException e) {
             throw new BusinessException("Error changing the phone number.", e);
         }
     }
 
-    public void changeEmail(int id, String email) throws BusinessException {
+    public String changeEmail(int id, String email) throws BusinessException {
         if (id <= 0) {
             throw new BusinessException("The client supplier ID must be a positive number.");
         }
@@ -99,19 +101,21 @@ public abstract class ClientSupplierManager {
         }
         try {
             clientSupplierDA.changeEmail(id, email);
+            return email;
         } catch (DataBaseException e) {
             throw new BusinessException("Error changing the email.", e);
         }
     }
 
-    public void deleteClientSupplier(int id) throws BusinessException {
+    public boolean deleteClientSupplier(int id) throws BusinessException {
         if (id <= 0) {
             throw new BusinessException("The client supplier ID must be a positive number.");
         }
         try {
             clientSupplierDA.deleteClientSupplier(id);
+            return true;
         } catch (DataBaseException e) {
-            throw new BusinessException("Error deleting the client supplier .", e);
+            throw new BusinessException("Error deleting the client supplier.", e);
         }
     }
 
