@@ -24,8 +24,10 @@ public class FidelityCardDA extends CRUD<FidelityCard> {
     }
 
     public static FidelityCardDA getInstance() {
-        if (instance == null) {
-            instance = new FidelityCardDA();
+        synchronized (FidelityCardDA.class) {
+            if (instance == null) {
+                instance = new FidelityCardDA();
+            }
         }
         return instance;
     }
