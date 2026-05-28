@@ -18,7 +18,7 @@ import main.java.be.henallux.project.model.Product;
 import main.java.be.henallux.project.model.ProductCategory;
 
 class ProductSearch {
-    private ProductDA productDA;
+    private CRUD<Product> productDA;
 
     ProductSearch() {
         productDA = ProductDA.getInstance();
@@ -48,7 +48,7 @@ class ProductSearch {
                         """);
         }
         try (Connection connection = MySQLConnector.getInstance().getConnection()) {
-            Statement statement = connection.prepareStatement(SQLInstruction.toString());
+            Statement statement = connection.prepareStatement(SQLInstruction.toString() + ";");
             int currentIndex = 1;
             if (nom != null && !nom.isEmpty()) {
                 statement.setString(currentIndex, nom);
