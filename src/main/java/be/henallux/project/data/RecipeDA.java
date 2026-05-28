@@ -25,6 +25,7 @@ public class RecipeDA extends CRUD<Recipe> {
     private RecipeDA() {
         TABLE_NAME = "Recipe";
         IDS_MAPPING_OBJECT = new HashMap<>();
+        compositionDA = RecipeCompositionDA.getInstance();
     }
 
     public static RecipeDA getInstance() {
@@ -62,7 +63,7 @@ public class RecipeDA extends CRUD<Recipe> {
             IDS_MAPPING_OBJECT.put(id, recipe);
 
             if (mapping)
-                compositionDA.getById(id);
+                compositionDA.getByRecipe(recipe);
 
             return recipe;
 
