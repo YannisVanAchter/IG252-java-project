@@ -25,7 +25,7 @@ public class Recipe implements Model {
         return id;
     }
 
-    private void setId(int id) throws DataValidationException {
+    public void setId(int id) throws DataValidationException {
         if (id < 0)
             throw new DataValidationException("Id cannot be negative");
         this.id = id;
@@ -45,7 +45,7 @@ public class Recipe implements Model {
         return instruction;
     }
 
-    private void setInstruction(String instruction) throws DataValidationException {
+    public void setInstruction(String instruction) throws DataValidationException {
         if (instruction == null || instruction.isEmpty())
             throw new DataValidationException("Instruction cannot be empty");
         this.instruction = instruction;
