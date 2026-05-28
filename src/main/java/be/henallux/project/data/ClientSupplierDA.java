@@ -22,15 +22,14 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
     private static final volatile ClientSupplierDA instance;
     private final String TABLE_NAME;
     private final AddressDA addressDA;
-    // TODO: Fidelity card management
-    // private final FidelityCardDA fidelityCardDA;
+    private final FidelityCardDA fidelityCardDA;
 
     private ClientSupplierDA() {
         TABLE_NAME = "Client_supplier";
         IDS_MAPPING_OBJECT = new HashMap<>();
 
         addressDA = AddressDA.getInstance();
-        // fidelityCardDA = FidelityCardDA.getInstance();
+        fidelityCardDA = FidelityCardDA.getInstance();
     }
 
     public static ClientSupplierDA getInstance() {
@@ -190,7 +189,7 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
     @Override
     public boolean insert(ClientSupplier clientSupplier)
             throws DataBaseException, DataValidationException {
-
+        addressDA.chechExist(clientSupplier.getAddress())
         String query = String.format("""
                 INSERT INTO %S
                 (
