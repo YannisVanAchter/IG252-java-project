@@ -193,7 +193,7 @@ public class Document implements Model {
 
     public int getId() { return id; }
 
-    private void setId(int id) throws DataValidationException {
+    public void setId(int id) throws DataValidationException {
         if (id < 0) {
             String message = "ID setting error, ID is lower or equal to 0 (zero) when it shouldn't (current value: " + id + ")";
             throw new DataValidationException(message);
