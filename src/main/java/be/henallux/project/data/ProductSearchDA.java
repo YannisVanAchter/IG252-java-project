@@ -24,9 +24,6 @@ class ProductSearch {
         productDA = ProductDA.getInstance();
     }
 
-    /**
-     *
-     */
     public List<Product> search(String nom, ProductCategory category, boolean isDiscounted) throws DataBaseException, DataValidationException {
         List<Product> products = new ArrayList();
         StringBuilder SQLInstruction = """
@@ -42,10 +39,10 @@ class ProductSearch {
         }
         LocalDate today = LocalDate.now();
         if (isDiscounted) {
-            SQLInstruction.add("""
+            SQLInstruction.add("""(
                         Discount.startDate <= ? AND
                         ? <= Discount.endDate 
-                        """);
+                        )""");
         }
         try (Connection connection = MySQLConnector.getInstance().getConnection()) {
             Statement statement = connection.prepareStatement(SQLInstruction.toString() + ";");
@@ -59,9 +56,9 @@ class ProductSearch {
                 currentIndex++;
             }
             if (isDiscounted) {
-                statement.setDate(currentIndex, Date.of(today);
+                statement.setDate(currentIndex, Date.of(today));
                 currentIndex++;
-                statement.setDate(currentIndex, Date.of(today);
+                statement.setDate(currentIndex, Date.of(today));
                 currentIndex++;
             }
 
