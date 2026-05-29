@@ -23,13 +23,13 @@ class RecipeSearchDA {
         recipeDA = RecipeDA.getInstance();
     }
 
-    public List<Recipe> search(String nom, String productName,) throws DataBaseException, DataValidationException {
+    public List<Recipe> search(String nom, String productName) throws DataBaseException, DataValidationException {
         List<Recipe> recipes = new ArrayList();
-        StringBuilder SQLInstruction = """
+        StringBuilder SQLInstruction = new StringBuilder("""
                     SELECT Recipe.id_ as recipeID
                     FROM Recipe, RecipeComposition AS Composition, Product 
-                    WHERE (Recipe.id_ = Composition.recipeId OR Recipe.finalProductId = Product.id_)
-                    """;
+                    WHERE Recipe.id_ = Composition.recipeId AND Composition.productId = Product.id_
+                    """);
         if (nom != null && !nom.isEmpty()) {
             SQLInstruction.add(" AND Recipe.name_=?");
         }

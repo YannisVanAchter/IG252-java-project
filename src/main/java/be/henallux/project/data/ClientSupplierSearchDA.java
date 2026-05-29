@@ -28,11 +28,11 @@ class ClientSupplierSearchDA {
      */
     public List<ClientSupplier> search(String nom, String email, boolean isFidelityCardValid ) throws DataBaseException, DataValidationException {
         List<ClientSupplier> clientSupplier = new ArrayList();
-        StringBuilder SQLInstruction = """
+        StringBuilder SQLInstruction = new StringBuilder("""
                     SELECT cs.id_ as ID
                     FROM Client_Supplier AS cs
                     WHERE 
-                    """;
+                    """);
         boolean addedWhereClause = false;
         if (nom != null && !nom.isEmpty()) {
             SQLInstruction.add(" cs.name_=?");
