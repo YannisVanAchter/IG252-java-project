@@ -449,4 +449,29 @@ public class ProductDA extends CRUD<Product> {
 
         return exist;
     }
+
+    public Map<ClientSupplier, List<Product>> getLowQuantityProduct() throws DataBaseException, DataValidationException {
+        String SQLInstruction = "SELECT * FROM vw_LowQuantity_ProductSupplier;";
+        try (Statement statement = connector.getInstance().getConnection().createStatement(SQLInstruction)) {
+            ResultSet result = statement.executeQuery();
+
+            Map<ClientSupplier, List<Product>> supplier_mapping_product = new HashMap();
+            ClientSupplierDA supplierDA = ClientSupplierDA.getInstance();
+            ClientSupplier supplier;
+            result.next();
+            do {
+                if (supplier == null || supplier.getId() != result.getInt("supplierId")) {
+                    supplier = supplierDA.getById(result.getInt("supplierId"))
+                    supplier_mapping_product.put(supplier, new ArrayList<>());
+                }
+                supplier_mapping_product
+                        .get(supplier)
+                        .add(getById(result.getInt("productId")));
+            } while (result.next())
+
+            return supplier_mapping_product;
+        } catch (SQLException e) {
+            throw new DataBaseException(e.getMessage(), e);
+        }
+    }
 }

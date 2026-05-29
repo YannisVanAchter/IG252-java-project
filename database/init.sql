@@ -667,6 +667,17 @@ AND w.workFlowTypeId = wt.id_
 AND wt.isSupplier = TRUE
 AND w.otherId = s.id_;
 
+CREATE VIEW vw_LowQuantity_ProductSupplier AS
+    SELECT v.productId as productID, v.supplierId as supplierId
+    FROM vw_ProductSuppliers v, Product p
+    WHERE v.productId = p.id_ AND p.minStockQuantity*1.1 >= (
+        SELECT SUM(q.quantity)
+        FROM QuantityProduct q
+        WHERE p.id_ = q.productId
+        )
+    ORDER BY v.supplierId;
+
+
 -- Insert
 
 INSERT INTO ProductCategory (name_) VALUES ('Ménager');
