@@ -29,9 +29,10 @@ public class RecipeDA extends CRUD<Recipe> {
     }
 
     public static RecipeDA getInstance() {
-        if (instance == null)
-            instance = new RecipeDA();
-
+        synchronized (RecipeDA.class) {
+            if (instance == null)
+                instance = new RecipeDA();
+        }
         return instance;
     }
 
