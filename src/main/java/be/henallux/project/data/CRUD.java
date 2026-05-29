@@ -14,9 +14,9 @@ import main.java.be.henallux.project.model.Model;
 import main.java.be.henallux.project.model.exception.DataValidationException;
 
 public abstract class CRUD<M extends Model> {
-    CRUD<M> instance;
-    String TABLE_NAME;
-    Map<Object, M> IDS_MAPPING_OBJECT;
+    protected static volatile CRUD<M> instance;
+    protected String TABLE_NAME;
+    protected Map<Object, M> IDS_MAPPING_OBJECT;
     public final static MySQLConnector connector = MySQLConnector.getInstance();
 
     abstract M mapDataToObject(ResultSet data, boolean mapping) throws DataBaseException, DataValidationException;
