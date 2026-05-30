@@ -31,26 +31,20 @@ public class ClientSupplierSearchDA {
         StringBuilder SQLInstruction = new StringBuilder("""
                     SELECT cs.id_ as ID
                     FROM Client_Supplier AS cs
-                    WHERE 
-                    """);
+                    WHERE 1=1
+                    """); // ? Add '1=1', if all parameters are null, the where clause would create problems
         boolean addedWhereClause = false;
         if (nom != null && !nom.isEmpty()) {
-            SQLInstruction.add(" cs.name_=?");
+            SQLInstruction.add(" AND cs.name_=?");
             addedWhereClause = true;
         }
         if (email != null && !email.isEmpty()) {
-            if (addedWhereClause) {
-                SQLInstruction.add(" AND ");
-            }
-            SQLInstruction.add(" email=?");
+            SQLInstruction.add(" AND email=?");
             addedWhereClause = true;
         }
         if (isFidelityCardValid){
-            if (addedWhereClause) {
-                SQLInstruction.add(" AND ");
-            }
             SQLInstruction.add("""
-                    cs.id_ in (
+                     AND cs.id_ in (
                         SELECT fd.clientID FROM FidelityCard AS fd
                         WHERE isValid=?
                     )

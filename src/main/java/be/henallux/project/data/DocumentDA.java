@@ -24,7 +24,7 @@ import main.java.be.henallux.project.model.exception.DataValidationException;
 
 public class DocumentDA extends CRUD<Document>
 {
-    private static DocumentDA instance;
+    private static volatile DocumentDA instance;
 
     private final String TABLE_NAME = "Document_";
 

@@ -422,7 +422,7 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
             int affectedRows = statement.executeUpdate();
 
             if (affectedRows > 0) {
-                oldModel.setEmail(newAddress);
+                oldModel.setEmail(newEmail);
 
                 return true;
             }
@@ -459,7 +459,7 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
             int affectedRows = statement.executeUpdate();
 
             if (affectedRows > 0) {
-                oldModel.setEmail(newAddress);
+                oldModel.setPhoneNumber(newPhoneNumber);
 
                 return true;
             }

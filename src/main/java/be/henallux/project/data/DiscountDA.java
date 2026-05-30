@@ -199,7 +199,7 @@ public class DiscountDA extends CRUD<Discount> {
             int affectedRows = statement.executeUpdate();
 
             dataMappingObject.remove(discount.hashCode());
-            dataMappingObject.put(discount.hashCode(), discount);
+            dataMappingObject.put(newDiscount.hashCode(), newDiscount);
 
             return affectedRows > 0;
 

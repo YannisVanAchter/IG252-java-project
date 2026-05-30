@@ -363,7 +363,7 @@ public class ProductDA extends CRUD<Product> {
         String SQLInstruction = "UPDATE " + TABLE_NAME +
                 " SET minStockQuantity=? " +
                 "WHERE id_=?;";
-
+        int oldQuantity = product.getQuantity();
         try (Connection connection = connector.getConnection()) {
 
             product.setMinStockQuantity(newQuantity);
@@ -380,6 +380,7 @@ public class ProductDA extends CRUD<Product> {
             return affectedRows > 0;
 
         } catch (SQLException e) {
+            product.setQuantity(oldQuantity);
             throw new DataBaseException("Update impossible", e);
         }
     }
@@ -452,16 +453,17 @@ public class ProductDA extends CRUD<Product> {
 
     public Map<ClientSupplier, List<Product>> getLowQuantityProduct() throws DataBaseException, DataValidationException {
         String SQLInstruction = "SELECT * FROM vw_LowQuantity_ProductSupplier;";
-        try (Statement statement = connector.getInstance().getConnection().createStatement(SQLInstruction)) {
+        try (Connection connection = connector.getInstance().getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(SQLInstruction)
             ResultSet result = statement.executeQuery();
 
             Map<ClientSupplier, List<Product>> supplier_mapping_product = new HashMap();
             ClientSupplierDA supplierDA = ClientSupplierDA.getInstance();
-            ClientSupplier supplier;
             result.next();
+            ClientSupplier supplier = supplierDA.getById(result.getInt("supplierId"));
             do {
                 if (supplier == null || supplier.getId() != result.getInt("supplierId")) {
-                    supplier = supplierDA.getById(result.getInt("supplierId"))
+                    supplier = supplierDA.getById(result.getInt("supplierId"));
                     supplier_mapping_product.put(supplier, new ArrayList<>());
                 }
                 supplier_mapping_product
