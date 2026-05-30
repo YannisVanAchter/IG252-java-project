@@ -240,7 +240,7 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
             if (clientSupplier.getAddress() != null) {
                 statement.setInt(
                         10,
-                        clientSupplier.getAddress().getId()
+                        clientSupplier.getAddress().getAddressId()
                 );
             } else {
                 statement.setNull(10, java.sql.Types.INTEGER);
@@ -327,7 +327,7 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
             if (newModel.getAddress() != null) {
                 statement.setInt(
                         10,
-                        newModel.getAddress().getId()
+                        newModel.getAddress().getAddressId()
                 );
             } else {
                 statement.setNull(10, java.sql.Types.INTEGER);
@@ -378,7 +378,7 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
         ) {
             statement.setInt(
                     1,
-                    newAddress.getId()
+                    newAddress.getAddressId()
             );
             statement.setInt(2, oldModel.getId());
 

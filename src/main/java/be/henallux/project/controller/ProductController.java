@@ -99,12 +99,12 @@ public class ProductController {
 
     /**
      * Changes the minimal stock quantity for a product.
-     * @param productID   the product ID
+     * @param product   the chosen product
      * @param newQuantity the new minimal quantity
-     * @see ProductManager#changeMinimalQuantity(int, int)
+     * @see ProductManager#changeMinimalQuantity(Product, int)
      */
-    public void changeMinimalQuantity(int productID, int newQuantity) throws BusinessException {
-        productManager.changeMinimalQuantity(productID, newQuantity);
+    public void changeMinimalQuantity(Product product, int newQuantity) throws BusinessException, DataValidationException {
+        productManager.changeMinimalQuantity(product, newQuantity);
     }
 
     /**
@@ -112,8 +112,8 @@ public class ProductController {
      * @param productID the product ID
      * @see ProductManager#deleteProduct(Product, int)
      */
-    public void deleteProduct(Product product, int productID) throws BusinessException, DataValidationException, DataBaseException {
-        productManager.deleteProduct(product, productID);
+    public void deleteProduct(Product product) throws BusinessException, DataValidationException, DataBaseException {
+        productManager.deleteProduct(product);
     }
 
     /**

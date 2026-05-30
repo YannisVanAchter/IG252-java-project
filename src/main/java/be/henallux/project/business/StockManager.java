@@ -1,18 +1,24 @@
 package main.java.be.henallux.project.business;
 
-import main.java.be.henallux.project.data.StockDA;
+import main.java.be.henallux.project.data.ProductDA;
+import main.java.be.henallux.project.data.QuantityProductDA;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.business.exception.BusinessException;
 
 import main.java.be.henallux.project.model.LocationProduct;
 import main.java.be.henallux.project.model.Product;
+import main.java.be.henallux.project.model.QuantityProduct;
+import main.java.be.henallux.project.model.exception.DataValidationException;
+
 import java.util.List;
 public class StockManager {
 
-    private final StockDA stockDA;
+    private final ProductDA productDA;
+    private final QuantityProductDA quantityProductDA;
 
     public StockManager() {
-        this.stockDA = StockDA.getInstance();
+        this.productDA = ProductDA.getInstance();
+        this.quantityProductDA = QuantityProductDA.getInstance();
     }
 
     public LocationProduct addStockLocation(LocationProduct location) throws BusinessException {
@@ -27,24 +33,25 @@ public class StockManager {
         }
     }
 
-    public void addToStocks(int productID, int quantity, LocationProduct storeLocation) throws BusinessException {
+    public void addToStocks(int productID, int quantity, LocationProduct storeLocation) throws BusinessException, DataValidationException {
         if (productID <= 0) {
             throw new BusinessException("The product ID is invalid.");
         }
         if (quantity <= 0) {
             throw new BusinessException("The quantity must be positive.");
         }
-        if (storeLocation == null) {
-            throw new BusinessException("The stock location is invalid.");
-        }
         try {
-            stockDA.addToStocks(productID, quantity, storeLocation);
+            Product product = productDA.getById(productID);
+            QuantityProduct quantityProduct = quantityProductDA.getById(QuantityProduct.hashCode(storeLocation, product));
+            if (quantity < product.getStockQuantity()) {
+                quantityProductDA.update(quantityProduct, quantity);
+            }
         } catch (DataBaseException e) {
             throw new BusinessException("Error occurred while adding to stock.", e);
         }
     }
 
-    public void subtractFromStock(int productID, int quantity, LocationProduct storeLocation) throws BusinessException {
+    public void subtractFromStock(int productID, int quantity, LocationProduct storeLocation) throws BusinessException, DataValidationException {
         if (productID <= 0) {
             throw new BusinessException("The product ID is invalid.");
         }
@@ -56,11 +63,11 @@ public class StockManager {
         }
         try {
             // Business rule — check if there is enough stock before subtracting
-            int currentStock = stockDA.getStockLevel(productID, storeLocation);
-            if (quantity > currentStock) {
-                throw new BusinessException("Insufficient stock to perform this operation.");
+            Product product = productDA.getById(productID);
+            QuantityProduct quantityProduct = quantityProductDA.getById(QuantityProduct.hashCode(storeLocation, product));
+            if (quantity < product.getStockQuantity()) {
+                quantityProductDA.update(quantityProduct, quantity);
             }
-            stockDA.subtractFromStock(productID, quantity, storeLocation);
         } catch (DataBaseException e) {
             throw new BusinessException("Error occurred while subtracting from stock.", e);
         }

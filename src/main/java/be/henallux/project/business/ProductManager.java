@@ -132,34 +132,35 @@ public class ProductManager {
         }
     }
 
-    public int changeMinimalQuantity(int productID, int minimalQuantity) throws BusinessException, DataValidationException {
+    public int changeMinimalQuantity(Product product, int newQuantity) throws BusinessException, DataValidationException {
         // Validation
-        if (productID <= 0) {
+        if (product == null) {
             throw new BusinessException("The product ID is invalid.");
         }
-        if (minimalQuantity < 0) {
+        if (newQuantity < 0) {
             throw new BusinessException("The minimal quantity cannot be negative.");
         }
         try {
-            productDA.changeMinimalQuantity(productID, minimalQuantity);
-            return minimalQuantity;
+            productDA.updateQuantity(product, newQuantity);
+            return newQuantity;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when changing the minimal quantity.", e);
         }
     }
 
-    public boolean deleteProduct(Product product, int productID) throws BusinessException, DataValidationException, DataBaseException {
+    public boolean deleteProduct(Product product) throws BusinessException, DataValidationException {
         // Validation
         if (product == null) {
             throw new BusinessException("The product is empty.");
         }
         try {
             // Business rule — check that the product exists before deleting it
-            if (productDA.getById(productID) == null) {
-                throw new BusinessException("The product does not exist.");
+            if (productDA.checkExist(product)) {
+                productDA.delete(product);
+                return true;
+            } else {
+                return false;
             }
-            productDA.delete(product);
-            return true;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when deleting the product.", e);
         }

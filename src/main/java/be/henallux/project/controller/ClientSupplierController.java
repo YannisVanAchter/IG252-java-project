@@ -7,6 +7,7 @@ import main.java.be.henallux.project.business.exception.BusinessException;
 import main.java.be.henallux.project.model.Address;
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.Product;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,22 +58,22 @@ public abstract class ClientSupplierController {
 
     /**
      * Changes the address of a client or supplier.
-     * @param id         the client/supplier ID
+     * @param oldModel         the client/supplier ID
      * @param newAddress the new {@link Address}
-     * @see ClientManager#changeAddress(int, Address)
+     * @see ClientManager#changeAddress(ClientSupplier, Address)
      */
-    public void changeAddress(int id, Address newAddress) throws BusinessException {
-        clientManger.changeAddress(id, newAddress);
+    public void changeAddress(ClientSupplier oldModel, Address newAddress) throws BusinessException, DataValidationException {
+        clientManger.changeAddress(oldModel, newAddress);
     }
 
     /**
      * Changes the phone number of a client or supplier.
-     * @param id             the client/supplier ID
+     * @param oldModel the client/supplier
      * @param newPhoneNumber the new phone number
-     * @see ClientManager#changePhoneNumber(int, int)
+     * @see ClientManager#changePhoneNumber(ClientSupplier, String)
      */
-    public void changePhoneNumber(int id, int newPhoneNumber) throws BusinessException {
-        clientManger.changePhoneNumber(id, newPhoneNumber);
+    public void changePhoneNumber(ClientSupplier oldModel, String newPhoneNumber) throws BusinessException, DataValidationException {
+        clientManger.changePhoneNumber(oldModel, newPhoneNumber);
     }
 
     /**

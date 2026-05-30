@@ -17,20 +17,20 @@ import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.model.Product;
 import main.java.be.henallux.project.model.ProductCategory;
 
-class ProductSearchDA {
+class ProductSearch {
     private CRUD<Product> productDA;
 
-    ProductSearchDA () {
+    ProductSearch() {
         productDA = ProductDA.getInstance();
     }
 
     public List<Product> search(String nom, ProductCategory category, boolean isDiscounted) throws DataBaseException, DataValidationException {
         List<Product> products = new ArrayList();
-        StringBuilder SQLInstruction = new StringBuilder("""
+        StringBuilder SQLInstruction = """
                     SELECT Product.id_ as productID
                     FROM Product, ProductCategory AS Category, Discount 
                     WHERE Product.id_ = Discount.productId AND Product.categoryId = Category.id_
-                    """);
+                    """;
         if (nom != null && !nom.isEmpty()) {
             SQLInstruction.add(" AND Product.name=?");
         }

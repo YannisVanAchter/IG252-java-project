@@ -1,6 +1,6 @@
 package main.java.be.henallux.project.business;
 
-import main.java.be.henallux.project.data.ProductDA;
+import main.java.be.henallux.project.data.ProductSearch;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.business.exception.BusinessException;
 
@@ -10,15 +10,15 @@ import main.java.be.henallux.project.model.Discount;
 import java.util.List;
 
 public class ProductSearchManager {
-    private final ProductDA productDA;
+    private final ProductSearch productSearch;
 
     public ProductSearchManager() {
-        this.productDA = ProductDA.getInstance();
+        this.productSearch = new ProductSearch();
     }
 
-    public List<Product> searchProducts(String name, String category, Boolean discount) throws BusinessException {
+    public List<Product> searchProducts(String name, ProductCategory category, Boolean discount) throws BusinessException {
         try {
-            return productDA.search(name, category, discount);
+            return productSearch.search(name, category, discount);
         } catch (DataBaseException e) {
             throw new BusinessException("Error while searching for products.", e);
         }

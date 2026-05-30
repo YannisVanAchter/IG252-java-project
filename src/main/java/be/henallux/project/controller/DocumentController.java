@@ -6,10 +6,12 @@ import main.java.be.henallux.project.business.SupplierManager;
 import main.java.be.henallux.project.business.DocumentManager;
 import main.java.be.henallux.project.business.WorkFlowManager;
 import main.java.be.henallux.project.business.exception.BusinessException;
+import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.Document;
 import main.java.be.henallux.project.model.DocumentType;
 import main.java.be.henallux.project.model.LocationProduct;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -39,7 +41,7 @@ public class DocumentController {
      * @return list of all {@link Document}
      * @see DocumentManager#getAllDocuments()
      */
-    public ArrayList<Document> getAllDocuments() throws BusinessException {
+    public ArrayList<Document> getAllDocuments() throws BusinessException, DataValidationException {
         return new ArrayList<>(documentManager.getAllDocuments());
     }
 
@@ -49,7 +51,7 @@ public class DocumentController {
      * @return the matching {@link Document}
      * @see DocumentManager#getDocument(int)
      */
-    public Document getDocument(int id) throws BusinessException {
+    public Document getDocument(int id) throws BusinessException, DataValidationException {
         return documentManager.getDocument(id);
     }
 
@@ -85,39 +87,33 @@ public class DocumentController {
 
     /**
      * Records a delivery reception for a document.
-     * @param documentId      the document ID
+     * @param document      the chosen document
      * @param date            the reception date
-     * @param locationProduct the stock location
-     * @see DocumentManager#receiveDelivery(int, LocalDate, LocationProduct)
+     * @see DocumentManager#receiveDelivery(Document, LocalDate)
      */
-    public void receiveDelivery(int documentId, LocalDate date, LocationProduct locationProduct) throws BusinessException {
-        documentManager.receiveDelivery(documentId, date, locationProduct);
+    public void receiveDelivery(Document document, LocalDate date) throws BusinessException, DataValidationException {
+        documentManager.receiveDelivery(document, date);
     }
 
     /**
      * Records a delivery send for a document.
-     * @param documentId      the document ID
+     * @param document      the chosen document
      * @param date            the send date
-     * @param locationProduct the stock location
-     * @see DocumentManager#sendDelivery(int, LocalDate, LocationProduct)
+     * @see DocumentManager#sendDelivery(Document, LocalDate)
      */
-    public void sendDelivery(int documentId, LocalDate date, LocationProduct locationProduct) throws BusinessException {
-        documentManager.sendDelivery(documentId, date, locationProduct);
+    public void sendDelivery(Document document, LocalDate date) throws BusinessException, DataValidationException {
+        documentManager.sendDelivery(document, date);
     }
 
     /**
      * Deletes a document.
-     * @param doc the {@link Document} to delete
+     * @param document the {@link Document} to delete
      * @return {@code true} if deleted successfully, {@code false} otherwise
-     * @see DocumentManager#deleteDocument(int)
+     * @see DocumentManager#deleteDocument(Document)
      */
-    public boolean deleteDocument(Document doc) {
-        try {
-            documentManager.deleteDocument(doc.getId());
-            return true;
-        } catch (BusinessException e) {
-            return false;
-        }
+    public boolean deleteDocument(Document document) throws BusinessException, DataValidationException {
+        documentManager.deleteDocument(document);
+        return true;
     }
 
     /**
@@ -126,8 +122,8 @@ public class DocumentController {
      * @return the created {@link Document}
      * @see DocumentManager#createDocument(Document)
      */
-    public Document createDocument(Document document) throws BusinessException {
-        addressManager.createAddress(document.getAddress());
+    public boolean createDocument(Document document) throws BusinessException, DataValidationException {
+        addressManager.createAddress(document.getAddress(), document.getAddress().getLocality());
         workFlowManager.addWorkFlow(document.getWorkflow());
         documentManager.addDocumentType(document.getDocumentType());
         return documentManager.createDocument(document);
@@ -136,11 +132,10 @@ public class DocumentController {
     /**
      * Updates a document with an address and workflow.
      * @param document the {@link Document} to update
-     * @see DocumentManager#updateDocument(Document)
      */
-    public void updateDocument(Document document) throws BusinessException {
-        addressManager.createAddress(document.getAddress());
+    public void updateDocument(Document document, Document oldDocument, Document newDocument) throws BusinessException, DataValidationException {
+        addressManager.createAddress(document.getAddress(), document.getAddress().getLocality());
         workFlowManager.addWorkFlow(document.getWorkflow());
-        documentManager.updateDocument(document);
+        documentManager.updateDocument(oldDocument, newDocument);
     }
 }

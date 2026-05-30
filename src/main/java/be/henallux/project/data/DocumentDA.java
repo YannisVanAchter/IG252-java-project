@@ -261,7 +261,7 @@ public class DocumentDA extends CRUD<Document>
             statement.setInt(10, document.getDocumentType().getId());
 
             if(document.getAddress() != null)
-                statement.setInt(11, document.getAddress().getId());
+                statement.setInt(11, document.getAddress().getAddressId());
             else
                 statement.setNull(11, java.sql.Types.INTEGER);
 
@@ -356,7 +356,7 @@ public class DocumentDA extends CRUD<Document>
             statement.setInt(10, newDocument.getDocumentType().getId());
 
             if(newDocument.getAddress() != null)
-                statement.setInt(11, newDocument.getAddress().getId());
+                statement.setInt(11, newDocument.getAddress().getAddressId());
             else
                 statement.setNull(11, java.sql.Types.INTEGER);
 
@@ -533,7 +533,7 @@ public class DocumentDA extends CRUD<Document>
         return updateField(
                 document.getId(),
                 "addressId",
-                address.getId()
+                address.getAddressId()
         );
     }
 }

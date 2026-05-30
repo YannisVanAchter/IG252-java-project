@@ -28,6 +28,22 @@ public class AddressManager {
         }
     }
 
+    public Address getAddressById(int id) throws BusinessException, DataValidationException {
+        try {
+            return addressDA.getById(id);
+        } catch (DataBaseException e) {
+            throw new BusinessException("Error cannot retrieve address.", e);
+        }
+    }
+
+    public Locality getLocalityById(int postalCode) throws BusinessException, DataValidationException {
+        try {
+            return localityDA.getById(postalCode);
+        } catch (DataBaseException e) {
+            throw new BusinessException("Error cannot retrieve locality.", e);
+        }
+    }
+
     public boolean createLocality(Locality locality) throws BusinessException, DataValidationException {
         // Validation
         if (locality == null) {
@@ -48,7 +64,7 @@ public class AddressManager {
         return false;
     }
 
-    public boolean createAddress(Address address, Locality locality) throws BusinessException, DataValidationException {
+    public Address createAddress(Address address, Locality locality) throws BusinessException, DataValidationException {
         // Validation
         if (address == null) {
             throw new BusinessException("Error: Address cannot be null.");
@@ -59,12 +75,11 @@ public class AddressManager {
         try {
             if (localityDA.checkExist(locality)) {
                 addressDA.insert(address);
-                return true;
             }
         } catch (DataBaseException e) {
             throw new BusinessException("Error creating address.", e);
         }
-        return false;
+        return address;
     }
 
     public boolean delete(Address address) throws BusinessException, DataValidationException {

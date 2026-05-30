@@ -59,19 +59,6 @@ public class WorkFlowManager {
         }
     }
 
-    public WorkFlowType addWorkFlowType(WorkFlowType workFlowType) throws BusinessException {
-        if (workFlowType == null) {
-            throw new BusinessException("The workflow type cannot be null.");
-        }
-        
-        try {
-            workFlowDA.addWorkFlowType(workFlowType);
-            return workFlowType;
-        } catch (DataBaseException e) {
-            throw new BusinessException("Error when adding the workflow type.", e);
-        }
-    }
-
     public void addWorkFlow(WorkFlow workFlow) throws BusinessException {
         if (workFlow == null) {
             throw new BusinessException("The workflow cannot be null.");
