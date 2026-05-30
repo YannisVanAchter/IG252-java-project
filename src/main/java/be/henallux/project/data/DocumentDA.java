@@ -84,7 +84,7 @@ public class DocumentDA extends CRUD<Document>
 
             Integer addressId = data.getObject("addressId", Integer.class);
 
-            WorkFlow workflow = WorkFlowDA.getInstance().getById(workflowId, mapping);
+            WorkFlow workflow = WorkFlowDA.getInstance().getById(workflowId, false);
 
             DocumentType documentType =
                     DocumentTypeDA.getInstance().getById(documentTypeId, mapping);
@@ -111,6 +111,8 @@ public class DocumentDA extends CRUD<Document>
             );
 
             IDS_MAPPING_OBJECT.put(id, document);
+
+            document.getWorkflow().addDocument(document);
 
             if (mapping)
                 detailDA.getAll();
