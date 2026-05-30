@@ -17,7 +17,7 @@ import main.java.be.henallux.project.model.exception.DataValidationException;
 
 public class DetailDA extends CRUD<Detail>
 {
-    private static DetailDA instance;
+    private static volatile DetailDA instance;
 
     private final ProductDA productDA;
     private final DocumentDetailsDA documentDetailsDA;
@@ -105,7 +105,7 @@ public class DetailDA extends CRUD<Detail>
     }
 
     @Override
-    Detail getById(int id, boolean mapping)
+    public Detail getById(int id, boolean mapping)
             throws DataBaseException, DataValidationException
     {
         if(mapping && IDS_MAPPING_OBJECT.containsKey(id))
@@ -134,7 +134,7 @@ public class DetailDA extends CRUD<Detail>
     }
 
     @Override
-    List<Detail> getsByIds(List<Integer> ids, boolean mapping)
+    public List<Detail> getsByIds(List<Integer> ids, boolean mapping)
             throws DataBaseException, DataValidationException
     {
         List<Detail> details = new ArrayList<>();
@@ -233,7 +233,14 @@ public class DetailDA extends CRUD<Detail>
             ps.setInt(6, newDetail.getFidelityPointEarned());
             ps.setInt(7, oldDetail.getId());
 
-            return ps.executeUpdate() > 0;
+            int isUpdated = ps.executeUpdate() > 0;
+
+            if (isUpdated) {
+                IDS_MAPPING_OBJECT.remove(oldDetail.getId());
+                IDS_MAPPING_OBJECT.put(newDetail.getId(), newDetail);
+            }
+
+            return isUpdated;
         }
         catch(Exception e)
         {

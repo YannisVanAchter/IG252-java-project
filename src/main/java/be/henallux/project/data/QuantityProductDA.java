@@ -185,7 +185,8 @@ public class QuantityProductDA extends CRUD<QuantityProduct> {
 
             int affectedRows = statement.executeUpdate();
 
-            dataMappingObject.put(qp.hashCode(), qp);
+            dataMappingObject.remove(qp.hashCode());
+            dataMappingObject.put(newQp.hashCode(), newQp);
 
             return affectedRows > 0;
 

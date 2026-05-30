@@ -149,7 +149,7 @@ public class LocationProductDA extends CRUD<LocationProduct> {
     public boolean update(LocationProduct locationProduct, LocationProduct newLocationProduct) throws DataBaseException, DataValidationException {
         String SQLInstruction =
                 "UPDATE " + TABLE_NAME +
-                " SET shelf_=?, floor_=?, isStock_=?, isFreezer_=? WHERE id_=?;";
+                " SET shelf_=?, floor_=?, isStock_=?, isFreezer_=? WHERE shelf_=? AND floor_=? AND isStock_=?;";
 
         try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
@@ -158,13 +158,16 @@ public class LocationProductDA extends CRUD<LocationProduct> {
             statement.setString(2, newLocationProduct.getFloor());
             statement.setBoolean(3, newLocationProduct.getIsStock());
             statement.setBoolean(4, newLocationProduct.getIsFreezer());
-            statement.setString(5, newLocationProduct.getLocationProductId());
+            statement.setString(5, locationProduct.getShelf());
+            statement.setString(6, locationProduct.getFloor());
+            statement.setBoolean(7, locationProduct.getIsStock());
 
             int affectedRows = statement.executeUpdate();
 
+            dataMappingObject.remove(locationProduct.hashCode());
             dataMappingObject.put(
-                    locationProduct.hashCode(),
-                    locationProduct
+                    newLocationProduct.hashCode(),
+                    newLocationProduct
             );
 
             return affectedRows > 0;

@@ -160,7 +160,7 @@ public class RecipeCompositionDA extends CRUD<RecipeComposition> {
     }
 
     @Override
-    List<RecipeComposition> getsByIds(
+    public List<RecipeComposition> getsByIds(
             List<Integer> ids,
             boolean mapping
     ) throws DataBaseException, DataValidationException {

@@ -15,7 +15,6 @@ import main.java.be.henallux.project.data.MySQLConnector;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 
 import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.exception.DataValidationException;
 
 public class ClientSupplierSearchDA {
     private CRUD<ClientSupplier> clientSupplierDA;
@@ -32,26 +31,20 @@ public class ClientSupplierSearchDA {
         StringBuilder SQLInstruction = new StringBuilder("""
                     SELECT cs.id_ as ID
                     FROM Client_Supplier AS cs
-                    WHERE 
-                    """);
+                    WHERE 1=1
+                    """); // ? Add '1=1', if all parameters are null, the where clause would create problems
         boolean addedWhereClause = false;
         if (nom != null && !nom.isEmpty()) {
-            SQLInstruction.append(" cs.name_=?");
+            SQLInstruction.add(" AND cs.name_=?");
             addedWhereClause = true;
         }
         if (email != null && !email.isEmpty()) {
-            if (addedWhereClause) {
-                SQLInstruction.append(" AND ");
-            }
-            SQLInstruction.append(" email=?");
+            SQLInstruction.add(" AND email=?");
             addedWhereClause = true;
         }
         if (isFidelityCardValid){
-            if (addedWhereClause) {
-                SQLInstruction.append(" AND ");
-            }
-            SQLInstruction.append("""
-                    cs.id_ in (
+            SQLInstruction.add("""
+                     AND cs.id_ in (
                         SELECT fd.clientID FROM FidelityCard AS fd
                         WHERE isValid=?
                     )
@@ -59,7 +52,7 @@ public class ClientSupplierSearchDA {
             addedWhereClause = true;
         }
         try (Connection connection = MySQLConnector.getInstance().getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(SQLInstruction.toString() + ";");
+            Statement statement = connection.prepareStatement(SQLInstruction.toString() + ";");
             int currentIndex = 1;
             if (nom != null && !nom.isEmpty()) {
                 statement.setString(currentIndex, nom);
@@ -70,11 +63,11 @@ public class ClientSupplierSearchDA {
                 currentIndex++;
             }
             if (isFidelityCardValid) {
-                statement.setBoolean(currentIndex, isFidelityCardValid);
+                statement.setString(currentIndex, isFidelityCardValid);
                 currentIndex++;
             }
 
-            ResultSet result = statement.executeQuery();
+            ResultSet result = statement.executeQuerry();
             while  (result.next()) {
                 clientSupplier.add(clientSupplierDA.getById(result.getInt("ID")));
             }

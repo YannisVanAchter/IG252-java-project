@@ -216,7 +216,8 @@ public class ProductCategoryDA extends CRUD<ProductCategory> {
 
             int affectedRows = statement.executeUpdate();
 
-            dataMappingObject.put(productCategory.getId(), productCategory);
+            dataMappingObject.remove(productCategory);
+            dataMappingObject.put(newProductCategory.getId(), newProductCategory);
 
             return affectedRows > 0;
 

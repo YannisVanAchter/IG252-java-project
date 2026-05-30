@@ -19,7 +19,7 @@ import main.java.be.henallux.project.model.exception.DataValidationException;
 
 public class RecipeDA extends CRUD<Recipe> {
 
-    private static RecipeDA instance;
+    private static volatile RecipeDA instance;
     private CRUD<RecipeComposition> compositionDA;
 
     private RecipeDA() {
@@ -76,7 +76,7 @@ public class RecipeDA extends CRUD<Recipe> {
     }
 
     @Override
-    List<Recipe> getAll() throws DataBaseException, DataValidationException {
+    public List<Recipe> getAll() throws DataBaseException, DataValidationException {
 
         List<Recipe> recipes = new ArrayList<>();
 
@@ -102,7 +102,7 @@ public class RecipeDA extends CRUD<Recipe> {
     }
 
     @Override
-    Recipe getById(int id, boolean mapping)
+    public Recipe getById(int id, boolean mapping)
             throws DataBaseException, DataValidationException {
 
         if (IDS_MAPPING_OBJECT.containsKey(id))
@@ -132,7 +132,7 @@ public class RecipeDA extends CRUD<Recipe> {
     }
 
     @Override
-    List<Recipe> getsByIds(List<Integer> ids, boolean mapping)
+    public List<Recipe> getsByIds(List<Integer> ids, boolean mapping)
             throws DataBaseException, DataValidationException {
 
         List<Recipe> recipes = new ArrayList<>();
@@ -148,7 +148,7 @@ public class RecipeDA extends CRUD<Recipe> {
     }
 
     @Override
-    boolean insert(Recipe recipe)
+    public boolean insert(Recipe recipe)
             throws DataBaseException, DataValidationException {
 
         if (checkExist(recipe))
@@ -202,7 +202,7 @@ public class RecipeDA extends CRUD<Recipe> {
     }
 
     @Override
-    boolean update(Recipe recipe, Recipe newRecipe)
+    public boolean update(Recipe recipe, Recipe newRecipe)
             throws DataBaseException, DataValidationException {
 
         String query = String.format("""
@@ -241,7 +241,7 @@ public class RecipeDA extends CRUD<Recipe> {
     }
 
     @Override
-    boolean delete(Recipe recipe)
+    public boolean delete(Recipe recipe)
             throws DataBaseException, DataValidationException {
 
         /*
@@ -279,7 +279,7 @@ public class RecipeDA extends CRUD<Recipe> {
     }
 
     @Override
-    boolean checkExist(Recipe recipe)
+    public boolean checkExist(Recipe recipe)
             throws DataBaseException, DataValidationException {
 
         String query = String.format("""
