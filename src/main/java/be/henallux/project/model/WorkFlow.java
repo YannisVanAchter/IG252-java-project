@@ -53,7 +53,7 @@ public class WorkFlow implements Model {
         return id;
     }
 
-    private void setId(int id) throws DataValidationException {
+    public void setId(int id) throws DataValidationException {
         if (id < 0) {
             throw new DataValidationException("ID cannot be negative.");
         }

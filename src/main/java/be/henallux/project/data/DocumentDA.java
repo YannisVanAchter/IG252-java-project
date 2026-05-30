@@ -29,8 +29,11 @@ public class DocumentDA extends CRUD<Document>
     private final String TABLE_NAME = "Document_";
 
     private final HashMap<Object, Document> IDS_MAPPING_OBJECT = new HashMap<>();
+    private final DetailDA detailDA;
 
-    private DocumentDA() {}
+    private DocumentDA() {
+        detailDA = DetailDA.getInstance();
+    }
 
     public static DocumentDA getInstance()
     {
@@ -49,7 +52,7 @@ public class DocumentDA extends CRUD<Document>
         {
             int id = data.getInt("id_");
 
-            if(mapping && IDS_MAPPING_OBJECT.containsKey(id))
+            if(IDS_MAPPING_OBJECT.containsKey(id))
                 return IDS_MAPPING_OBJECT.get(id);
 
             LocalDate dateOfCreation = SQLDateToLocalDate(data.getDate("date_"));
@@ -81,7 +84,7 @@ public class DocumentDA extends CRUD<Document>
 
             Integer addressId = data.getObject("addressId", Integer.class);
 
-            WorkFlow workflow = WorkFlowDA.getInstance().getById(workflowId, mapping);
+            WorkFlow workflow = WorkFlowDA.getInstance().getById(workflowId, false);
 
             DocumentType documentType =
                     DocumentTypeDA.getInstance().getById(documentTypeId, mapping);
@@ -108,6 +111,11 @@ public class DocumentDA extends CRUD<Document>
             );
 
             IDS_MAPPING_OBJECT.put(id, document);
+
+            document.getWorkflow().addDocument(document);
+
+            if (mapping)
+                detailDA.getAll();
 
             return document;
         }
