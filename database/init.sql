@@ -694,3 +694,9 @@ INSERT INTO LocationProduct (shelf, floor_, isStock, isFreezer) VALUES ("B-a", 1
 INSERT INTO LocationProduct (shelf, floor_, isStock, isFreezer) VALUES ("B-a", 2, false, false);
 INSERT INTO LocationProduct (shelf, floor_, isStock, isFreezer) VALUES ("B-a", 3, false, true);
 INSERT INTO LocationProduct (shelf, floor_, isStock, isFreezer) VALUES ("B-b", 1, false, true);
+
+INSERT INTO WorkFlowType (id_, name_, isBuy, isSupplier, isInternal) VALUES (1,'WorkFlowType1', true, false, false);
+INSERT INTO WorkFlowType (id_, name_, isBuy, isSupplier, isInternal) VALUES (2,'WorkFlowType2', false, true, false);
+INSERT INTO WorkFlowType (id_, name_, isBuy, isSupplier, isInternal) VALUES (3,'WorkFlowType3', false, false, true);
+
+INSERT INTO DocumentType (id_, name_) VALUES (1,'Purchase Order');
