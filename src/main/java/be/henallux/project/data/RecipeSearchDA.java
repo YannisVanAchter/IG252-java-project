@@ -16,7 +16,7 @@ import main.java.be.henallux.project.data.exception.DataBaseException;
 
 import main.java.be.henallux.project.model.Recipe;
 
-class RecipeSearchDA {
+public class RecipeSearchDA {
     private CRUD<Recipe> recipeDA;
 
     RecipeSearchDA() {

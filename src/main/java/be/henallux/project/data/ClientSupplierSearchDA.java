@@ -16,7 +16,7 @@ import main.java.be.henallux.project.data.exception.DataBaseException;
 
 import main.java.be.henallux.project.model.ClientSupplier;
 
-class ClientSupplierSearchDA {
+public class ClientSupplierSearchDA {
     private CRUD<ClientSupplier> clientSupplierDA;
 
     ClientSupplierSearchDA() {
