@@ -154,11 +154,11 @@ public class LocationProductDA extends CRUD<LocationProduct> {
         try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
-            statement.setString(1, locationProduct.getShelf());
-            statement.setString(2, locationProduct.getFloor());
-            statement.setBoolean(3, locationProduct.getIsStock());
-            statement.setBoolean(4, locationProduct.getIsFreezer());
-            statement.setString(5, locationProduct.getLocationProductId());
+            statement.setString(1, newLocationProduct.getShelf());
+            statement.setString(2, newLocationProduct.getFloor());
+            statement.setBoolean(3, newLocationProduct.getIsStock());
+            statement.setBoolean(4, newLocationProduct.getIsFreezer());
+            statement.setString(5, newLocationProduct.getLocationProductId());
 
             int affectedRows = statement.executeUpdate();
 

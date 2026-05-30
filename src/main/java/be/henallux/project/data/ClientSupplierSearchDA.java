@@ -15,6 +15,7 @@ import main.java.be.henallux.project.data.MySQLConnector;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 
 import main.java.be.henallux.project.model.ClientSupplier;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
 public class ClientSupplierSearchDA {
     private CRUD<ClientSupplier> clientSupplierDA;
@@ -35,21 +36,21 @@ public class ClientSupplierSearchDA {
                     """);
         boolean addedWhereClause = false;
         if (nom != null && !nom.isEmpty()) {
-            SQLInstruction.add(" cs.name_=?");
+            SQLInstruction.append(" cs.name_=?");
             addedWhereClause = true;
         }
         if (email != null && !email.isEmpty()) {
             if (addedWhereClause) {
-                SQLInstruction.add(" AND ");
+                SQLInstruction.append(" AND ");
             }
-            SQLInstruction.add(" email=?");
+            SQLInstruction.append(" email=?");
             addedWhereClause = true;
         }
         if (isFidelityCardValid){
             if (addedWhereClause) {
-                SQLInstruction.add(" AND ");
+                SQLInstruction.append(" AND ");
             }
-            SQLInstruction.add("""
+            SQLInstruction.append("""
                     cs.id_ in (
                         SELECT fd.clientID FROM FidelityCard AS fd
                         WHERE isValid=?
@@ -58,7 +59,7 @@ public class ClientSupplierSearchDA {
             addedWhereClause = true;
         }
         try (Connection connection = MySQLConnector.getInstance().getConnection()) {
-            Statement statement = connection.prepareStatement(SQLInstruction.toString() + ";");
+            PreparedStatement statement = connection.prepareStatement(SQLInstruction.toString() + ";");
             int currentIndex = 1;
             if (nom != null && !nom.isEmpty()) {
                 statement.setString(currentIndex, nom);
@@ -69,11 +70,11 @@ public class ClientSupplierSearchDA {
                 currentIndex++;
             }
             if (isFidelityCardValid) {
-                statement.setString(currentIndex, isFidelityCardValid);
+                statement.setBoolean(currentIndex, isFidelityCardValid);
                 currentIndex++;
             }
 
-            ResultSet result = statement.executeQuerry();
+            ResultSet result = statement.executeQuery();
             while  (result.next()) {
                 clientSupplier.add(clientSupplierDA.getById(result.getInt("ID")));
             }

@@ -159,7 +159,7 @@ public class LocalityDA extends  CRUD<Locality> {
 
             return affectedRows > 0;
         } catch (SQLException e) {
-            throw new DataBaseException("Imposible update", e);
+            throw new DataBaseException("Impossible update", e);
         }
     }
 
@@ -201,7 +201,7 @@ public class LocalityDA extends  CRUD<Locality> {
                 exist = true;
                 
             } catch (SQLException e) {
-                throw new DataBaseException("Check imposible", e);
+                throw new DataBaseException("Check impossible", e);
             }
         }
 

@@ -146,7 +146,7 @@ public class FidelityCardDA extends CRUD<FidelityCard> {
     @Override
     public boolean insert(FidelityCard model)
             throws DataBaseException, DataValidationException {
-        ClientSupplierDA.getInstance().checkExist(model.getClient())
+        ClientSupplierDA.getInstance().checkExist(model.getClient());
 
         String query = String.format("""
                 INSERT INTO %s (points, isValid, clientId)
@@ -273,7 +273,7 @@ public class FidelityCardDA extends CRUD<FidelityCard> {
     public boolean updateTotalPoint(FidelityCard fidelityCard, int totalPoint)
             throws DataBaseException, DataValidationException {
 
-        String query = String.format"""
+        String query = String.format("""
                 UPDATE %s
                 SET points = ?
                 WHERE id_ = ?

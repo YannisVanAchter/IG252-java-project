@@ -189,7 +189,7 @@ public class RecipeDA extends CRUD<Recipe> {
              * Insert recipe composition
              */
             for (RecipeComposition composition : recipe.getComposition()) {
-                compositionDA.getInstance().insert(composition);
+                compositionDA.insert(composition);
             }
 
             return true;
@@ -284,7 +284,7 @@ public class RecipeDA extends CRUD<Recipe> {
 
         String query = String.format("""
             SELECT id_
-            FROM %S
+            FROM %s
             WHERE id_ = ?
                OR name_ = ?
         """, TABLE_NAME);

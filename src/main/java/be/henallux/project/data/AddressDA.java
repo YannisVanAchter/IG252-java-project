@@ -183,7 +183,7 @@ public class AddressDA extends CRUD<Address> {
     public boolean insert (Address newAddress) throws DataBaseException, DataValidationException {
         this.locality.checkExist(newAddress.getLocality());
         boolean inserted = false;
-        String SQLInstruction = "INSERT INTO " + TABLE_NAME + " (streetName, streetNumber, postalId, city VALUES (?, ?, ?, ?);";
+        String SQLInstruction = "INSERT INTO " + TABLE_NAME + " (streetName, streetNumber, postalId, city) VALUES (?, ?, ?, ?);";
 
         try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);

@@ -179,7 +179,7 @@ public class DiscountDA extends CRUD<Discount> {
     public boolean update(Discount discount, Discount newDiscount) throws DataBaseException {
         String SQLInstruction =
                 "UPDATE " + TABLE_NAME +
-                " SET discountPercentage=?, startDate=?, endDate=?, requiredQuantity=?, name_=?, productId=? WHERE discountPercentage=?, startDate=?, endDate=?, requiredQuantity=?;";
+                " SET discountPercentage=? AND startDate=?, endDate=?, requiredQuantity=?, name_=?, productId=? WHERE discountPercentage=? AND startDate=? AND endDate=? AND requiredQuantity=?;";
 
         try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
@@ -210,7 +210,7 @@ public class DiscountDA extends CRUD<Discount> {
 
     @Override
     public boolean delete(Discount discount) throws DataBaseException {
-        String SQLInstruction = "DELETE FROM " + TABLE_NAME + " WHERE discountPercentage=?, startDate=?, endDate=?, requiredQuantity=?;";
+        String SQLInstruction = "DELETE FROM " + TABLE_NAME + " WHERE discountPercentage=? AND startDate=? AND endDate=? AND requiredQuantity=?;";
 
         try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
@@ -239,7 +239,7 @@ public class DiscountDA extends CRUD<Discount> {
             String SQLInstruction =
                     "SELECT COUNT(*) as nbDiscount FROM " +
                     TABLE_NAME +
-                    " WHERE discountPercentage=?, startDate=?, endDate=?, requiredQuantity=?;;";
+                    " WHERE discountPercentage=? AND startDate=? AND endDate=? AND requiredQuantity=?;";
 
             try (Connection connection = connector.getConnection()) {
                 PreparedStatement statement = connection.prepareStatement(SQLInstruction);

@@ -17,6 +17,7 @@ import main.java.be.henallux.project.data.DiscountDA;
 import main.java.be.henallux.project.data.QuantityProductDA;
 import main.java.be.henallux.project.data.LocationProductDA;
 import main.java.be.henallux.project.data.ProductCategoryDA;
+import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.Product;
 import main.java.be.henallux.project.model.QuantityProduct;
@@ -455,19 +456,19 @@ public class ProductDA extends CRUD<Product> {
         try (Statement statement = connector.getInstance().getConnection().createStatement(SQLInstruction)) {
             ResultSet result = statement.executeQuery();
 
-            Map<ClientSupplier, List<Product>> supplier_mapping_product = new HashMap();
+            Map<ClientSupplier, List<Product>> supplier_mapping_product = new HashMap<>();
             ClientSupplierDA supplierDA = ClientSupplierDA.getInstance();
             ClientSupplier supplier;
             result.next();
             do {
                 if (supplier == null || supplier.getId() != result.getInt("supplierId")) {
-                    supplier = supplierDA.getById(result.getInt("supplierId"))
+                    supplier = supplierDA.getById(result.getInt("supplierId"));
                     supplier_mapping_product.put(supplier, new ArrayList<>());
                 }
                 supplier_mapping_product
                         .get(supplier)
                         .add(getById(result.getInt("productId")));
-            } while (result.next())
+            } while (result.next());
 
             return supplier_mapping_product;
         } catch (SQLException e) {

@@ -15,6 +15,7 @@ import main.java.be.henallux.project.data.MySQLConnector;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 
 import main.java.be.henallux.project.model.Recipe;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
 public class RecipeSearchDA {
     private CRUD<Recipe> recipeDA;
@@ -24,32 +25,32 @@ public class RecipeSearchDA {
     }
 
     public List<Recipe> search(String nom, String productName) throws DataBaseException, DataValidationException {
-        List<Recipe> recipes = new ArrayList();
+        List<Recipe> recipes = new ArrayList<>();
         StringBuilder SQLInstruction = new StringBuilder("""
                     SELECT Recipe.id_ as recipeID
                     FROM Recipe, RecipeComposition AS Composition, Product 
                     WHERE Recipe.id_ = Composition.recipeId AND Composition.productId = Product.id_
                     """);
         if (nom != null && !nom.isEmpty()) {
-            SQLInstruction.add(" AND Recipe.name_=?");
+            SQLInstruction.append(" AND Recipe.name_=?");
         }
         if (productName != null && !productName.isEmpty()) {
-            SQLInstruction.add(" AND Product.name_=?");
+            SQLInstruction.append(" AND Product.name_=?");
         }
 
         try (Connection connection = MySQLConnector.getInstance().getConnection()) {
-            Statement statement = connection.prepareStatement(SQLInstruction.toString() + ";");
+            PreparedStatement statement = connection.prepareStatement(SQLInstruction.toString() + ";");
             int currentIndex = 1;
             if (nom != null && !nom.isEmpty()) {
                 statement.setString(currentIndex, nom);
                 currentIndex++;
             }
             if (productName != null && !productName.isEmpty()) {
-                statement.setInt(currentIndex, productName);
+                statement.setString(currentIndex, productName);
                 currentIndex++;
             }
 
-            ResultSet result = statement.executeQuerry();
+            ResultSet result = statement.executeQuery();
             while  (result.next()) {
                 recipes.add(recipeDA.getById(result.getInt("recipeID")));
             }
