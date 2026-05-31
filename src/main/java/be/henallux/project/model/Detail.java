@@ -44,7 +44,7 @@ public class Detail implements Model {
         return priceEVAT;
     }
 
-    private void setPriceEVAT(double priceEVAT) throws DataValidationException {
+    public void setPriceEVAT(double priceEVAT) throws DataValidationException {
         if (priceEVAT < 0)
             throw new DataValidationException("Price cannot be negative");
         this.priceEVAT = priceEVAT;
@@ -54,7 +54,7 @@ public class Detail implements Model {
         return vat;
     }
 
-    private void setVat(BigDecimal vat) throws DataValidationException {
+    public void setVat(BigDecimal vat) throws DataValidationException {
         BigDecimal min = new BigDecimal("0.00");
         BigDecimal max = new BigDecimal("1.00");
         if (vat == null || min.compareTo(vat) > 0 || max.compareTo(vat) < 0)
@@ -66,7 +66,7 @@ public class Detail implements Model {
         return fidelityPointEarned;
     }
 
-    private void setFidelityPointEarned(int fidelityPointEarned) throws DataValidationException {
+    public void setFidelityPointEarned(int fidelityPointEarned) throws DataValidationException {
         if (fidelityPointEarned < 0)
             throw new DataValidationException("Fidelity point cannot be negative");
         this.fidelityPointEarned = fidelityPointEarned;

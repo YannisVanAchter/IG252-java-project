@@ -82,11 +82,11 @@ public class ProductController {
      * @param newVAT    the new VAT rate (0–100)
      * @see ProductManager#changeProductVAT(int, double)
      */
-
-//    public void changeProductVAT(int productID, double newVAT) throws BusinessException {
-//        productManager.changeProductVAT(productID, newVAT);
-//    }
-
+/*
+    public void changeProductVAT(int productID, double newVAT) throws BusinessException {
+        productManager.changeProductVAT(productID, newVAT);
+    }
+*/
     /**
      * Changes the fidelity points awarded for a product.
      * @param product the chosen product
