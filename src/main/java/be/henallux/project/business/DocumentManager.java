@@ -102,7 +102,6 @@ public class DocumentManager {
                 throw new BusinessException("The document with the specified ID does not exist.");
             }
             documentDA.update(oldDocument, newDocument);
-            for ()
         } catch (DataBaseException e) {
             throw new BusinessException("Error when updating the document.", e);
         }
