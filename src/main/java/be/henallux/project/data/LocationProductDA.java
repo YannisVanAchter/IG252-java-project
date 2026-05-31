@@ -179,6 +179,11 @@ public class LocationProductDA extends CRUD<LocationProduct> {
 
     @Override
     public boolean delete(LocationProduct locationProduct) throws DataBaseException, DataValidationException {
+
+        QuantityProductDA.getInstance().getAll().stream()
+                .filter(qp -> qp.getLocation() == locationProduct)
+                .map(qp -> QuantityProductDA.getInstance().delete(qp));
+
         String SQLInstruction = "DELETE FROM " + TABLE_NAME + " WHERE id_=?;";
 
         try (Connection connection = connector.getConnection()) {

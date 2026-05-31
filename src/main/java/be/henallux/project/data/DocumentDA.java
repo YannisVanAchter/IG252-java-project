@@ -406,6 +406,9 @@ public class DocumentDA extends CRUD<Document>
     {
         String query = "DELETE FROM " + TABLE_NAME + " WHERE id_ = ?";
 
+        document.getDetails().stream()
+                .map(detail -> detailDA.delete(detail));
+
         try
         {
             PreparedStatement statement =

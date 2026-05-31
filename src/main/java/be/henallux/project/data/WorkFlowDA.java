@@ -324,6 +324,9 @@ public class WorkFlowDA extends CRUD<WorkFlow> {
 
         String query = "DELETE FROM WorkFlow WHERE id_ = ?";
 
+        for (Document doc: workflow.getDocuments())
+            documentDA.delete(doc);
+
         try (
                 PreparedStatement statement =
                         connector.getConnection().prepareStatement(query)
