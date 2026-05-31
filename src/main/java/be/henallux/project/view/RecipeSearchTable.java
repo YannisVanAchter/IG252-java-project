@@ -88,7 +88,6 @@ public class RecipeSearchTable extends JPanel {
 
         txtRecipeName = new JTextField();
         ViewUtils.setCursor(txtRecipeName);
-        ViewUtils.addFilterListener(txtRecipeName, this::onSearchClick);
 
         JButton btnSearch = new JButton("Search");
         ViewUtils.setCursor(btnSearch);
@@ -219,7 +218,7 @@ public class RecipeSearchTable extends JPanel {
      * {@link RecipeSearchController#searchRecipes(String, List)}.
      * <p>Filtering is applied on:
      * <ul><li>Recipe name: {@code null} if blank, or passed as-is</li>
-     *     <li>Ingredient list: {@code null} if empty, or full list passed</li></ul>
+     *     <li>Ingredient list: {@code null} if an empty, or full list passed</li></ul>
      * <p>Results update {@link #displayRecipes} and refresh the table model.
      */
     public void onSearchClick() {

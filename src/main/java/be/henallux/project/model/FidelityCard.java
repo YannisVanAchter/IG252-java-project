@@ -19,6 +19,10 @@ public class FidelityCard implements Model {
         this(id, 0, true, client);
     }
 
+    public FidelityCard(ClientSupplier client) throws DataValidationException {
+        this(0, 0, true, client);
+    }
+
     public int getId() {
         return id;
     }

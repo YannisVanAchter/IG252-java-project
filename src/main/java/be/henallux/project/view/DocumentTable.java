@@ -45,7 +45,7 @@ public class DocumentTable extends JPanel {
     /**
      * Initializes the document table view and loads all documents from the controller.
      * <p>This view is typically instantiated from {@link MainWindow} and integrated into the
-     * main application layout. It builds the search panel and the table panel, and initializes
+     * main application layout. It builds the search panel and the table panel and initializes
      * the internal document lists used for filtering and display.
      *
      * @param mainWindow the main application window associated with this view.
@@ -256,11 +256,7 @@ public class DocumentTable extends JPanel {
 
         for (Document doc : documents) {
 
-            boolean match = true;
-
-            if (idValue != null && idValue > 0 && doc.getId() != idValue) {
-                match = false;
-            }
+            boolean match = idValue == null || idValue <= 0 || doc.getId() == idValue;
 
             if (selectedItem != null && selectedItem.getObject() != null && !doc.getDocumentType().equals(selectedItem.getObject())) {
                 match = false;
@@ -339,8 +335,6 @@ public class DocumentTable extends JPanel {
         if (confirm == JOptionPane.YES_OPTION) {
             Document docToDelete = displayDocuments.get(selectedRow);
             onDeleteClick(docToDelete);
-            controller.deleteDocument(docToDelete);
-
         }
     }
 
@@ -353,20 +347,12 @@ public class DocumentTable extends JPanel {
      * @param docToDelete the Document to delete
      */
     public void onDeleteClick(Document docToDelete) {
-        boolean isSuccess = controller.deleteDocument(docToDelete);
-        if (isSuccess) {
+        try {
+            controller.deleteDocument(docToDelete);
             documents.remove(docToDelete);
             displayDocuments.remove(docToDelete);
             model.setDocuments(displayDocuments);
-
-            mainWindow.getNotificationController().push(new NotificationItem(
-                    "Delete",
-                    docToDelete.getLabel() + " has been deleted.",
-                    NotificationItem.Type.SUCCESS,
-                    null
-            ));
-
-        } else {
+        } catch (Exception e) {
             mainWindow.getNotificationController().push(new NotificationItem(
                     "Delete",
                     "Failed to delete. Click to retry.",
@@ -374,6 +360,13 @@ public class DocumentTable extends JPanel {
                     () -> onDeleteClick(docToDelete)
             ));
         }
+
+        mainWindow.getNotificationController().push(new NotificationItem(
+                "Delete",
+                docToDelete.getLabel() + " has been deleted.",
+                NotificationItem.Type.SUCCESS,
+                null
+        ));
     }
 
     /**

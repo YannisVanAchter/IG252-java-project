@@ -1,5 +1,6 @@
 package main.java.be.henallux.project.view;
 
+import main.java.be.henallux.project.controller.ClientSupplierController;
 import main.java.be.henallux.project.model.ClientSupplier;
 
 import javax.swing.table.AbstractTableModel;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
  *
  * @see ClientSupplier
  * @see ClientSupplierTable
- * @see main.java.be.henallux.project.controller.ClientSupplierController
+ * @see ClientSupplierController
  */
 public class ClientSupplierTableModel extends AbstractTableModel {
     private static final String[] COLUMNS = {
@@ -33,7 +34,7 @@ public class ClientSupplierTableModel extends AbstractTableModel {
     /**
      * Load the ClientSupplier list in the table and allow refresh with new data.
      * <p>It is typically called after a modification of the dataset such as:
-     * <ul><li>loading data from {@link main.java.be.henallux.project.controller.ClientSupplierController}</li>
+     * <ul><li>loading data from {@link ClientSupplierController}</li>
      *    <li>applying filters in {@link ClientSupplierTable}</li>
      *    <li>deleting or updating an entry</li></ul>
      *

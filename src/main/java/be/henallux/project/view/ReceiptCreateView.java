@@ -3,6 +3,7 @@ package main.java.be.henallux.project.view;
 import main.java.be.henallux.project.controller.ProductController;
 import main.java.be.henallux.project.controller.ProductSearchController;
 import main.java.be.henallux.project.model.Product;
+import main.java.be.henallux.project.model.ProductCategory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -168,7 +169,6 @@ public class ReceiptCreateView extends JPanel {
         productTable.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                int row = productTable.rowAtPoint(e.getPoint());
                 int col = productTable.columnAtPoint(e.getPoint());
 
                 if (col == ReceiptProductTableModel.TBL_BTN_ADD) {
@@ -329,10 +329,10 @@ public class ReceiptCreateView extends JPanel {
 
     /**
      * Filters displayed products based on user input in {@link #txtSearch}.
-     * <p>This method is triggered on keyboard input and delegates the search to {@link ProductSearchController#searchProducts(String, String, Boolean)}.
+     * <p>This method is triggered on keyboard input and delegates the search to {@link ProductSearchController#searchProducts(String, ProductCategory, Boolean)}.
      * <p>Results are applied to {@link #displayProducts} and the product table model is refreshed.
      *
-     * @see ProductSearchController#searchProducts(String, String, Boolean)
+     * @see ProductSearchController#searchProducts(String, ProductCategory, Boolean)
      */
     private void onFilterClick() {
         String txtQuery = txtSearch.getText().trim();

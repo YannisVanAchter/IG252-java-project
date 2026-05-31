@@ -30,7 +30,7 @@ public class ClientSearchTable extends JPanel {
 
     private JTextField txtName;
     private JTextField txtEmail;
-    private JTextField txtFidelityCard;
+    private JCheckBox chkFidelityCard;
 
     private JTable table;
 
@@ -43,7 +43,7 @@ public class ClientSearchTable extends JPanel {
      * <p>The initial table content is populated with an unfiltered search.
      *
      * @param mainWindow the parent {@link MainWindow} used to open detailed client views
-     * @see ClientSupplierSearchController#search(String, String, String)
+     * @see ClientSupplierSearchController#search(String, String, Boolean)
      */
     public ClientSearchTable(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
@@ -83,7 +83,7 @@ public class ClientSearchTable extends JPanel {
 
     /**
      * Builds the search/filter panel containing input fields and the search button.
-     * Contains: Name, email, card number.
+     * Contains: Name, email, bool isValid card.
      *
      * @return a {@code JPanel} containing search filters
      * @see #onSearchClick()
@@ -101,12 +101,9 @@ public class ClientSearchTable extends JPanel {
         emailPanel.add(new JLabel("Email"), BorderLayout.NORTH);
         emailPanel.add(txtEmail, BorderLayout.CENTER);
 
-        txtFidelityCard = new JTextField(10);
-        ViewUtils.digitsOnly(txtFidelityCard);
-        ViewUtils.setCursor(txtFidelityCard);
-        JPanel fidelityPanel = new JPanel(new BorderLayout(0, 4));
-        fidelityPanel.add(new JLabel("Fidelity card number"), BorderLayout.NORTH);
-        fidelityPanel.add(txtFidelityCard, BorderLayout.CENTER);
+        chkFidelityCard = new JCheckBox("Has valid fidelity card");
+        ViewUtils.setCursor(chkFidelityCard);
+        ViewUtils.addFilterListener(chkFidelityCard, this::onSearchClick);
 
         JButton btnSearch = new JButton("Search");
         btnSearch.addActionListener(e -> onSearchClick());
@@ -119,7 +116,7 @@ public class ClientSearchTable extends JPanel {
         column.add(Box.createVerticalStrut(6));
         column.add(ViewUtils.makeRow(emailPanel));
         column.add(Box.createVerticalStrut(6));
-        column.add(ViewUtils.makeRow(fidelityPanel));
+        column.add(ViewUtils.makeRow(chkFidelityCard));
         column.add(Box.createVerticalStrut(8));
         column.add(ViewUtils.makeRow(btnSearch));
 
@@ -177,20 +174,18 @@ public class ClientSearchTable extends JPanel {
      * to disable the corresponding filter criterion.
      * <p>After the search is completed, the table model is updated with the retrieved results.
      *
-     * @see ClientSupplierSearchController#search(String, String, String)
+     * @see ClientSupplierSearchController#search(String, String, Boolean)
      * @see ClientSearchTableModel#setClients(List)
      *
      */
     public void onSearchClick() {
         String name = txtName.getText().trim();
         String email = txtEmail.getText().trim();
-        String fidelityCard = txtFidelityCard.getText().trim();
-
         try {
             List<ClientSupplier> results = controller.search(
                     name.isBlank() ? null : name,
                     email.isBlank() ? null : email,
-                    fidelityCard.isBlank() ? null : fidelityCard
+                    chkFidelityCard.isSelected() ? true : null
             );
             model.setClients(new ArrayList<>(results));
         } catch (Exception e) {

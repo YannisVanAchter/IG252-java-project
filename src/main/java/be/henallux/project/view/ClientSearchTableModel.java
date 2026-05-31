@@ -63,7 +63,6 @@ public class ClientSearchTableModel extends AbstractTableModel {
     /** {@inheritDoc} */
     @Override public String getColumnName(int col) { return COLUMNS[col]; }
 
-    /** {@inheritDoc} */
     /**
      * Returns the value displayed for a specific table cell.
      * <p>The returned value depends on the requested column and formatted information from the corresponding {@link ClientSupplier}.

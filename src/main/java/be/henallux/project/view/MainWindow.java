@@ -33,8 +33,8 @@ public class MainWindow extends JFrame {
     private final RecipeSearchView recipeSearchView;
     private final StockOrderCreation orderView;
 
-    private CardLayout cardLayout;
-    private JPanel container;
+    private final CardLayout cardLayout;
+    private final JPanel container;
 
     public MainWindow(NotificationController notificationController, StockManagementController stockManagementController) {
         super("Magasin du Grand Bazard");
@@ -206,5 +206,14 @@ public class MainWindow extends JFrame {
      */
     public NotificationController getNotificationController() {
         return notificationController;
+    }
+
+    /**
+     * Returns the StockManagement controller.
+     *
+     * @return the shared {@link StockManagementController} instance
+     */
+    public StockManagementController getStockManagementController() {
+        return stockManagementController;
     }
 }

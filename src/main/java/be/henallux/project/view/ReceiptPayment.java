@@ -1,6 +1,6 @@
 package main.java.be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.ClientController;
+import main.java.be.henallux.project.controller.ClientSupplierController;
 import main.java.be.henallux.project.controller.ProductController;
 import main.java.be.henallux.project.model.*;
 
@@ -39,7 +39,7 @@ public class ReceiptPayment extends JPanel {
     private static final Color COLOR_PROMO = new Color(0, 140, 0);
 
     private final MainWindow mainWindow;
-    private final ClientController clientController;
+    private final ClientSupplierController clientController;
     private final ProductController productController;
     private final ReceiptCreateView receiptCreateView;
     private final ClientSupplier clientSupplier;
@@ -53,7 +53,7 @@ public class ReceiptPayment extends JPanel {
 
     public ReceiptPayment(MainWindow mainWindow, ReceiptCreateView receiptCreateView, ClientSupplier clientSupplier, LinkedHashMap<Product, Integer> receipt) {
         this.mainWindow = mainWindow;
-        this.clientController = new ClientController();
+        this.clientController = new ClientSupplierController();
         this.productController = new ProductController();
         this.receiptCreateView = receiptCreateView;
         this.clientSupplier = clientSupplier;
@@ -309,7 +309,7 @@ public class ReceiptPayment extends JPanel {
      * Handles payment confirmation.
      * <p>If the receipt is empty, the transaction does not start and the user is redirected back.
      * <p>Prompts the user to confirm the total amount and selected payment method before proceeding.
-     * <p>Delegates checkout registration to {@link ClientController} based on the client context:
+     * <p>Delegates checkout registration to {@link ClientSupplierController} based on the client context:
      * Client with fidelity card, points used: checkout with card and points
      * <p>After checkout registration, deducts sold quantities from the first shelf location
      * ({@link LocationProduct#getIsStock()} = {@code false}) of each product.
@@ -321,7 +321,7 @@ public class ReceiptPayment extends JPanel {
      *     <li>The receipt is cleared {@link ReceiptCreateView#clearAll()}</li>
      *     <li>The application navigates back to the receipt page {@link MainWindow#setPage(String)}</li></ul>
      *
-     * @see ClientController#addCheckout(LinkedHashMap)
+     * @see ClientSupplierController#addCheckout(LinkedHashMap)
      * @see ProductController#subtractFromStock(int, int, LocationProduct)
      */
     private void onPayClick() {

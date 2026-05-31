@@ -76,7 +76,7 @@ public class ProductSearchTable extends JPanel {
 
     private JPanel buildSearchPanel() {
 
-        txtProductName = ViewUtils.addFilterListener(new JTextField(10), this::onSearchClick);
+        txtProductName = new JTextField(10);
         ViewUtils.setCursor(txtProductName);
         JPanel nameFields = new JPanel(new BorderLayout(0, 4));
         nameFields.add(new JLabel("Product name"), BorderLayout.NORTH);
@@ -161,7 +161,7 @@ public class ProductSearchTable extends JPanel {
      */
     public void onSearchClick() {
         String name = txtProductName.getText().trim();
-        String category = (String) comboCategory.getSelectedItem();
+        ProductCategory category = (ProductCategory) comboCategory.getSelectedItem();
         Boolean promo = chkPromotion.isSelected() ? true : null;
 
         try {

@@ -20,7 +20,7 @@ public class RecipeSearchTableModel extends AbstractTableModel {
             "Name", "Document ID", "Product", ""
     };
 
-    public static final int TBL_BTN_SEE = 3;
+    public static final int TBL_BTN_SEE = 4;
 
     private List<Recipe> recipes;
 
@@ -85,9 +85,10 @@ public class RecipeSearchTableModel extends AbstractTableModel {
         Recipe r = recipes.get(rowIndex);
         return switch (columnIndex) {
             case 0 -> ViewUtils.safeText(r.getName(), "Unknown");
-            case 1 -> r.getId();
-            case 2 -> getCompositionLabel(r.getComposition());
-            case 3 -> "See Recipe";
+            case 1 -> ViewUtils.safeText(r.getFinalProduct().getName(), "Unknown");
+            case 2 -> r.getId();
+            case 3 -> getCompositionLabel(r.getComposition());
+            case 4 -> "See Recipe";
             default -> null;
         };
     }

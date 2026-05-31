@@ -1,7 +1,5 @@
 package main.java.be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.NotificationController;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;

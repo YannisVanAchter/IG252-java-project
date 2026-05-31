@@ -1,6 +1,6 @@
 package main.java.be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.ClientController;
+import main.java.be.henallux.project.controller.ClientSupplierController;
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.FidelityCard;
 import main.java.be.henallux.project.model.Product;
@@ -8,7 +8,6 @@ import main.java.be.henallux.project.model.Product;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
@@ -20,11 +19,11 @@ import java.util.LinkedHashMap;
  *     <li>Scan a loyalty or membership card</li>
  *     <li>View client information before payment</li>
  *     <li>Continue checkout with or without a linked client</li></ul>
- * <p>The panel interacts with {@link ClientController} to retrieve available clients
+ * <p>The panel interacts with {@link ClientSupplierController} to retrieve available clients
  * and maintains the currently selected {@link ClientSupplier}.
  * <p>When the workflow is validated, the view transitions to {@link ReceiptPayment} to finalize the transaction.
  *
- * @see ClientController
+ * @see ClientSupplierController
  * @see ClientSupplier
  * @see Product
  * @see ReceiptCreateView
@@ -33,7 +32,7 @@ import java.util.LinkedHashMap;
 public class ReceiptClientInfoDialog extends JPanel {
     private final MainWindow mainWindow;
     private final ReceiptCreateView receiptCreateView;
-    private final ClientController controller;
+    private final ClientSupplierController controller;
     private final ArrayList<ClientSupplier> allClients;
     private final ArrayList<ComboBoxItem<ClientSupplier>> allClientItems = new ArrayList<>();
     private LinkedHashMap<Product, Integer> receipt;
@@ -46,7 +45,7 @@ public class ReceiptClientInfoDialog extends JPanel {
         this.mainWindow = mainWindow;
         this.receiptCreateView = receiptCreateView;
         this.receipt = receipt;
-        this.controller = new ClientController();
+        this.controller = new ClientSupplierController();
         ArrayList<ClientSupplier> loaded = new ArrayList<>();
         try {
             loaded = controller.getAllClientsSuppliers();
@@ -226,9 +225,8 @@ public class ReceiptClientInfoDialog extends JPanel {
         }
 
         try {
-            List<ClientSupplier> clients = controller.getClientByCardID(cardNumber);
-            if (clients != null && !clients.isEmpty()) {
-                ClientSupplier selectedClient = clients.getFirst();
+            ClientSupplier selectedClient = controller.getClientByCardID(cardNumber);
+            if (selectedClient != null) {
                 setComboClient(selectedClient);
                 refreshInfoPanel();
             } else {

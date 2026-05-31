@@ -5,6 +5,7 @@ import main.java.be.henallux.project.controller.*;
 import java.awt.*;
 import java.time.*;
 import java.util.Date;
+import java.util.Objects;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
@@ -26,8 +27,7 @@ import main.java.be.henallux.project.model.*;
 public class ClientSupplierForm extends JPanel {
     private final MainWindow mainWindow;
     private final Boolean isOpenInModal;
-    private final ClientController clientController;
-    private final SupplierController supplierController;
+    private final ClientSupplierController clientSupplierControllerController;
     private final AddressController addressController;
     private ClientSupplier currentClientSupplier;
 
@@ -41,8 +41,6 @@ public class ClientSupplierForm extends JPanel {
 
     private JPanel loyaltyPanel;
     private JCheckBox chkCreateFidelityCard;
-    private JTextField txtIdLoyaltyCard;
-    private JSpinner spnLoyaltyPoint;
 
     private JCheckBox chkIsClient;
     private JCheckBox chkIsSupplier;
@@ -55,7 +53,7 @@ public class ClientSupplierForm extends JPanel {
     private JTextField txtCity;
     private JTextField txtCountry;
 
-    private JButton btnSave;
+    private JButton btnSave, btnCancelClear;
 
     /**
      * Constructs a new instance of the ClientSupplierForm.
@@ -67,8 +65,7 @@ public class ClientSupplierForm extends JPanel {
     public ClientSupplierForm(MainWindow mainWindow, Boolean isOpenInModal) {
         this.mainWindow = mainWindow;
         this.isOpenInModal = isOpenInModal;
-        this.clientController = new ClientController();
-        this.supplierController = new SupplierController();
+        this.clientSupplierControllerController = new ClientSupplierController();
         this.addressController = new AddressController();
 
         setLayout(new BorderLayout(10, 16));
@@ -245,10 +242,7 @@ public class ClientSupplierForm extends JPanel {
         addressPanel.add(ViewUtils.labeledRequired("City", txtCity));
 
         txtCountry = new JTextField("Belgium");
-        txtCountry.setEditable(false);
-        txtCountry.setFocusable(false);
-        txtCountry.setBackground(Color.LIGHT_GRAY);
-        txtCountry.setForeground(Color.DARK_GRAY);
+        toggleEditable(txtCity, false);
         addressPanel.add(ViewUtils.labeled("Country", txtCountry));
 
         addressPanel.add(Box.createVerticalStrut(10));
@@ -270,7 +264,7 @@ public class ClientSupplierForm extends JPanel {
      * Si le client existe, mais n'a pas de carte, il peut en générer une
      * Si le client existe et sa carte est disponible affichage des infos.
      *
-     * @see ClientController#createFidelityCard(int)
+     * @see ClientSupplierController#createFidelityCard(FidelityCard)
      */
     private void buildLoyaltyPanel(FidelityCard newCard) {
         loyaltyPanel.removeAll();
@@ -324,12 +318,18 @@ public class ClientSupplierForm extends JPanel {
         btnSave.addActionListener(e -> saveEditForm());
         ViewUtils.setCursor(btnSave);
 
-        JButton btnClear = new JButton("Clear");
-        btnClear.addActionListener(e -> clearForm());
-        ViewUtils.setCursor(btnClear);
+        btnCancelClear = new JButton("Clear");
+        btnCancelClear.addActionListener(e -> {
+            if (currentClientSupplier == null) {
+                clearForm();
+            } else {
+                loadClientSupplier(currentClientSupplier);
+            }
+        });
+        ViewUtils.setCursor(btnCancelClear);
 
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
-        panel.add(btnClear);
+        panel.add(btnCancelClear);
         panel.add(btnSave);
         return panel;
     }
@@ -416,38 +416,27 @@ public class ClientSupplierForm extends JPanel {
             if (currentClientSupplier == null) {
                 Locality locality = new Locality(city, postalCode);
                 Address newAddress = new Address(street, streetNumber, city, postalCode);
-                addressController.createAddress(newAddress);
+                addressController.createAddress(newAddress, locality);
 
                 ClientSupplier newItem = new ClientSupplier(name, firstName, mail, phoneNumber, newAddress, isClient, isSupplier, isMember, vatNumber, becameClient, null);
-                currentClientSupplier = clientController.createClientSupplier(newItem);
+                clientSupplierControllerController.createClientSupplier(newItem);
+                currentClientSupplier = newItem;
 
                 if (isClient && chkCreateFidelityCard != null && chkCreateFidelityCard.isSelected()) {
-                    clientController.createFidelityCard(currentClientSupplier.getId());
-                    currentClientSupplier = clientController.getClientSupplier(currentClientSupplier.getId());
+                    onCreateFidelityCard();
                 }
             } else {
-                //TODO : pas de changement sur autre champs ?
-                if (!currentClientSupplier.getAddress().equals(new Address(street, streetNumber, city, postalCode))) {
-                    Locality locality = new Locality(city, postalCode);
-                    addressController.createLocality(locality);
-                    Address newAddress = new Address(street, streetNumber, city, postalCode);
-                    addressController.createAddress(newAddress);
-                    clientController.changeAddress(currentClientSupplier.getId(), newAddress);
-                }
-                if (!currentClientSupplier.getPhoneNumber().equals(phoneNumber)) {
-                    clientController.changePhoneNumber(currentClientSupplier.getId(), Integer.parseInt(phoneNumber));
-                }
-                if (!currentClientSupplier.getEmail().equals(mail)) {
-                    clientController.changeEmail(currentClientSupplier.getId(), mail);
-                }
-                if (isSupplier && !currentClientSupplier.getVATNumber().equals(vatNumber)) {
-                    supplierController.changeVATNumber(currentClientSupplier.getId(), vatNumber);
-                }
-            }
+                Locality locality = new Locality(city, postalCode);
+                Address newAddress = new Address(street, streetNumber, city, postalCode);
+                addressController.createAddress(newAddress, locality);
 
-            if (currentClientSupplier == null) {
-                JOptionPane.showMessageDialog(this, "Unable to save client/supplier.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
+                ClientSupplier updatedCs = new ClientSupplier(
+                        name, firstName, mail, phoneNumber,
+                        newAddress, isClient, isSupplier, isMember,
+                        vatNumber, becameClient,
+                        currentClientSupplier.getFidelityCard()
+                );
+                clientSupplierControllerController.updateClientSupplier(currentClientSupplier, updatedCs);
             }
 
             JOptionPane.showMessageDialog(this, "Client/Supplier saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
@@ -470,12 +459,15 @@ public class ClientSupplierForm extends JPanel {
     public void clearForm() {
 
         txtName.setText("");
+        toggleEditable(txtName, true);
         txtFirstName.setText("");
+        toggleEditable(txtFirstName, true);
         txtMail.setText("");
         txtPhoneNumber.setText("");
         txtVATNumber.setText("BE");
 
         becameClientDate.setValue(new Date());
+        toggleEditable(becameClientDate, true);
 
         currentClientSupplier = null;
         buildLoyaltyPanel();
@@ -483,6 +475,10 @@ public class ClientSupplierForm extends JPanel {
         chkIsClient.setSelected(false);
         chkIsSupplier.setSelected(false);
         chkIsMember.setSelected(false);
+        toggleEditable(chkIsClient, true);
+        toggleEditable(chkIsSupplier, true);
+        toggleEditable(chkIsMember, true);
+
 
         spnStreetNumber.setValue(0);
         spnPostalCode.setValue(0);
@@ -512,19 +508,25 @@ public class ClientSupplierForm extends JPanel {
         currentClientSupplier = cs;
 
         txtName.setText(ViewUtils.safeText(cs.getName(), ""));
+        toggleEditable(txtName, false);
         txtFirstName.setText(ViewUtils.safeText(cs.getFirstname(), ""));
+        toggleEditable(txtFirstName, false);
         txtMail.setText(ViewUtils.safeText(cs.getEmail(), ""));
         txtVATNumber.setText(ViewUtils.safeText(cs.getVATNumber(), "BE"));
 
         if (cs.getBecameClientDate() != null) {
             becameClientDate.setValue(ViewUtils.toDate(cs.getBecameClientDate()));
         }
+        toggleEditable(becameClientDate, false);
 
         buildLoyaltyPanel();
 
         chkIsClient.setSelected(cs.getIsClient());
         chkIsSupplier.setSelected(cs.getIsSupplier());
         chkIsMember.setSelected(cs.getIsUs());
+        toggleEditable(chkIsClient, false);
+        toggleEditable(chkIsSupplier, false);
+        toggleEditable(chkIsMember, false);
 
         Address address = cs.getAddress();
         if (address != null) {
@@ -546,7 +548,8 @@ public class ClientSupplierForm extends JPanel {
             txtCity.setText("");
         }
 
-        btnSave.setText("Edit");
+        btnSave.setText("Save");
+        btnCancelClear.setText("Clear");
     }
 
     /**
@@ -562,16 +565,50 @@ public class ClientSupplierForm extends JPanel {
 
     private void onCreateFidelityCard() {
         try {
-            FidelityCard newCard = clientController.createFidelityCard(currentClientSupplier.getId());
-            if (newCard != null) {
-                currentClientSupplier.setFidelityCard(newCard);
-                buildLoyaltyPanel(newCard);
-                JOptionPane.showMessageDialog(this, "Fidelity card created successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, "Failed to create fidelity card.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
+            FidelityCard newCard = new FidelityCard(currentClientSupplier);
+            clientSupplierControllerController.createFidelityCard(newCard);
+            currentClientSupplier.setFidelityCard(newCard);
+            buildLoyaltyPanel(newCard);
+            JOptionPane.showMessageDialog(this, "Fidelity card created successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    /**
+     * Toggles the editable state of a {@link JTextField}.
+     *
+     * @param txtField   the text field to update
+     * @param isEditable {@code true} to make the field editable; {@code false} to disable it
+     */
+    private void toggleEditable(JTextField txtField, boolean isEditable) {
+        txtField.setEditable(isEditable);
+        txtField.setBackground(isEditable ? UIManager.getColor("TextField.background") : Color.LIGHT_GRAY);
+        txtField.setForeground(isEditable ? UIManager.getColor("TextField.foreground") : Color.DARK_GRAY);
+        txtField.setFocusable(false);
+    }
+
+    /**
+     * Toggles the editable state of a {@link JCheckBox}.
+     *
+     * @param checkBox   the checkbox to update
+     * @param isEditable {@code true} to enable the checkbox; {@code false} to disable it
+     */
+    private void toggleEditable(JCheckBox checkBox, boolean isEditable) {
+        checkBox.setEnabled(isEditable);
+        checkBox.setFocusable(false);
+    }
+
+    /**
+     * Toggles the editable state of a {@link JSpinner}.
+     *
+     * @param spinner    the spinner to update
+     * @param isEditable {@code true} to enable the spinner; {@code false} to disable it
+     */
+    private void toggleEditable(JSpinner spinner, boolean isEditable) {
+        spinner.setEnabled(isEditable);
+        spinner.setBackground(isEditable ? UIManager.getColor("TextField.background") : Color.LIGHT_GRAY);
+        spinner.setForeground(isEditable ? UIManager.getColor("TextField.foreground") : Color.DARK_GRAY);
+        spinner.setFocusable(false);
     }
 }

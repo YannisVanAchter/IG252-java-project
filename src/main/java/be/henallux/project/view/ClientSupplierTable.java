@@ -29,7 +29,6 @@ public class ClientSupplierTable extends JPanel {
 
     private final MainWindow mainWindow;
     private final ClientSupplierController clientSupplierController;
-    private final ClientController clientController;
     private final ArrayList<ClientSupplier> clientSuppliers;
     private ClientSupplierTableModel model;
     private ArrayList<ClientSupplier> displayClientSupplier;
@@ -45,8 +44,7 @@ public class ClientSupplierTable extends JPanel {
 
     public ClientSupplierTable(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
-        this.clientSupplierController = new ClientController();
-        this.clientController = new ClientController();
+        this.clientSupplierController = new ClientSupplierController();
 
         setLayout(new BorderLayout(10, 16));
         setBorder(new EmptyBorder(16, 16, 16, 16));
@@ -69,6 +67,7 @@ public class ClientSupplierTable extends JPanel {
         add(top, BorderLayout.NORTH);
         add(buildTablePanel(), BorderLayout.CENTER);
     }
+
     /**
      * Builds the header section containing the title.
      *
@@ -184,7 +183,6 @@ public class ClientSupplierTable extends JPanel {
         table.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                int row = table.rowAtPoint(e.getPoint());
                 int col = table.columnAtPoint(e.getPoint());
 
                 if (col == ClientSupplierTableModel.TBL_BTN_UPDATE || col == ClientSupplierTableModel.TBL_BTN_DEL) {
@@ -224,11 +222,7 @@ public class ClientSupplierTable extends JPanel {
         displayClientSupplier = new ArrayList<>();
 
         for (ClientSupplier cs : clientSuppliers) {
-            boolean match = true;
-
-            if (!idText.isEmpty() && !String.valueOf(cs.getId()).contains(idText)) {
-                match = false;
-            }
+            boolean match = idText.isEmpty() || String.valueOf(cs.getId()).contains(idText);
 
             if (!lastNameText.isEmpty()
                     && !cs.getName().toLowerCase().contains(lastNameText)) {
@@ -296,7 +290,8 @@ public class ClientSupplierTable extends JPanel {
      * <p>Retrieves the currently selected row in the table, asks for user confirmation,
      * and delegates the deletion to the overloaded {@link #onDeleteClick(ClientSupplier)} method.
      * <p>If no row is selected, a warning dialog is shown and the operation is canceled.
-     * @see JOptionPane#showMessageDialog(Component, Object) 
+     *
+     * @see JOptionPane#showMessageDialog(Component, Object)
      */
     public void onDeleteClick() {
         int selectedRow = table.getSelectedRow();
@@ -329,40 +324,28 @@ public class ClientSupplierTable extends JPanel {
      */
     public void onDeleteClick(ClientSupplier csToDelete) {
         try {
-            boolean isSuccess;
             if (csToDelete.getIsClient() && csToDelete.getFidelityCard() != null) {
-                isSuccess = clientController.deleteClientAccount(csToDelete.getId(), csToDelete.getFidelityCard().getId());
-            } else if (csToDelete.getIsClient()) {
-                isSuccess = clientController.deleteClientAccount(csToDelete.getId());
+                clientSupplierController.deleteClientAccount(csToDelete.getId(), csToDelete.getFidelityCard().getId());
             } else {
-                isSuccess = clientSupplierController.deleteClientSupplier(csToDelete.getId());
-            }
-
-            if (isSuccess) {
-                clientSuppliers.remove(csToDelete);
-                displayClientSupplier.remove(csToDelete);
-                model.setClientSuppliers(displayClientSupplier);
-
-                mainWindow.getNotificationController().push(new NotificationItem(
-                        "Delete",
-                        csToDelete.getLabel() + " has been deleted.",
-                        NotificationItem.Type.SUCCESS,
-                        null
-                ));
-            } else {
-                mainWindow.getNotificationController().push(new NotificationItem(
-                        "Delete",
-                        "Failed to delete. Click to retry.",
-                        NotificationItem.Type.ERROR,
-                        () -> onDeleteClick(csToDelete)
-                ));
+                clientSupplierController.deleteClientSupplier(csToDelete);
             }
         } catch (Exception e) {
             mainWindow.getNotificationController().push(new NotificationItem(
                     "Delete",
-                    e.getMessage(),
+                    "Failed to delete. Click to retry.",
                     NotificationItem.Type.ERROR,
                     () -> onDeleteClick(csToDelete)
             ));
         }
-    }}
+        clientSuppliers.remove(csToDelete);
+        displayClientSupplier.remove(csToDelete);
+        model.setClientSuppliers(displayClientSupplier);
+
+        mainWindow.getNotificationController().push(new NotificationItem(
+                "Delete",
+                csToDelete.getLabel() + " has been deleted.",
+                NotificationItem.Type.SUCCESS,
+                null
+        ));
+    }
+}
