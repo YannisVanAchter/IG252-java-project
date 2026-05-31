@@ -151,8 +151,7 @@ public class RecipeDA extends CRUD<Recipe> {
     public boolean insert(Recipe recipe)
             throws DataBaseException, DataValidationException {
 
-        if (checkExist(recipe))
-            return false;
+        ProductDA.getInstance().checkExist(recipe.getFinalProduct());
 
         String query = String.format("""
             INSERT INTO %s (name_, instructions, finalProductId)

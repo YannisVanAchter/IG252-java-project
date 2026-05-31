@@ -213,9 +213,8 @@ public class RecipeCompositionDA extends CRUD<RecipeComposition> {
     public boolean insert(RecipeComposition recipeComposition)
             throws DataBaseException, DataValidationException {
 
-        if (checkExist(recipeComposition)) {
-            return false;
-        }
+        productDA.checkExist(recipeComposition.getProduct());
+        recipeDA.checkExist(recipeComposition.getRecipe());
 
         String query =
                 "INSERT INTO " + TABLE_NAME +

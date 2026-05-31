@@ -186,6 +186,9 @@ public class WorkFlowDA extends CRUD<WorkFlow> {
             throws DataBaseException, DataValidationException {
         workflowTypeDA.chechExist(workflow.getWorkFlowType());
         statusDA.checkExist(workflow.getStatus());
+        clientSupplierDA.checkExist(workflow.getUs());
+        if (workflow.setOtherParty() != null)
+            clientSupplierDA.checkExist(workflow.setOtherParty());
 
         String query = String.format("""
             INSERT INTO %s
