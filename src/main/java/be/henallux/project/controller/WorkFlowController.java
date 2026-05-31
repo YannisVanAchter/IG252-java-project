@@ -6,8 +6,10 @@ import main.java.be.henallux.project.model.Document;
 import main.java.be.henallux.project.model.Status;
 import main.java.be.henallux.project.model.WorkFlow;
 import main.java.be.henallux.project.model.WorkFlowType;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @see WorkFlowManager
@@ -25,17 +27,17 @@ public class WorkFlowController {
      * @return list of all {@link WorkFlow}
      * @see WorkFlowManager#getAllWorkFlows()
      */
-    public ArrayList<WorkFlow> getAllWorkFlows() throws BusinessException {
+    public ArrayList<WorkFlow> getAllWorkFlows() throws BusinessException, DataValidationException {
         return new ArrayList<>(workFlowManager.getAllWorkFlows());
     }
 
     /**
-     * Returns all buying workflow types.
-     * @return list of buying {@link WorkFlowType}
+     * Returns all buying workflows.
+     * @return list of buying {@link WorkFlow}
      * @see WorkFlowManager#getAllBuying()
      */
-    public ArrayList<WorkFlowType> getAllBuying() throws BusinessException {
-        return new ArrayList<>(workFlowManager.getAllBuying());
+    public List<WorkFlow> getAllBuying() throws BusinessException, DataValidationException {
+        return workFlowManager.getAllBuying();
     }
 
     /**
@@ -43,8 +45,8 @@ public class WorkFlowController {
      * @return list of internal {@link WorkFlow}
      * @see WorkFlowManager#getAllInternal()
      */
-    public ArrayList<WorkFlow> getAllInternal() throws BusinessException {
-        return new ArrayList<>(workFlowManager.getAllInternal());
+    public List<WorkFlow> getAllInternal() throws BusinessException, DataValidationException {
+        return workFlowManager.getAllInternal();
     }
 
     /**
@@ -52,50 +54,32 @@ public class WorkFlowController {
      * @return list of selling {@link WorkFlow}
      * @see WorkFlowManager#getAllSelling()
      */
-    public ArrayList<WorkFlow> getAllSelling() throws BusinessException {
-        return new ArrayList<>(workFlowManager.getAllSelling());
+    public List<WorkFlow> getAllSelling() throws BusinessException, DataValidationException {
+        return workFlowManager.getAllSelling();
     }
 
     /**
      * Returns all workflow types.
      * @return list of all {@link WorkFlowType}
-     * @see WorkFlowManager#getWorkFlowType()
      */
-    public ArrayList<WorkFlowType> getWorkFlowTypes() throws BusinessException {
-        return new ArrayList<>(workFlowManager.getWorkFlowType());
+    public ArrayList<WorkFlowType> getWorkFlowTypes() throws BusinessException, DataValidationException {
+        return new ArrayList<>(workFlowManager.getAllWorkFlows().stream()
+                .map(WorkFlow::getWorkflowType)
+                .distinct()
+                .toList());
     }
 
     /**
-     * Returns all status.
-     * @return list of {@link Status} extracted from all workflows
+     * Returns all statuses extracted from all workflows.
+     * @return list of {@link Status}
      * @see WorkFlow#getStatus()
      */
-    public ArrayList<Status> getWorkFlowStatus() throws BusinessException {
-        ArrayList<Status> status = new ArrayList<>();
-        for (WorkFlow type : getAllWorkFlows()) {
-            status.add(type.getStatus());
+    public List<Status> getWorkFlowStatus() throws BusinessException, DataValidationException {
+        List<Status> status = new ArrayList<>();
+        for (WorkFlow workFlow : getAllWorkFlows()) {
+            status.add(workFlow.getStatus());
         }
         return status;
-    }
-
-    /**
-     * Adds a new workflow type.
-     * @param newWorkFlowType the {@link WorkFlowType} to add
-     * @see WorkFlowManager#addWorkFlowType(WorkFlowType)
-     */
-    public void addWorkFlowType(WorkFlowType newWorkFlowType) throws BusinessException {
-        workFlowManager.addWorkFlowType(newWorkFlowType);
-    }
-
-    /**
-     * Adds a new workflow.
-     * @param workflow the {@link WorkFlow} to add
-     * @return
-     * @see WorkFlowManager#addWorkFlow(WorkFlow)
-     */
-    public WorkFlow addWorkFlow(WorkFlow workflow) throws BusinessException {
-        workFlowManager.addWorkFlow(workflow);
-        return workflow;
     }
 
     /**
@@ -104,8 +88,17 @@ public class WorkFlowController {
      * @param status     the new {@link Status}
      * @see WorkFlowManager#changeStatus(int, Status)
      */
-    public void changeStatus(int workflowId, Status status) throws BusinessException {
+    public void changeStatus(int workflowId, Status status) throws BusinessException, DataValidationException {
         workFlowManager.changeStatus(workflowId, status);
+    }
+
+    /**
+     * Creates a new workflow.
+     * @param workFlow the {@link WorkFlow} to create
+     * @see WorkFlowManager#createWorkFlow(WorkFlow)
+     */
+    public void createWorkFlow(WorkFlow workFlow) throws BusinessException, DataValidationException {
+        workFlowManager.createWorkFlow(workFlow);
     }
 
     /**
@@ -114,7 +107,7 @@ public class WorkFlowController {
      * @param document   the {@link Document} to add
      * @see WorkFlowManager#addDocument(int, Document)
      */
-    public void addDocument(int workflowId, Document document) throws BusinessException {
+    public void addDocument(int workflowId, Document document) throws BusinessException, DataValidationException {
         workFlowManager.addDocument(workflowId, document);
     }
 }

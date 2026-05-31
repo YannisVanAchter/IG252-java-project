@@ -1,16 +1,12 @@
 package main.java.be.henallux.project.controller;
 
-import main.java.be.henallux.project.business.AddressManager;
-import main.java.be.henallux.project.business.ClientManager;
-import main.java.be.henallux.project.business.SupplierManager;
 import main.java.be.henallux.project.business.DocumentManager;
 import main.java.be.henallux.project.business.WorkFlowManager;
+import main.java.be.henallux.project.business.ClientSupplierManager;
+import main.java.be.henallux.project.business.AddressManager;
+import main.java.be.henallux.project.controller.ClientSupplierController;
 import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.Document;
-import main.java.be.henallux.project.model.DocumentType;
-import main.java.be.henallux.project.model.LocationProduct;
+import main.java.be.henallux.project.model.*;
 import main.java.be.henallux.project.model.exception.DataValidationException;
 
 import java.time.LocalDate;
@@ -23,17 +19,17 @@ import java.util.ArrayList;
 public class DocumentController {
 
     private final DocumentManager documentManager;
-    private final WorkFlowManager workFlowManager;
-    private final SupplierManager supplierManager;
-    private final ClientManager clientManager;
+    private final ClientSupplierManager clientSupplierManager;
+    private final ClientSupplierController clientSupplierController;
     private final AddressManager addressManager;
+    private final WorkFlowManager workFlowManager;
 
     public DocumentController() {
         this.documentManager = new DocumentManager();
-        this.workFlowManager = new WorkFlowManager();
-        this.supplierManager = new SupplierManager();
-        this.clientManager = new ClientManager();
+        this.clientSupplierManager = new ClientSupplierManager();
+        this.clientSupplierController = new ClientSupplierController();
         this.addressManager = new AddressManager();
+        this.workFlowManager = new WorkFlowManager();
     }
 
     /**
@@ -60,7 +56,7 @@ public class DocumentController {
      * @return list of all {@link DocumentType}
      * @see DocumentManager#getDocumentTypes()
      */
-    public ArrayList<DocumentType> getAllDocumentTypes() throws BusinessException {
+    public ArrayList<DocumentType> getAllDocumentTypes() throws BusinessException, DataValidationException {
         return new ArrayList<>(documentManager.getDocumentTypes());
     }
 
@@ -70,7 +66,7 @@ public class DocumentController {
      * @return the created {@link DocumentType}
      * @see DocumentManager#addDocumentType(DocumentType)
      */
-    public DocumentType addDocumentType(String name) throws BusinessException {
+    public DocumentType addDocumentType(String name) throws BusinessException, DataValidationException {
         DocumentType newType = new DocumentType(name);
         documentManager.addDocumentType(newType);
         return newType;
@@ -79,10 +75,10 @@ public class DocumentController {
     /**
      * Returns all clients and suppliers.
      * @return list of all {@link ClientSupplier}
-     * @see ClientManager#getAllClientSuppliers()
+     * @see ClientSupplierController#getAllClientsSuppliers()
      */
-    public ArrayList<ClientSupplier> getAllClientSupplier() throws BusinessException {
-        return new ArrayList<>(clientManager.getAllClientSuppliers());
+    public ArrayList<ClientSupplier> getAllClientSupplier() throws BusinessException, DataValidationException {
+        return new ArrayList<>(clientSupplierManager.getAllClientSuppliers());
     }
 
     /**
@@ -122,20 +118,24 @@ public class DocumentController {
      * @return the created {@link Document}
      * @see DocumentManager#createDocument(Document)
      */
-    public boolean createDocument(Document document) throws BusinessException, DataValidationException {
+    public void createDocument(Document document) throws BusinessException, DataValidationException {
         addressManager.createAddress(document.getAddress(), document.getAddress().getLocality());
-        workFlowManager.addWorkFlow(document.getWorkflow());
+        workFlowManager.createWorkFlow(document.getWorkflow());
         documentManager.addDocumentType(document.getDocumentType());
-        return documentManager.createDocument(document);
     }
 
     /**
-     * Updates a document with an address and workflow.
-     * @param document the {@link Document} to update
+     * Updates the document.
+     *
+     * @param oldDoc the {@link Document} to update
+     * @param newDoc  the new {@link Address}
+     * @see DocumentManager#updateDocument(Document, Document)
      */
-    public void updateDocument(Document document, Document oldDocument, Document newDocument) throws BusinessException, DataValidationException {
-        addressManager.createAddress(document.getAddress(), document.getAddress().getLocality());
-        workFlowManager.addWorkFlow(document.getWorkflow());
-        documentManager.updateDocument(oldDocument, newDocument);
+    public void updateDocument(Document oldDoc, Document newDoc) throws BusinessException, DataValidationException {
+        documentManager.updateDocument(oldDoc, newDoc);
+    }
+
+    public ClientSupplier getUs() throws BusinessException, DataValidationException {
+        return clientSupplierController.getUs();
     }
 }

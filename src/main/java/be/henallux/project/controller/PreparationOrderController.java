@@ -5,6 +5,7 @@ import main.java.be.henallux.project.business.exception.BusinessException;
 import main.java.be.henallux.project.model.Product;
 import main.java.be.henallux.project.model.Recipe;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
@@ -47,8 +48,8 @@ public class PreparationOrderController extends DocumentController {
      * @return list of entries mapping each {@link Product} to its quantity
      * @see PreparationOrderManager#getIngredient(String)
      */
-    public ArrayList<Map.Entry<Product, Integer>> getIngredients(String recipeName) throws BusinessException {
-        return new ArrayList<>(preparationOrderManager.getIngredient(recipeName));
+    public HashMap<Product, Integer> getIngredients(String recipeName) throws BusinessException {
+        return preparationOrderManager.getIngredient(recipeName);
     }
 
     /**
@@ -56,13 +57,9 @@ public class PreparationOrderController extends DocumentController {
      * @param newRecipe   the {@link Recipe} to create
      * @param ingredients list of entries mapping each {@link Product} to its quantity
      * @return the created {@link Recipe}
-     * @see PreparationOrderManager#createRecipe(Recipe, List)
+     * @see PreparationOrderManager#createRecipe(Recipe, HashMap)
      */
-    public Recipe createNewRecipe(Recipe newRecipe, ArrayList<Map.Entry<Product, Integer>> ingredients) throws BusinessException {
-        List<Pair<Product, Integer>> newIngredients = new ArrayList<>();
-        for (Map.Entry<Product, Integer> e : ingredients) {
-            newIngredients.add(new Pair<>(e.getKey(), e.getValue()));
-        }
-        return preparationOrderManager.createRecipe(newRecipe, newIngredients);
+    public Recipe createNewRecipe(Recipe newRecipe, HashMap<Product, Integer> ingredients) throws BusinessException {
+        return preparationOrderManager.createRecipe(newRecipe, ingredients);
     }
 }

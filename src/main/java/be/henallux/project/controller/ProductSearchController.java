@@ -3,6 +3,8 @@ package main.java.be.henallux.project.controller;
 import main.java.be.henallux.project.business.ProductSearchManager;
 import main.java.be.henallux.project.business.exception.BusinessException;
 import main.java.be.henallux.project.model.Product;
+import main.java.be.henallux.project.model.ProductCategory;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
 import java.util.ArrayList;
 
@@ -24,9 +26,9 @@ public class ProductSearchController {
      * @param category  the category name to filter by, or {@code null} to ignore
      * @param promotion {@code true} to filter products with a discount, {@code null} to ignore
      * @return list of matching {@link Product}
-     * @see ProductSearchManager#searchProducts(String, String, Boolean)
+     * @see ProductSearchManager#searchProducts(String, ProductCategory, Boolean)
      */
-    public ArrayList<Product> searchProducts(String name, String category, Boolean promotion) throws BusinessException {
+    public ArrayList<Product> searchProducts(String name, ProductCategory category, Boolean promotion) throws BusinessException, DataValidationException {
         return new ArrayList<>(productSearchManager.searchProducts(name, category, promotion));
     }
 }
