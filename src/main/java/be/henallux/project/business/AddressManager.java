@@ -87,13 +87,13 @@ public class AddressManager {
             throw new BusinessException("Error: Address cannot be null.");
         }
         try {
-            // Règle métier — vérifier que l'adresse existe avant de la supprimer
+            // Business rule - address must exist
             if ((addressDA.checkExist(address))) {
                 addressDA.delete(address);
                 return true;
             }
         } catch (DataBaseException e) {
-            throw new BusinessException("Erreur lors de la suppression de l'adresse.", e);
+            throw new BusinessException("Error when deleting address.", e);
         }
         return false;
     }

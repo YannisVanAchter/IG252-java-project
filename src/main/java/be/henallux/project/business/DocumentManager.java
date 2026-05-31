@@ -47,12 +47,8 @@ public class DocumentManager {
         }
     }
 
-    public List<DocumentType> getDocumentTypes() throws BusinessException {
-        try {
-            return documentDA.getDocumentTypes();
-        } catch (DataBaseException e) {
-            throw new BusinessException("Error when retrieving document types.", e);
-        }
+    public List<DocumentType> getDocumentTypes() {
+            return DocumentTypeRepository.getInstance().getDocumentTypes();
     }
 
     public Address getAddress(int id) throws BusinessException, DataValidationException, DataBaseException {
@@ -84,13 +80,17 @@ public class DocumentManager {
             throw new BusinessException("The document cannot be null.");
         }
         try {
-            return documentDA.insert(document);
+            boolean retCode = documentDA.insert(document);
+            for (Detail detail : document.getDetails().getDetails()) {
+                DetailDA.insert(detail);
+            }
+            return retCode;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when creating the document.", e);
         }
     }
 
-    public Document updateDocument(Document oldDocument, Document newDocument) throws BusinessException, DataValidationException {
+    public void updateDocument(Document oldDocument, Document newDocument) throws BusinessException, DataValidationException {
         if (oldDocument == null) {
             throw new BusinessException("The old document cannot be null.");
         }
@@ -102,7 +102,7 @@ public class DocumentManager {
                 throw new BusinessException("The document with the specified ID does not exist.");
             }
             documentDA.update(oldDocument, newDocument);
-            return newDocument;
+            for ()
         } catch (DataBaseException e) {
             throw new BusinessException("Error when updating the document.", e);
         }
