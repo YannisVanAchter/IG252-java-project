@@ -19,7 +19,7 @@ import main.java.be.henallux.project.model.exception.DataValidationException;
 
 public class ClientSupplierDA extends CRUD<ClientSupplier> {
 
-    private static final volatile ClientSupplierDA instance;
+    private static volatile ClientSupplierDA instance;
     private final String TABLE_NAME;
     private final AddressDA addressDA;
     private final FidelityCardDA fidelityCardDA;
@@ -189,9 +189,9 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
     @Override
     public boolean insert(ClientSupplier clientSupplier)
             throws DataBaseException, DataValidationException {
-        addressDA.chechExist(clientSupplier.getAddress())
+        addressDA.checkExist(clientSupplier.getAddress());
         String query = String.format("""
-                INSERT INTO %S
+                INSERT INTO %s
                 (
                     name_,
                     firstname,
@@ -413,7 +413,7 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
                 PreparedStatement statement =
                         connector.getConnection().prepareStatement(query)
         ) {
-            statement.setInt(
+            statement.setString(
                     1,
                     newEmail
             );
@@ -450,7 +450,7 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
                 PreparedStatement statement =
                         connector.getConnection().prepareStatement(query)
         ) {
-            statement.setInt(
+            statement.setString(
                     1,
                     newPhoneNumber
             );

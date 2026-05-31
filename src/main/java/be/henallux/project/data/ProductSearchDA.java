@@ -16,36 +16,38 @@ import main.java.be.henallux.project.data.exception.DataBaseException;
 
 import main.java.be.henallux.project.model.Product;
 import main.java.be.henallux.project.model.ProductCategory;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
 public class ProductSearchDA {
     private CRUD<Product> productDA;
 
-    ProductSearch() {
+    ProductSearchDA () {
         productDA = ProductDA.getInstance();
     }
 
     public List<Product> search(String nom, ProductCategory category, boolean isDiscounted) throws DataBaseException, DataValidationException {
         List<Product> products = new ArrayList();
-        StringBuilder SQLInstruction = """
+        StringBuilder SQLInstruction = new StringBuilder("""
                     SELECT Product.id_ as productID
                     FROM Product, ProductCategory AS Category, Discount 
                     WHERE Product.id_ = Discount.productId AND Product.categoryId = Category.id_
-                    """;
+                    """);
         if (nom != null && !nom.isEmpty()) {
-            SQLInstruction.add(" AND Product.name=?");
+            SQLInstruction.append(" AND Product.name=?");
         }
         if (category != null) {
-            SQLInstruction.add(" AND Category.id_=?");
+            SQLInstruction.append(" AND Category.id_=?");
         }
         LocalDate today = LocalDate.now();
         if (isDiscounted) {
-            SQLInstruction.add("""(
+            SQLInstruction.append("""
+                        (
                         Discount.startDate <= ? AND
                         ? <= Discount.endDate 
                         )""");
         }
         try (Connection connection = MySQLConnector.getInstance().getConnection()) {
-            Statement statement = connection.prepareStatement(SQLInstruction.toString() + ";");
+            PreparedStatement statement = connection.prepareStatement(SQLInstruction.toString() + ";");
             int currentIndex = 1;
             if (nom != null && !nom.isEmpty()) {
                 statement.setString(currentIndex, nom);
@@ -56,13 +58,13 @@ public class ProductSearchDA {
                 currentIndex++;
             }
             if (isDiscounted) {
-                statement.setDate(currentIndex, Date.of(today));
+                statement.setDate(currentIndex, Date.valueOf(today));
                 currentIndex++;
-                statement.setDate(currentIndex, Date.of(today));
+                statement.setDate(currentIndex, Date.valueOf(today));
                 currentIndex++;
             }
 
-            ResultSet result = statement.executeQuerry();
+            ResultSet result = statement.executeQuery();
             while  (result.next()) {
                 products.add(productDA.getById(result.getInt("productID")));
             }

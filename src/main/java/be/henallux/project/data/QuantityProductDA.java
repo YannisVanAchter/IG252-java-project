@@ -272,9 +272,7 @@ public class QuantityProductDA extends CRUD<QuantityProduct> {
             ResultSet rs = statement.executeQuery();
 
             if (rs.next()) {
-                boolean exist = rs.getInt("nb") > 0;
-
-                return true;
+                return rs.getInt("nb") > 0;
             }
 
         } catch (SQLException e) {
