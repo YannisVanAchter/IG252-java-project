@@ -38,6 +38,13 @@ public class StockManager {
             throw new BusinessException("Error occurred while adding stock location.", e);
         }
     }
+    public void addStockLocation(LocationProduct location) throws BusinessException, DataValidationException {
+        try {
+            locationProductDA.insert(location);
+        } catch (DataBaseException e) {
+            throw new BusinessException("Error occurred while creating product location.", e);
+        }
+    }
 
     public void addToStocks(int productID, int quantity, LocationProduct storeLocation) throws BusinessException, DataValidationException {
         if (productID <= 0) {
