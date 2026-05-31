@@ -145,6 +145,7 @@ public class DiscountDA extends CRUD<Discount> {
     @Override
     public boolean insert(Discount newDiscount) throws DataBaseException, DataValidationException {
         boolean inserted = false;
+        productDA.checkExist(newDiscount.getProduct());
 
         String SQLInstruction =
                 "INSERT INTO " + TABLE_NAME +

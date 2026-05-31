@@ -131,6 +131,9 @@ public class QuantityProductDA extends CRUD<QuantityProduct> {
 
     @Override
     public boolean insert(QuantityProduct qp) throws DataBaseException, DataValidationException {
+        productDA.checkExist(qp.getProduct());
+        locationDA.checkExist(qp.getLocation());
+
         String sql = String.format("""
             INSERT INTO %s 
             (shelf, floor_, isStock, productId, quantity) VALUES 

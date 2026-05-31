@@ -30,9 +30,15 @@ public class DocumentDA extends CRUD<Document>
 
     private final HashMap<Object, Document> IDS_MAPPING_OBJECT = new HashMap<>();
     private final DetailDA detailDA;
+    private final WorkFlowDA workFlowDA;
+    private final DocumentTypeDA documentTypeDA;
+    private final AddressDA addressDA;
 
     private DocumentDA() {
         detailDA = DetailDA.getInstance();
+        workFlowDA = WorkFlowDA.getInstance();
+        documentTypeDA = DocumentDA.getInstance();
+        addressDA = AddressDA.getInstance();
     }
 
     public static DocumentDA getInstance()
@@ -84,14 +90,14 @@ public class DocumentDA extends CRUD<Document>
 
             Integer addressId = data.getObject("addressId", Integer.class);
 
-            WorkFlow workflow = WorkFlowDA.getInstance().getById(workflowId, false);
+            WorkFlow workflow = workFlowDA.getById(workflowId, false);
 
             DocumentType documentType =
-                    DocumentTypeDA.getInstance().getById(documentTypeId, mapping);
+                    documentTypeDA.getById(documentTypeId, mapping);
 
             Address address = null;
             if(addressId != null)
-                address = AddressDA.getInstance().getById(addressId, mapping);
+                address = AddressDA.getInstance()addressDA.getById(addressId, mapping);
 
             Document document = new Document(
                     id,
@@ -208,6 +214,11 @@ public class DocumentDA extends CRUD<Document>
     public boolean insert(Document document)
             throws DataBaseException, DataValidationException
     {
+        workFlowDA.checkExist(document.getWorkFlow());
+        documentTypeDA.checkExist(document.getDocumentType());
+        if (document.getAddress() != null)
+            addressDA.checkExist(document.getAddress());
+
         String query =
                 "INSERT INTO " + TABLE_NAME + " (" +
                         "date_, " +

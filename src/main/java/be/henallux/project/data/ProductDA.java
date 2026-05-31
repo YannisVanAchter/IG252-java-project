@@ -227,6 +227,7 @@ public class ProductDA extends CRUD<Product> {
     public boolean insert(Product newProduct) throws DataBaseException, DataValidationException {
 
         boolean inserted = false;
+        categoryDA.checkExist(newProduct.getCategory());
 
         String SQLInstruction =
                 "INSERT INTO " + TABLE_NAME +
