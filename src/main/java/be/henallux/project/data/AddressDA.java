@@ -244,6 +244,19 @@ public class AddressDA extends CRUD<Address> {
     }
 
     public boolean delete(Address address) throws DataBaseException, DataValidationException {
+
+        int nbClientSupplierUsingAddress =
+                ClientSupplierDA.getInstance().getAll().stream()
+                        .filter(cs -> cs.getAddress() == address)
+                        .toList().size();
+        boolean isUsedInDocuments =
+                DocumentDA.getInstance().getAll().stream()
+                        .filter(doc -> doc.getAddress() == address)
+                        .toList().size() > 0;
+
+        if (nbClientSupplierUsingAddress > 1 || isUsedInDocuments)
+            return false;
+
         String SQLInstruction = "DELETE FROM " + TABLE_NAME + " WHERE id_=?;";
 
         try (Connection connection = connector.getConnection()) {

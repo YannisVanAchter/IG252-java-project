@@ -477,6 +477,9 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
             throws DataBaseException, DataValidationException {
 
         String query = "DELETE FROM " + TABLE_NAME + " WHERE id_ = ?;";
+        FidelityCardDA.getInstance().getAll().stream()
+                .filter(card -> card.getClient() == clientSupplier)
+                .map(card -> FidelityCardDA.getInstance().delete(card));
 
         try (
                 PreparedStatement statement =

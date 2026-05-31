@@ -164,6 +164,14 @@ public class LocalityDA extends  CRUD<Locality> {
     }
 
     public boolean delete(Locality locality) throws DataBaseException {
+
+        boolean isUsedInAddress = AddressDA.getInstance().getAll().stream()
+                .filter(address -> address.getLocality() == locality)
+                .toList().size() > 0;
+
+        if (isUsedInAddress)
+            return false;
+
         String SQLInstruction = "DELETE FROM " + TABLE_NAME + " WHERE city = ? AND postalId = ?;";
 
         try (Connection connection = connector.getConnection()) {
