@@ -3,6 +3,7 @@ package main.java.be.henallux.project.business;
 import main.java.be.henallux.project.data.LocationProductDA;
 import main.java.be.henallux.project.model.LocationProduct;
 import main.java.be.henallux.project.data.DocumentDA;
+import main.java.be.henallux.project.data.DocumentTypeDA;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.business.exception.BusinessException;
 
@@ -15,6 +16,7 @@ import java.util.List;
 public class DocumentManager {
 
     private final DocumentDA documentDA;
+    private final DocumentTypeDA documentTypeDA;
     protected final ProductManager productManager;
     protected final StockManager stockManager;
     private final AddressManager addressManager;
@@ -22,6 +24,7 @@ public class DocumentManager {
 
     public DocumentManager() {
         this.documentDA = DocumentDA.getInstance();
+        this.documentTypeDA = DocumentTypeDA.getInstance();
         this.productManager = new ProductManager();
         this.stockManager = new StockManager();
         this.addressManager = new AddressManager();
@@ -47,8 +50,12 @@ public class DocumentManager {
         }
     }
 
-    public List<DocumentType> getDocumentTypes() {
-            return DocumentTypeRepository.getInstance().getDocumentTypes();
+    public List<DocumentType> getDocumentTypes() throws BusinessException, DataValidationException{
+        try {
+            return documentTypeDA.getAll();
+        } catch (DataBaseException e) {
+            throw new BusinessException("Error when retrieving list of document types", e);
+        }
     }
 
     public Address getAddress(int id) throws BusinessException, DataValidationException, DataBaseException {
@@ -63,28 +70,24 @@ public class DocumentManager {
         }
     }
 
-    public DocumentType addDocumentType(DocumentType docType) throws BusinessException {
+    public DocumentType addDocumentType(DocumentType docType) throws BusinessException, DataValidationException {
         if (docType == null) {
             throw new BusinessException("The document type cannot be null.");
         }
         try {
-            documentDA.addDocumentType(docType);
+            documentTypeDA.insert(docType);
             return docType;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when adding the document type.", e);
         }
     }
 
-    public boolean createDocument(Document document) throws BusinessException, DataValidationException {
+    public void createDocument(Document document) throws BusinessException, DataValidationException {
         if (document == null) {
             throw new BusinessException("The document cannot be null.");
         }
         try {
             boolean retCode = documentDA.insert(document);
-            for (Detail detail : document.getDetails().getDetails()) {
-                DetailDA.insert(detail);
-            }
-            return retCode;
         } catch (DataBaseException e) {
             throw new BusinessException("Error when creating the document.", e);
         }
@@ -163,6 +166,8 @@ public class DocumentManager {
         }
     }
 
+    // Not used
+    /*
     public List<Document> getDeliveryOrders() throws BusinessException {
         try {
             return documentDA.getDeliveryOrders();
@@ -181,4 +186,5 @@ public class DocumentManager {
             throw new BusinessException("Error when retrieving delivery orders by client.", e);
         }
     }
+    */
 }
