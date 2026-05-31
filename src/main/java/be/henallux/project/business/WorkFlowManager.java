@@ -4,10 +4,14 @@ import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.business.exception.BusinessException;
 
 import main.java.be.henallux.project.model.*;
+<<<<<<< Updated upstream
 import main.java.be.henallux.project.model.exception.DataValidationException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+=======
+
+>>>>>>> Stashed changes
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,7 +50,15 @@ public class WorkFlowManager {
         return workFlows.stream().filter(w -> w.getWorkflowType().getIsSell()).toList();
     }
 
+<<<<<<< Updated upstream
     public void createWorkFlow(WorkFlow workFlow) throws BusinessException, DataValidationException {
+=======
+    public List<WorkFlowType> getWorkFlowType() {
+        return WorkFlowTypeRepository.getInstance().getWorkFLowTypes();
+    }
+
+    public void addWorkFlow(WorkFlow workFlow) throws BusinessException {
+>>>>>>> Stashed changes
         if (workFlow == null) {
             throw new BusinessException("The workflow cannot be null.");
         }
