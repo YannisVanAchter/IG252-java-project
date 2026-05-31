@@ -17,7 +17,7 @@ import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.model.Product;
 import main.java.be.henallux.project.model.ProductCategory;
 
-class ProductSearch {
+public class ProductSearchDA {
     private CRUD<Product> productDA;
 
     ProductSearch() {

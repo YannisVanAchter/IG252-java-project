@@ -16,7 +16,7 @@ import java.util.List;
 
 public class FidelityCardDA extends CRUD<FidelityCard> {
 
-    private static FidelityCardDA instance;
+    private static volatile FidelityCardDA instance;
 
     private FidelityCardDA() {
         TABLE_NAME = "FidelityCard";

@@ -18,7 +18,7 @@ public class Detail implements Model {
     private Product product;
     private List<Batch> batches;
 
-    public Detail(int id, double priceEVAT, BigDecimal var, int fidelityPointEarned, int quantity, DocumentDetails doc, Product product, List<Batch> batches) throws DataValidationException {
+    public Detail(int id, double priceEVAT, BigDecimal vat, int fidelityPointEarned, int quantity, DocumentDetails doc, Product product, List<Batch> batches) throws DataValidationException {
         setId(id);
         setPriceEVAT(priceEVAT);
         setVat(vat);
@@ -34,7 +34,7 @@ public class Detail implements Model {
         return id;
     }
 
-    private void setId(int id) throws DataValidationException {
+    public void setId(int id) throws DataValidationException {
         if (id < 0)
             throw new DataValidationException("ID's cannot be negative");
         this.id = id;
