@@ -61,7 +61,7 @@ public class ProductManager {
         }
     }
 
-    public Product createProduct(Product product) throws BusinessException, DataValidationException {
+    public void createProduct(Product product) throws BusinessException, DataValidationException {
         // Validation
         if (product == null) {
             throw new BusinessException("The product cannot be null.");
@@ -72,12 +72,11 @@ public class ProductManager {
         if (product.getPrice() < 0) {
             throw new BusinessException("The product price cannot be negative.");
         }
-        if ((product.getVat().compareTo(java.math.BigDecimal.ZERO) == -1) || (product.getVat().compareTo(new java.math.BigDecimal("100")) == 1)) {
+        if ((product.getVat().compareTo(java.math.BigDecimal.ZERO) < 0) || (product.getVat().compareTo(new java.math.BigDecimal("100")) > 0)) {
             throw new BusinessException("The VAT must be between 0 and 100.");
         }
         try {
-            productDA.insert(product);
-            return product;
+            boolean insert = productDA.insert(product);
         } catch (DataBaseException e) {
             throw new BusinessException("Error when creating the product.", e);
         }
@@ -98,7 +97,7 @@ public class ProductManager {
             throw new BusinessException("Error when changing the price.", e);
         }
     }
-/*
+/* Superseded by change product price
     public double changeProductVAT(int productID, double VAT) throws BusinessException {
         // Validation
         if (productID <= 0) {
@@ -116,7 +115,7 @@ public class ProductManager {
         }
     }
 */
-    public int changeFidelityPoint(Product product, int newFidelityPoint) throws BusinessException, DataValidationException, DataBaseException {
+    public void changeFidelityPoint(Product product, int newFidelityPoint) throws BusinessException, DataValidationException, DataBaseException {
         // Validation
         if (productDA.checkExist(product)) {
             throw new BusinessException("The product ID is invalid.");
@@ -125,14 +124,13 @@ public class ProductManager {
             throw new BusinessException("The fidelity points cannot be negative.");
         }
         try {
-            productDA.updateFidelityPoint(product, newFidelityPoint);
-            return newFidelityPoint;
+            boolean b = productDA.updateFidelityPoint(product, newFidelityPoint);
         } catch (DataBaseException e) {
             throw new BusinessException("Error when changing the fidelity points.", e);
         }
     }
 
-    public int changeMinimalQuantity(Product product, int newQuantity) throws BusinessException, DataValidationException {
+    public void changeMinimalQuantity(Product product, int newQuantity) throws BusinessException, DataValidationException {
         // Validation
         if (product == null) {
             throw new BusinessException("The product ID is invalid.");
@@ -141,14 +139,13 @@ public class ProductManager {
             throw new BusinessException("The minimal quantity cannot be negative.");
         }
         try {
-            productDA.updateQuantity(product, newQuantity);
-            return newQuantity;
+            boolean b = productDA.updateQuantity(product, newQuantity);
         } catch (DataBaseException e) {
             throw new BusinessException("Error when changing the minimal quantity.", e);
         }
     }
 
-    public boolean deleteProduct(Product product) throws BusinessException, DataValidationException {
+    public void deleteProduct(Product product) throws BusinessException, DataValidationException {
         // Validation
         if (product == null) {
             throw new BusinessException("The product is empty.");
@@ -157,29 +154,25 @@ public class ProductManager {
             // Business rule — check that the product exists before deleting it
             if (productDA.checkExist(product)) {
                 productDA.delete(product);
-                return true;
-            } else {
-                return false;
             }
         } catch (DataBaseException e) {
             throw new BusinessException("Error when deleting the product.", e);
         }
     }
 
-    public ProductCategory createProductCategory(ProductCategory newProductCategory) throws BusinessException, DataValidationException, DataBaseException {
+    public void createProductCategory(ProductCategory newProductCategory) throws BusinessException, DataValidationException, DataBaseException {
         // Validation
         if (newProductCategory == null) {
             throw new BusinessException("The product category is null.");
         }
         try {
-            productCategoryDA.insert(newProductCategory);
-            return newProductCategory;
+           boolean b = productCategoryDA.insert(newProductCategory);
         } catch (DataBaseException e) {
             throw new BusinessException("Error when creating the category.", e);
         }
     }
 
-    public Discount addDiscount(Discount newDiscount) throws BusinessException, DataValidationException {
+    public void addDiscount(Product product, Discount newDiscount) throws BusinessException, DataValidationException {
         // Validation
         if (newDiscount == null) {
             throw new BusinessException("The discount cannot be null.");
@@ -192,21 +185,19 @@ public class ProductManager {
             throw new BusinessException("The start date must be before the end date.");
         }
         try {
-            discountDA.insert(newDiscount);
-            return newDiscount;
+            boolean insert = discountDA.insert(newDiscount);
         } catch (DataBaseException e) {
             throw new BusinessException("Error when adding the discount.", e);
         }
     }
 
-    public boolean deleteDiscount(Discount discount) throws BusinessException {
+    public void deleteDiscount(Discount discount) throws BusinessException {
         // Validation
         if (discount == null) {
             throw new BusinessException("The discount cannot be null.");
         }
         try {
-            discountDA.delete(discount);
-            return true;
+            boolean delete = discountDA.delete(discount);
         } catch (DataBaseException e) {
             throw new BusinessException("Error when deleting the discount.", e);
         }

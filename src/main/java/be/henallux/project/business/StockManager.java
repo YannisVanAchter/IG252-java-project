@@ -2,32 +2,38 @@ package main.java.be.henallux.project.business;
 
 import main.java.be.henallux.project.data.ProductDA;
 import main.java.be.henallux.project.data.QuantityProductDA;
+import main.java.be.henallux.project.data.LocationProductDA;
 import main.java.be.henallux.project.data.exception.DataBaseException;
+
 import main.java.be.henallux.project.business.exception.BusinessException;
 
+import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.LocationProduct;
 import main.java.be.henallux.project.model.Product;
 import main.java.be.henallux.project.model.QuantityProduct;
 import main.java.be.henallux.project.model.exception.DataValidationException;
 
 import java.util.List;
+import java.util.Map;
+
 public class StockManager {
 
     private final ProductDA productDA;
     private final QuantityProductDA quantityProductDA;
+    private final LocationProductDA locationProductDA;
 
     public StockManager() {
         this.productDA = ProductDA.getInstance();
         this.quantityProductDA = QuantityProductDA.getInstance();
+        this.locationProductDA = LocationProductDA.getInstance();
     }
 
-    public LocationProduct addStockLocation(LocationProduct location) throws BusinessException {
+    public void createStockLocation(LocationProduct location) throws BusinessException, DataValidationException {
         if (location == null) {
             throw new BusinessException("The location cannot be null.");
         }
         try {
-            stockDA.addStockLocation(location);
-            return location;
+            locationProductDA.insert(location);
         } catch (DataBaseException e) {
             throw new BusinessException("Error occurred while adding stock location.", e);
         }
@@ -42,9 +48,12 @@ public class StockManager {
         }
         try {
             Product product = productDA.getById(productID);
-            QuantityProduct quantityProduct = quantityProductDA.getById(QuantityProduct.hashCode(storeLocation, product));
-            if (quantity < product.getStockQuantity()) {
+            QuantityProduct quantityProduct = new QuantityProduct(storeLocation, product, quantity);
+            if (quantityProductDA.checkExist(quantityProduct)) {
                 quantityProductDA.update(quantityProduct, quantity);
+            }
+            else {
+                quantityProductDA.insert(quantityProduct);
             }
         } catch (DataBaseException e) {
             throw new BusinessException("Error occurred while adding to stock.", e);
@@ -64,36 +73,43 @@ public class StockManager {
         try {
             // Business rule — check if there is enough stock before subtracting
             Product product = productDA.getById(productID);
-            QuantityProduct quantityProduct = quantityProductDA.getById(QuantityProduct.hashCode(storeLocation, product));
-            if (quantity < product.getStockQuantity()) {
-                quantityProductDA.update(quantityProduct, quantity);
+            QuantityProduct quantityProduct = new QuantityProduct(storeLocation, product, quantity);
+            if (quantityProductDA.checkExist(quantityProduct)) {
+                if ((quantityProduct.getQuantity() - quantity) < 0) {
+                    throw new DataValidationException("The final stock has a negative quantity.");
+                }
+                quantityProductDA.update(quantityProduct, (quantityProduct.getQuantity() - quantity));
+            }
+            else {
+                throw new  DataValidationException("The stock location with the product does not exist.");
             }
         } catch (DataBaseException e) {
             throw new BusinessException("Error occurred while subtracting from stock.", e);
         }
     }
 
-    public boolean deleteStockLocation(LocationProduct location) throws BusinessException {
+    public void deleteStockLocation(LocationProduct location) throws BusinessException, DataValidationException {
         if (location == null) {
-            throw new BusinessException("The location cannot be null.");
+            throw new BusinessException("The product location must be not null.");
         }
         try {
-            // Business rule — check if there are still products in this location before deleting
-            if (stockDA.hasProducts(location)) {
-                throw new BusinessException("Impossible to delete location because it still contains products.");
+            List<QuantityProduct> quantityProductList = quantityProductDA.getAll();
+            boolean isInUse = quantityProductList.stream()
+                    .anyMatch(qp -> qp.getLocationProduct().equals(location));
+            if (isInUse) {
+                throw new DataValidationException("The location product cannot be deleted because still in use.");
             }
-            stockDA.deleteStockLocation(location);
-            return true;
+            boolean b = locationProductDA.delete(location);
         } catch (DataBaseException e) {
-            throw new BusinessException("Error occurred while deleting stock location.", e);
+            throw new BusinessException("Error occurred while adding to stock.", e);
         }
     }
 
-    public List<Product> getAllShortSuppliedProduct() throws BusinessException {
+    public Map<ClientSupplier, List<Product>> getAllShortSuppliedProduct() throws BusinessException, DataValidationException {
         try {
-            return stockDA.getAllShortSuppliedProduct();
+            return productDA.getLowQuantityProduct();
         } catch (DataBaseException e) {
-            throw new BusinessException("Error occurred while retrieving out-of-stock products.", e);
+            throw new BusinessException("Error occurred while retrieving products.", e);
         }
     }
 }

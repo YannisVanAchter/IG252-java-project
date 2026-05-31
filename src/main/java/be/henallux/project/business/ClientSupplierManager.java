@@ -20,12 +20,13 @@ import java.util.List;
 public abstract class ClientSupplierManager {
 
     private final ClientSupplierDA clientSupplierDA;
-    private AddressDA addressDA;
-    private FidelityCardDA fidelityCardDA;
-    private ProductDA productDA;
+    private final FidelityCardDA fidelityCardDA;
+    private final ProductDA productDA;
 
     public ClientSupplierManager() {
         this.clientSupplierDA = ClientSupplierDA.getInstance();
+        this.fidelityCardDA = FidelityCardDA.getInstance();
+        this.productDA = ProductDA.getInstance();
     }
 
 //===================================
@@ -68,22 +69,6 @@ public abstract class ClientSupplierManager {
         }
     }
 
-
-    public List<Product> getAllProducts(int supplierId) throws BusinessException {
-        if (supplierId <= 0) {
-            throw new BusinessException("The supplier ID is invalid.");
-        }
-        try {
-            return productDA.getAllProducts(supplierId);
-        } catch (DataBaseException e) {
-            throw new BusinessException("Error when retrieving the products.", e);
-        }
-    }
-
-    public ClientSupplier getSupplierByProduct(int id) throws BusinessException {
-        return productDA.getSupplierByProduct(id);
-    }
-
 //===================================
 //              CREATE
 //===================================
@@ -95,6 +80,9 @@ public abstract class ClientSupplierManager {
         if (clientSupplier.getName() == null || clientSupplier.getName().isBlank()) {
             throw new BusinessException("The client supplier name is required.");
         }
+        if (clientSupplier.getIsUs() && (clientSupplier.getIsSupplier() || clientSupplier.getIsClient())) {
+            throw new BusinessException("The client supplier cannot be Us and (supplier or client).");
+        }
         try {
             clientSupplierDA.insert(clientSupplier);
         } catch (DataBaseException e) {
@@ -102,18 +90,19 @@ public abstract class ClientSupplierManager {
         }
     }
 
-    public void createFidelityCard(int clientId) throws BusinessException, DataValidationException {
+    public void createFidelityCard(FidelityCard fidelityCard) throws BusinessException, DataValidationException {
         // Validation
-        if (clientId <= 0) {
-            throw new BusinessException("Error: Client ID is invalid.");
+        if (fidelityCard == null) {
+            throw new BusinessException("Error : fidelity card cannot be null.");
         }
         try {
             // Business rule — a client can only have one card
-
-            if (fidelityCardDA.getById(clientId) == null) {
+            List<FidelityCard> fidelityCardList = fidelityCardDA.getAll();
+            boolean cardFound = fidelityCardList.stream().anyMatch(fidelityCard1 ->  fidelityCard1.getClient() == fidelityCard.getClient());
+            if (cardFound) {
                 throw new BusinessException("Error: This client already has a loyalty card.");
             }
-            fidelityCardDA.insert(clientId);
+            boolean insert = fidelityCardDA.insert(fidelityCard);
         } catch (DataBaseException e) {
             throw new BusinessException("Error creating loyalty card.", e);
         }
@@ -137,7 +126,7 @@ public abstract class ClientSupplierManager {
     }
 
     public void addCheckout(List<Product> products, int clientId,
-                            FidelityCard fidelityCard, boolean useFidelityPoint) throws BusinessException {
+                            FidelityCard fidelityCard, boolean useFidelityPoint) throws BusinessException, DataValidationException {
         if (products == null || products.isEmpty()) {
             throw new BusinessException("Error: The product list cannot be empty.");
         }
@@ -145,16 +134,17 @@ public abstract class ClientSupplierManager {
             throw new BusinessException("Error: The client ID is invalid.");
         }
         if (fidelityCard == null) {
-            throw new BusinessException("Error: The loyalty card is invalid.");
-        }
-        try {
-            // Business rule — verify that the card belongs to the client
-            if (!fidelityCardDA.validateFidelityCardOwnership(clientId, fidelityCard.getId())) {
-                throw new BusinessException("Error: This loyalty card does not belong to the specified client.");
+            addCheckout(products, clientId);
+        } else {
+            try {
+                // Business rule — verify that the card belongs to the client
+                if (!validateFidelityCardOwnership(clientId, fidelityCard.getId())) {
+                    throw new BusinessException("Error: This loyalty card does not belong to the specified client.");
+                }
+                checkoutDA.addCheckout(products, clientId, fidelityCard, useFidelityPoint);
+            } catch (DataBaseException e) {
+                throw new BusinessException("Error recording checkout.", e);
             }
-            checkoutDA.addCheckout(products, clientId, fidelityCard, useFidelityPoint);
-        } catch (DataBaseException e) {
-            throw new BusinessException("Error recording checkout.", e);
         }
     }
 
@@ -219,81 +209,58 @@ public abstract class ClientSupplierManager {
         }
     }
 
-    public void changeVATNumber(int supplierId, String VATNumber) throws BusinessException {
-        if (supplierId <= 0) {
-            throw new BusinessException("The supplier ID is invalid.");
-        }
-        if (VATNumber == null || VATNumber.isBlank()) {
-            throw new BusinessException("The VAT number is required.");
-        }
-        try {
-            clientSupplierDA.changeVATNumber(supplierId, VATNumber);
-        } catch (DataBaseException e) {
-            throw new BusinessException("Error when changing the VAT number.", e);
-        }
-    }
-
-
 
 //===================================
 //              DELETE
 //===================================
 
-    public boolean deleteClientSupplier(int id) throws BusinessException {
-        if (id <= 0) {
-            throw new BusinessException("The client supplier ID must be a positive number.");
+    public boolean deleteClientSupplier(ClientSupplier clientSupplier) throws BusinessException, DataValidationException {
+        if (clientSupplier == null) {
+            throw new BusinessException("The client supplier cannot be null.");
         }
         try {
-            clientSupplierDA.deleteClientSupplier(id);
+            clientSupplierDA.delete(clientSupplier);
             return true;
         } catch (DataBaseException e) {
             throw new BusinessException("Error deleting the client supplier.", e);
         }
     }
 
-    public void deleteClientAccount(int clientId) throws BusinessException {
+    public void deleteClientAccount(int clientId) throws BusinessException, DataValidationException {
         if (clientId <= 0) {
             throw new BusinessException("Error: The client ID is invalid.");
         }
         try {
-            // Orchestration — remove the loyalty card before the account deletion to respect the business rule that a card cannot exist without an associated client
-            if (fidelityCardDA.hasFidelityCard(clientId)) {
-                fidelityCardDA.deleteFidelityCard(clientId);
-            }
-            super.deleteClientSupplier(clientId);
+            ClientSupplier clientSupplier = clientSupplierDA.getById(clientId);
+            clientSupplierDA.delete(clientSupplier);
         } catch (DataBaseException e) {
             throw new BusinessException("Error: Failed to delete client account.", e);
         }
     }
 
-    public void deleteClientAccount(int clientId, int cardId) throws BusinessException {
-        if (clientId <= 0 || cardId <= 0) {
-            throw new BusinessException("Error: The provided IDs are invalid.");
-        }
-        try {
-            // Business rule — verify that the card belongs to the client before deletion
-            if (!fidelityCardDA.validateFidelityCardOwnership(clientId, cardId)) {
-                throw new BusinessException("Error: This loyalty card does not belong to the specified client.");
-            }
-            fidelityCardDA.deleteFidelityCard(clientId);
-            super.deleteClientSupplier(clientId, cardId);
-        } catch (DataBaseException e) {
-            throw new BusinessException("Error: Failed to delete client account.", e);
-        }
+    public void deleteClientAccount(int clientId, int cardId) throws BusinessException, DataValidationException {
+        deleteClientAccount(clientId);
     }
 
 
 //===================================
 //              OTHERS
 //===================================
-
-    public boolean validateFidelityCardOwnership(int clientId, int cardId) throws BusinessException {
+// validate client with clientId is associated with fidelity card with cardId
+    public boolean validateFidelityCardOwnership(int clientId, int cardId) throws BusinessException, DataValidationException {
         // Validation
         if (clientId <= 0 || cardId <= 0) {
             throw new BusinessException("Error: The provided IDs are invalid.");
         }
         try {
-            return fidelityCardDA.validateFidelityCardOwnership(clientId, cardId);
+           ClientSupplier clientSupplier = clientSupplierDA.getById(clientId);
+           if (clientSupplier == null) {
+               return false;
+           }
+           if (clientSupplier.getFidelityCard().getId() != cardId) {
+               return false;
+           }
+           return true;
         } catch (DataBaseException e) {
             throw new BusinessException("Error validating loyalty card ownership.", e);
         }
