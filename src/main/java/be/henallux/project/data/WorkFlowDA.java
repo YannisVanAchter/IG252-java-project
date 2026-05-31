@@ -168,7 +168,6 @@ public class WorkFlowDA extends CRUD<WorkFlow> {
     @Override
     public List<WorkFlow> getsByIds(List<Integer> ids, boolean mapping)
             throws DataBaseException, DataValidationException {
-
         List<WorkFlow> workflows = new ArrayList<>();
 
         for (Integer id : ids) {
@@ -185,10 +184,8 @@ public class WorkFlowDA extends CRUD<WorkFlow> {
     @Override
     public boolean insert(WorkFlow workflow)
             throws DataBaseException, DataValidationException {
-
-        if (checkExist(workflow)) {
-            return false;
-        }
+        workflowTypeDA.chechExist(workflow.getWorkFlowType());
+        statusDA.checkExist(workflow.getStatus());
 
         String query = String.format("""
             INSERT INTO %s

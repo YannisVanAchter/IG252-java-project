@@ -43,7 +43,7 @@ public class WorkFlowType implements Model {
 
     public String getName() { return name; }
 
-    private void setName(String name) throws DataValidationException {
+    public void setName(String name) throws DataValidationException {
         if (name == null || name.trim().isEmpty()) {
             throw new DataValidationException("Workflow type name cannot be null or empty.");
         }
