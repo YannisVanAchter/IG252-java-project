@@ -307,7 +307,7 @@ public class Document implements Model {
 
     public WorkFlow getWorkflow() { return workflow; }
 
-    private void setWorkflow(WorkFlow workflow) {
+    public void setWorkflow(WorkFlow workflow) {
         this.workflow = workflow;
     }
 

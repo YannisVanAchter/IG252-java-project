@@ -7,6 +7,8 @@ import main.java.be.henallux.project.business.exception.BusinessException;
 import main.java.be.henallux.project.model.Product;
 import main.java.be.henallux.project.model.ProductCategory;
 import main.java.be.henallux.project.model.Discount;
+import main.java.be.henallux.project.model.exception.DataValidationException;
+
 import java.util.List;
 
 public class ProductSearchManager {
@@ -16,7 +18,7 @@ public class ProductSearchManager {
         this.productSearchDA = new ProductSearchDA();
     }
 
-    public List<Product> searchProducts(String name, ProductCategory category, Boolean discount) throws BusinessException {
+    public List<Product> searchProducts(String name, ProductCategory category, Boolean discount) throws BusinessException, DataValidationException {
         try {
             return productSearchDA.search(name, category, discount);
         } catch (DataBaseException e) {

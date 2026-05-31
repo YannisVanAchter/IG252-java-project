@@ -15,18 +15,20 @@ import main.java.be.henallux.project.data.MySQLConnector;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 
 import main.java.be.henallux.project.model.ClientSupplier;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
 public class ClientSupplierSearchDA {
     private CRUD<ClientSupplier> clientSupplierDA;
 
-    ClientSupplierSearchDA() {
+    public ClientSupplierSearchDA() {
         clientSupplierDA = ClientSupplierDA.getInstance();
     }
 
     /**
      *
      */
-    public List<ClientSupplier> search(String nom, String email, boolean isFidelityCardValid ) throws DataBaseException, DataValidationException {
+    public List<ClientSupplier> search(String nom, String email, boolean isFidelityCardValid ) throws DataBaseException, DataValidationException
+    {
         List<ClientSupplier> clientSupplier = new ArrayList();
         StringBuilder SQLInstruction = new StringBuilder("""
                     SELECT cs.id_ as ID

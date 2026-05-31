@@ -21,11 +21,8 @@ import main.java.be.henallux.project.model.exception.DataValidationException;
 public class ProductSearchDA {
     private CRUD<Product> productDA;
 
-<<<<<<< Updated upstream
-    ProductSearchDA () {
-=======
-    ProductSearchDA() {
->>>>>>> Stashed changes
+
+    public ProductSearchDA() {
         productDA = ProductDA.getInstance();
     }
 
