@@ -14,11 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.data.CRUD;
-import main.java.be.henallux.project.data.ProductDA;
 import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.Discount;
-import main.java.be.henallux.project.model.Product;
 
 public class DiscountDA extends CRUD<Discount> {
     private static volatile DiscountDA instance;

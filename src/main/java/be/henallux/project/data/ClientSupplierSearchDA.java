@@ -5,20 +5,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Date;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.java.be.henallux.project.data.MySQLConnector;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.exception.DataValidationException;
 
 public class ClientSupplierSearchDA {
-    private CRUD<ClientSupplier> clientSupplierDA;
+    private final CRUD<ClientSupplier> clientSupplierDA;
 
     public ClientSupplierSearchDA() {
         clientSupplierDA = ClientSupplierDA.getInstance();
@@ -29,7 +26,7 @@ public class ClientSupplierSearchDA {
      */
     public List<ClientSupplier> search(String nom, String email, boolean isFidelityCardValid ) throws DataBaseException, DataValidationException
     {
-        List<ClientSupplier> clientSupplier = new ArrayList();
+        List<ClientSupplier> clientSupplier = new ArrayList<>();
         StringBuilder SQLInstruction = new StringBuilder("""
                     SELECT cs.id_ as ID
                     FROM Client_Supplier AS cs
@@ -37,15 +34,15 @@ public class ClientSupplierSearchDA {
                     """); // ? Add '1=1', if all parameters are null, the where clause would create problems
         boolean addedWhereClause = false;
         if (nom != null && !nom.isEmpty()) {
-            SQLInstruction.add(" AND cs.name_=?");
+            SQLInstruction.append(" AND cs.name_=?");
             addedWhereClause = true;
         }
         if (email != null && !email.isEmpty()) {
-            SQLInstruction.add(" AND email=?");
+            SQLInstruction.append(" AND email=?");
             addedWhereClause = true;
         }
         if (isFidelityCardValid){
-            SQLInstruction.add("""
+            SQLInstruction.append("""
                      AND cs.id_ in (
                         SELECT fd.clientID FROM FidelityCard AS fd
                         WHERE isValid=?
@@ -54,7 +51,7 @@ public class ClientSupplierSearchDA {
             addedWhereClause = true;
         }
         try (Connection connection = MySQLConnector.getInstance().getConnection()) {
-            Statement statement = connection.prepareStatement(SQLInstruction.toString() + ";");
+            PreparedStatement statement = connection.prepareStatement(SQLInstruction.toString() + ";");
             int currentIndex = 1;
             if (nom != null && !nom.isEmpty()) {
                 statement.setString(currentIndex, nom);
@@ -65,11 +62,11 @@ public class ClientSupplierSearchDA {
                 currentIndex++;
             }
             if (isFidelityCardValid) {
-                statement.setString(currentIndex, isFidelityCardValid);
+                statement.setBoolean(currentIndex, isFidelityCardValid);
                 currentIndex++;
             }
 
-            ResultSet result = statement.executeQuerry();
+            ResultSet result = statement.executeQuery();
             while  (result.next()) {
                 clientSupplier.add(clientSupplierDA.getById(result.getInt("ID")));
             }

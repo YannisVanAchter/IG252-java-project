@@ -77,7 +77,7 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
 
             if (isClient && mapping) {
                 try {
-                    fidelityCard = fidelityCardDA.getByClientSupplierId(id);
+                    fidelityCard = fidelityCardDA.getById(id);
                 } catch (Exception e) {
                     fidelityCard = null;
                 }
@@ -260,7 +260,7 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
 
                     IDS_MAPPING_OBJECT.put(
                             generatedId,
-                            getById(generatedId)
+                            clientSupplier
                     );
                 }
             }
@@ -477,9 +477,10 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
             throws DataBaseException, DataValidationException {
 
         String query = "DELETE FROM " + TABLE_NAME + " WHERE id_ = ?;";
-        FidelityCardDA.getInstance().getAll().stream()
-                .filter(card -> card.getClient() == clientSupplier)
-                .map(card -> FidelityCardDA.getInstance().delete(card));
+        for (FidelityCard card : fidelityCardDA.getAll()) {
+            if (card.getClient() != null && card.getClient().getId() == clientSupplier.getId())
+                fidelityCardDA.delete(card);
+        }
 
         try (
                 PreparedStatement statement =

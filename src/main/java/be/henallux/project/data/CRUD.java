@@ -8,13 +8,12 @@ import java.util.Map;
 import java.util.List;
 
 import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.data.MySQLConnector;
 
 import main.java.be.henallux.project.model.Model;
 import main.java.be.henallux.project.model.exception.DataValidationException;
 
 public abstract class CRUD<M extends Model> {
-    protected static volatile CRUD<M> instance;
+    protected static volatile CRUD<?> instance;
     protected String TABLE_NAME;
     protected Map<Object, M> IDS_MAPPING_OBJECT;
     public final static MySQLConnector connector = MySQLConnector.getInstance();
@@ -42,7 +41,7 @@ public abstract class CRUD<M extends Model> {
     abstract boolean delete(M model) throws DataBaseException, DataValidationException;
 
     /**
-     * Check if a given instance of a Model exist in the database
+     * Check if a given instance of a Model exists in the database
      * @param model the model to evaluate
      * @effect If the model does not exist in the DB, it will insert the object
      */
