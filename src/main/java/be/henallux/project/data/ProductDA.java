@@ -468,7 +468,7 @@ public class ProductDA extends CRUD<Product> {
     public Map<ClientSupplier, List<Product>> getLowQuantityProduct() throws DataBaseException, DataValidationException {
         String SQLInstruction = "SELECT * FROM vw_LowQuantity_ProductSupplier;";
         try (Connection connection = connector.getInstance().getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(SQLInstruction)
+            PreparedStatement statement = connection.prepareStatement(SQLInstruction);
             ResultSet result = statement.executeQuery();
 
             Map<ClientSupplier, List<Product>> supplier_mapping_product = new HashMap<>();
