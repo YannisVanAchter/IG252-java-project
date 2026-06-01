@@ -447,6 +447,7 @@ public class ClientSupplierForm extends JPanel {
                 mainWindow.goBack();
             }
         } catch (Exception ex) {
+            ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Unexpected error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -571,6 +572,7 @@ public class ClientSupplierForm extends JPanel {
             buildLoyaltyPanel(newCard);
             JOptionPane.showMessageDialog(this, "Fidelity card created successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }

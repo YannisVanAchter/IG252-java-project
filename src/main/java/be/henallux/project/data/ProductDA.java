@@ -26,18 +26,34 @@ public class ProductDA extends CRUD<Product> {
     private static volatile ProductDA instance;
     private final String TABLE_NAME = "Product";
     private final Map<Integer, Product> dataMappingObject;
-    private final DiscountDA discountDA;
-    private final QuantityProductDA quantityDA;
-    private final LocationProductDA locationDA;
-    private final ProductCategoryDA categoryDA;
+    private  DiscountDA discountDA;
+    private  QuantityProductDA quantityDA;
+    private  LocationProductDA locationDA;
+    private  ProductCategoryDA categoryDA;
 
     private ProductDA() {
         super();
         this.dataMappingObject = new HashMap<>();
-        discountDA = DiscountDA.getInstance();
-        quantityDA = QuantityProductDA.getInstance();
-        locationDA = LocationProductDA.getInstance();
-        categoryDA = ProductCategoryDA.getInstance();
+    }
+
+    private DiscountDA getDiscountDA() {
+        if (discountDA == null) discountDA = DiscountDA.getInstance();
+        return discountDA;
+    }
+
+    private QuantityProductDA getQuantityDA() {
+        if (quantityDA == null) quantityDA = QuantityProductDA.getInstance();
+        return quantityDA;
+    }
+
+    private LocationProductDA getLocationDA() {
+        if (locationDA == null) locationDA = LocationProductDA.getInstance();
+        return locationDA;
+    }
+
+    private ProductCategoryDA getCategoryDA() {
+        if (categoryDA == null) categoryDA = ProductCategoryDA.getInstance();
+        return categoryDA;
     }
 
     @SuppressWarnings("DoubleCheckedLocking")
@@ -77,7 +93,7 @@ public class ProductDA extends CRUD<Product> {
                         data.getInt("loyaltyPoints"),
                         data.getBoolean("isEdible"),
                         data.getInt("minStockQuantity"),
-                        categoryDA.getById(data.getInt("categoryId")),
+                        getCategoryDA().getById(data.getInt("categoryId")),
                         null,
                         null
                 );
@@ -85,12 +101,12 @@ public class ProductDA extends CRUD<Product> {
                 dataMappingObject.put(id, product);
 
                 if (mapping) {
-                    discountDA.getAll(); // Discounts set by getting all discounts
-                    List<Integer> idsLocation = locationDA.getAll().stream().map(location ->
+                    getDiscountDA().getAll(); // Discounts set by getting all discounts
+                    List<Integer> idsLocation = getLocationDA().getAll().stream().map(location ->
                             QuantityProduct.hashCode(location, product)
                     ).toList();
 
-                    product.setLocation(quantityDA.getsByIds(idsLocation));
+                    product.setLocation(getQuantityDA().getsByIds(idsLocation));
                 }
             }
 
@@ -227,7 +243,7 @@ public class ProductDA extends CRUD<Product> {
     public boolean insert(Product newProduct) throws DataBaseException, DataValidationException {
 
         boolean inserted = false;
-        categoryDA.checkExist(newProduct.getCategory());
+        getCategoryDA().checkExist(newProduct.getCategory());
 
         String SQLInstruction =
                 "INSERT INTO " + TABLE_NAME +

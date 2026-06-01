@@ -45,14 +45,14 @@ public class LocalityDA extends  CRUD<Locality> {
     public Locality mapDataToObject(ResultSet data, boolean mapping) throws DataBaseException, DataValidationException {
         int id;
         try {
-            id = data.getInt("id");
+            id = data.getInt("postalId");
             Locality locality;
             if (IDS_MAPPING_OBJECT.get(id) == null) {
                 locality = new Locality(
                     data.getString("city"),
                     data.getInt("postalId")
                 );
-                IDS_MAPPING_OBJECT.put(locality.hashCode(), locality);
+                IDS_MAPPING_OBJECT.put(id, locality);
             }
         } catch (SQLException e) {
             throw new DataBaseException("Error mapping data to object", e);
@@ -66,7 +66,7 @@ public class LocalityDA extends  CRUD<Locality> {
     }
 
     public List<Locality> getAll() throws DataBaseException, DataValidationException {
-        String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " ORDER BY name";
+        String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " ORDER BY city";
         List<Locality> localities = new ArrayList<>();
 
         try (Connection connection = connector.getConnection()) {
@@ -98,7 +98,7 @@ public class LocalityDA extends  CRUD<Locality> {
     }
 
     public Locality getById(int postalCode, boolean mapping) throws DataBaseException, DataValidationException {
-        String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " WHERE postalCode = ?;";
+        String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " WHERE postalId = ?;";
 
         try (Connection connection = connector.getConnection()) {
 
@@ -133,7 +133,7 @@ public class LocalityDA extends  CRUD<Locality> {
 
             int affectedRows = statement.executeUpdate();
 
-            IDS_MAPPING_OBJECT.put(locality.hashCode(), locality);
+            IDS_MAPPING_OBJECT.put(locality.getPostalCode(), locality);
 
             return affectedRows > 0;
         } catch (SQLException e) {
@@ -154,8 +154,8 @@ public class LocalityDA extends  CRUD<Locality> {
 
             int affectedRows = statement.executeUpdate();
 
-            IDS_MAPPING_OBJECT.remove(locality.hashCode());
-            IDS_MAPPING_OBJECT.put(newLocality.hashCode(), newLocality);
+            IDS_MAPPING_OBJECT.remove(locality.getPostalCode());
+            IDS_MAPPING_OBJECT.put(newLocality.getPostalCode(), newLocality);
 
             return affectedRows > 0;
         } catch (SQLException e) {
@@ -182,7 +182,7 @@ public class LocalityDA extends  CRUD<Locality> {
 
             int affectedRows = statement.executeUpdate();
 
-            IDS_MAPPING_OBJECT.remove(locality.hashCode());
+            IDS_MAPPING_OBJECT.remove(locality.getPostalCode());
 
             return affectedRows > 0;
         } catch (SQLException e) {

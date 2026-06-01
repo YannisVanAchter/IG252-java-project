@@ -13,17 +13,17 @@ import main.java.be.henallux.project.model.exception.DataValidationException;
  */
 public class Document implements Model {
     public static final List<DocumentType> TYPES_REQUIRING_PLANNED_SEND_DATE =
-        Arrays.asList(new DocumentType(1,"Delivery"));
+            Arrays.asList(new DocumentType(1, "Purchase Order"));
     public static final List<DocumentType> TYPES_REQUIRING_RECEPTION_DATE =
-        Arrays.asList(new DocumentType(2,"Delivery"));
+            Arrays.asList(new DocumentType(2, "Delivery Note"));
     public static final List<DocumentType> TYPES_REQUIRING_PAYMENT_DELAY =
-        Arrays.asList(new DocumentType(3,"Command"));
+            Arrays.asList(new DocumentType(3, "Invoice"));
     public static final List<DocumentType> TYPES_REQUIRING_COMMENTARY =
-        Arrays.asList(new DocumentType(4,"Preparation Order"));
+            Arrays.asList(new DocumentType(5, "Preparation Order"));
     public static final List<DocumentType> TYPES_REQUIRING_ADDRESS =
-        Arrays.asList(new DocumentType(5,"Delivery"));
+            Arrays.asList(new DocumentType(1, "Purchase Order"));
     public static final List<DocumentType> TYPES_REQUIRING_RECIPE_ORDER =
-        Arrays.asList(new DocumentType(6,"Preparation Order"));
+            Arrays.asList(new DocumentType(5, "Preparation Order"));
 
     private int id;
     private LocalDate dateOfCreation;
@@ -291,17 +291,23 @@ public class Document implements Model {
 
     public Integer getPaymentDelay() { return paymentDelay; }
 
-    private void setPaymentDelay(int paymentDelay) throws DataValidationException {
-        if (TYPES_REQUIRING_PAYMENT_DELAY.contains(getDocumentType())) {
+    private void setPaymentDelay(Integer paymentDelay) throws DataValidationException {
+
+        if (TYPES_REQUIRING_PAYMENT_DELAY.contains(getDocumentType())
+                && paymentDelay == null) {
+
             throw new DataValidationException(
-                String.format(  "Payment delay cannot be null for %s document types.",
-                                        TYPES_REQUIRING_PAYMENT_DELAY.toString())
+                    String.format("Payment delay cannot be null for %s document types.",
+                            TYPES_REQUIRING_PAYMENT_DELAY.toString())
             );
         }
-        else if (paymentDelay < 0) {
-            String message = "Payment delay setting error, payment delay is lower than 0 (zero) when it shouldn't (current value: " + paymentDelay + ")";
-            throw new DataValidationException(message);
+
+        if (paymentDelay != null && paymentDelay < 0) {
+            throw new DataValidationException(
+                    "Payment delay setting error, payment delay is lower than 0"
+            );
         }
+
         this.paymentDelay = paymentDelay;
     }
 
@@ -314,10 +320,10 @@ public class Document implements Model {
     public Address getAddress() { return address; }
 
     private void setAddress(Address address) throws DataValidationException {
-        if (TYPES_REQUIRING_ADDRESS.contains(getDocumentType())) {
+        if (TYPES_REQUIRING_ADDRESS.contains(getDocumentType()) && address == null) {
             throw new DataValidationException(
-                String.format(  "Address cannot be null for %s document types.",
-                                        TYPES_REQUIRING_ADDRESS.toString())
+                    String.format("Address cannot be null for %s document types.",
+                            TYPES_REQUIRING_ADDRESS.toString())
             );
         }
         this.address = address;
@@ -326,12 +332,16 @@ public class Document implements Model {
     public String getComment() { return comment; }
 
     private void setComment(String comment) throws DataValidationException {
-        if (TYPES_REQUIRING_COMMENTARY.contains(getDocumentType())) {
+
+        if (TYPES_REQUIRING_COMMENTARY.contains(getDocumentType())
+                && (comment == null || comment.isBlank())) {
+
             throw new DataValidationException(
-                String.format(  "Commentary cannot be null for %s document types.",
-                                        TYPES_REQUIRING_COMMENTARY.toString())
+                    String.format("Commentary cannot be null for %s document types.",
+                            TYPES_REQUIRING_COMMENTARY.toString())
             );
         }
+
         this.comment = comment;
     }
 

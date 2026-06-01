@@ -27,12 +27,12 @@ public class ClientSupplierSearchDA {
     /**
      *
      */
-    public List<ClientSupplier> search(String nom, String email, boolean isFidelityCardValid ) throws DataBaseException, DataValidationException
+    public List<ClientSupplier> search(String nom, String email, Boolean isFidelityCardValid ) throws DataBaseException, DataValidationException
     {
         List<ClientSupplier> clientSupplier = new ArrayList();
         StringBuilder SQLInstruction = new StringBuilder("""
                     SELECT cs.id_ as ID
-                    FROM Client_Supplier AS cs
+                    FROM Client_supplier AS cs
                     WHERE 1=1
                     """); // ? Add '1=1', if all parameters are null, the where clause would create problems
         if (nom != null && !nom.isEmpty()) {
@@ -41,7 +41,7 @@ public class ClientSupplierSearchDA {
         if (email != null && !email.isEmpty()) {
             SQLInstruction.append(" AND email=?");
         }
-        if (isFidelityCardValid){
+        if (isFidelityCardValid != null && isFidelityCardValid){
             SQLInstruction.append("""
                      AND cs.id_ in (
                         SELECT fd.clientID FROM FidelityCard AS fd
@@ -60,7 +60,7 @@ public class ClientSupplierSearchDA {
                 statement.setString(currentIndex, email);
                 currentIndex++;
             }
-            if (isFidelityCardValid) {
+            if (isFidelityCardValid != null && isFidelityCardValid) {
                 statement.setBoolean(currentIndex, isFidelityCardValid);
                 currentIndex++;
             }

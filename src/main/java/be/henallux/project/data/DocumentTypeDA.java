@@ -1,5 +1,6 @@
 package main.java.be.henallux.project.data;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -23,34 +24,22 @@ import main.java.be.henallux.project.model.exception.DataValidationException;
  */
 public class DocumentTypeDA extends CRUD<DocumentType> {
 
-    /**
-     * Singleton instance
-     */
     private static volatile DocumentTypeDA instance;
 
-    /**
-     * Constructor
-     */
     private DocumentTypeDA() throws DataBaseException, DataValidationException {
         TABLE_NAME = "DocumentType";
         IDS_MAPPING_OBJECT = new HashMap<>();
 
         DocumentTypeRepository documentTypeRepository = DocumentTypeRepository.getInstance();
-        for (DocumentType docType: documentTypeRepository.getDocumentTypes())
+        for (DocumentType docType : documentTypeRepository.getDocumentTypes())
             this.checkExist(docType);
     }
 
-    /**
-     * Get singleton instance
-     *
-     * @return DocumentTypeDA instance
-     */
     public static DocumentTypeDA getInstance() {
         synchronized (DocumentTypeDA.class) {
             try {
-                if (instance == null) {
+                if (instance == null)
                     instance = new DocumentTypeDA();
-                }
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
@@ -72,30 +61,18 @@ public class DocumentTypeDA extends CRUD<DocumentType> {
     @Override
     DocumentType mapDataToObject(ResultSet data, boolean mapping)
             throws DataBaseException, DataValidationException {
-
         try {
             int id = data.getInt("id_");
 
-            /*
-             * Return mapped object if already loaded
-             */
-            if (IDS_MAPPING_OBJECT.containsKey(id)) {
+            if (IDS_MAPPING_OBJECT.containsKey(id))
                 return IDS_MAPPING_OBJECT.get(id);
-            }
 
-            String name = data.getString("name_");
-
-            DocumentType documentType = new DocumentType(id, name);
-
+            DocumentType documentType = new DocumentType(id, data.getString("name_"));
             IDS_MAPPING_OBJECT.put(id, documentType);
-
             return documentType;
 
         } catch (SQLException exception) {
-            throw new DataBaseException(
-                    "Error while mapping DocumentType data",
-                    exception
-            );
+            throw new DataBaseException("Error while mapping DocumentType data", exception);
         }
     }
 
@@ -112,23 +89,17 @@ public class DocumentTypeDA extends CRUD<DocumentType> {
             throws DataBaseException, DataValidationException {
 
         List<DocumentType> documentTypes = new ArrayList<>();
-
         String query = "SELECT * FROM " + TABLE_NAME;
 
-        try (
-                Statement statement = connector.getConnection().createStatement();
-                ResultSet result = statement.executeQuery(query)
-        ) {
+        try (Connection connection = connector.getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet result = statement.executeQuery(query)) {
 
-            while (result.next()) {
+            while (result.next())
                 documentTypes.add(mapDataToObject(result, true));
-            }
 
         } catch (SQLException exception) {
-            throw new DataBaseException(
-                    "Error while getting all DocumentTypes",
-                    exception
-            );
+            throw new DataBaseException("Error while getting all DocumentTypes", exception);
         }
 
         return documentTypes;
@@ -149,31 +120,23 @@ public class DocumentTypeDA extends CRUD<DocumentType> {
     public DocumentType getById(int id, boolean mapping)
             throws DataBaseException, DataValidationException {
 
-        if (mapping && IDS_MAPPING_OBJECT.containsKey(id)) {
+        if (IDS_MAPPING_OBJECT.containsKey(id))
             return IDS_MAPPING_OBJECT.get(id);
-        }
 
         String query = "SELECT * FROM " + TABLE_NAME + " WHERE id_ = ?";
 
-        try (
-                PreparedStatement statement =
-                        connector.getConnection().prepareStatement(query)
-        ) {
+        try (Connection connection = connector.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setInt(1, id);
 
             try (ResultSet result = statement.executeQuery()) {
-
-                if (result.next()) {
+                if (result.next())
                     return mapDataToObject(result, mapping);
-                }
             }
 
         } catch (SQLException exception) {
-            throw new DataBaseException(
-                    "Error while getting DocumentType by id",
-                    exception
-            );
+            throw new DataBaseException("Error while getting DocumentType by id", exception);
         }
 
         return null;
@@ -196,12 +159,40 @@ public class DocumentTypeDA extends CRUD<DocumentType> {
 
         List<DocumentType> documentTypes = new ArrayList<>();
 
-        for (Integer id : ids) {
-            DocumentType documentType = getById(id, mapping);
+        if (ids == null || ids.isEmpty())
+            return documentTypes;
 
-            if (documentType != null) {
-                documentTypes.add(documentType);
+        List<Integer> uncachedIds = new ArrayList<>();
+        for (Integer id : ids) {
+            DocumentType cached = IDS_MAPPING_OBJECT.get(id);
+            if (cached != null)
+                documentTypes.add(cached);
+            else
+                uncachedIds.add(id);
+        }
+
+        if (uncachedIds.isEmpty())
+            return documentTypes;
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT * FROM " + TABLE_NAME + " WHERE id_ IN (");
+        for (int i = 0; i < uncachedIds.size(); i++)
+            sql.append(i > 0 ? ",?" : "?");
+        sql.append(")");
+
+        try (Connection connection = connector.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < uncachedIds.size(); i++)
+                statement.setInt(i + 1, uncachedIds.get(i));
+
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next())
+                    documentTypes.add(mapDataToObject(result, mapping));
             }
+
+        } catch (SQLException exception) {
+            throw new DataBaseException("Error while getting DocumentTypes by ids", exception);
         }
 
         return documentTypes;
@@ -221,35 +212,21 @@ public class DocumentTypeDA extends CRUD<DocumentType> {
     public boolean insert(DocumentType model)
             throws DataBaseException, DataValidationException {
 
-        if (checkExist(model)) {
-            return false;
-        }
-
         String query = "INSERT INTO " + TABLE_NAME + " (name_) VALUES (?)";
 
-        try (
-                PreparedStatement statement =
-                        connector.getConnection().prepareStatement(
-                                query,
-                                Statement.RETURN_GENERATED_KEYS
-                        )
-        ) {
+        try (Connection connection = connector.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     query, Statement.RETURN_GENERATED_KEYS)) {
 
             statement.setString(1, model.getName());
 
-            int affectedRows = statement.executeUpdate();
-
-            if (affectedRows <= 0) {
+            if (statement.executeUpdate() <= 0)
                 return false;
-            }
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-
                 if (generatedKeys.next()) {
                     int generatedId = generatedKeys.getInt(1);
-
                     model.setId(generatedId);
-
                     IDS_MAPPING_OBJECT.put(generatedId, model);
                 }
             }
@@ -257,163 +234,91 @@ public class DocumentTypeDA extends CRUD<DocumentType> {
             return true;
 
         } catch (SQLException exception) {
-            throw new DataBaseException(
-                    "Error while inserting DocumentType",
-                    exception
-            );
+            throw new DataBaseException("Error while inserting DocumentType", exception);
         }
     }
 
-    /**
-     * Update an existing DocumentType
-     *
-     * @param model old model
-     * @param newModel new model values
-     *
-     * @return true if updated
-     *
-     * @throws DataBaseException SQL error
-     * @throws DataValidationException invalid data
-     */
     @Override
     public boolean update(DocumentType model, DocumentType newModel)
             throws DataBaseException, DataValidationException {
 
-        String query =
-                "UPDATE " + TABLE_NAME +
-                        " SET name_ = ?" +
-                        " WHERE id_ = ?";
+        String query = "UPDATE " + TABLE_NAME + " SET name_ = ? WHERE id_ = ?";
 
-        try (
-                PreparedStatement statement =
-                        connector.getConnection().prepareStatement(query)
-        ) {
+        // FIX: Connection included in try-with-resources to prevent leaks
+        try (Connection connection = connector.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setString(1, newModel.getName());
             statement.setInt(2, model.getId());
 
-            int affectedRows = statement.executeUpdate();
-
-            if (affectedRows > 0) {
-
+            if (statement.executeUpdate() > 0) {
                 IDS_MAPPING_OBJECT.remove(model.getId());
                 IDS_MAPPING_OBJECT.put(newModel.getId(), newModel);
-
                 return true;
             }
 
             return false;
 
         } catch (SQLException exception) {
-            throw new DataBaseException(
-                    "Error while updating DocumentType",
-                    exception
-            );
+            throw new DataBaseException("Error while updating DocumentType", exception);
         }
     }
 
-    /**
-     * Update only name field
-     *
-     * @param model target model
-     * @param newName new name value
-     *
-     * @return true if updated
-     *
-     * @throws DataBaseException SQL error
-     */
     public boolean updateFieldName(DocumentType model, String newName)
             throws DataBaseException {
 
-        String query =
-                "UPDATE " + TABLE_NAME +
-                        " SET name_ = ?" +
-                        " WHERE id_ = ?";
+        String query = "UPDATE " + TABLE_NAME + " SET name_ = ? WHERE id_ = ?";
 
-        try (
-                PreparedStatement statement =
-                        connector.getConnection().prepareStatement(query)
-        ) {
+        // FIX: Connection included in try-with-resources to prevent leaks
+        try (Connection connection = connector.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setString(1, newName);
             statement.setInt(2, model.getId());
 
-            int affectedRows = statement.executeUpdate();
-
-            if (affectedRows > 0) {
-
+            if (statement.executeUpdate() > 0) {
                 IDS_MAPPING_OBJECT.remove(model.getId());
-
                 return true;
             }
 
             return false;
 
         } catch (SQLException exception) {
-            throw new DataBaseException(
-                    "Error while updating DocumentType name",
-                    exception
-            );
+            throw new DataBaseException("Error while updating DocumentType name", exception);
         }
     }
 
-    /**
-     * Delete a DocumentType
-     *
-     * @param model model to delete
-     *
-     * @return true if deleted
-     *
-     * @throws DataBaseException SQL error
-     */
     @Override
     public boolean delete(DocumentType model)
             throws DataBaseException {
 
-        String query =
-                "DELETE FROM " + TABLE_NAME +
-                        " WHERE id_ = ?";
+        String query = "DELETE FROM " + TABLE_NAME + " WHERE id_ = ?";
 
-        try (
-                PreparedStatement statement =
-                        connector.getConnection().prepareStatement(query)
-        ) {
+        // FIX: Connection included in try-with-resources to prevent leaks
+        try (Connection connection = connector.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setInt(1, model.getId());
 
-            int affectedRows = statement.executeUpdate();
-
-            if (affectedRows > 0) {
-
+            if (statement.executeUpdate() > 0) {
                 IDS_MAPPING_OBJECT.remove(model.getId());
-
                 return true;
             }
 
             return false;
 
         } catch (SQLException exception) {
-            throw new DataBaseException(
-                    "Error while deleting DocumentType",
-                    exception
-            );
+            throw new DataBaseException("Error while deleting DocumentType", exception);
         }
     }
 
-    /**
-     * Check if a DocumentType already exists in database
-     *
-     * @param model model to evaluate
-     *
-     * @return true if exists
-     *
-     * @throws DataBaseException SQL error
-     */
     @Override
     public boolean checkExist(DocumentType model)
             throws DataBaseException, DataValidationException {
+
         if (getById(model.getId(), false) == null)
             return insert(model);
+
         return true;
     }
 }

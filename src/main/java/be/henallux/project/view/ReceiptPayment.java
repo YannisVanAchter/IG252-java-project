@@ -366,6 +366,7 @@ public class ReceiptPayment extends JPanel {
             receiptCreateView.clearAll();
             mainWindow.setPage("RECEIPT");
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Payment failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }

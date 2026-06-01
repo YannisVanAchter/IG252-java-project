@@ -17,13 +17,22 @@ public class RecipeSearchManager {
         this.recipeSearchDA = RecipeSearchDA.getInstance();
     }
 
-    public List<Recipe> searchRecipes(String name, List<String> products) throws BusinessException, DataValidationException {
+    public List<Recipe> searchRecipes(String name, List<String> products)
+            throws BusinessException, DataValidationException {
         try {
+
+            if (products == null) {
+                return new ArrayList<>();
+            }
+
             List<Recipe> recipes = new ArrayList<>();
+
             for (String product : products) {
                 recipes.addAll(recipeSearchDA.search(name, product));
             }
+
             return recipes.stream().distinct().toList();
+
         } catch (DataBaseException e) {
             throw new BusinessException("Error occurred while searching for recipes.", e);
         }

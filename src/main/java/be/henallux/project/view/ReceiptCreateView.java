@@ -62,6 +62,7 @@ public class ReceiptCreateView extends JPanel {
         try {
             loaded = productController.getAllProduct();
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             mainWindow.goBack();
         }
@@ -306,6 +307,7 @@ public class ReceiptCreateView extends JPanel {
         try {
             productCode = Integer.parseInt(input.trim());
         } catch (NumberFormatException e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Code format invalide", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -318,6 +320,7 @@ public class ReceiptCreateView extends JPanel {
                 JOptionPane.showMessageDialog(this, "No product found", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }    /**
@@ -337,9 +340,10 @@ public class ReceiptCreateView extends JPanel {
     private void onFilterClick() {
         String txtQuery = txtSearch.getText().trim();
         try {
-            displayProducts = productSearchController.searchProducts(txtQuery, null, null);
+            displayProducts = productSearchController.searchProducts(txtQuery, null, false);
             productModel.setProducts(displayProducts);
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }

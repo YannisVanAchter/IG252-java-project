@@ -25,7 +25,7 @@ public class RecipeDA extends CRUD<Recipe> {
     private RecipeDA() {
         TABLE_NAME = "Recipe";
         IDS_MAPPING_OBJECT = new HashMap<>();
-        compositionDA = RecipeCompositionDA.getInstance();
+        // FIX: compositionDA is no longer fetched here
     }
 
     public static RecipeDA getInstance() {
@@ -34,6 +34,12 @@ public class RecipeDA extends CRUD<Recipe> {
                 instance = new RecipeDA();
         }
         return instance;
+    }
+
+    private CRUD<RecipeComposition> getCompositionDA() {
+        if (compositionDA == null)
+            compositionDA = RecipeCompositionDA.getInstance();
+        return compositionDA;
     }
 
     @Override
@@ -48,30 +54,21 @@ public class RecipeDA extends CRUD<Recipe> {
 
             String name = data.getString("name_");
             String instruction = data.getString("instructions");
-
             int finalProductId = data.getInt("finalProductId");
 
             Product finalProduct = ProductDA.getInstance().getById(finalProductId, mapping);
 
-            Recipe recipe = new Recipe(
-                    id,
-                    name,
-                    instruction,
-                    finalProduct,
-                    null
-            );
+            Recipe recipe = new Recipe(id, name, instruction, finalProduct, null);
 
             IDS_MAPPING_OBJECT.put(id, recipe);
 
             if (mapping)
-                compositionDA.getAll();
+                getCompositionDA().getAll();
 
             return recipe;
 
         } catch (Exception e) {
-            throw new DataBaseException(
-                    "Error while mapping Recipe data : " + e.getMessage()
-            );
+            throw new DataBaseException("Error while mapping Recipe data : " + e.getMessage());
         }
     }
 
@@ -79,7 +76,6 @@ public class RecipeDA extends CRUD<Recipe> {
     public List<Recipe> getAll() throws DataBaseException, DataValidationException {
 
         List<Recipe> recipes = new ArrayList<>();
-
         String query = "SELECT * FROM " + TABLE_NAME + ";";
 
         try (
@@ -87,17 +83,13 @@ public class RecipeDA extends CRUD<Recipe> {
                 Statement statement = connection.createStatement();
                 ResultSet result = statement.executeQuery(query)
         ) {
-
-            while (result.next()) {
+            while (result.next())
                 recipes.add(mapDataToObject(result, true));
-            }
 
             return recipes;
 
         } catch (Exception e) {
-            throw new DataBaseException(
-                    "Error while getting all recipes : " + e.getMessage()
-            );
+            throw new DataBaseException("Error while getting all recipes : " + e.getMessage());
         }
     }
 
@@ -114,20 +106,17 @@ public class RecipeDA extends CRUD<Recipe> {
                 Connection connection = connector.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)
         ) {
-
             statement.setInt(1, id);
 
-            ResultSet result = statement.executeQuery();
-
-            if (result.next())
-                return mapDataToObject(result, mapping);
+            try (ResultSet result = statement.executeQuery()) {
+                if (result.next())
+                    return mapDataToObject(result, mapping);
+            }
 
             return null;
 
         } catch (Exception e) {
-            throw new DataBaseException(
-                    "Error while getting recipe by id : " + e.getMessage()
-            );
+            throw new DataBaseException("Error while getting recipe by id : " + e.getMessage());
         }
     }
 
@@ -137,11 +126,41 @@ public class RecipeDA extends CRUD<Recipe> {
 
         List<Recipe> recipes = new ArrayList<>();
 
-        for (Integer id : ids) {
-            Recipe recipe = getById(id, mapping);
+        if (ids == null || ids.isEmpty())
+            return recipes;
 
-            if (recipe != null)
-                recipes.add(recipe);
+        List<Integer> uncachedIds = new ArrayList<>();
+        for (Integer id : ids) {
+            Recipe cached = IDS_MAPPING_OBJECT.get(id);
+            if (cached != null)
+                recipes.add(cached);
+            else
+                uncachedIds.add(id);
+        }
+
+        if (uncachedIds.isEmpty())
+            return recipes;
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT * FROM " + TABLE_NAME + " WHERE id_ IN (");
+        for (int i = 0; i < uncachedIds.size(); i++)
+            sql.append(i > 0 ? ",?" : "?");
+        sql.append(")");
+
+        try (
+                Connection connection = connector.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql.toString())
+        ) {
+            for (int i = 0; i < uncachedIds.size(); i++)
+                statement.setInt(i + 1, uncachedIds.get(i));
+
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next())
+                    recipes.add(mapDataToObject(result, mapping));
+            }
+
+        } catch (Exception e) {
+            throw new DataBaseException("Error while getting recipes by ids : " + e.getMessage());
         }
 
         return recipes;
@@ -160,43 +179,31 @@ public class RecipeDA extends CRUD<Recipe> {
 
         try (
                 Connection connection = connector.getConnection();
-                PreparedStatement statement =
-                        connection.prepareStatement(
-                                query,
-                                Statement.RETURN_GENERATED_KEYS
-                        )
+                PreparedStatement statement = connection.prepareStatement(
+                        query, Statement.RETURN_GENERATED_KEYS)
         ) {
-
             statement.setString(1, recipe.getName());
             statement.setString(2, recipe.getInstruction());
             statement.setInt(3, recipe.getFinalProduct().getId());
 
-            int affectedRows = statement.executeUpdate();
-
-            if (affectedRows == 0)
+            if (statement.executeUpdate() == 0)
                 return false;
 
-            ResultSet generatedKeys = statement.getGeneratedKeys();
-
-            if (generatedKeys.next()) {
-                recipe.setId(generatedKeys.getInt(1));
+            // FIX: ResultSet is now closed via try-with-resources to prevent a resource leak
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next())
+                    recipe.setId(generatedKeys.getInt(1));
             }
 
             IDS_MAPPING_OBJECT.put(recipe.getId(), recipe);
 
-            /*
-             * Insert recipe composition
-             */
-            for (RecipeComposition composition : recipe.getComposition()) {
-                compositionDA.insert(composition);
-            }
+            for (RecipeComposition composition : recipe.getComposition())
+                getCompositionDA().insert(composition);
 
             return true;
 
         } catch (Exception e) {
-            throw new DataBaseException(
-                    "Error while inserting recipe : " + e.getMessage()
-            );
+            throw new DataBaseException("Error while inserting recipe : " + e.getMessage());
         }
     }
 
@@ -214,28 +221,21 @@ public class RecipeDA extends CRUD<Recipe> {
                 Connection connection = connector.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)
         ) {
-
             statement.setString(1, newRecipe.getName());
             statement.setString(2, newRecipe.getInstruction());
             statement.setInt(3, newRecipe.getFinalProduct().getId());
             statement.setInt(4, recipe.getId());
 
-            int affectedRows = statement.executeUpdate();
-
-            if (affectedRows > 0) {
-
+            if (statement.executeUpdate() > 0) {
                 IDS_MAPPING_OBJECT.remove(recipe.getId());
                 IDS_MAPPING_OBJECT.put(newRecipe.getId(), newRecipe);
-
                 return true;
             }
 
             return false;
 
         } catch (Exception e) {
-            throw new DataBaseException(
-                    "Error while updating recipe : " + e.getMessage()
-            );
+            throw new DataBaseException("Error while updating recipe : " + e.getMessage());
         }
     }
 
@@ -243,12 +243,8 @@ public class RecipeDA extends CRUD<Recipe> {
     public boolean delete(Recipe recipe)
             throws DataBaseException, DataValidationException {
 
-        /*
-         * Delete compositions first because of FK constraint
-         */
-        for (RecipeComposition composition : recipe.getComposition()) {
+        for (RecipeComposition composition : recipe.getComposition())
             RecipeCompositionDA.getInstance().delete(composition);
-        }
 
         String query = "DELETE FROM " + TABLE_NAME + " WHERE id_ = ?";
 
@@ -256,15 +252,10 @@ public class RecipeDA extends CRUD<Recipe> {
                 Connection connection = connector.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)
         ) {
-
             statement.setInt(1, recipe.getId());
 
-            int affectedRows = statement.executeUpdate();
-
-            if (affectedRows > 0) {
-
+            if (statement.executeUpdate() > 0) {
                 IDS_MAPPING_OBJECT.remove(recipe.getId());
-
                 return true;
             }
 
@@ -292,19 +283,16 @@ public class RecipeDA extends CRUD<Recipe> {
                 Connection connection = connector.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)
         ) {
-
             statement.setInt(1, recipe.getId());
             statement.setString(2, recipe.getName());
 
-            ResultSet result = statement.executeQuery();
-
-            return result.next();
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next();
+            }
 
         } catch (Exception e) {
             throw new DataBaseException(
-                    "Error while checking recipe existence : "
-                            + e.getMessage()
-            );
+                    "Error while checking recipe existence : " + e.getMessage());
         }
     }
 
@@ -327,10 +315,8 @@ public class RecipeDA extends CRUD<Recipe> {
                 Connection connection = connector.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)
         ) {
-
             statement.setString(1, newName);
             statement.setInt(2, recipe.getId());
-
             return statement.executeUpdate() > 0;
 
         } catch (Exception e) {
@@ -354,10 +340,8 @@ public class RecipeDA extends CRUD<Recipe> {
                 Connection connection = connector.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)
         ) {
-
             statement.setString(1, newInstruction);
             statement.setInt(2, recipe.getId());
-
             return statement.executeUpdate() > 0;
 
         } catch (Exception e) {

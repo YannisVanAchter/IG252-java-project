@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class RecipeSearchTableModel extends AbstractTableModel {
     private static final String[] COLUMNS = {
-            "Name", "Document ID", "Product", ""
+            "Name", "Final Product", "Document ID", "Product", ""
     };
 
     public static final int TBL_BTN_SEE = 4;

@@ -17,7 +17,7 @@ public class ProductSearchManager {
         this.productSearchDA = new ProductSearchDA();
     }
 
-    public List<Product> searchProducts(String name, ProductCategory category, Boolean discount) throws BusinessException, DataValidationException {
+    public List<Product> searchProducts(String name, ProductCategory category, boolean discount) throws BusinessException, DataValidationException {
         try {
             return productSearchDA.search(name, category, discount);
         } catch (DataBaseException e) {

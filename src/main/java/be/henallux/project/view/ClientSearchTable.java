@@ -56,6 +56,7 @@ public class ClientSearchTable extends JPanel {
         try {
             loaded = controller.search(null, null, null);
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             mainWindow.goBack();
         }
@@ -189,6 +190,7 @@ public class ClientSearchTable extends JPanel {
             );
             model.setClients(new ArrayList<>(results));
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }

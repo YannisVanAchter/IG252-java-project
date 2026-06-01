@@ -61,6 +61,7 @@ public class DocumentTable extends JPanel {
         try {
             loaded = controller.getAllDocuments();
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         documents = loaded;
@@ -112,6 +113,7 @@ public class DocumentTable extends JPanel {
         try {
             setDocumentTypes(controller.getAllDocumentTypes());
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         ViewUtils.addFilterListener(comboTypeDocumentFilter, this::onFilterClick);

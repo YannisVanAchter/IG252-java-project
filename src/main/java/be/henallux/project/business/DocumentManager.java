@@ -35,6 +35,7 @@ public class DocumentManager {
         try {
             return documentDA.getAll();
         } catch (DataBaseException e) {
+            e.printStackTrace();
             throw new BusinessException("Error when retrieving documents.", e);
         }
     }

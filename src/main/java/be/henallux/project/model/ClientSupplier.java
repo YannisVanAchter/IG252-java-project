@@ -72,9 +72,10 @@ public class ClientSupplier implements Model {
     public boolean getIsUs() { return isUs; }
 
     private void setIsUs(boolean isUs) throws DataValidationException {
-        if (isUs && !isClient && !isSupplier) {
-            String message = "IsUs setting error, isUs is true while isClient and isSupplier are both false when it shouldn't (current values: isUs=" + isUs + ", isClient=" + getIsClient() + ", isSupplier=" + getIsSupplier() + ")";
-            throw new DataValidationException(message);
+        if (!isUs && !isClient && !isSupplier) {
+            throw new DataValidationException(
+                    "IsUs setting error, a ClientSupplier must be at least one of: isUs, isClient, isSupplier"
+            );
         }
         this.isUs = isUs;
     }

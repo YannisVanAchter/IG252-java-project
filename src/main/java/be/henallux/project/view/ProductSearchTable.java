@@ -48,8 +48,9 @@ public class ProductSearchTable extends JPanel {
 
         ArrayList<Product> loaded = new ArrayList<>();
         try {
-            loaded = productSearchController.searchProducts(null, null, null);
+            loaded = productSearchController.searchProducts(null, null, false);
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         this.displayProducts = loaded;
@@ -87,6 +88,7 @@ public class ProductSearchTable extends JPanel {
         try {
             setCategory(productController.getAllProductCategory());
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         ViewUtils.addFilterListener(comboCategory, this::onSearchClick);
@@ -162,7 +164,7 @@ public class ProductSearchTable extends JPanel {
     public void onSearchClick() {
         String name = txtProductName.getText().trim();
         ProductCategory category = (ProductCategory) comboCategory.getSelectedItem();
-        Boolean promo = chkPromotion.isSelected() ? true : null;
+        boolean promo = chkPromotion.isSelected();
 
         try {
             ArrayList<Product> results = productSearchController.searchProducts(
@@ -173,6 +175,7 @@ public class ProductSearchTable extends JPanel {
             displayProducts = results;
             model.setProducts(new ArrayList<>(results));
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }

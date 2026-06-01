@@ -59,8 +59,11 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
             String phoneNumber = data.getString("phoneNumber");
 
             boolean isClient = data.getBoolean("isClient");
+            if (data.wasNull()) isClient = false;
             boolean isSupplier = data.getBoolean("isSupplier");
+            if (data.wasNull()) isSupplier = false;
             boolean isUs = data.getBoolean("isUs");
+            if (data.wasNull()) isUs = false;
 
             String VATNumber = data.getString("VATNumber");
 

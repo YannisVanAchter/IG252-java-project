@@ -1,4 +1,5 @@
-
+CREATE DATABASE IF NOT EXISTS superdatabasename;
+USE superdatabasename;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -27,6 +28,9 @@ DROP TABLE IF EXISTS Absence_type;
 DROP TABLE IF EXISTS Employee;
 DROP TABLE IF EXISTS Address_;
 DROP TABLE IF EXISTS Locality;
+DROP TABLE IF EXISTS PreparationOrder;
+DROP VIEW IF EXISTS vw_LowQuantity_ProductSupplier;
+DROP VIEW IF EXISTS vw_ProductSuppliers;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -1191,40 +1195,40 @@ VALUES ('Le grand Bazard', NULL, 'contact@magasin.be', '047123456789', false, fa
 -- Clients
 INSERT INTO Client_supplier (name_, firstname, email, phoneNumber, isClient, isSupplier, isUs, VATNumber,
                              dateBecameClient, addressId)
-VALUES ('Dupont', 'Marie', 'marie.dupont@gmail.com', '+32470123456', TRUE, FALSE, FALSE, NULL, '2021-03-15', 2),
-       ('Lejeune', 'Thomas', 'thomas.lejeune@hotmail.com', '+32478234567', TRUE, FALSE, FALSE, NULL, '2020-07-22', 3),
-       ('Peeters', 'Sofie', 'sofie.peeters@outlook.com', '+32492345678', TRUE, FALSE, FALSE, NULL, '2019-11-05', 4),
-       ('De Smet', 'Jonas', 'jonas.desmet@gmail.com', '+32456456789', TRUE, FALSE, FALSE, NULL, '2022-01-30', 5),
-       ('Lambert', 'Isabelle', 'isabelle.lambert@yahoo.fr', '+32471567890', TRUE, FALSE, FALSE, NULL, '2018-06-10', 6),
-       ('Maes', 'Pieter', 'pieter.maes@gmail.com', '+32493678901', TRUE, FALSE, FALSE, NULL, '2023-02-14', 7),
-       ('Renard', 'Claire', 'claire.renard@proximus.be', '+32487789012', TRUE, FALSE, FALSE, NULL, '2021-09-03', 8),
-       ('Claes', 'Bram', 'bram.claes@telenet.be', '+32465890123', TRUE, FALSE, FALSE, NULL, '2020-04-18', 9),
-       ('Fontaine', 'Nathalie', 'nathalie.fontaine@gmail.com', '+32479901234', TRUE, FALSE, FALSE, NULL, '2017-12-01',
+VALUES ('Dupont', 'Marie', 'marie.dupont@gmail.com', '0470123456', TRUE, FALSE, FALSE, NULL, '2021-03-15', 2),
+       ('Lejeune', 'Thomas', 'thomas.lejeune@hotmail.com', '0478234567', TRUE, FALSE, FALSE, NULL, '2020-07-22', 3),
+       ('Peeters', 'Sofie', 'sofie.peeters@outlook.com', '0492345678', TRUE, FALSE, FALSE, NULL, '2019-11-05', 4),
+       ('De Smet', 'Jonas', 'jonas.desmet@gmail.com', '0456456789', TRUE, FALSE, FALSE, NULL, '2022-01-30', 5),
+       ('Lambert', 'Isabelle', 'isabelle.lambert@yahoo.fr', '0471567890', TRUE, FALSE, FALSE, NULL, '2018-06-10', 6),
+       ('Maes', 'Pieter', 'pieter.maes@gmail.com', '0493678901', TRUE, FALSE, FALSE, NULL, '2023-02-14', 7),
+       ('Renard', 'Claire', 'claire.renard@proximus.be', '0487789012', TRUE, FALSE, FALSE, NULL, '2021-09-03', 8),
+       ('Claes', 'Bram', 'bram.claes@telenet.be', '0465890123', TRUE, FALSE, FALSE, NULL, '2020-04-18', 9),
+       ('Fontaine', 'Nathalie', 'nathalie.fontaine@gmail.com', '0479901234', TRUE, FALSE, FALSE, NULL, '2017-12-01',
         10),
-       ('Willems', 'Kevin', 'kevin.willems@hotmail.be', '+32468012345', TRUE, FALSE, FALSE, NULL, '2022-08-25', 11);
+       ('Willems', 'Kevin', 'kevin.willems@hotmail.be', '0468012345', TRUE, FALSE, FALSE, NULL, '2022-08-25', 11);
 
 -- Fournisseurs
 INSERT INTO Client_supplier (name_, firstname, email, phoneNumber, isClient, isSupplier, isUs, VATNumber,
                              dateBecameClient, addressId)
-VALUES ('BioFresh SA', NULL, 'contact@biofresh.be', '+32(0)10441122', FALSE, TRUE, FALSE, 'BE0111222333', '2018-04-12',
+VALUES ('BioFresh SA', NULL, 'contact@biofresh.be', '010441122', FALSE, TRUE, FALSE, 'BE0111222333', '2018-04-12',
         12),
-       ('Métal Pro SPRL', NULL, 'info@metalpro.be', '+32(0)63881234', FALSE, TRUE, FALSE, 'BE0222333444', '2015-09-03',
+       ('Métal Pro SPRL', NULL, 'info@metalpro.be', '063881234', FALSE, TRUE, FALSE, 'BE0222333444', '2015-09-03',
         13),
-       ('Limburg Supplies NV', NULL, 'orders@limburgsupplies.be', '+32(0)11223344', FALSE, TRUE, FALSE, 'BE0333444555',
+       ('Limburg Supplies NV', NULL, 'orders@limburgsupplies.be', '011223344', FALSE, TRUE, FALSE, 'BE0333444555',
         '2020-11-27', 14),
-       ('TextilKort BV', NULL, 'verkoop@textilkort.be', '+32(0)56991234', FALSE, TRUE, FALSE, 'BE0444555666',
+       ('TextilKort BV', NULL, 'verkoop@textilkort.be', '056991234', FALSE, TRUE, FALSE, 'BE0444555666',
         '2017-06-15', 15),
-       ('Namur Logistics SA', NULL, 'logistique@namurlog.be', '+32(0)81556677', FALSE, TRUE, FALSE, 'BE0555666777',
+       ('Namur Logistics SA', NULL, 'logistique@namurlog.be', '081556677', FALSE, TRUE, FALSE, 'BE0555666777',
         '2019-02-08', 16),
-       ('BruxTech SPRL', NULL, 'support@bruxtech.be', '+32(0)25678901', FALSE, TRUE, FALSE, 'BE0666777888',
+       ('BruxTech SPRL', NULL, 'support@bruxtech.be', '025678901', FALSE, TRUE, FALSE, 'BE0666777888',
         '2021-07-30', 17),
-       ('LiègeChim SA', NULL, 'chimie@liegechim.be', '+32(0)43456789', FALSE, TRUE, FALSE, 'BE0777888999', '2016-03-22',
+       ('LiègeChim SA', NULL, 'chimie@liegechim.be', '043456789', FALSE, TRUE, FALSE, 'BE0777888999', '2016-03-22',
         18),
-       ('AntwerpGoods NV', NULL, 'goods@antwerpgoods.be', '+32(0)33109988', FALSE, TRUE, FALSE, 'BE0888999000',
+       ('AntwerpGoods NV', NULL, 'goods@antwerpgoods.be', '033109988', FALSE, TRUE, FALSE, 'BE0888999000',
         '2022-10-05', 19),
-       ('GentDistrib BVBA', NULL, 'distrib@gentdistrib.be', '+32(0)92345678', FALSE, TRUE, FALSE, 'BE0999000111',
+       ('GentDistrib BVBA', NULL, 'distrib@gentdistrib.be', '092345678', FALSE, TRUE, FALSE, 'BE0999000111',
         '2014-08-19', 20),
-       ('SudBelge SA', NULL, 'contact@sudbelge.be', '+32(0)81234567', FALSE, TRUE, FALSE, 'BE0100200300', '2023-01-11',
+       ('SudBelge SA', NULL, 'contact@sudbelge.be', '081234567', FALSE, TRUE, FALSE, 'BE0100200300', '2023-01-11',
         21);
 
 -- Fidelity Cards
@@ -1244,7 +1248,8 @@ VALUES (1, 'Purchase Order'),
        (3, 'Invoice'),
        (4, 'Credit Note'),
        (5, 'Preparation Order'),
-       (6, 'Internal Transfer');
+       (6, 'Internal Transfer'),
+       (7, 'Command');
 
 INSERT INTO Status_ (name_)
 VALUES ('Pending'),
@@ -1274,22 +1279,22 @@ VALUES (1, 1, 'Delivered', 1, 12),
 INSERT INTO Document_ (id_, date_, plannedSendingDate, plannedReceiveDate, effectiveSendingDate, effectiveReceiveDate,
                        paymentDelay, commentary, isChecked, workflowId, documentTypeId, addressId)
 VALUES (1, '2025-01-10', '2026-06-01', '2026-06-11', '2025-01-10', NULL, 30, NULL, TRUE, 1, 1, 12),
-       (2, '2025-01-17', NULL, NULL, NULL, '2025-01-17', 0, NULL, TRUE, 1, 2, NULL),
+       (2, '2025-01-17', NULL, '2025-01-17', NULL, '2025-01-17', 0, NULL, TRUE, 1, 2, NULL),
        (3, '2025-01-17', NULL, NULL, NULL, '2025-01-17', 30, NULL, TRUE, 1, 3, NULL),
        (4, '2025-05-20', '2026-06-01', '2026-06-15', '2025-05-20', NULL, 45, NULL, FALSE, 2, 1, 13),
        (5, '2025-03-01', '2026-06-01', '2026-06-15', NULL, NULL, 30, NULL, FALSE, 3, 1, 18),
        (6, '2025-03-05', NULL, NULL, NULL, NULL, 0, NULL, TRUE, 3, 4, NULL),
        (7, '2025-04-02', '2026-06-01', '2026-06-11', '2025-04-02', NULL, 60, NULL, TRUE, 4, 1, 20),
-       (8, '2025-04-11', NULL, NULL, NULL, '2025-04-11', 0, NULL, TRUE, 4, 2, NULL),
+       (8, '2025-04-11', NULL, '2025-04-11', NULL, '2025-04-11', 0, NULL, TRUE, 4, 2, NULL),
        (9, '2025-04-11', NULL, NULL, NULL, '2025-04-11', 60, NULL, TRUE, 4, 3, NULL),
        (10, '2025-02-14', NULL, NULL, '2025-02-14', '2025-02-14', 0, NULL, TRUE, 5, 3, 2),
-       (11, '2025-02-14', NULL, NULL, '2025-02-14', '2025-02-14', 0, NULL, TRUE, 5, 2, NULL),
+       (11, '2025-02-14', NULL, '2025-02-14', '2025-02-14', '2025-02-14', 0, NULL, TRUE, 5, 2, NULL),
        (12, '2025-05-28', NULL, NULL, NULL, NULL, 15, NULL, FALSE, 6, 3, 3),
        (13, '2025-03-10', NULL, NULL, '2025-03-10', '2025-03-10', 0, NULL, TRUE, 7, 3, 4),
-       (14, '2025-03-10', NULL, NULL, '2025-03-10', '2025-03-10', 0, NULL, TRUE, 7, 2, NULL),
+       (14, '2025-03-10', NULL, '2025-03-10', '2025-03-10', '2025-03-10', 0, NULL, TRUE, 7, 2, NULL),
        (15, '2025-03-15', NULL, NULL, '2025-03-15', NULL, 0, 'Partial return — 2 damaged items', TRUE, 7, 4, NULL),
        (16, '2025-04-22', NULL, NULL, '2025-04-22', '2025-04-22', 30, NULL, TRUE, 8, 3, 11),
-       (17, '2025-04-22', NULL, NULL, '2025-04-22', '2025-04-22', 0, NULL, TRUE, 8, 2, NULL),
+       (17, '2025-04-22', NULL, '2025-04-22', '2025-04-22', '2025-04-22', 0, NULL, TRUE, 8, 2, NULL),
        (18, '2025-05-05', NULL, NULL, '2025-05-05', '2025-05-05', 0, NULL, TRUE, 9, 6, NULL),
        (19, '2025-05-30', NULL, '2025-06-02', NULL, NULL, 0, 'Prepare 20 units of fresh croissant assortment', FALSE,
         10, 5, NULL),
