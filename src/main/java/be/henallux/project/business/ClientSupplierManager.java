@@ -373,7 +373,7 @@ public class ClientSupplierManager {
                         product.getVat(),
                         0,
                         quantityOrdered,
-                        purchaseOrder.getDetails(),
+                        purchaseOrder,
                         product,
                         null
                 );

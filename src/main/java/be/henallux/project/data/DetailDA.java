@@ -148,7 +148,7 @@ public class DetailDA extends CRUD<Detail>
     }
 
     @Override
-    boolean insert(Detail detail)
+    public boolean insert(Detail detail)
             throws DataBaseException
     {
         productDA.checkExist(detail.getProduct());

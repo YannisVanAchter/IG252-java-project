@@ -69,7 +69,7 @@ public class WorkFlowManager {
         }
         try {
             for (Document document : workFlow.getDocuments()) {
-                for (Detail detail : document.getDetails().getDetails()) {
+                for (Detail detail : document.getDetails()) {
                     Product product = detail.getProduct();
                     List<Discount> discountList = product.getDiscounts();
                     BigDecimal currentDiscountPercentage = BigDecimal.ZERO;
