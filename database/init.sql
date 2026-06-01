@@ -1,5 +1,4 @@
-CREATE DATABASE IF NOT EXISTS `${MYSQL_DATABASE}`;
-USE `${MYSQL_DATABASE}`;
+
 
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -8,7 +7,6 @@ DROP TABLE IF EXISTS Batch;
 DROP TABLE IF EXISTS Detail;
 DROP TABLE IF EXISTS RecipeComposition;
 DROP TABLE IF EXISTS Recipe;
-DROP TABLE IF EXISTS PreparationOrder;
 DROP TABLE IF EXISTS Discount;
 DROP TABLE IF EXISTS QuantityProduct;
 DROP TABLE IF EXISTS LocationProduct;
@@ -29,8 +27,6 @@ DROP TABLE IF EXISTS Absence_type;
 DROP TABLE IF EXISTS Employee;
 DROP TABLE IF EXISTS Address_;
 DROP TABLE IF EXISTS Locality;
-DROP VIEW IF EXISTS vw_ProductSuppliers;
-DROP VIEW IF EXISTS vw_LowQuantity_ProductSupplier;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -338,22 +334,7 @@ CREATE TABLE Batch
 
 -- Triggers --
 
-/**
- * Trigger notation:
- * tgr_{CRUD}_{Target table}_{Trigger name or purpose}
-
- * This trigger ensures that all document created respect there respective
- * requirements regarding optional fields.
-
-
- * CRUD codes:
- *   C  = INSERT only
- *   U  = UPDATE only
- *   D  = DELETE only
- *   CU = INSERT + UPDATE
- */
-
-
+DELIMITER //
 CREATE TRIGGER tgr_C_Document_IntegrityCheck
     BEFORE INSERT
     ON Document_
@@ -389,32 +370,18 @@ BEGIN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Preparation Order must have a commentary';
     END IF;
-END
+END;
 CREATE TRIGGER tgr_CU_Batch_CheckExpirationDateRequirement
-BEFORE
-INSERT ON Batch FOR EACH ROW
-BEGIN DECLARE productIsEdible BOOLEAN;
-SELECT isEdible
-INTO productIsEdible
-FROM Product
-WHERE id_ = NEW.productId;
-
-IF productIsEdible
-       AND (NEW.expirationDate IS NULL OR NEW.expirationDate <= CURRENT_DATE)
-    THEN
-        SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'Edible products must have a valid future expiration date';
-END IF;
-END
-
-
-CREATE TRIGGER tgr_U_Batch_CheckExpirationDateRequirement
-    BEFORE UPDATE
+    BEFORE
+        INSERT
     ON Batch
     FOR EACH ROW
 BEGIN
     DECLARE productIsEdible BOOLEAN;
-    SELECT isEdible INTO productIsEdible FROM Product WHERE id_ = NEW.productId;
+    SELECT isEdible
+    INTO productIsEdible
+    FROM Product
+    WHERE id_ = NEW.productId;
 
     IF productIsEdible
         AND (NEW.expirationDate IS NULL OR NEW.expirationDate <= CURRENT_DATE)
@@ -422,8 +389,27 @@ BEGIN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Edible products must have a valid future expiration date';
     END IF;
-END
-DELIMITER $$
+END;
+CREATE TRIGGER tgr_U_Batch_CheckExpirationDateRequirement
+    BEFORE
+        UPDATE
+    ON Batch
+    FOR EACH ROW
+BEGIN
+    DECLARE productIsEdible BOOLEAN;
+    SELECT isEdible
+    INTO productIsEdible
+    FROM Product
+    WHERE id_ = NEW.productId;
+
+    IF productIsEdible
+        AND (NEW.expirationDate IS NULL OR NEW.expirationDate <= CURRENT_DATE)
+    THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Edible products must have a valid future expiration date';
+    END IF;
+END;
+
 CREATE TRIGGER tgr_CU_ClientSupplier_CheckIsClientIsSupplier
     BEFORE INSERT
     ON Client_supplier
@@ -437,24 +423,25 @@ BEGIN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'A client/supplier must be either a client or a supplier';
     END IF;
-END
+END;
 CREATE TRIGGER tgr_U_ClientSupplier_CheckIsClientIsSupplier
-BEFORE
-UPDATE ON Client_supplier
+    BEFORE
+        UPDATE
+    ON Client_supplier
     FOR EACH ROW
-BEGIN IF NEW.isUs = TRUE AND (NEW.isClient = TRUE OR NEW.isSupplier = TRUE) THEN
+BEGIN
+    IF NEW.isUs = TRUE AND (NEW.isClient = TRUE OR NEW.isSupplier = TRUE) THEN
         SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'US can not be a client nor a supplier';
+            SET MESSAGE_TEXT = 'US can not be a client nor a supplier';
 
-ELSEIF NEW.isClient = FALSE AND NEW.isSupplier = FALSE AND NEW.isUs = FALSE THEN
+    ELSEIF NEW.isClient = FALSE AND NEW.isSupplier = FALSE AND NEW.isUs = FALSE THEN
         SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'A client/supplier must be either a client or a supplier';
-END IF;
-END
-
-
+            SET MESSAGE_TEXT = 'A client/supplier must be either a client or a supplier';
+    END IF;
+END;
 CREATE TRIGGER tgr_C_FidelityCard_CheckIsClient
-    BEFORE INSERT
+    BEFORE
+        INSERT
     ON FidelityCard
     FOR EACH ROW
 BEGIN
@@ -468,26 +455,27 @@ BEGIN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'A fidelity card can only be assigned to a client';
     END IF;
-END
+END;
 CREATE TRIGGER tgr_U_FidelityCard_CheckIsClient
-BEFORE
-UPDATE ON FidelityCard
+    BEFORE
+        UPDATE
+    ON FidelityCard
     FOR EACH ROW
-BEGIN DECLARE clientIsClient BOOLEAN;
-SELECT isClient
-INTO clientIsClient
-FROM Client_supplier
-WHERE id_ = NEW.clientId;
+BEGIN
+    DECLARE clientIsClient BOOLEAN;
+    SELECT isClient
+    INTO clientIsClient
+    FROM Client_supplier
+    WHERE id_ = NEW.clientId;
 
-IF clientIsClient = FALSE THEN
+    IF clientIsClient = FALSE THEN
         SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'A fidelity card can only be assigned to a client';
-END IF;
-END
-
-
+            SET MESSAGE_TEXT = 'A fidelity card can only be assigned to a client';
+    END IF;
+END;
 CREATE TRIGGER tgr_C_Employee_CheckNoSelfManager
-    BEFORE INSERT
+    BEFORE
+        INSERT
     ON Employee
     FOR EACH ROW
 BEGIN
@@ -495,21 +483,21 @@ BEGIN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'An employee cannot be their own manager';
     END IF;
-END
+END;
 CREATE TRIGGER tgr_U_Employee_CheckNoSelfManager
-BEFORE
-UPDATE ON Employee
+    BEFORE
+        UPDATE
+    ON Employee
     FOR EACH ROW
-BEGIN IF NEW.managerId IS NOT NULL AND NEW.managerId = NEW.id_ THEN
+BEGIN
+    IF NEW.managerId IS NOT NULL AND NEW.managerId = NEW.id_ THEN
         SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'An employee cannot be their own manager';
-END IF;
-END
-
-
-
+            SET MESSAGE_TEXT = 'An employee cannot be their own manager';
+    END IF;
+END;
 CREATE TRIGGER tgr_C_Absence_CheckPaidDaysBalance
-    BEFORE INSERT
+    BEFORE
+        INSERT
     ON Absence
     FOR EACH ROW
 BEGIN
@@ -528,7 +516,7 @@ BEGIN
         FROM Employee
         WHERE id_ = NEW.employeeId;
 
-        -- Calcul en demi-journées : DATEDIFF * 2
+-- Calcul en demi-journées : DATEDIFF * 2
         IF NEW.endDate IS NOT NULL THEN
             SET durationHalfDays = (DATEDIFF(NEW.endDate, NEW.startDate) + 1) * 2;
         ELSE
@@ -545,29 +533,30 @@ BEGIN
         SET nbPaidDaysHalfDay = nbPaidDaysHalfDay - durationHalfDays
         WHERE id_ = NEW.employeeId;
     END IF;
-END
+END;
 CREATE TRIGGER tgr_C_Discount_CheckNoOverlap
-BEFORE
-INSERT ON Discount FOR EACH ROW
-BEGIN DECLARE overlapCount INT;
+    BEFORE
+        INSERT
+    ON Discount
+    FOR EACH ROW
+BEGIN
+    DECLARE overlapCount INT;
 
-SELECT COUNT(*)
-INTO overlapCount
-FROM Discount
-WHERE productId = NEW.productId
-  AND NEW.startDate <= endDate
-  AND NEW.endDate >= startDate;
+    SELECT COUNT(*)
+    INTO overlapCount
+    FROM Discount
+    WHERE productId = NEW.productId
+      AND NEW.startDate <= endDate
+      AND NEW.endDate >= startDate;
 
-IF overlapCount > 0 THEN
+    IF overlapCount > 0 THEN
         SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'A discount already exists for this product during the requested period';
-END IF;
-END
-
-
-
+            SET MESSAGE_TEXT = 'A discount already exists for this product during the requested period';
+    END IF;
+END;
 CREATE TRIGGER tgr_U_Discount_CheckNoOverlap
-    BEFORE UPDATE
+    BEFORE
+        UPDATE
     ON Discount
     FOR EACH ROW
 BEGIN
@@ -589,61 +578,66 @@ BEGIN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'A discount already exists for this product during the requested period';
     END IF;
-END
+END;
 CREATE TRIGGER tgr_C_RecipeComposition_CheckNoSelfReference
-BEFORE
-INSERT ON RecipeComposition FOR EACH ROW
-BEGIN DECLARE finalProduct INT;
-SELECT finalProductId
-INTO finalProduct
-FROM Recipe
-WHERE id_ = NEW.recipeId;
-
-IF NEW.productId = finalProduct THEN
-        SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'A recipe cannot contain its own final product as an ingredient';
-END IF;
-END
-
-
-
-CREATE TRIGGER tgr_U_RecipeComposition_CheckNoSelfReference
-    BEFORE UPDATE
+    BEFORE
+        INSERT
     ON RecipeComposition
     FOR EACH ROW
 BEGIN
     DECLARE finalProduct INT;
-    SELECT finalProductId INTO finalProduct FROM Recipe WHERE id_ = NEW.recipeId;
+    SELECT finalProductId
+    INTO finalProduct
+    FROM Recipe
+    WHERE id_ = NEW.recipeId;
 
     IF NEW.productId = finalProduct THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'A recipe cannot contain its own final product as an ingredient';
     END IF;
-END
-CREATE TRIGGER tgr_C_Pointing_CheckNoOverlap
-BEFORE
-INSERT ON Pointing FOR EACH ROW
-BEGIN DECLARE overlapCount INT;
+END;
+CREATE TRIGGER tgr_U_RecipeComposition_CheckNoSelfReference
+    BEFORE
+        UPDATE
+    ON RecipeComposition
+    FOR EACH ROW
+BEGIN
+    DECLARE finalProduct INT;
+    SELECT finalProductId
+    INTO finalProduct
+    FROM Recipe
+    WHERE id_ = NEW.recipeId;
 
-SELECT COUNT(*)
-INTO overlapCount
-FROM Pointing
-WHERE employeeId = NEW.employeeId
-  AND date_ = NEW.date_
-  AND endTime IS NOT NULL
-  AND NEW.startTime < endTime
-  AND (NEW.endTime IS NULL OR NEW.endTime > startTime);
-
-IF overlapCount > 0 THEN
+    IF NEW.productId = finalProduct THEN
         SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'Overlapping time entry for this employee on this day';
-END IF;
-END
+            SET MESSAGE_TEXT = 'A recipe cannot contain its own final product as an ingredient';
+    END IF;
+END;
+CREATE TRIGGER tgr_C_Pointing_CheckNoOverlap
+    BEFORE
+        INSERT
+    ON Pointing
+    FOR EACH ROW
+BEGIN
+    DECLARE overlapCount INT;
 
+    SELECT COUNT(*)
+    INTO overlapCount
+    FROM Pointing
+    WHERE employeeId = NEW.employeeId
+      AND date_ = NEW.date_
+      AND endTime IS NOT NULL
+      AND NEW.startTime < endTime
+      AND (NEW.endTime IS NULL OR NEW.endTime > startTime);
 
-
+    IF overlapCount > 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Overlapping time entry for this employee on this day';
+    END IF;
+END;
 CREATE TRIGGER tgr_U_Pointing_CheckNoOverlap
-    BEFORE UPDATE
+    BEFORE
+        UPDATE
     ON Pointing
     FOR EACH ROW
 BEGIN
@@ -664,7 +658,7 @@ BEGIN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Overlapping time entry for this employee on this day';
     END IF;
-END
+END;
 -- STORED INDEXES --
 
 /**
@@ -676,7 +670,7 @@ END
 /**
  * Easily find a supplier
 */
-CREATE INDEX idx_ClientSupplier_isSupplier ON Client_supplier(isSupplier);
+CREATE INDEX idx_ClientSupplier_isSupplier ON Client_supplier (isSupplier);
 
 -- VIEWS --
 
@@ -691,7 +685,7 @@ CREATE INDEX idx_ClientSupplier_isSupplier ON Client_supplier(isSupplier);
 CREATE VIEW vw_ProductSuppliers AS
 SELECT p.id_ AS productId, p.name_ AS productLabel, cs.id_ AS supplierId, cs.name_ AS supplierName
 FROM Product p,
-     idx_ClientSupplier_isSupplier s,
+     Client_supplier cs,
      Document_ d,
      WorkFlow w,
      WorkFlowType wt,
@@ -701,7 +695,7 @@ WHERE p.id_ = dt.productId
   AND d.workflowId = w.id_
   AND w.workFlowTypeId = wt.id_
   AND wt.isSupplier = TRUE
-  AND w.otherId = s.id_;
+  AND w.otherId = cs.id_;
 
 CREATE VIEW vw_LowQuantity_ProductSupplier AS
 SELECT v.productId as productID, v.supplierId as supplierId
