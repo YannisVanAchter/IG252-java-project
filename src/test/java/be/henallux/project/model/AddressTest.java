@@ -1,4 +1,4 @@
-package test.java.be.henallux.project;
+package be.henallux.project.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,7 +26,8 @@ public class AddressTest {
         try {
             String streetName = "Rue de la Loi";
             int streetNumber = 16;
-            Address a = new Address(streetName, streetNumber, locality);
+            Locality locality = new Locality("marlon",7500);
+            Address a = new Address(123, streetName, streetNumber, locality);
             assertEquals(streetName, a.getStreetName(), "Assertion creation Rue de la Loi has failed, street names are different");
             assertEquals(streetNumber, a.getStreetNumber(), "Assertion creation 16 has failed, street numbers are different");
             assertEquals(locality, a.getLocality(), "Assertion creation locality Namur 5000 has failed, localities are different");
@@ -40,7 +41,8 @@ public class AddressTest {
         try {
             String streetName = "Rue de la Loi";
             int streetNumber = 16;
-            String localityName = locality.getName();
+            Locality locality = new Locality("marlon",7500);
+            String localityName = locality.getCity();
             int localityPostalCode = locality.getPostalCode();
             Address a = new Address(streetName, streetNumber, localityName, localityPostalCode);
             assertEquals(streetName, a.getStreetName(), "Assertion creation Rue de la Loi has failed, street names are different");
@@ -52,9 +54,11 @@ public class AddressTest {
     }
 
     @Test
-    public void comparisonEqualTest() {
+    public void comparisonEqualTest() throws DataValidationException {
         try {
-            assertEquals(new Address("Rue de la Loi", 16, locality), new Address("Rue de la Loi", 16, locality), "AssertEqual Rue de la Loi 16 Namur 5000 not OK");
+            Locality locality = new Locality("marlon",7500);
+            Address address = new Address(123, "Rue de la Loi", 16, locality);
+            assertEquals(address, address, "AssertEqual Rue de la Loi 16 Namur 5000 not OK");
         } catch (DataValidationException e) {
             e.printStackTrace();
         }
@@ -63,7 +67,9 @@ public class AddressTest {
     @Test
     public void comparisonNotEqualTest() {
         try {
-            assertNotEquals(new Address("Rue de la Loi", 16, locality), new Address("Rue de la Loi", 17, locality), "AssertEqual Rue de la Loi 16 VS 17 Namur 5000 not OK");
+            Locality locality = new Locality("marlon",7500);
+            Address address = new Address(123, "Rue de la Loi", 16, locality);
+            assertNotEquals(address, address, "AssertEqual Rue de la Loi 16 VS 17 Namur 5000 not OK");
         } catch (DataValidationException e) {
             e.printStackTrace();
         }
@@ -71,11 +77,16 @@ public class AddressTest {
 
     @Test
     public void wrongStreetNumber() {
-        assertThrows(DataValidationException.class, () -> { new Address("Rue de la Loi", -16, locality); });
+        try{
+            Locality locality = new Locality("marlon",7500);
+            assertThrows(DataValidationException.class, () -> { new Address(123, "Rue de la Loi", -16, locality); });
+        } catch (DataValidationException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     public void nullLocality() {
-        assertThrows(DataValidationException.class, () -> { new Address("Rue de la Loi", 16, (Locality) null); });
+        assertThrows(DataValidationException.class, () -> { new Address(123, "Rue de la Loi", 16, (Locality) null); });
     }
 }

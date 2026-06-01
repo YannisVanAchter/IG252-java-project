@@ -20,7 +20,9 @@ import java.util.AbstractMap.SimpleEntry;
  */
 public class StockManagementController extends Thread {
 
-    /** Shared common zone containing low-stock products and their associated supplier. */
+    /**
+     * Shared common zone containing low-stock products and their associated supplier.
+     */
     private final List<Map.Entry<Product, ClientSupplier>> data = new ArrayList<>();
 
     /**
@@ -155,6 +157,26 @@ public class StockManagementController extends Thread {
                 orderedData.put(product, orderedData.get(product) + quantity);
             } else {
                 orderedData.put(product, quantity);
+            }
+        }
+    }
+
+    /**
+     * Marks an ordered product as receive.
+     *
+     * @param product  the {@link Product} that has been received
+     * @param quantity the quantity received
+     * @see #markAsOrdered(Product, int)
+     * @see #askStockCheckUp()
+     */
+    public void markAsReceived(Product product, int quantity) {
+        synchronized (orderedData) {
+            int current = orderedData.getOrDefault(product, 0);
+            int remaining = current - quantity;
+            if (remaining <= 0) {
+                orderedData.remove(product);
+            } else {
+                orderedData.put(product, remaining);
             }
         }
     }

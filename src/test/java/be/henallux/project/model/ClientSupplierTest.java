@@ -1,8 +1,10 @@
-package test.java.be.henallux.project;
+package be.henallux.project.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import main.java.be.henallux.project.model.Locality;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.Address;
@@ -16,9 +18,13 @@ public class ClientSupplierTest {
     @BeforeEach
     public void setup() {
         try {
+            String streetName = "Rue de la Loi";
+            int streetNumber = 16;
+            Locality locality = new Locality("marlon",7500);
+            Address address = new Address(123, streetName, streetNumber, locality);
             clientSupplier = new ClientSupplier(
                 0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-                new Address("10 Rue de la Paix", "Paris", "France"), true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
+                address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
             );
         } catch (DataValidationException e) {
             fail("Failed to initialize test data");
@@ -27,9 +33,13 @@ public class ClientSupplierTest {
 
     @Test
     public void basicCreationTest() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         ClientSupplier cs = new ClientSupplier(
             0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-            new Address("10 Rue de la Paix", "Paris", "France"), true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
+            address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
         );
         assertEquals(0,               cs.getId());
         assertEquals("Dupont",      cs.getName());
@@ -46,9 +56,13 @@ public class ClientSupplierTest {
 
     @Test
     public void basicCreationTestClientOnly() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         ClientSupplier cs = new ClientSupplier(
             1, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-            new Address("10 Rue de la Paix", "Paris", "France"), true, false, false, null, LocalDate.of(2020, 1, 15)
+            address, true, false, false, null, LocalDate.of(2020, 1, 15)
         );
         assertTrue(cs.getIsClient());
         assertFalse(cs.getIsSupplier());
@@ -57,9 +71,13 @@ public class ClientSupplierTest {
 
     @Test
     public void basicCreationTestSupplierOnly() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         ClientSupplier cs = new ClientSupplier(
             2, "Dupont", null, "jean.dupont@example.com", "0123456789",
-            new Address("10 Rue de la Paix", "Paris", "France"), false, true, false, "FR12345678901", null
+            address, false, true, false, "FR12345678901", null
         );
         assertFalse(cs.getIsClient());
         assertTrue(cs.getIsSupplier());
@@ -68,9 +86,13 @@ public class ClientSupplierTest {
 
     @Test
     public void basicCreationTestIsUs() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         ClientSupplier cs = new ClientSupplier(
             3, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-            new Address("10 Rue de la Paix", "Paris", "France"), true, false, true, null, LocalDate.of(2020, 1, 15)
+            address, true, false, true, null, LocalDate.of(2020, 1, 15)
         );
         assertTrue(cs.getIsUs());
         assertEquals("us", cs.getType());
@@ -78,35 +100,47 @@ public class ClientSupplierTest {
 
     @Test
     public void comparisonEqualTest() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         ClientSupplier cs1 = new ClientSupplier(
             0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-            new Address("10 Rue de la Paix", "Paris", "France"), true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
+            address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
         );
         ClientSupplier cs2 = new ClientSupplier(
             0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-            new Address("10 Rue de la Paix", "Paris", "France"), true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
+            address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
         );
         assertEquals(cs1, cs2, "Two identical ClientSuppliers should be equal");
     }
 
     @Test
     public void comparisonNotEqualTest() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         ClientSupplier cs1 = new ClientSupplier(
             0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-            new Address("10 Rue de la Paix", "Paris", "France"), true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
+            address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
         );
         ClientSupplier cs2 = new ClientSupplier(
             0, "Martin", "Jean", "jean.martin@example.com", "0123456789",
-            new Address("20 Avenue des Champs-Élysées", "Paris", "France"), true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
+            address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
         );
         assertNotEquals(cs1, cs2, "ClientSuppliers with different names should not be equal");
     }
 
     @Test
     public void toStringTest() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         ClientSupplier cs = new ClientSupplier(
             0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-            new Address("10 Rue de la Paix", "Paris", "France"), true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
+            address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
         );
         String result = cs.toString();
         assertTrue(result.contains("id=0"),                          "toString should contain id=0");
@@ -120,88 +154,132 @@ public class ClientSupplierTest {
     }
 
     @Test
-    public void negativeIdThrows() {
+    public void negativeIdThrows() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         assertThrows(DataValidationException.class, () ->
             new ClientSupplier(-1, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-                new Address("10 Rue de la Paix", "Paris", "France"), true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15))
+                address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15))
         );
     }
 
     @Test
-    public void emptyNameThrows() {
+    public void emptyNameThrows() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         assertThrows(DataValidationException.class, () ->
             new ClientSupplier(0, "", "Jean", "jean.dupont@example.com", "0123456789",
-                new Address("10 Rue de la Paix", "Paris", "France"), true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15))
+                address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15))
         );
     }
 
     @Test
-    public void nullNameThrows() {
+    public void nullNameThrows() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         assertThrows(DataValidationException.class, () ->
             new ClientSupplier(0, null, "Jean", "jean.dupont@example.com", "0123456789",
-                new Address("10 Rue de la Paix", "Paris", "France"), true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15))
+                address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15))
         );
     }
 
     @Test
-    public void nullFirstnameWhenClientThrows() {
+    public void nullFirstnameWhenClientThrows() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         assertThrows(DataValidationException.class, () ->
             new ClientSupplier(0, "Dupont", null, "jean.dupont@example.com", "0123456789",
-                new Address("10 Rue de la Paix", "Paris", "France"), true, false, false, "FR12345678901", LocalDate.of(2020, 1, 15))
+                address, true, false, false, "FR12345678901", LocalDate.of(2020, 1, 15))
         );
     }
 
     @Test
-    public void emptyFirstnameWhenClientThrows() {
+    public void emptyFirstnameWhenClientThrows() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         assertThrows(DataValidationException.class, () ->
             new ClientSupplier(0, "Dupont", "", "jean.dupont@example.com", "0123456789",
-                new Address("10 Rue de la Paix", "Paris", "France"), true, false, false, "FR12345678901", LocalDate.of(2020, 1, 15))
+                address, true, false, false, "FR12345678901", LocalDate.of(2020, 1, 15))
         );
     }
 
     @Test
     public void nullFirstnameWhenNotClientOk() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         ClientSupplier cs = new ClientSupplier(
             0, "Dupont", null, "jean.dupont@example.com", "0123456789",
-            new Address("10 Rue de la Paix", "Paris", "France"), false, true, false, "FR12345678901", null
+            address, false, true, false, "FR12345678901", null
         );
         assertNull(cs.getFirstname());
     }
 
     @Test
-    public void nullEmailThrows() {
+    public void nullEmailThrows() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         assertThrows(DataValidationException.class, () ->
             new ClientSupplier(0, "Dupont", "Jean", null, "0123456789",
-                new Address("10 Rue de la Paix", "Paris", "France"), true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15))
+                address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15))
         );
     }
 
     @Test
-    public void invalidEmailThrows() {
+    public void invalidEmailThrows() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         assertThrows(DataValidationException.class, () ->
             new ClientSupplier(0, "Dupont", "Jean", "not-an-email", "0123456789",
-                new Address("10 Rue de la Paix", "Paris", "France"), true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15))
+                address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15))
         );
     }
 
     @Test
-    public void nullPhoneThrows() {
+    public void nullPhoneThrows() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         assertThrows(DataValidationException.class, () ->
             new ClientSupplier(0, "Dupont", "Jean", "jean.dupont@example.com", null,
-                new Address("10 Rue de la Paix", "Paris", "France"), true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15))
+                address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15))
         );
     }
 
     @Test
-    public void nonDigitPhoneThrows() {
+    public void nonDigitPhoneThrows() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         assertThrows(DataValidationException.class, () ->
             new ClientSupplier(0, "Dupont", "Jean", "jean.dupont@example.com", "012-345-6789",
-                new Address("10 Rue de la Paix", "Paris", "France"), true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15))
+                address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15))
         );
     }
 
     @Test
-    public void nullAddressWhenSupplierThrows() {
+    public void nullAddressWhenSupplierThrows() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         assertThrows(DataValidationException.class, () ->
             new ClientSupplier(0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
                 null, false, true, false, "FR12345678901", LocalDate.of(2020, 1, 15))
@@ -218,32 +296,48 @@ public class ClientSupplierTest {
     }
 
     @Test
-    public void nullVATWhenSupplierThrows() {
+    public void nullVATWhenSupplierThrows() throws  DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         assertThrows(DataValidationException.class, () ->
             new ClientSupplier(0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-                new Address("10 Rue de la Paix", "Paris", "France"), false, true, false, null, LocalDate.of(2020, 1, 15))
+                address, false, true, false, null, LocalDate.of(2020, 1, 15))
         );
     }
 
     @Test
-    public void invalidVATFormatThrows() {
+    public void invalidVATFormatThrows() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         assertThrows(DataValidationException.class, () ->
             new ClientSupplier(0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-                new Address("10 Rue de la Paix", "Paris", "France"), false, true, false, "12INVALID", LocalDate.of(2020, 1, 15))
+                address, false, true, false, "12INVALID", LocalDate.of(2020, 1, 15))
         );
     }
 
     @Test
     public void validVATFormatOk() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         ClientSupplier cs = new ClientSupplier(
             0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-            new Address("10 Rue de la Paix", "Paris", "France"), false, true, false, "BE0123456789", LocalDate.of(2020, 1, 15)
+            address, false, true, false, "BE0123456789", LocalDate.of(2020, 1, 15)
         );
         assertEquals("BE0123456789", cs.getVATNumber());
     }
 
     @Test
-    public void nullDateWhenClientThrows() {
+    public void nullDateWhenClientThrows() throws  DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         assertThrows(DataValidationException.class, () ->
             new ClientSupplier(0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
                 null, true, false, false, null, null)
@@ -252,35 +346,51 @@ public class ClientSupplierTest {
 
     @Test
     public void nullDateWhenNotClientOk() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         ClientSupplier cs = new ClientSupplier(
             0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-            new Address("10 Rue de la Paix", "Paris", "France"), false, true, false, "FR12345678901", null
+            address, false, true, false, "FR12345678901", null
         );
         assertNull(cs.getBecameClientDate());
     }
 
     @Test
-    public void isUsTrueWithBothFalseThrows() {
+    public void isUsTrueWithBothFalseThrows() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         assertThrows(DataValidationException.class, () ->
             new ClientSupplier(0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-                new Address("10 Rue de la Paix", "Paris", "France"), false, false, true, null, null)
+                address, false, false, true, null, null)
         );
     }
 
     @Test
     public void getTypeClientAndSupplier() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         ClientSupplier cs = new ClientSupplier(
             0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-            new Address("10 Rue de la Paix", "Paris", "France"), true, true, false, null, null
+            address, true, true, false, null, null
         );
         assertEquals("client and supplier", cs.getType());
     }
 
     @Test
     public void getTypeUs() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
         ClientSupplier cs = new ClientSupplier(
             0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-            new Address("10 Rue de la Paix", "Paris", "France"), true, false, true, null, LocalDate.of(2020, 1, 15)
+            address, true, false, true, null, LocalDate.of(2020, 1, 15)
         );
         assertEquals("us", cs.getType());
     }

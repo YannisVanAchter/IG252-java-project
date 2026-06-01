@@ -1,4 +1,4 @@
-package test.java.be.henallux.project;
+package be.henallux.project.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,7 +17,7 @@ public class LocationProductTest {
             String floor = "1";
             boolean isStock = true;
             boolean isFreezer = false;
-            LocationProduct locationProduct = new LocationProduct(locationProductId, shelf, floor, isStock, isFreezer);
+            LocationProduct locationProduct = new LocationProduct(shelf, floor, isStock, isFreezer);
             assertEquals(locationProductId, locationProduct.getLocationProductId(), "Assertion creation LP1 has failed, IDs are different");
             assertEquals(shelf, locationProduct.getShelf(), "Assertion creation A has failed, shelves are different");
             assertEquals(floor, locationProduct.getFloor(), "Assertion creation 1 has failed, floors are different");
@@ -31,7 +31,9 @@ public class LocationProductTest {
     @Test
     public void comparisonEqualTest() {
         try {
-            assertEquals(new LocationProduct("LP1", "A", "1", true, false), new LocationProduct("LP1", "A", "1", true, false), "AssertEqual LP1 A 1 true false not OK");
+            assertEquals(new LocationProduct("LP1", "A", true, true),
+                        new LocationProduct("LP1", "A", false, true),
+                        "AssertEqual LP1 A 1 true false not OK");
         } catch (DataValidationException e) {
             fail("Unexpected exception thrown: " + e.getMessage());
         }
@@ -40,7 +42,9 @@ public class LocationProductTest {
     @Test
     public void comparisonNotEqualTest() {
         try {
-            assertNotEquals(new LocationProduct("LP1", "A", "1", true, false), new LocationProduct("LP2", "B", "2", false, true), "AssertEqual LP1 A 1 true false VS LP2 B 2 false true not OK");
+            assertNotEquals(new LocationProduct("LP1", "A", true, true),
+                            new LocationProduct("LP2", "B", true, false),
+                            "AssertEqual LP1 A 1 true false VS LP2 B 2 false true not OK");
         } catch (DataValidationException e) {
             fail("Unexpected exception thrown: " + e.getMessage());
         }
@@ -48,11 +52,11 @@ public class LocationProductTest {
 
     @Test
     public void wrongShelf() {
-        assertThrows(DataValidationException.class, () -> { new LocationProduct("LP1", "", "1", true, false); });
+        assertThrows(DataValidationException.class, () -> { new LocationProduct("", "1", true, true); });
     }
 
     @Test
     public void wrongFloor() {
-        assertThrows(DataValidationException.class, () -> { new LocationProduct("LP1", "A", "", true, false); });
+        assertThrows(DataValidationException.class, () -> { new LocationProduct("LP1", "", true, true); });
     }
 }

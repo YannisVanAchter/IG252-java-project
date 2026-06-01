@@ -1,8 +1,6 @@
-package test.java.be.henallux.project;
+package be.henallux.project.model;
 
 import static org.junit.jupiter.api.Assertions.*;
-
-import java.beans.Transient;
 
 import org.junit.jupiter.api.Test;
 
