@@ -343,13 +343,16 @@ public class StockOrderCreation extends JPanel {
 
             String supplierName = selectedSupplier.getName();
             int total = model.getTotal();
-            Timer timer = new Timer(5000, e ->
-                    mainWindow.getNotificationController().push(new NotificationItem(
-                            "Purchase order received",
-                            "Order received from " + supplierName + " — " + total + " item(s) added to stock.",
-                            NotificationItem.Type.INFO
-                    ))
-            );
+            Timer timer = new Timer(5000, e -> {
+                mainWindow.getNotificationController().push(new NotificationItem(
+                        "Purchase order received",
+                        "Order received from " + supplierName + " — " + total + " item(s) added to stock.",
+                        NotificationItem.Type.INFO
+                ));
+                for (Map.Entry<Product, Integer> entry : products.entrySet()) {
+                    stockManagementController.markAsReceived(entry.getKey(), entry.getValue());
+                }
+            });
             timer.setRepeats(false);
             timer.start();
 
