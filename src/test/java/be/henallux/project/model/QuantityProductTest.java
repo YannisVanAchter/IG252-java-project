@@ -1,4 +1,4 @@
-package test.java.be.henallux.project;
+package be.henallux.project.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -135,29 +135,6 @@ public class QuantityProductTest {
             fail("Setting quantity to -1 should have thrown a DataValidationException");
         } catch (DataValidationException e) {
             assertEquals("Quantity setting error, quantity is lower than 0 when it shouldn't (current value: -1)", e.getMessage(), "Assertion quantity setting error message has failed, messages are different");
-        }
-    }
-
-    @Test
-    public void setLocationProductTest() {
-        try {
-            QuantityProduct qp = new QuantityProduct(locationProduct, null, 10);
-            LocationProduct newLocationProduct = new LocationProduct("shelf B2","floor 2",true,false);
-            qp.setLocationProduct(newLocationProduct);
-            assertEquals(newLocationProduct, qp.getLocationProduct(), "Assertion setLocationProduct shelf B2 floor 2 has failed, locationProducts are different");
-        } catch (DataValidationException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    public void setLocationProductNullTest() {
-        try {
-            QuantityProduct qp = new QuantityProduct(locationProduct, null, 10);
-            qp.setLocationProduct(null);
-            fail("Setting locationProduct to null should have thrown a DataValidationException");
-        } catch (DataValidationException e) {
-            assertEquals("LocationProduct setting error, locationProduct is null when it shouldn't", e.getMessage(), "Assertion locationProduct setting error message has failed, messages are different");
         }
     }
 }

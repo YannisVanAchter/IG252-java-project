@@ -1,4 +1,4 @@
-package test.java.be.henallux.project;
+package be.henallux.project.model;
 
 import static org.junit.jupiter.api.Assertions.*; 
 import org.junit.jupiter.api.Test;
@@ -13,7 +13,7 @@ public class LocalityTest {
             String name = "Namur";
             int postalCode = 5000;
             Locality l = new Locality(name, postalCode);
-            assertEquals(name, l.getName(), "Assertion creation Namur has failed, names are different");
+            assertEquals(name, l.getCity(), "Assertion creation Namur has failed, names are different");
             assertEquals(postalCode, l.getPostalCode(), "Assertion creation 5000 has failed, postal codes are different");
         } catch (DataValidationException e) {
             e.printStackTrace();

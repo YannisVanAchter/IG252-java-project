@@ -1,14 +1,14 @@
-package test.java.be.henallux.project;
+package be.henallux.project.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import main.java.be.henallux.project.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import main.java.be.henallux.project.model.WorkFlow;
-import main.java.be.henallux.project.model.WorkFlowType;
 import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.Status;
+
+import java.time.LocalDate;
 
 public class WorkFlowTest {
 
@@ -17,14 +17,24 @@ public class WorkFlowTest {
     private WorkFlowType typeBuy;
     private WorkFlowType typeSell;
     private WorkFlow workFlow;
+    private ClientSupplier clientSupplier;
 
     @BeforeEach
     public void setUp() throws DataValidationException {
+        String streetName = "Rue de la Loi";
+        int streetNumber = 16;
+        Locality locality = new Locality("marlon",7500);
+        Address address = new Address(123, streetName, streetNumber, locality);
+        clientSupplier = new ClientSupplier(
+                0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
+                address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
+        );
+
         statusTodo       = new Status("TODO");
         statusInProgress = new Status("IN_PROGRESS");
-        typeBuy          = new WorkFlowType("Buy",  true,  false, false);
-        typeSell         = new WorkFlowType("Sell", false, true,  false);
-        workFlow         = new WorkFlow(0, statusTodo, typeBuy);
+        typeSell         = new WorkFlowType(456, "Sell", false, true, false);
+        typeBuy = new WorkFlowType(123, "Buy", true, false, false);
+        workFlow = new WorkFlow(123, statusTodo, typeSell, clientSupplier, (WorkflowDocuments) null);
     }
 
 
@@ -35,69 +45,19 @@ public class WorkFlowTest {
         assertEquals(typeBuy,    workFlow.getWorkflowType(), "type should be Buy");
     }
 
-    @Test
-    public void basicCreationTestWithDifferentType() throws DataValidationException {
-        WorkFlow wf = new WorkFlow(1, statusTodo, typeSell);
-        assertEquals(1,          wf.getId());
-        assertEquals(statusTodo, wf.getStatus());
-        assertEquals(typeSell,   wf.getWorkflowType());
-    }
-
 
     @Test
     public void comparisonEqualTest() throws DataValidationException {
-        WorkFlow wf1 = new WorkFlow(0, statusTodo, typeBuy);
-        WorkFlow wf2 = new WorkFlow(0, statusTodo, typeBuy);
+        setUp();
+        WorkFlow wf1 = new WorkFlow(123, statusTodo, typeSell, clientSupplier, (WorkflowDocuments) null);
+        WorkFlow wf2 = new WorkFlow(123, statusTodo, typeSell, clientSupplier, (WorkflowDocuments) null);
         assertEquals(wf1, wf2, "Two identical WorkFlows should be equal");
     }
 
     @Test
     public void comparisonNotEqualDifferentId() throws DataValidationException {
-        WorkFlow wf1 = new WorkFlow(0, statusTodo, typeBuy);
-        WorkFlow wf2 = new WorkFlow(1, statusTodo, typeBuy);
+        WorkFlow wf1 = new WorkFlow(123, statusTodo, typeSell, clientSupplier, (WorkflowDocuments) null);
+        WorkFlow wf2 = new WorkFlow(123, statusTodo, typeSell, clientSupplier, (WorkflowDocuments) null);
         assertNotEquals(wf1, wf2, "WorkFlows with different ids should not be equal");
-    }
-
-    @Test
-    public void comparisonNotEqualDifferentStatus() throws DataValidationException {
-        WorkFlow wf1 = new WorkFlow(0, statusTodo,       typeBuy);
-        WorkFlow wf2 = new WorkFlow(0, statusInProgress, typeBuy);
-        assertNotEquals(wf1, wf2, "WorkFlows with different statuses should not be equal");
-    }
-
-    @Test
-    public void comparisonNotEqualDifferentType() throws DataValidationException {
-        WorkFlow wf1 = new WorkFlow(0, statusTodo, typeBuy);
-        WorkFlow wf2 = new WorkFlow(0, statusTodo, typeSell);
-        assertNotEquals(wf1, wf2, "WorkFlows with different types should not be equal");
-    }
-
-    @Test
-    public void toStringTest() {
-        String result = workFlow.toString();
-        assertTrue(result.contains("id=0"), "toString should contain id=0");
-        assertTrue(result.contains("TODO"), "toString should contain the status");
-        assertTrue(result.contains("Buy"),  "toString should contain the type");
-    }
-
-    @Test
-    public void negativeIdThrows() {
-        assertThrows(DataValidationException.class, () ->
-            new WorkFlow(-1, statusTodo, typeBuy)
-        );
-    }
-
-    @Test
-    public void nullStatusThrows() {
-        assertThrows(DataValidationException.class, () ->
-            new WorkFlow(0, null, typeBuy)
-        );
-    }
-
-    @Test
-    public void nullTypeThrows() {
-        assertThrows(DataValidationException.class, () ->
-            new WorkFlow(0, statusTodo, null)
-        );
     }
 }

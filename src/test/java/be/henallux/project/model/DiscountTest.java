@@ -1,18 +1,17 @@
-package test.java.be.henallux.project;
+package be.henallux.project.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
+import main.java.be.henallux.project.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.Discount;
-import main.java.be.henallux.project.model.Product;
-import main.java.be.henallux.project.model.ProductCategory;
 
 public class DiscountTest {
 
@@ -31,11 +30,17 @@ public class DiscountTest {
         startDate          = LocalDate.of(2024, 1, 1);
         endDate            = LocalDate.of(2024, 1, 31);
         name               = "New Year Discount";
-        ProductCategory fruitsCategory = new ProductCategory(1, "Fruits", new ArrayList<>());
+        ProductCategory fruitsCategory = new ProductCategory(1, "Fruits");
+        LocationProduct locationProduct = new LocationProduct("etagere 1", "etage 2", true, false);
+
+        List<QuantityProduct> location = new ArrayList<>();
         product = new Product(
-            1, "Smartphone", new BigDecimal("500"), new BigDecimal("50"),
-            10, true, 5, fruitsCategory, new ArrayList<>()
+                1, "Smartphone", new BigDecimal("500"), new BigDecimal("50"),
+                10, true, 5, fruitsCategory, null, null
         );
+        Discount discount = new Discount(10,new BigDecimal("10"), LocalDate.now(), LocalDate.now(), "promo", product);
+        QuantityProduct quantityProduct = new QuantityProduct(locationProduct, product, 10);
+
         } catch (DataValidationException e) {
             fail("Failed to initialize test dependencies");
         }
@@ -210,9 +215,10 @@ public class DiscountTest {
 
     @Test
     public void comparisonNotEqualDifferentProduct() throws DataValidationException {
+        ProductCategory fruitsCategory = new ProductCategory(1, "Fruits");
+
         Product otherProduct = new Product(2, "Laptop", new BigDecimal("1000"), new BigDecimal("100"), 5,
-        true, 10, new ProductCategory(2, "fruitsCategory", new ArrayList<>()), new ArrayList<>()
-        );
+        true, 10, fruitsCategory, null, null);
         assertNotEquals(
             buildValid(),
             new Discount(requiredQuantity, discountPercentage, startDate, endDate, name, otherProduct)
