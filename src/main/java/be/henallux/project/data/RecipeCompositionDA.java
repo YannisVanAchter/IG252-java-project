@@ -50,7 +50,7 @@ public class RecipeCompositionDA extends CRUD<RecipeComposition> {
 
             String key = recipeId + "-" + productId;
 
-            if (mapping && IDS_MAPPING_OBJECT.containsKey(key)) {
+            if (IDS_MAPPING_OBJECT.containsKey(key)) {
                 return IDS_MAPPING_OBJECT.get(key);
             }
 
@@ -61,10 +61,12 @@ public class RecipeCompositionDA extends CRUD<RecipeComposition> {
 
             RecipeComposition recipeComposition =
                     new RecipeComposition(quantity, product, recipe);
+
+            IDS_MAPPING_OBJECT.put(key, recipeComposition);
+
             if (mapping)
                 recipe.addProductInComposition(recipeComposition);
 
-            IDS_MAPPING_OBJECT.put(key, recipeComposition);
             return recipeComposition;
 
         } catch (SQLException e) {

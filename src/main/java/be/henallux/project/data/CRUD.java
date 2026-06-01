@@ -14,7 +14,7 @@ import main.java.be.henallux.project.model.Model;
 import main.java.be.henallux.project.model.exception.DataValidationException;
 
 public abstract class CRUD<M extends Model> {
-    protected static volatile CRUD<M> instance;
+    protected static volatile CRUD<?> instance;
     protected String TABLE_NAME;
     protected Map<Object, M> IDS_MAPPING_OBJECT;
     public final static MySQLConnector connector = MySQLConnector.getInstance();

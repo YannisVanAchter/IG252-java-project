@@ -64,7 +64,7 @@ public class RecipeDA extends CRUD<Recipe> {
             IDS_MAPPING_OBJECT.put(id, recipe);
 
             if (mapping)
-                compositionDA.getByRecipe(recipe);
+                compositionDA.getAll();
 
             return recipe;
 

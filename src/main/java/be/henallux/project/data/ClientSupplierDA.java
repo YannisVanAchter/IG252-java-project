@@ -71,16 +71,8 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
 
             int addressId = data.getInt("addressId");
 
-            if ( mapping && !data.wasNull()) {
+            if ( !data.wasNull() ) {
                 address = addressDA.getById(addressId, mapping);
-            }
-
-            if (isClient && mapping) {
-                try {
-                    fidelityCard = fidelityCardDA.getByClientSupplierId(id);
-                } catch (Exception e) {
-                    fidelityCard = null;
-                }
             }
 
             ClientSupplier clientSupplier = new ClientSupplier(
@@ -95,10 +87,14 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
                     isUs,
                     VATNumber,
                     (sqlDate != null ? SQLDateToLocalDate(sqlDate) : null),
-                    fidelityCard
+                    null
             );
 
             IDS_MAPPING_OBJECT.put(id, clientSupplier);
+
+            if (isClient && mapping) {
+                fidelityCardDA.getAll();
+            }
 
             return clientSupplier;
 

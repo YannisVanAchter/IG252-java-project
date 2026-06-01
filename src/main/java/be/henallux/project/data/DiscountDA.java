@@ -75,9 +75,9 @@ public class DiscountDA extends CRUD<Discount> {
                     productDA.getById(data.getInt("productId"), false)
                 );
 
-                discount.getProduct().addDiscount(discount);
-
                 dataMappingObject.put(id, discount);
+
+                discount.getProduct().addDiscount(discount);
             }
 
         } catch (SQLException e) {

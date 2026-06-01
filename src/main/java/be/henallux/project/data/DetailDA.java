@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,12 +23,14 @@ public class DetailDA extends CRUD<Detail>
 
     private final ProductDA productDA;
     private final DocumentDA documentDA;
+    private final MySQLConnector connector;
     // TODO Implement BatchDA to be complete with the database
 
     private DetailDA()
     {
         TABLE_NAME = "Detail";
         IDS_MAPPING_OBJECT = new HashMap<>();
+        connector = MySQLConnector.getInstance();
 
         productDA = ProductDA.getInstance();
         documentDA = DocumentDA.getInstance();
@@ -69,9 +73,9 @@ public class DetailDA extends CRUD<Detail>
                 batches
         );
 
-        document.addDetail(detail);
-
         IDS_MAPPING_OBJECT.put(id, detail);
+
+        document.addDetail(detail);
 
         return detail;
     }
@@ -82,18 +86,11 @@ public class DetailDA extends CRUD<Detail>
     {
         List<Detail> details = new ArrayList<>();
 
-        try
-        {
-            ResultSet rs =
-                    connector.executeQuery(
-                            "SELECT * FROM " + TABLE_NAME
-                    );
+        try (Statement st = connector.getConnection().createStatement();
+             ResultSet rs = st.executeQuery("SELECT * FROM " + TABLE_NAME)) {
 
-            while(rs.next())
-            {
-                details.add(
-                        mapDataToObject(rs, true)
-                );
+            while (rs.next()) {
+                details.add(mapDataToObject(rs, true));
             }
 
             return details;
@@ -233,7 +230,7 @@ public class DetailDA extends CRUD<Detail>
             ps.setInt(6, newDetail.getFidelityPointEarned());
             ps.setInt(7, oldDetail.getId());
 
-            int isUpdated = ps.executeUpdate() > 0;
+            boolean isUpdated = ps.executeUpdate() > 0;
 
             if (isUpdated) {
                 IDS_MAPPING_OBJECT.remove(oldDetail.getId());

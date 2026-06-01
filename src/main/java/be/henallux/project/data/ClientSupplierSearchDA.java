@@ -35,26 +35,22 @@ public class ClientSupplierSearchDA {
                     FROM Client_Supplier AS cs
                     WHERE 1=1
                     """); // ? Add '1=1', if all parameters are null, the where clause would create problems
-        boolean addedWhereClause = false;
         if (nom != null && !nom.isEmpty()) {
-            SQLInstruction.add(" AND cs.name_=?");
-            addedWhereClause = true;
+            SQLInstruction.append(" AND cs.name_=?");
         }
         if (email != null && !email.isEmpty()) {
-            SQLInstruction.add(" AND email=?");
-            addedWhereClause = true;
+            SQLInstruction.append(" AND email=?");
         }
         if (isFidelityCardValid){
-            SQLInstruction.add("""
+            SQLInstruction.append("""
                      AND cs.id_ in (
                         SELECT fd.clientID FROM FidelityCard AS fd
                         WHERE isValid=?
                     )
                     """);
-            addedWhereClause = true;
         }
         try (Connection connection = MySQLConnector.getInstance().getConnection()) {
-            Statement statement = connection.prepareStatement(SQLInstruction.toString() + ";");
+            PreparedStatement statement = connection.prepareStatement(SQLInstruction.toString() + ";");
             int currentIndex = 1;
             if (nom != null && !nom.isEmpty()) {
                 statement.setString(currentIndex, nom);
@@ -65,11 +61,11 @@ public class ClientSupplierSearchDA {
                 currentIndex++;
             }
             if (isFidelityCardValid) {
-                statement.setString(currentIndex, isFidelityCardValid);
+                statement.setBoolean(currentIndex, isFidelityCardValid);
                 currentIndex++;
             }
 
-            ResultSet result = statement.executeQuerry();
+            ResultSet result = statement.executeQuery();
             while  (result.next()) {
                 clientSupplier.add(clientSupplierDA.getById(result.getInt("ID")));
             }

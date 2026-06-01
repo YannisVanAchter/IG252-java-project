@@ -408,7 +408,7 @@ public class DocumentTypeDA extends CRUD<DocumentType> {
     @Override
     public boolean checkExist(DocumentType model)
             throws DataBaseException {
-        if (getById(model, false) == null)
+        if (getById(model.getId(), false) == null)
             return insert(model);
         return true;
     }

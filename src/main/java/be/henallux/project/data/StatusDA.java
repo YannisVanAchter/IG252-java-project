@@ -1,6 +1,9 @@
 package main.java.be.henallux.project.data;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
@@ -20,7 +23,7 @@ public class StatusDA extends CRUD<Status> {
     private StatusDA() {
         TABLE_NAME = "Status_";
         IDS_MAPPING_OBJECT = new HashMap<>();
-        
+
         WorkFlowStatusRepository statusRepository = WorkFlowStatusRepository.getInstance();
         for (Status status: statusRepository.getWorkFlowStatuses())
             checkExist(status);
@@ -63,8 +66,8 @@ public class StatusDA extends CRUD<Status> {
 
         String query = "SELECT * FROM " + TABLE_NAME;
 
-        try {
-            ResultSet rs = connector.executeQuery(query);
+        try (Connection connection = connector.getConnection()) {
+            ResultSet rs = connection.createStatement().executeQuery(query);
 
             while (rs.next()) {
                 statuses.add(mapDataToObject(rs, true));
@@ -99,8 +102,12 @@ public class StatusDA extends CRUD<Status> {
 
         String query = "SELECT * FROM " + TABLE_NAME + " WHERE name_ = ?";
 
-        try {
-            ResultSet rs = connector.executeQuery(query, name);
+        try (Connection connection = connector.getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(query);
+
+            statement.setString(1, name);
+
+            ResultSet rs = statement.executeQuery();
 
             if (rs.next()) {
                 return mapDataToObject(rs, true);
@@ -144,16 +151,21 @@ public class StatusDA extends CRUD<Status> {
 
         String query = "INSERT INTO " + TABLE_NAME + " (name_) VALUES (?)";
 
-        boolean inserted = connector.executeUpdate(
-                query,
-                model.getName()
-        );
+        try (Connection connection = connector.getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(query);
 
-        if (inserted) {
-            IDS_MAPPING_OBJECT.put(model.getName(), model);
+            statement.setString(1, model.getName());
+
+            boolean inserted = statement.executeUpdate() > 0;
+
+            if (inserted) {
+                IDS_MAPPING_OBJECT.put(model.getName(), model);
+            }
+
+            return inserted;
+        } catch (SQLException e) {
+            throw new DataBaseException(e.getMessage(), e);
         }
-
-        return inserted;
     }
 
     @Override
@@ -165,18 +177,23 @@ public class StatusDA extends CRUD<Status> {
                         " SET name_ = ? " +
                         "WHERE name_ = ?";
 
-        boolean updated = connector.executeUpdate(
-                query,
-                newModel.getName(),
-                model.getName()
-        );
+        try (Connection connection = connector.getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(query);
 
-        if (updated) {
-            IDS_MAPPING_OBJECT.remove(model.getName());
-            IDS_MAPPING_OBJECT.put(newModel.getName(), newModel);
+            statement.setString(1, newModel.getName());
+            statement.setString(2, model.getName());
+
+            boolean updated = statement.executeUpdate() > 0;
+
+            if (updated) {
+                IDS_MAPPING_OBJECT.remove(model.getName());
+                IDS_MAPPING_OBJECT.put(newModel.getName(), newModel);
+            }
+
+            return updated;
+        } catch (SQLException e) {
+            throw new DataBaseException(e.getMessage(), e);
         }
-
-        return updated;
     }
 
     /**
@@ -198,16 +215,21 @@ public class StatusDA extends CRUD<Status> {
                 "DELETE FROM " + TABLE_NAME +
                         " WHERE name_ = ?";
 
-        boolean deleted = connector.executeUpdate(
-                query,
-                model.getName()
-        );
+        try (Connection connection = connector.getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(query);
 
-        if (deleted) {
-            IDS_MAPPING_OBJECT.remove(model.getName());
+            statement.setString(1, model.getName());
+
+            boolean deleted = statement.executeUpdate() > 0;
+
+            if (deleted) {
+                IDS_MAPPING_OBJECT.remove(model.getName());
+            }
+
+            return deleted;
+        } catch (SQLException e) {
+            throw new DataBaseException(e.getMessage(), e);
         }
-
-        return deleted;
     }
 
     @Override
