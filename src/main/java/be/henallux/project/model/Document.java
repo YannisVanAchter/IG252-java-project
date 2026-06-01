@@ -226,8 +226,8 @@ public class Document implements Model {
         this.isChecked = isChecked;
     }
 
-    public DocumentDetails getDetails() {
-        return details;
+    public List<Detail> getDetails() {
+        return details.getDetails();
     }
 
     private void setDetails(DocumentDetails details) {

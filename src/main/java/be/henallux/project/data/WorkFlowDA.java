@@ -11,6 +11,7 @@ import java.util.List;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 
 import main.java.be.henallux.project.model.ClientSupplier;
+import main.java.be.henallux.project.model.Document;
 import main.java.be.henallux.project.model.Status;
 import main.java.be.henallux.project.model.WorkFlow;
 import main.java.be.henallux.project.model.WorkFlowType;
@@ -61,7 +62,7 @@ public class WorkFlowDA extends CRUD<WorkFlow> {
             Integer otherId = data.getObject("otherId", Integer.class) ;
 
             WorkFlowType workflowType = workflowTypeDA.getById(workflowTypeId, mapping);
-            Status status = statusDA.getById(statusId, mapping);
+            Status status = statusDA.getByName(statusId);
             ClientSupplier us = clientSupplierDA.getById(usId, mapping);
 
             ClientSupplier otherParty = null;
@@ -184,11 +185,11 @@ public class WorkFlowDA extends CRUD<WorkFlow> {
     @Override
     public boolean insert(WorkFlow workflow)
             throws DataBaseException, DataValidationException {
-        workflowTypeDA.chechExist(workflow.getWorkFlowType());
+        workflowTypeDA.checkExist(workflow.getWorkflowType());
         statusDA.checkExist(workflow.getStatus());
         clientSupplierDA.checkExist(workflow.getUs());
-        if (workflow.setOtherParty() != null)
-            clientSupplierDA.checkExist(workflow.setOtherParty());
+        if (workflow.getOtherParty() != null)
+            clientSupplierDA.checkExist(workflow.getOtherParty());
 
         String query = String.format("""
             INSERT INTO %s
@@ -325,7 +326,7 @@ public class WorkFlowDA extends CRUD<WorkFlow> {
         String query = "DELETE FROM WorkFlow WHERE id_ = ?";
 
         for (Document doc: workflow.getDocuments())
-            documentDA.delete(doc);
+            DocumentDA.getInstance().delete(doc);
 
         try (
                 PreparedStatement statement =

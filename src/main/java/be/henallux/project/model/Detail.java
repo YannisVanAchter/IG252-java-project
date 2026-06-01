@@ -30,6 +30,10 @@ public class Detail implements Model {
         setBatches(batches);
     }
 
+    public Detail(int id, double priceEVAT, BigDecimal vat, int fidelityPointEarned, int quantity, Document doc, Product product, List<Batch> batches) throws DataValidationException {
+        this(id, priceEVAT, vat, fidelityPointEarned, quantity, new DocumentDetails(doc), product, batches);
+    }
+
     public int getId() {
         return id;
     }

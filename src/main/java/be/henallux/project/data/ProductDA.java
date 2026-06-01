@@ -82,16 +82,16 @@ public class ProductDA extends CRUD<Product> {
                         null
                 );
 
+                dataMappingObject.put(id, product);
+
                 if (mapping) {
                     discountDA.getAll(); // Discounts set by getting all discounts
                     List<Integer> idsLocation = locationDA.getAll().stream().map(location ->
-                        QuantityProduct.hashCode(location, product)
+                            QuantityProduct.hashCode(location, product)
                     ).toList();
 
                     product.setLocation(quantityDA.getsByIds(idsLocation));
                 }
-
-                dataMappingObject.put(id, product);
             }
 
         } catch (SQLException e) {
@@ -365,7 +365,7 @@ public class ProductDA extends CRUD<Product> {
         String SQLInstruction = "UPDATE " + TABLE_NAME +
                 " SET minStockQuantity=? " +
                 "WHERE id_=?;";
-        int oldQuantity = product.getQuantity();
+        int oldQuantity = product.getMinStockQuantity();
         try (Connection connection = connector.getConnection()) {
 
             product.setMinStockQuantity(newQuantity);
@@ -382,7 +382,7 @@ public class ProductDA extends CRUD<Product> {
             return affectedRows > 0;
 
         } catch (SQLException e) {
-            product.setQuantity(oldQuantity);
+            product.setMinStockQuantity(oldQuantity);
             throw new DataBaseException("Update impossible", e);
         }
     }
@@ -397,7 +397,7 @@ public class ProductDA extends CRUD<Product> {
         product.getDiscounts().stream()
                 .map(discount -> discountDA.delete(discount));
         product.getLocation().stream()
-                .map(locationDA.delete(location));
+                .map(location -> quantityDA.delete(location));
         RecipeDA.getInstance().getAll().stream()
                 .filter(recipe -> recipe.getFinalProduct()==product)
                 .map(recipe -> RecipeDA.getInstance().delete(recipe));

@@ -71,16 +71,8 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
 
             int addressId = data.getInt("addressId");
 
-            if ( mapping && !data.wasNull()) {
+            if ( !data.wasNull() ) {
                 address = addressDA.getById(addressId, mapping);
-            }
-
-            if (isClient && mapping) {
-                try {
-                    fidelityCard = fidelityCardDA.getById(id);
-                } catch (Exception e) {
-                    fidelityCard = null;
-                }
             }
 
             ClientSupplier clientSupplier = new ClientSupplier(
@@ -95,10 +87,14 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
                     isUs,
                     VATNumber,
                     (sqlDate != null ? SQLDateToLocalDate(sqlDate) : null),
-                    fidelityCard
+                    null
             );
 
             IDS_MAPPING_OBJECT.put(id, clientSupplier);
+
+            if (isClient && mapping) {
+                fidelityCardDA.getAll();
+            }
 
             return clientSupplier;
 
@@ -260,7 +256,7 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
 
                     IDS_MAPPING_OBJECT.put(
                             generatedId,
-                            clientSupplier
+                            getById(generatedId)
                     );
                 }
             }
@@ -477,10 +473,9 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
             throws DataBaseException, DataValidationException {
 
         String query = "DELETE FROM " + TABLE_NAME + " WHERE id_ = ?;";
-        for (FidelityCard card : fidelityCardDA.getAll()) {
-            if (card.getClient() != null && card.getClient().getId() == clientSupplier.getId())
-                fidelityCardDA.delete(card);
-        }
+        FidelityCardDA.getInstance().getAll().stream()
+                .filter(card -> card.getClient() == clientSupplier)
+                .map(card -> FidelityCardDA.getInstance().delete(card));
 
         try (
                 PreparedStatement statement =

@@ -37,7 +37,7 @@ public class DocumentDA extends CRUD<Document>
     private DocumentDA() {
         detailDA = DetailDA.getInstance();
         workFlowDA = WorkFlowDA.getInstance();
-        documentTypeDA = DocumentDA.getInstance();
+        documentTypeDA = DocumentTypeDA.getInstance();
         addressDA = AddressDA.getInstance();
     }
 
@@ -97,13 +97,13 @@ public class DocumentDA extends CRUD<Document>
 
             Address address = null;
             if(addressId != null)
-                address = AddressDA.getInstance().addressDA.getById(addressId, mapping);
+                address = addressDA.getById(addressId, mapping);
 
             Document document = new Document(
                     id,
                     dateOfCreation,
                     documentType,
-                    new DocumentDetails(),
+                    null,
                     isChecked,
                     plannedSendingDate,
                     plannedReceiveDate,
@@ -214,7 +214,7 @@ public class DocumentDA extends CRUD<Document>
     public boolean insert(Document document)
             throws DataBaseException, DataValidationException
     {
-        workFlowDA.checkExist(document.getWorkFlow());
+        workFlowDA.checkExist(document.getWorkflow());
         documentTypeDA.checkExist(document.getDocumentType());
         if (document.getAddress() != null)
             addressDA.checkExist(document.getAddress());
