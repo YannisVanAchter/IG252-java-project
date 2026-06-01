@@ -6,7 +6,6 @@ import main.java.be.henallux.project.business.exception.BusinessException;
 
 import main.java.be.henallux.project.model.Product;
 import main.java.be.henallux.project.model.ProductCategory;
-import main.java.be.henallux.project.model.Discount;
 import main.java.be.henallux.project.model.exception.DataValidationException;
 
 import java.util.List;

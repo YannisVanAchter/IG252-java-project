@@ -8,6 +8,7 @@ import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.business.exception.BusinessException;
 import main.java.be.henallux.project.model.Recipe;
 import main.java.be.henallux.project.model.Product;
+import main.java.be.henallux.project.model.RecipeComposition;
 import main.java.be.henallux.project.model.exception.DataValidationException;
 
 import java.util.HashMap;
@@ -22,7 +23,7 @@ private final RecipeDA recipeDA;
         this.recipeDA = RecipeDA.getInstance();
     }
 
-    public List<Recipe> getAllRecipes() throws BusinessException {
+    public List<Recipe> getAllRecipes() throws BusinessException, DataValidationException {
         try {
             return recipeDA.getAll();
         } catch (DataBaseException e) {
@@ -30,25 +31,21 @@ private final RecipeDA recipeDA;
         }
     }
 
-    public Recipe getRecipe(String recipeName) throws BusinessException {
-        if (recipeName == null || recipeName.isBlank()) {
-            throw new BusinessException("The recipe name cannot be null or blank.");
-        }
+    public Recipe getRecipe(int recipeId) throws BusinessException {
         try {
-            return recipeDA.getRecipe(recipeName);
-        } catch (DataBaseException e) {
+            return recipeDA.getById(recipeId, true);
+        } catch (DataBaseException | DataValidationException e) {
             throw new BusinessException("Error when retrieving the recipe.", e);
         }
     }
 
-    public HashMap<Product, Integer> getIngredient(String recipeName) throws BusinessException {
-        if (recipeName == null || recipeName.isBlank()) {
-            throw new BusinessException("The recipe name cannot be null or blank.");
-        }
+    public List<RecipeComposition> getIngredients(int recipeId) throws BusinessException {
         try {
-            return recipeDA.getIngredient(recipeName);
-        } catch (DataBaseException e) {
-            throw new BusinessException("Error when retrieving the ingredients.", e);
+            Recipe recipe = recipeDA.getById(recipeId, true);
+            if (recipe == null) throw new BusinessException("Recipe not found.");
+            return recipe.getComposition();
+        } catch (DataBaseException | DataValidationException e) {
+            throw new BusinessException("Error when retrieving ingredients.", e);
         }
     }
 
@@ -60,9 +57,9 @@ private final RecipeDA recipeDA;
             throw new BusinessException("The ingredients cannot be null or empty.");
         }
         try {
-            recipeDA.createRecipe(recipe, ingredients);
+            recipeDA.insert(recipe);
             return recipe;
-        } catch (DataBaseException e) {
+        } catch (DataBaseException | DataValidationException e ) {
             throw new BusinessException("Error when creating the recipe.", e);
         }
     }
