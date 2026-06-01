@@ -472,10 +472,13 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
     public boolean delete(ClientSupplier clientSupplier)
             throws DataBaseException, DataValidationException {
 
+        CRUD<FidelityCard> cardDA = FidelityCardDA.getInstance();
+        for (FidelityCard card: cardDA.getAll()) {
+            if (card.getClient() == clientSupplier)
+                cardDA.delete(card);
+        }
+
         String query = "DELETE FROM " + TABLE_NAME + " WHERE id_ = ?;";
-        FidelityCardDA.getInstance().getAll().stream()
-                .filter(card -> card.getClient() == clientSupplier)
-                .map(card -> FidelityCardDA.getInstance().delete(card));
 
         try (
                 PreparedStatement statement =
@@ -498,6 +501,8 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
                     "Error while deleting ClientSupplier",
                     e
             );
+        } catch (Exception e) {
+            throw e;
         }
     }
 

@@ -31,13 +31,13 @@ public class DocumentTypeDA extends CRUD<DocumentType> {
     /**
      * Constructor
      */
-    private DocumentTypeDA() {
+    private DocumentTypeDA() throws DataBaseException, DataValidationException {
         TABLE_NAME = "DocumentType";
         IDS_MAPPING_OBJECT = new HashMap<>();
 
         DocumentTypeRepository documentTypeRepository = DocumentTypeRepository.getInstance();
         for (DocumentType docType: documentTypeRepository.getDocumentTypes())
-            checkExist(docType);
+            this.checkExist(docType);
     }
 
     /**
@@ -47,8 +47,12 @@ public class DocumentTypeDA extends CRUD<DocumentType> {
      */
     public static DocumentTypeDA getInstance() {
         synchronized (DocumentTypeDA.class) {
-            if (instance == null) {
-                instance = new DocumentTypeDA();
+            try {
+                if (instance == null) {
+                    instance = new DocumentTypeDA();
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage(), e);
             }
         }
         return instance;
@@ -407,7 +411,7 @@ public class DocumentTypeDA extends CRUD<DocumentType> {
      */
     @Override
     public boolean checkExist(DocumentType model)
-            throws DataBaseException {
+            throws DataBaseException, DataValidationException {
         if (getById(model.getId(), false) == null)
             return insert(model);
         return true;

@@ -49,32 +49,52 @@ public class DetailDA extends CRUD<Detail>
     Detail mapDataToObject(ResultSet data, boolean mapping)
             throws DataBaseException, DataValidationException
     {
-        int id = data.getInt("id_");
+        int id;
+        try {
+            id = data.getInt("id_");
+        } catch (SQLException e) {
+            throw new DataBaseException("Error getting id from ResultSet", e);
+        }
 
         if(IDS_MAPPING_OBJECT.containsKey(id))
             return IDS_MAPPING_OBJECT.get(id);
 
-        Product product =
-                productDA.getById(data.getInt("productId"), mapping);
-
-        Document document =
-                documentDA.getById(data.getInt("documentId"), mapping);
+        Product product;
+        Document document;
+        try {
+            product = productDA.getById(data.getInt("productId"), mapping);
+            document = documentDA.getById(data.getInt("documentId"), mapping);
+        } catch (SQLException e) {
+            throw new DataBaseException("Error reading detail fields from ResultSet", e);
+        }
 
         List<Batch> batches = null;
 
+        double priceVAT;
+        BigDecimal vat;
+        int fidelityPointsEarned;
+        int quantity;
+        try {
+            priceVAT = data.getDouble("priceVAT");
+            vat = data.getBigDecimal("VAT");
+            fidelityPointsEarned = data.getInt("fidelityPointsEarned");
+            quantity = data.getInt("quantity");
+        } catch (SQLException e) {
+            throw new DataBaseException("Error reading detail fields from ResultSet", e);
+        }
+
         Detail detail = new Detail(
                 id,
-                data.getDouble("priceVAT"),
-                data.getBigDecimal("VAT"),
-                data.getInt("fidelityPointsEarned"),
-                data.getInt("quantity"),
+                priceVAT,
+                vat,
+                fidelityPointsEarned,
+                quantity,
                 document,
                 product,
                 batches
         );
 
         IDS_MAPPING_OBJECT.put(id, detail);
-
         document.addDetail(detail);
 
         return detail;
@@ -95,9 +115,9 @@ public class DetailDA extends CRUD<Detail>
 
             return details;
         }
-        catch(Exception e)
+        catch(SQLException e)
         {
-            throw new DataBaseException(e.getMessage());
+            throw new DataBaseException("Error getting all details", e);
         }
     }
 
@@ -110,23 +130,24 @@ public class DetailDA extends CRUD<Detail>
 
         try
         {
-            PreparedStatement ps =
-                    connector.getConnection().prepareStatement(
-                            "SELECT * FROM " + TABLE_NAME + " WHERE id_ = ?"
-                    );
+            try (PreparedStatement ps =
+                         connector.getConnection().prepareStatement(
+                                 "SELECT * FROM " + TABLE_NAME + " WHERE id_ = ?")) {
 
-            ps.setInt(1, id);
+                ps.setInt(1, id);
 
-            ResultSet rs = ps.executeQuery();
+                try (ResultSet rs = ps.executeQuery()) {
 
-            if(rs.next())
-                return mapDataToObject(rs, mapping);
+                    if(rs.next())
+                        return mapDataToObject(rs, mapping);
 
-            return null;
+                    return null;
+                }
+            }
         }
-        catch(Exception e)
+        catch(SQLException e)
         {
-            throw new DataBaseException(e.getMessage());
+            throw new DataBaseException("Error getting detail by id", e);
         }
     }
 
@@ -149,29 +170,26 @@ public class DetailDA extends CRUD<Detail>
 
     @Override
     public boolean insert(Detail detail)
-            throws DataBaseException
+            throws DataBaseException, DataValidationException
     {
         productDA.checkExist(detail.getProduct());
         documentDA.checkExist(detail.getDocument());
-        try (
-            PreparedStatement ps =
-                    connector.getConnection().prepareStatement(
-                            String.format("""
-                            INSERT INTO %s
-                            (
-                                documentId,
-                                productId,
-                                quantity,
-                                priceVAT,
-                                VAT,
-                                fidelityPointsEarned
-                            )
-                            VALUES (?, ?, ?, ?, ?, ?)
-                            """, TABLE_NAME),
-                            Statement.RETURN_GENERATED_KEYS
-                    );
-            )
-            {
+
+        try (PreparedStatement ps =
+                     connector.getConnection().prepareStatement(
+                             String.format("""
+                        INSERT INTO %s
+                        (
+                            documentId,
+                            productId,
+                            quantity,
+                            priceVAT,
+                            VAT,
+                            fidelityPointsEarned
+                        )
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        """, TABLE_NAME),
+                             Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setInt(1, detail.getDocument().getId());
             ps.setInt(2, detail.getProduct().getId());
@@ -185,43 +203,39 @@ public class DetailDA extends CRUD<Detail>
             if(rows == 0)
                 return false;
 
-            ResultSet keys = ps.getGeneratedKeys();
-
-            if(keys.next())
-            {
-                detail.setId(keys.getInt(1));
-                IDS_MAPPING_OBJECT.put(detail.getId(), detail);
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if(keys.next()) {
+                    detail.setId(keys.getInt(1));
+                    IDS_MAPPING_OBJECT.put(detail.getId(), detail);
+                }
             }
 
             return true;
         }
-        catch(Exception e)
+        catch(SQLException e)
         {
-            throw new DataBaseException(e.getMessage());
+            throw new DataBaseException("Error inserting detail", e);
         }
     }
 
     @Override
     boolean update(Detail oldDetail, Detail newDetail)
-            throws DataBaseException
+            throws DataBaseException, DataValidationException
     {
-        try (
-            PreparedStatement ps =
-                    connector.getConnection().prepareStatement(
-                            String.format("""
-                            UPDATE %s
-                            SET
-                                documentId=?,
-                                productId=?,
-                                quantity=?,
-                                priceVAT=?,
-                                VAT=?,
-                                fidelityPointsEarned=?
-                            WHERE id_=?
-                            """, TABLE_NAME)
-                    );
-            )
-            {
+        try (PreparedStatement ps =
+                     connector.getConnection().prepareStatement(
+                             String.format("""
+                        UPDATE %s
+                        SET
+                            documentId=?,
+                            productId=?,
+                            quantity=?,
+                            priceVAT=?,
+                            VAT=?,
+                            fidelityPointsEarned=?
+                        WHERE id_=?
+                        """, TABLE_NAME))) {
+
             ps.setInt(1, newDetail.getDocument().getId());
             ps.setInt(2, newDetail.getProduct().getId());
             ps.setInt(3, newDetail.getQuantity());
@@ -239,9 +253,9 @@ public class DetailDA extends CRUD<Detail>
 
             return isUpdated;
         }
-        catch(Exception e)
+        catch(SQLException e)
         {
-            throw new DataBaseException(e.getMessage());
+            throw new DataBaseException("Error updating detail", e);
         }
     }
 
@@ -249,13 +263,9 @@ public class DetailDA extends CRUD<Detail>
     boolean delete(Detail detail)
             throws DataBaseException
     {
-        try (
-            PreparedStatement ps =
-                    connector.getConnection().prepareStatement(
-                            "DELETE FROM " + TABLE_NAME + " WHERE id_=?"
-                    );
-            )
-            {
+        try (PreparedStatement ps =
+                     connector.getConnection().prepareStatement(
+                             "DELETE FROM " + TABLE_NAME + " WHERE id_=?")) {
 
             ps.setInt(1, detail.getId());
 
@@ -266,9 +276,9 @@ public class DetailDA extends CRUD<Detail>
 
             return deleted;
         }
-        catch(Exception e)
+        catch(SQLException e)
         {
-            throw new DataBaseException(e.getMessage());
+            throw new DataBaseException("Error deleting detail", e);
         }
     }
 
@@ -276,7 +286,7 @@ public class DetailDA extends CRUD<Detail>
     boolean checkExist(Detail detail)
             throws DataBaseException, DataValidationException
     {
-        if(getById(detail.getId()) != null)
+        if(getById(detail.getId(), true) != null)
             return true;
 
         return insert(detail);
@@ -284,9 +294,8 @@ public class DetailDA extends CRUD<Detail>
 
     private boolean updateField(Detail detail, String field, Object value) throws DataBaseException {
         try (PreparedStatement statement = connector.getConnection().prepareStatement(
-                "UPDATE " + TABLE_NAME + " SET " + field + "=? WHERE id_=?"
-        ))
-        {
+                "UPDATE " + TABLE_NAME + " SET " + field + "=? WHERE id_=?")) {
+
             statement.setObject(1, value);
             statement.setInt(2, detail.getId());
             return statement.executeUpdate() > 0;
@@ -295,19 +304,19 @@ public class DetailDA extends CRUD<Detail>
         }
     }
 
-    public boolean updateQuantity(Detail detail, int quantity) {
+    public boolean updateQuantity(Detail detail, int quantity) throws DataBaseException {
         return updateField(detail, "quantity", quantity);
     }
 
-    public boolean updatePriceVat(Detail detail, BigDecimal priceVAT) {
+    public boolean updatePriceVat(Detail detail, BigDecimal priceVAT) throws DataBaseException {
         return updateField(detail, "priceVAT", priceVAT);
     }
 
-    public boolean updateVAT(Detail detail, BigDecimal vat) {
+    public boolean updateVAT(Detail detail, BigDecimal vat) throws DataBaseException {
         return updateField(detail, "VAT", vat);
     }
 
-    public boolean updateFidelityPoints(Detail detail, int fidelityPoints) {
+    public boolean updateFidelityPoints(Detail detail, int fidelityPoints) throws DataBaseException {
         return updateField(detail, "fidelityPointsEarned", fidelityPoints);
     }
 }

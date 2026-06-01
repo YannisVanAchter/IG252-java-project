@@ -14,6 +14,7 @@ import java.util.List;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 
 import main.java.be.henallux.project.model.Address;
+import main.java.be.henallux.project.model.Detail;
 import main.java.be.henallux.project.model.Document;
 import main.java.be.henallux.project.model.DocumentDetails;
 import main.java.be.henallux.project.model.DocumentType;
@@ -406,8 +407,8 @@ public class DocumentDA extends CRUD<Document>
     {
         String query = "DELETE FROM " + TABLE_NAME + " WHERE id_ = ?";
 
-        document.getDetails().stream()
-                .map(detail -> detailDA.delete(detail));
+        for (Detail detail: document.getDetails())
+                detailDA.delete(detail);
 
         try
         {

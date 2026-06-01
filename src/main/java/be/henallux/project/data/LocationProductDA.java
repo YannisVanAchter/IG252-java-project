@@ -14,6 +14,7 @@ import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.data.CRUD;
 import main.java.be.henallux.project.model.exception.DataValidationException;
 import main.java.be.henallux.project.model.LocationProduct;
+import main.java.be.henallux.project.model.QuantityProduct;
 
 public class LocationProductDA extends CRUD<LocationProduct> {
     private static volatile LocationProductDA instance;
@@ -180,9 +181,9 @@ public class LocationProductDA extends CRUD<LocationProduct> {
     @Override
     public boolean delete(LocationProduct locationProduct) throws DataBaseException, DataValidationException {
 
-        QuantityProductDA.getInstance().getAll().stream()
-                .filter(qp -> qp.getLocationProduct() == locationProduct)
-                .map(qp -> QuantityProductDA.getInstance().delete(qp));
+        for (QuantityProduct qp: QuantityProductDA.getInstance().getAll())
+                if (qp.getLocationProduct() == locationProduct)
+                    QuantityProductDA.getInstance().delete(qp);
 
         String SQLInstruction = "DELETE FROM " + TABLE_NAME + " WHERE id_=?;";
 

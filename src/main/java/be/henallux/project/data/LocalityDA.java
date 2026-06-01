@@ -163,7 +163,7 @@ public class LocalityDA extends  CRUD<Locality> {
         }
     }
 
-    public boolean delete(Locality locality) throws DataBaseException {
+    public boolean delete(Locality locality) throws DataBaseException, DataValidationException {
 
         boolean isUsedInAddress = AddressDA.getInstance().getAll().stream()
                 .filter(address -> address.getLocality() == locality)
