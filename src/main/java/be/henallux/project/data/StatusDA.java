@@ -20,7 +20,7 @@ public class StatusDA extends CRUD<Status> {
 
     private static volatile StatusDA instance;
 
-    private StatusDA() {
+    private StatusDA() throws DataBaseException, DataValidationException {
         TABLE_NAME = "Status_";
         IDS_MAPPING_OBJECT = new HashMap<>();
 
@@ -31,8 +31,12 @@ public class StatusDA extends CRUD<Status> {
 
     public static StatusDA getInstance() {
         synchronized (StatusDA.class) {
-            if (instance == null) {
-                instance = new StatusDA();
+            try {
+                if (instance == null) {
+                    instance = new StatusDA();
+                }
+            } catch (Exception ex) {
+                throw new RuntimeException(ex.getMessage(), ex);
             }
         }
         return instance;

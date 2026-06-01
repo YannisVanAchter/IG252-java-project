@@ -229,7 +229,7 @@ public class FidelityCardDA extends CRUD<FidelityCard> {
 
     @Override
     public boolean delete(FidelityCard model)
-            throws DataBaseException {
+            throws DataBaseException, DataValidationException {
 
         String query = String.format("DELETE FROM %s WHERE id_ = ?", TABLE_NAME);
 

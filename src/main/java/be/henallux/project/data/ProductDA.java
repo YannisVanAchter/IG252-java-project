@@ -394,17 +394,25 @@ public class ProductDA extends CRUD<Product> {
         String SQLInstruction =
                 "DELETE FROM " + TABLE_NAME + " WHERE id_=?;";
 
-        product.getDiscounts().stream()
-                .map(discount -> discountDA.delete(discount));
-        product.getLocation().stream()
-                .map(location -> quantityDA.delete(location));
-        RecipeDA.getInstance().getAll().stream()
-                .filter(recipe -> recipe.getFinalProduct()==product)
-                .map(recipe -> RecipeDA.getInstance().delete(recipe));
-        RecipeCompositionDA.getInstance().getAll().stream()
-                .filter(composition -> composition.getProduct() == product)
-                .map(composition -> RecipeDA.getInstance().delete(composition.getRecipe()));
+        for (var discount : product.getDiscounts()) {
+            discountDA.delete(discount);
+        }
 
+        for (var location : product.getLocation()) {
+            quantityDA.delete(location);
+        }
+
+        for (var recipe : RecipeDA.getInstance().getAll()) {
+            if (recipe.getFinalProduct() == product) {
+                RecipeDA.getInstance().delete(recipe);
+            }
+        }
+
+        for (var composition : RecipeCompositionDA.getInstance().getAll()) {
+            if (composition.getProduct() == product) {
+                RecipeDA.getInstance().delete(composition.getRecipe());
+            }
+        }
 
         try (Connection connection = connector.getConnection()) {
 

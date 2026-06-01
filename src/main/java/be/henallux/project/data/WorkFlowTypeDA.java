@@ -16,7 +16,7 @@ import java.util.List;
 public class WorkFlowTypeDA extends CRUD<WorkFlowType> {
     private static volatile WorkFlowTypeDA instance;
 
-    public WorkFlowTypeDA() {
+    public WorkFlowTypeDA() throws DataBaseException, DataValidationException {
         this.TABLE_NAME = "WorkFlowType";
         this.IDS_MAPPING_OBJECT = new HashMap<>();
 
@@ -28,8 +28,12 @@ public class WorkFlowTypeDA extends CRUD<WorkFlowType> {
 
     public static WorkFlowTypeDA getInstance() {
         synchronized (WorkFlowTypeDA.class) {
-            if (instance == null)
-                instance = new WorkFlowTypeDA();
+            try {
+                if (instance == null)
+                    instance = new WorkFlowTypeDA();
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
         }
         return instance;
     }
@@ -155,11 +159,11 @@ public class WorkFlowTypeDA extends CRUD<WorkFlowType> {
         return workflowTypes;
     }
 
-    public WorkFlowType getByName(String name, boolean mapping) {
+    public WorkFlowType getByName(String name, boolean mapping) throws DataBaseException, DataValidationException {
         return getAll().stream().filter(wf -> wf.getName().equals(name)).findFirst().orElse(null);
     }
 
-    public WorkFlowType getByName(String name) {
+    public WorkFlowType getByName(String name) throws DataBaseException, DataValidationException {
         return getByName(name, true);
     }
 
