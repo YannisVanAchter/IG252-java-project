@@ -170,7 +170,7 @@ public class WorkFlowTypeDA extends CRUD<WorkFlowType> {
     boolean insert(WorkFlowType model)
             throws DataBaseException {
 
-        String query = String.format"""
+        String query = String.format("""
                 INSERT INTO %s
                 (name_, isBuy, isSupplier, isInternal)
                 VALUES (?, ?, ?, ?)

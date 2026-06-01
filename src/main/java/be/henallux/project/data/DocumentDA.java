@@ -97,7 +97,7 @@ public class DocumentDA extends CRUD<Document>
 
             Address address = null;
             if(addressId != null)
-                address = AddressDA.getInstance()addressDA.getById(addressId, mapping);
+                address = AddressDA.getInstance().addressDA.getById(addressId, mapping);
 
             Document document = new Document(
                     id,
