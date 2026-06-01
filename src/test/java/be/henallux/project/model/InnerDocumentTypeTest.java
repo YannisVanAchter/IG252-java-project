@@ -1,4 +1,4 @@
-package test.java.be.henallux.project;
+package be.henallux.project.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -10,32 +10,20 @@ import main.java.be.henallux.project.model.*;
 
 public class InnerDocumentTypeTest {
 
-    public void basicCreationTest() {
-        try {
-            String name = "Passport";
-            DocumentType dt = new DocumentType(name);
-            assertEquals(name, dt.getName(), "Assertion creation Passport has failed, names are different");
-        } catch (DataValidationException e) {
-            e.printStackTrace();
-        }
+    public void basicCreationTest() throws DataValidationException {
+        String name = "Passport";
+        DocumentType dt = new DocumentType(name);
+        assertEquals(name, dt.getName(), "Assertion creation Passport has failed, names are different");
     }
 
     @Test
     public void comparisonEqualTest() {
-        try {
-            assertEquals(new DocumentType("Passport"), new DocumentType("Passport"), "AssertEqual Passport not OK");
-        } catch (DataValidationException e) {
-            e.printStackTrace();
-        }
+        assertEquals(new DocumentType("Passport"), new DocumentType("Passport"), "AssertEqual Passport not OK");
     }
 
     @Test
     public void comparisonNotEqualTest() {
-        try {
-            assertNotEquals(new DocumentType("Passpoort"), new DocumentType("Passport"), "AssertEqual Passpoort VS Passport not OK");
-        } catch (DataValidationException e) {
-            e.printStackTrace();
-        }
+        assertNotEquals(new DocumentType("Passpoort"), new DocumentType("Passport"), "AssertEqual Passpoort VS Passport not OK");
     }
 
     @Test

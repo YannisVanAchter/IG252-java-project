@@ -14,7 +14,7 @@ ENV TZ=${TZ}
 ENV LANG=${LANG}
 ENV LC_ALL=${LC_ALL}
 ENV MAVEN_VERSION=${MAVEN_VERSION}
-ENV JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk-arm64
+ENV JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64
 ENV PATH=/opt/maven/bin:${PATH}
 
 WORKDIR /app
