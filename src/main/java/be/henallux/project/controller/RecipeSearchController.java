@@ -3,6 +3,7 @@ package main.java.be.henallux.project.controller;
 import main.java.be.henallux.project.business.RecipeSearchManager;
 import main.java.be.henallux.project.business.exception.BusinessException;
 import main.java.be.henallux.project.model.Recipe;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ public class RecipeSearchController {
      * @return list of matching {@link Recipe}
      * @see RecipeSearchManager#searchRecipes(String, List)
      */
-    public ArrayList<Recipe> searchRecipes(String name, List<String> ingredients) throws BusinessException {
+    public ArrayList<Recipe> searchRecipes(String name, List<String> ingredients) throws BusinessException, DataValidationException {
         return new ArrayList<>(recipeSearchManager.searchRecipes(name, ingredients));
     }
 }

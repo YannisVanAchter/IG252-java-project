@@ -4,12 +4,12 @@ import main.java.be.henallux.project.business.PreparationOrderManager;
 import main.java.be.henallux.project.business.exception.BusinessException;
 import main.java.be.henallux.project.model.Product;
 import main.java.be.henallux.project.model.Recipe;
+import main.java.be.henallux.project.model.RecipeComposition;
+import main.java.be.henallux.project.model.exception.DataValidationException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import javafx.util.Pair;
 
 /**
  * @see PreparationOrderManager
@@ -28,34 +28,34 @@ public class PreparationOrderController extends DocumentController {
      * @return list of all {@link Recipe}
      * @see PreparationOrderManager#getAllRecipes()
      */
-    public ArrayList<Recipe> getAllRecipes() throws BusinessException {
+    public ArrayList<Recipe> getAllRecipes() throws BusinessException, DataValidationException {
         return new ArrayList<>(preparationOrderManager.getAllRecipes());
     }
 
     /**
-     * Returns a recipe by name.
-     * @param recipeName the name of the recipe
+     * Returns a recipe by id.
+     * @param recipeId the id of the recipe
      * @return the matching {@link Recipe}
-     * @see PreparationOrderManager#getRecipe(String)
+     * @see PreparationOrderManager#getRecipe(int)
      */
-    public Recipe getRecipe(String recipeName) throws BusinessException {
-        return preparationOrderManager.getRecipe(recipeName);
+    public Recipe getRecipe(int recipeId) throws BusinessException {
+        return preparationOrderManager.getRecipe(recipeId);
     }
 
     /**
      * Returns the ingredients of a recipe.
-     * @param recipeName the name of the recipe
-     * @return list of entries mapping each {@link Product} to its quantity
-     * @see PreparationOrderManager#getIngredient(String)
+     * @param recipeId the id of the recipe
+     * @return list of {@link RecipeComposition} for the recipe
+     * @see PreparationOrderManager#getIngredients(int)
      */
-    public HashMap<Product, Integer> getIngredients(String recipeName) throws BusinessException {
-        return preparationOrderManager.getIngredient(recipeName);
+    public List<RecipeComposition> getIngredients(int recipeId) throws BusinessException {
+        return preparationOrderManager.getIngredients(recipeId);
     }
 
     /**
      * Creates a new recipe with its ingredients.
      * @param newRecipe   the {@link Recipe} to create
-     * @param ingredients list of entries mapping each {@link Product} to its quantity
+     * @param ingredients map of each {@link Product} to its quantity
      * @return the created {@link Recipe}
      * @see PreparationOrderManager#createRecipe(Recipe, HashMap)
      */

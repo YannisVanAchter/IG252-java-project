@@ -2,7 +2,6 @@ package main.java.be.henallux.project.controller;
 
 import main.java.be.henallux.project.business.ClientSupplierManager;
 import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.model.Address;
 import main.java.be.henallux.project.model.ClientSupplier;
 import main.java.be.henallux.project.model.FidelityCard;
 import main.java.be.henallux.project.model.Product;
@@ -11,7 +10,6 @@ import main.java.be.henallux.project.model.exception.DataValidationException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 public class ClientSupplierController {
 
@@ -32,9 +30,9 @@ public class ClientSupplierController {
     }
 
     /**
-     * Returns a client or supplier by ID.
+     * Returns a client or supplier by fidelity card ID.
      *
-     * @param id the client/supplier ID
+     * @param id the fidelity card ID
      * @return the matching {@link ClientSupplier}
      * @see ClientSupplierManager#getClientByCardID(int)
      */
@@ -46,7 +44,6 @@ public class ClientSupplierController {
      * Creates a new client or supplier.
      *
      * @param newClient the {@link ClientSupplier} to create
-     * @return the created {@link ClientSupplier}
      * @see ClientSupplierManager#createClientSupplier(ClientSupplier)
      */
     public void createClientSupplier(ClientSupplier newClient) throws BusinessException, DataValidationException {
@@ -56,17 +53,18 @@ public class ClientSupplierController {
     /**
      * Changes the address of a client or supplier.
      *
-     * @param oldModel   the client/supplier ID
-     * @param newClientSupplier the new {@link ClientSupplier}
-     * @see ClientSupplierManager#changeAddress(ClientSupplier, Address)
+     * @param oldModel          the existing {@link ClientSupplier}
+     * @param newClientSupplier the updated {@link ClientSupplier}
+     * @see ClientSupplierManager#updateClientSupplier(ClientSupplier, ClientSupplier)
      */
     public void updateClientSupplier(ClientSupplier oldModel, ClientSupplier newClientSupplier) throws BusinessException, DataValidationException {
-        clientSupplierManager.changeAddress(oldModel, newClientSupplier);
+        clientSupplierManager.updateClientSupplier(oldModel, newClientSupplier);
     }
 
     /**
-     * Deletes a client or supplier by ID.
-     * @param clientSupplier the client/supplier ID
+     * Deletes a client or supplier.
+     *
+     * @param clientSupplier the {@link ClientSupplier} to delete
      * @return {@code true} if deleted successfully
      * @see ClientSupplierManager#deleteClientSupplier(ClientSupplier)
      */
@@ -74,13 +72,34 @@ public class ClientSupplierController {
         return clientSupplierManager.deleteClientSupplier(clientSupplier);
     }
 
+    /**
+     * Returns the client/supplier entity representing the store itself.
+     *
+     * @return the {@link ClientSupplier} entity where {@code isUs = true}
+     * @see ClientSupplierManager#getAllClientSuppliers()
+     */
+    public ClientSupplier getUs() throws BusinessException, DataValidationException {
+        return clientSupplierManager.getUs();
+    }
+
     // ===================================
     // CLIENTS
     // ===================================
+
     /**
-     * Creates a fidelity card for the given client.
-     * @param fidelityCard the fidelityCard
-     * @return the created {@link FidelityCard}
+     * Returns all clients.
+     *
+     * @return list of all {@link ClientSupplier} of type client
+     * @see ClientSupplierManager#getAllClients()
+     */
+    public ArrayList<ClientSupplier> getAllClients() throws BusinessException, DataValidationException {
+        return new ArrayList<>(clientSupplierManager.getAllClients());
+    }
+
+    /**
+     * Creates a fidelity card for a client.
+     *
+     * @param fidelityCard the {@link FidelityCard} to create
      * @see ClientSupplierManager#createFidelityCard(FidelityCard)
      */
     public void createFidelityCard(FidelityCard fidelityCard) throws BusinessException, DataValidationException {
@@ -89,6 +108,7 @@ public class ClientSupplierController {
 
     /**
      * Validates that a fidelity card belongs to the given client.
+     *
      * @param clientID the client's ID
      * @param cardID   the fidelity card ID
      * @return {@code true} if the card belongs to the client, {@code false} otherwise
@@ -97,77 +117,76 @@ public class ClientSupplierController {
     public boolean validateFidelityCardOwnership(int clientID, int cardID) throws BusinessException, DataValidationException {
         return clientSupplierManager.validateFidelityCardOwnership(clientID, cardID);
     }
-    
+
     /**
-     * Records a checkout without a client.
-     * @param products map of {@link Product} and their quantities
-     * @see ClientSupplierManager#addCheckout
+     * Records a checkout without a client (anonymous purchase).
+     * Decrements stock for each product by the given quantity.
+     *
+     * @param products map of {@link Product} to their purchased quantity
+     * @see ClientSupplierManager#addCheckout(HashMap)
      */
-    public void addCheckout(LinkedHashMap<Product, Integer> products) throws BusinessException {
+    public void addCheckout(LinkedHashMap<Product, Integer> products) throws BusinessException, DataValidationException {
         clientSupplierManager.addCheckout(new HashMap<>(products));
     }
 
     /**
      * Records a checkout for a given client.
-     * @param products map of {@link Product} and their quantities
+     * Decrements stock for each product by the given quantity.
+     *
+     * @param products map of {@link Product} to their purchased quantity
      * @param clientID the client's ID
-     * @see ClientSupplierManager#addCheckout(List, int)
+     * @see ClientSupplierManager#addCheckout(HashMap, int)
      */
-    public void addCheckout(LinkedHashMap<Product, Integer> products, int clientID) throws BusinessException {
+    public void addCheckout(LinkedHashMap<Product, Integer> products, int clientID) throws BusinessException, DataValidationException {
         clientSupplierManager.addCheckout(new HashMap<>(products), clientID);
     }
 
     /**
+     * Records a checkout for a client with a fidelity card, without redeeming points.
+     * Decrements stock and adds earned fidelity points to the card.
+     *
+     * @param products     map of {@link Product} to their purchased quantity
+     * @param clientID     the client's ID
+     * @param fidelityCard the client's {@link FidelityCard}
+     * @see ClientSupplierManager#addCheckout(HashMap, int, FidelityCard)
+     */
+    public void addCheckout(LinkedHashMap<Product, Integer> products, int clientID, FidelityCard fidelityCard) throws BusinessException, DataValidationException {
+        clientSupplierManager.addCheckout(new HashMap<>(products), clientID, fidelityCard);
+    }
+
+    /**
      * Records a checkout for a client with a fidelity card.
-     * @param products         map of {@link Product} and their quantities
+     * Decrements stock, optionally redeems all current fidelity points, then adds earned points.
+     *
+     * @param products         map of {@link Product} to their purchased quantity
      * @param clientID         the client's ID
      * @param fidelityCard     the client's {@link FidelityCard}
-     * @param useFidelityPoint whether to redeem fidelity points
-     * @see ClientSupplierManager#addCheckout(List, int, FidelityCard, boolean)
+     * @param useFidelityPoint if {@code true}, all current points are redeemed before adding earned points
+     * @see ClientSupplierManager#addCheckout(HashMap, int, FidelityCard, boolean)
      */
-    public void addCheckout(LinkedHashMap<Product, Integer> products, int clientID, FidelityCard fidelityCard, boolean useFidelityPoint) throws BusinessException {
+    public void addCheckout(LinkedHashMap<Product, Integer> products, int clientID, FidelityCard fidelityCard, boolean useFidelityPoint) throws BusinessException, DataValidationException {
         clientSupplierManager.addCheckout(new HashMap<>(products), clientID, fidelityCard, useFidelityPoint);
     }
 
     /**
-     * Records a checkout for a client with a fidelity card without redeeming points.
-     * @param products     map of {@link Product} and their quantities
-     * @param clientID     the client's ID
-     * @param fidelityCard the client's {@link FidelityCard}
-     * @see ClientSupplierManager#addCheckout(List, int, FidelityCard, boolean)
-     */
-    public void addCheckout(LinkedHashMap<Product, Integer> products, int clientID, FidelityCard fidelityCard) throws BusinessException {
-        clientSupplierManager.addCheckout(new HashMap<>(products), clientID, fidelityCard);
-    }
-
-
-    /**
      * Deletes a client account.
-     * @param clientSupplier the client's
-     * @return {@code true} if the account was deleted successfully
-     * @see ClientSupplierManager#deleteClientAccount(int)
+     *
+     * @param clientSupplier the {@link ClientSupplier} to delete
+     * @see ClientSupplierManager#deleteClientSupplier(ClientSupplier)
      */
     public void deleteClientAccount(ClientSupplier clientSupplier) throws BusinessException, DataValidationException {
-        deleteClientSupplier(clientSupplier);
+        clientSupplierManager.deleteClientSupplier(clientSupplier);
     }
 
     /**
-     * Deletes a client account along with its fidelity card.
+     * Deletes a client account after verifying fidelity card ownership.
+     *
      * @param clientID the client's ID
      * @param cardID   the fidelity card ID
-     * @return {@code true} if the account was deleted successfully
      * @see ClientSupplierManager#deleteClientAccount(int, int)
      */
     public void deleteClientAccount(int clientID, int cardID) throws BusinessException, DataValidationException {
         clientSupplierManager.deleteClientAccount(clientID, cardID);
-    }
-
-    /**
-     * @param clientSupplierID the client's ID
-     * @param products         list of {@link Product} to order
-     */
-    public void placeClientOrder(int clientSupplierID, LinkedHashMap<Product, Integer> products) throws BusinessException {
-        addCheckout(products, clientSupplierID);
     }
 
     // ===================================
@@ -176,6 +195,7 @@ public class ClientSupplierController {
 
     /**
      * Returns all suppliers.
+     *
      * @return list of all {@link ClientSupplier} of type supplier
      * @see ClientSupplierManager#getAllSuppliers()
      */
@@ -184,54 +204,13 @@ public class ClientSupplierController {
     }
 
     /**
-     * Returns all products offered by a supplier.
-     * @param supplierID the supplier ID
-     * @return list of {@link Product} from the given supplier
-     * @see ClientSupplierManager#getAllProducts(int)
-     */
-    public ArrayList<Product> getAllProducts(int supplierID) throws BusinessException {
-        return new ArrayList<>(clientSupplierManager.get(supplierID));
-    }
-
-    /**
-     * Returns the supplier associated with a given product.
-     * @param productID the product ID
-     * @return the matching {@link ClientSupplier}
-     * @see ClientSupplierManager#getSupplierByProduct(int)
-     */
-    public ClientSupplier getSupplierByProduct(int productID) throws BusinessException {
-        return clientSupplierManager.getSupplierByProduct(productID);
-    }
-
-    /**
-     * Changes the VAT number of a supplier.
-     * @param supplierID    the supplier ID
-     * @param newVATNumber  the new VAT number
-     * @see ClientSupplierManager#changeVATNumber(int, String)
-     */
-    public void changeVATNumber(int supplierID, String newVATNumber) throws BusinessException {
-        clientSupplierManager.changeVATNumber(supplierID, newVATNumber);
-    }
-
-    /**
-     * @param supplierID the supplier ID
-     * @param products         list of {@link Product} to order
-     * @throws BusinessException not thrown
-     */
-    public void placeSupplierOrder(int supplierID, LinkedHashMap<Product, Integer> products) throws BusinessException {
-        clientSupplierManager.placeOrder(supplierID, new HashMap<>(products));
-    }
-
-    /**
-     * Get the client/supplier entity representing with store.
+     * Places an order to a supplier.
      *
-     * @return the {@link ClientSupplier} entity representing the store
+     * @param supplierID the supplier's ID
+     * @param products   map of {@link Product} to their ordered quantity
+     * @see ClientSupplierManager#placeSupplierOrder(int, HashMap)
      */
-    public ClientSupplier getUs() throws BusinessException, DataValidationException {
-        List<ClientSupplier> all = getAllClientsSuppliers();
-        return all.stream()
-                .filter(ClientSupplier::getIsUs)
-                .findFirst()
-                .orElseThrow(() -> new BusinessException("No 'us' client supplier found."));
+    public void placeSupplierOrder(int supplierID, LinkedHashMap<Product, Integer> products) throws BusinessException, DataValidationException {
+        clientSupplierManager.placeSupplierOrder(supplierID, new HashMap<>(products));
     }
 }
