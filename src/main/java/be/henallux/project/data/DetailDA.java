@@ -11,7 +11,7 @@ import java.util.List;
 import main.java.be.henallux.project.data.exception.DataBaseException;
 import main.java.be.henallux.project.model.Batch;
 import main.java.be.henallux.project.model.Detail;
-import main.java.be.henallux.project.model.DocumentDetails;
+import main.java.be.henallux.project.model.Document;
 import main.java.be.henallux.project.model.Product;
 import main.java.be.henallux.project.model.exception.DataValidationException;
 
@@ -20,7 +20,7 @@ public class DetailDA extends CRUD<Detail>
     private static volatile DetailDA instance;
 
     private final ProductDA productDA;
-    private final DocumentDetailsDA documentDetailsDA;
+    private final DocumentDA documentDA;
     // TODO Implement BatchDA to be complete with the database
 
     private DetailDA()
@@ -29,7 +29,7 @@ public class DetailDA extends CRUD<Detail>
         IDS_MAPPING_OBJECT = new HashMap<>();
 
         productDA = ProductDA.getInstance();
-        documentDetailsDA = DocumentDetailsDA.getInstance();
+        documentDA = DocumentDA.getInstance();
     }
 
     public static DetailDA getInstance()
@@ -53,8 +53,8 @@ public class DetailDA extends CRUD<Detail>
         Product product =
                 productDA.getById(data.getInt("productId"), mapping);
 
-        DocumentDetails documentDetails =
-                documentDetailsDA.getById(data.getInt("documentId"), mapping);
+        Document document =
+                documentDA.getById(data.getInt("documentId"), mapping);
 
         List<Batch> batches = null;
 
@@ -64,12 +64,12 @@ public class DetailDA extends CRUD<Detail>
                 data.getBigDecimal("VAT"),
                 data.getInt("fidelityPointsEarned"),
                 data.getInt("quantity"),
-                documentDetails,
+                document,
                 product,
                 batches
         );
 
-        documentDetails.addDetail(detail);
+        document.addDetail(detail);
 
         IDS_MAPPING_OBJECT.put(id, detail);
 
