@@ -31,13 +31,11 @@ public class DocumentDA extends CRUD<Document>
 
     private final HashMap<Object, Document> IDS_MAPPING_OBJECT = new HashMap<>();
     private final DetailDA detailDA;
-    private final WorkFlowDA workFlowDA;
     private final DocumentTypeDA documentTypeDA;
     private final AddressDA addressDA;
 
     private DocumentDA() {
         detailDA = DetailDA.getInstance();
-        workFlowDA = WorkFlowDA.getInstance();
         documentTypeDA = DocumentTypeDA.getInstance();
         addressDA = AddressDA.getInstance();
     }
@@ -49,6 +47,10 @@ public class DocumentDA extends CRUD<Document>
                 instance = new DocumentDA();
         }
         return instance;
+    }
+
+    private WorkFlowDA getWorkFlowDA() {
+        return WorkFlowDA.getInstance();
     }
 
     @Override
@@ -80,7 +82,11 @@ public class DocumentDA extends CRUD<Document>
             if(data.getDate("effectiveReceiveDate") != null)
                 effectiveReceiveDate = SQLDateToLocalDate(data.getDate("effectiveReceiveDate"));
 
-            int paymentDelay = data.getInt("paymentDelay");
+            Integer paymentDelay = null;
+            int tmp = data.getInt("paymentDelay");
+            if (!data.wasNull()) {
+                paymentDelay = tmp;
+            }
 
             String commentary = data.getString("commentary");
 
@@ -91,7 +97,7 @@ public class DocumentDA extends CRUD<Document>
 
             Integer addressId = data.getObject("addressId", Integer.class);
 
-            WorkFlow workflow = workFlowDA.getById(workflowId, false);
+            WorkFlow workflow = getWorkFlowDA().getById(workflowId, false);
 
             DocumentType documentType =
                     documentTypeDA.getById(documentTypeId, mapping);
@@ -142,12 +148,10 @@ public class DocumentDA extends CRUD<Document>
 
         String query = "SELECT * FROM " + TABLE_NAME;
 
-        try
-        {
-            Statement statement = connector.getConnection().createStatement();
-
-            ResultSet result = statement.executeQuery(query);
-
+        try (
+                Statement statement = connector.getConnection().createStatement();
+                ResultSet result = statement.executeQuery(query)
+        ) {
             while(result.next())
             {
                 documents.add(mapDataToObject(result, true));
@@ -172,17 +176,16 @@ public class DocumentDA extends CRUD<Document>
 
         String query = "SELECT * FROM " + TABLE_NAME + " WHERE id_ = ?";
 
-        try
-        {
-            PreparedStatement statement =
-                    connector.getConnection().prepareStatement(query);
-
+        try (
+                PreparedStatement statement =
+                        connector.getConnection().prepareStatement(query)
+        ) {
             statement.setInt(1, id);
 
-            ResultSet result = statement.executeQuery();
-
-            if(result.next())
-                return mapDataToObject(result, mapping);
+            try (ResultSet result = statement.executeQuery()) {
+                if(result.next())
+                    return mapDataToObject(result, mapping);
+            }
 
             return null;
         }
@@ -215,7 +218,7 @@ public class DocumentDA extends CRUD<Document>
     public boolean insert(Document document)
             throws DataBaseException, DataValidationException
     {
-        workFlowDA.checkExist(document.getWorkflow());
+        getWorkFlowDA().checkExist(document.getWorkflow());
         documentTypeDA.checkExist(document.getDocumentType());
         if (document.getAddress() != null)
             addressDA.checkExist(document.getAddress());
@@ -235,14 +238,13 @@ public class DocumentDA extends CRUD<Document>
                         "addressId" +
                         ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try
-        {
-            PreparedStatement statement =
-                    connector.getConnection().prepareStatement(
-                            query,
-                            Statement.RETURN_GENERATED_KEYS
-                    );
-
+        try (
+                PreparedStatement statement =
+                        connector.getConnection().prepareStatement(
+                                query,
+                                Statement.RETURN_GENERATED_KEYS
+                        )
+        ) {
             statement.setDate(1,
                     LocalDateToSQLDate(document.getDateOfCreation()));
 
@@ -290,18 +292,18 @@ public class DocumentDA extends CRUD<Document>
             if(affectedRows <= 0)
                 return false;
 
-            ResultSet generatedKeys = statement.getGeneratedKeys();
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if(generatedKeys.next())
+                {
+                    int generatedId = generatedKeys.getInt(1);
 
-            if(generatedKeys.next())
-            {
-                int generatedId = generatedKeys.getInt(1);
+                    document.setId(generatedId);
 
-                document.setId(generatedId);
-
-                IDS_MAPPING_OBJECT.put(
-                        generatedId,
-                        document
-                );
+                    IDS_MAPPING_OBJECT.put(
+                            generatedId,
+                            document
+                    );
+                }
             }
 
             return true;
@@ -333,11 +335,10 @@ public class DocumentDA extends CRUD<Document>
                         "addressId = ? " +
                         "WHERE id_ = ?";
 
-        try
-        {
-            PreparedStatement statement =
-                    connector.getConnection().prepareStatement(query);
-
+        try (
+                PreparedStatement statement =
+                        connector.getConnection().prepareStatement(query)
+        ) {
             statement.setDate(1,
                     LocalDateToSQLDate(newDocument.getDateOfCreation()));
 
@@ -386,7 +387,7 @@ public class DocumentDA extends CRUD<Document>
 
             if(affectedRows > 0)
             {
-                IDS_MAPPING_OBJECT.remove(oldDocument);
+                IDS_MAPPING_OBJECT.remove(oldDocument.getId());
                 IDS_MAPPING_OBJECT.put(newDocument.getId(), newDocument);
                 return true;
             }
@@ -408,13 +409,12 @@ public class DocumentDA extends CRUD<Document>
         String query = "DELETE FROM " + TABLE_NAME + " WHERE id_ = ?";
 
         for (Detail detail: document.getDetails())
-                detailDA.delete(detail);
+            detailDA.delete(detail);
 
-        try
-        {
-            PreparedStatement statement =
-                    connector.getConnection().prepareStatement(query);
-
+        try (
+                PreparedStatement statement =
+                        connector.getConnection().prepareStatement(query)
+        ) {
             statement.setInt(1, document.getId());
 
             int affectedRows = statement.executeUpdate();
@@ -439,19 +439,13 @@ public class DocumentDA extends CRUD<Document>
     public boolean checkExist(Document document)
             throws DataBaseException, DataValidationException
     {
-        Document existingDocument = getById(document.getId());
-
-        if(existingDocument != null)
+        if (getById(document.getId()) != null)
             return true;
 
-        return insert(document);
+        throw new DataBaseException(
+                "Document with id " + document.getId() + " does not exist"
+        );
     }
-
-    /*
-     * ==========================
-     * UPDATE FIELD METHODS
-     * ==========================
-     */
 
     private boolean updateField(int documentId, String field, Object value)
             throws DataBaseException
@@ -460,13 +454,11 @@ public class DocumentDA extends CRUD<Document>
                 "UPDATE " + TABLE_NAME +
                         " SET " + field + " = ? WHERE id_ = ?";
 
-        try
-        {
-            PreparedStatement statement =
-                    connector.getConnection().prepareStatement(query);
-
+        try (
+                PreparedStatement statement =
+                        connector.getConnection().prepareStatement(query)
+        ) {
             statement.setObject(1, value);
-
             statement.setInt(2, documentId);
 
             return statement.executeUpdate() > 0;

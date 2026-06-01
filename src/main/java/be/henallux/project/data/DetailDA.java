@@ -21,8 +21,8 @@ public class DetailDA extends CRUD<Detail>
 {
     private static volatile DetailDA instance;
 
-    private final ProductDA productDA;
-    private final DocumentDA documentDA;
+    private ProductDA productDA;
+    private DocumentDA documentDA;
     private final MySQLConnector connector;
     // TODO Implement BatchDA to be complete with the database
 
@@ -31,9 +31,6 @@ public class DetailDA extends CRUD<Detail>
         TABLE_NAME = "Detail";
         IDS_MAPPING_OBJECT = new HashMap<>();
         connector = MySQLConnector.getInstance();
-
-        productDA = ProductDA.getInstance();
-        documentDA = DocumentDA.getInstance();
     }
 
     public static DetailDA getInstance()
@@ -44,6 +41,17 @@ public class DetailDA extends CRUD<Detail>
         }
         return instance;
     }
+
+    private ProductDA getProductDA() {
+        if (productDA == null) productDA = ProductDA.getInstance();
+        return productDA;
+    }
+
+    private DocumentDA getDocumentDA() {
+        if (documentDA == null) documentDA = DocumentDA.getInstance();
+        return documentDA;
+    }
+
 
     @Override
     Detail mapDataToObject(ResultSet data, boolean mapping)

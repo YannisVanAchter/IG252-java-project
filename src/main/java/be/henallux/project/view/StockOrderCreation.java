@@ -359,6 +359,7 @@ public class StockOrderCreation extends JPanel {
             mainWindow.setPage("STOCK");
 
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }

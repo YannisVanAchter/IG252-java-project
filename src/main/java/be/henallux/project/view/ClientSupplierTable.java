@@ -53,6 +53,7 @@ public class ClientSupplierTable extends JPanel {
         try {
             loaded = clientSupplierController.getAllClientsSuppliers();
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             mainWindow.goBack();
         }

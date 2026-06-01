@@ -50,7 +50,7 @@ public class AddressDA extends CRUD<Address> {
     public Address mapDataToObject(ResultSet data, boolean mapping) throws DataBaseException, DataValidationException {
         int id;
         try {
-            id = data.getInt("id");
+            id = data.getInt("id_");
             if (dataMappingObject.get(id) == null) {
                 Address address = new Address(
                     id,
@@ -67,7 +67,7 @@ public class AddressDA extends CRUD<Address> {
     }
 
     public List<Address> getAll() throws DataBaseException, DataValidationException {
-        String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " ORDER BY name";
+        String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " ORDER BY streetName";
         List<Address> addresses = new ArrayList<>();
 
         try (Connection connection = connector.getConnection()) {
@@ -103,7 +103,7 @@ public class AddressDA extends CRUD<Address> {
             return addresses;
 
         String placeholders = String.join(",", java.util.Collections.nCopies(ids.size(), "?"));
-        String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " WHERE id IN (" + placeholders + ") ORDER BY name";
+        String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " WHERE id_ IN (" + placeholders + ") ORDER BY name";
 
         try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
@@ -131,7 +131,7 @@ public class AddressDA extends CRUD<Address> {
         if (addresse != null)
             return addresse;
 
-        String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " WHERE id=?;";
+        String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " WHERE id_=?;";
 
         try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);

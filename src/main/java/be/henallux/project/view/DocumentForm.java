@@ -84,6 +84,7 @@ public class DocumentForm extends JPanel {
         try {
             loaded = documentController.getAllClientSupplier();
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         this.allClients = loaded;
@@ -157,6 +158,7 @@ public class DocumentForm extends JPanel {
         try {
             setDocumentTypes(documentController.getAllDocumentTypes());
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
@@ -230,6 +232,7 @@ public class DocumentForm extends JPanel {
         try {
             setWorkflowTypes(workFlowController.getWorkFlowTypes());
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         workflowPanel.add(ViewUtils.labeledRequired("Workflow Type Name", comboWorkflowType));
@@ -241,6 +244,7 @@ public class DocumentForm extends JPanel {
         try {
             setWorkflowStatus(workFlowController.getAllWorkFlows());
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
@@ -516,6 +520,7 @@ public class DocumentForm extends JPanel {
             try {
                 documentType = documentController.addDocumentType(text.trim());
             } catch (Exception e) {
+                e.printStackTrace();
                 JOptionPane.showMessageDialog(this, "Unable to create document type: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -578,6 +583,7 @@ public class DocumentForm extends JPanel {
             mainWindow.goBack();
 
         } catch (Exception ex) {
+            ex.printStackTrace();
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Validation", JOptionPane.WARNING_MESSAGE);
         }
     }

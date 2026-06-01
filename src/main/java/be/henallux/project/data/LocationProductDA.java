@@ -49,17 +49,17 @@ public class LocationProductDA extends CRUD<LocationProduct> {
         int id;
 
         try {
-            String shelf = data.getString("shelf_");
-            String floor = String.format("%d", data.getInt("floor_"));
-            Boolean isStock = data.getBoolean("isStock_");
+            String shelf = data.getString("shelf");
+            String floor_ = String.format("%d", data.getInt("floor_"));
+            Boolean isStock = data.getBoolean("isStock");
 
-            id = LocationProduct.hashCode(shelf, floor, isStock);
+            id = LocationProduct.hashCode(shelf, floor_, isStock);
             if (dataMappingObject.get(id) == null) {
                 LocationProduct locationProduct = new LocationProduct(
                         shelf,
-                        floor,
+                        floor_,
                         isStock,
-                        data.getBoolean("isFreezer_")
+                        data.getBoolean("isFreezer")
                 );
 
                 dataMappingObject.put(id, locationProduct);
@@ -74,7 +74,7 @@ public class LocationProductDA extends CRUD<LocationProduct> {
 
     @Override
     public List<LocationProduct> getAll() throws DataBaseException, DataValidationException {
-        String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " ORDER BY id_";
+        String SQLInstruction = "SELECT * FROM " + TABLE_NAME + " ORDER BY shelf";
         List<LocationProduct> locationProducts = new ArrayList<>();
 
         try (Connection connection = connector.getConnection()) {
@@ -119,16 +119,15 @@ public class LocationProductDA extends CRUD<LocationProduct> {
 
         String SQLInstruction =
                 "INSERT INTO " + TABLE_NAME +
-                " (id_, shelf_, floor_, isStock_, isFreezer_) VALUES (?, ?, ?, ?, ?);";
+                " (shelf, floor_, isStock, isFreezer) VALUES (?, ?, ?, ?);";
 
         try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
-            statement.setString(1, newLocationProduct.getLocationProductId());
-            statement.setString(2, newLocationProduct.getShelf());
-            statement.setString(3, newLocationProduct.getFloor());
-            statement.setBoolean(4, newLocationProduct.getIsStock());
-            statement.setBoolean(5, newLocationProduct.getIsFreezer());
+            statement.setString(1, newLocationProduct.getShelf());
+            statement.setString(2, newLocationProduct.getFloor());
+            statement.setBoolean(3, newLocationProduct.getIsStock());
+            statement.setBoolean(4, newLocationProduct.getIsFreezer());
 
             inserted = 0 < statement.executeUpdate();
 
@@ -150,7 +149,7 @@ public class LocationProductDA extends CRUD<LocationProduct> {
     public boolean update(LocationProduct locationProduct, LocationProduct newLocationProduct) throws DataBaseException, DataValidationException {
         String SQLInstruction =
                 "UPDATE " + TABLE_NAME +
-                " SET shelf_=?, floor_=?, isStock_=?, isFreezer_=? WHERE shelf_=? AND floor_=? AND isStock_=?;";
+                " SET shelf=?, floor_=?, isStock=?, isFreezer=? WHERE shelf=? AND floor_=? AND isStock=?;";
 
         try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
@@ -185,12 +184,14 @@ public class LocationProductDA extends CRUD<LocationProduct> {
                 if (qp.getLocationProduct() == locationProduct)
                     QuantityProductDA.getInstance().delete(qp);
 
-        String SQLInstruction = "DELETE FROM " + TABLE_NAME + " WHERE id_=?;";
+        String SQLInstruction = "DELETE FROM " + TABLE_NAME + " WHERE shelf=? AND floor_=? AND isStock=?";
 
         try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
-            statement.setString(1, locationProduct.getLocationProductId());
+            statement.setString(1, locationProduct.getShelf());
+            statement.setString(2, locationProduct.getFloor());
+            statement.setBoolean(3, locationProduct.getIsStock());
 
             int affectedRows = statement.executeUpdate();
 
@@ -209,14 +210,15 @@ public class LocationProductDA extends CRUD<LocationProduct> {
 
         if (locationProduct != null) {
             String SQLInstruction =
-                    "SELECT COUNT(*) as nbLocationProduct FROM " +
-                    TABLE_NAME +
-                    " WHERE id_=?;";
+                    "SELECT COUNT(*) as nbLocationProduct FROM " + TABLE_NAME +
+                            " WHERE shelf=? AND floor_=? AND isStock=?";
 
             try (Connection connection = connector.getConnection()) {
                 PreparedStatement statement = connection.prepareStatement(SQLInstruction);
 
-                statement.setString(1, locationProduct.getLocationProductId());
+                statement.setString(1, locationProduct.getShelf());
+                statement.setString(2, locationProduct.getFloor());
+                statement.setBoolean(3, locationProduct.getIsStock());
 
                 ResultSet result = statement.executeQuery();
 

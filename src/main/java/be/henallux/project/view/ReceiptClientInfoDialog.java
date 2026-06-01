@@ -50,6 +50,7 @@ public class ReceiptClientInfoDialog extends JPanel {
         try {
             loaded = controller.getAllClientsSuppliers();
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         this.allClients = loaded;
@@ -220,6 +221,7 @@ public class ReceiptClientInfoDialog extends JPanel {
         try {
             cardNumber = Integer.parseInt(input.trim());
         } catch (NumberFormatException e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, "The number is invalid", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -233,6 +235,7 @@ public class ReceiptClientInfoDialog extends JPanel {
                 JOptionPane.showMessageDialog(this, "No customers found", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }

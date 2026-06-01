@@ -47,6 +47,7 @@ public class RecipeSearchTable extends JPanel {
         try {
             loaded = controller.searchRecipes(null, null);
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         this.displayRecipes = loaded;
@@ -237,6 +238,7 @@ public class RecipeSearchTable extends JPanel {
             );
             model.setRecipes(displayRecipes);
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }

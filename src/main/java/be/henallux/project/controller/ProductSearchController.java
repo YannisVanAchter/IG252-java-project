@@ -28,7 +28,7 @@ public class ProductSearchController {
      * @return list of matching {@link Product}
      * @see ProductSearchManager#searchProducts(String, ProductCategory, Boolean)
      */
-    public ArrayList<Product> searchProducts(String name, ProductCategory category, Boolean promotion) throws BusinessException, DataValidationException {
+    public ArrayList<Product> searchProducts(String name, ProductCategory category, boolean promotion) throws BusinessException, DataValidationException {
         return new ArrayList<>(productSearchManager.searchProducts(name, category, promotion));
     }
 }
