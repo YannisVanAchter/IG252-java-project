@@ -1,0 +1,9 @@
+be.henallux.project
+be.henallux.project.business
+be.henallux.project.business.exception
+be.henallux.project.controller
+be.henallux.project.data
+be.henallux.project.data.exception
+be.henallux.project.model
+be.henallux.project.model.exception
+be.henallux.project.view
