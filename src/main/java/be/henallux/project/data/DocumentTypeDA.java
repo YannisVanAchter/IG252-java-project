@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -10,12 +10,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import main.java.be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.data.exception.DataBaseException;
 
-import main.java.be.henallux.project.model.DocumentType;
-import main.java.be.henallux.project.model.DocumentTypeRepository;
+import be.henallux.project.model.DocumentType;
+import be.henallux.project.model.DocumentTypeRepository;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.exception.DataValidationException;
 
 /**
  * DAO for DocumentType table.

@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,14 +10,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.data.CRUD;
-import main.java.be.henallux.project.data.ProductDA;
-import main.java.be.henallux.project.data.LocationProductDA;
-import main.java.be.henallux.project.model.QuantityProduct;
-import main.java.be.henallux.project.model.Product;
-import main.java.be.henallux.project.model.LocationProduct;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.data.CRUD;
+import be.henallux.project.data.ProductDA;
+import be.henallux.project.data.LocationProductDA;
+import be.henallux.project.model.QuantityProduct;
+import be.henallux.project.model.Product;
+import be.henallux.project.model.LocationProduct;
+import be.henallux.project.model.exception.DataValidationException;
 
 public class QuantityProductDA extends CRUD<QuantityProduct> {
 
@@ -69,16 +69,15 @@ public class QuantityProductDA extends CRUD<QuantityProduct> {
             id = QuantityProduct.hashCode(location, product);
 
             if (dataMappingObject.get(id) == null) {
-
                 QuantityProduct quantityProduct = new QuantityProduct(
-                    location,
-                    product,
-                    data.getInt("quantity")
+                        location,
+                        product,
+                        data.getInt("quantity")
                 );
-
                 id = quantityProduct.hashCode();
-
                 dataMappingObject.put(id, quantityProduct);
+            } else {
+                dataMappingObject.get(id).setQuantity(data.getInt("quantity"));
             }
         } catch (SQLException e) {
             throw new DataBaseException("Error mapping QuantityProduct", e);
@@ -92,15 +91,14 @@ public class QuantityProductDA extends CRUD<QuantityProduct> {
         String sql = "SELECT * FROM " + TABLE_NAME + ";";
         List<QuantityProduct> list = new ArrayList<>();
 
-        try (Connection connection = connector.getConnection()) {
+        dataMappingObject.clear();
 
+        try (Connection connection = connector.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet rs = statement.executeQuery();
-
             while (rs.next()) {
                 list.add(mapDataToObject(rs, true));
             }
-
         } catch (SQLException e) {
             throw new DataBaseException("Error getting all QuantityProduct", e);
         }
@@ -220,7 +218,7 @@ public class QuantityProductDA extends CRUD<QuantityProduct> {
             int affectedRows = statement.executeUpdate();
 
             qp.setQuantity(newQuantity);
-
+            ProductDA.getInstance().invalidateCache(qp.getProduct().getId());
             return affectedRows > 0;
 
         } catch (SQLException e) {

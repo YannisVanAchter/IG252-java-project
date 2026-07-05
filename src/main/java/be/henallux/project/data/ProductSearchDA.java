@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,10 +10,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.model.Product;
-import main.java.be.henallux.project.model.ProductCategory;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.model.Product;
+import be.henallux.project.model.ProductCategory;
+import be.henallux.project.model.exception.DataValidationException;
 
 public class ProductSearchDA {
 
@@ -25,45 +25,48 @@ public class ProductSearchDA {
 
     public List<Product> search(String nom, ProductCategory category, boolean isDiscounted) throws DataBaseException, DataValidationException {
         List<Product> products = new ArrayList<>();
-        StringBuilder SQLInstruction = new StringBuilder("""
-                SELECT Product.id_ as productID
-                FROM Product, ProductCategory AS Category, Discount
-                WHERE Product.id_ = Discount.productId AND Product.categoryId = Category.id_
-                """);
+        LocalDate today = LocalDate.now();
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT DISTINCT Product.id_ as productID " +
+                        "FROM Product " +
+                        "JOIN ProductCategory AS Category ON Product.categoryId = Category.id_ "
+        );
+
+        if (isDiscounted) {
+            sql.append(
+                    "JOIN Discount ON Product.id_ = Discount.productId " +
+                            "AND Discount.startDate <= ? AND ? <= Discount.endDate "
+            );
+        }
+
+        boolean hasWhere = false;
 
         if (nom != null && !nom.isEmpty()) {
-            SQLInstruction.append(" AND Product.name=?");
+            sql.append(hasWhere ? " AND" : " WHERE");
+            sql.append(" Product.name_ LIKE ?");
+            hasWhere = true;
         }
         if (category != null) {
-            SQLInstruction.append(" AND Category.id_=?");
+            sql.append(hasWhere ? " AND" : " WHERE");
+            sql.append(" Category.id_ = ?");
+            hasWhere = true;
         }
 
-        LocalDate today = LocalDate.now();
-        if (isDiscounted) {
-            SQLInstruction.append("""
-                     AND (
-                     Discount.startDate <= ? AND
-                     ? <= Discount.endDate
-                     )""");
-        }
+        try (Connection connection = MySQLConnector.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql.toString())) {
 
-        try (Connection connection = MySQLConnector.getInstance().getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(SQLInstruction.toString() + ";");
             int currentIndex = 1;
 
+            if (isDiscounted) {
+                statement.setDate(currentIndex++, Date.valueOf(today));
+                statement.setDate(currentIndex++, Date.valueOf(today));
+            }
             if (nom != null && !nom.isEmpty()) {
-                statement.setString(currentIndex, nom);
-                currentIndex++;
+                statement.setString(currentIndex++, "%" + nom + "%");
             }
             if (category != null) {
-                statement.setInt(currentIndex, category.getId());
-                currentIndex++;
-            }
-            if (isDiscounted) {
-                statement.setDate(currentIndex, Date.valueOf(today));
-                currentIndex++;
-                statement.setDate(currentIndex, Date.valueOf(today));
-                currentIndex++;
+                statement.setInt(currentIndex++, category.getId());
             }
 
             ResultSet result = statement.executeQuery();

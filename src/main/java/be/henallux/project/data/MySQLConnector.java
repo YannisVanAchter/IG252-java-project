@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,11 +11,11 @@ public class MySQLConnector {
 
     /**
      * Creates an instance based on .env file variables.
-     * @require .env file at ../../.env
-     * @require MYSQL_ROOT_PASSWORD in .env file
-     * @require MYSQL_DATABASE in .env file
-     * @require MYSQL_USER in .env file
-     * @require MYSQL_PASSWORD in .env file
+     * Require .env file at ../../.env
+     * Require MYSQL_ROOT_PASSWORD in .env file
+     * Require MYSQL_DATABASE in .env file
+     * Require MYSQL_USER in .env file
+     * Require MYSQL_PASSWORD in .env file
      */
 
     private final String url;
@@ -23,12 +23,12 @@ public class MySQLConnector {
     private final String password;
 
     private MySQLConnector() {
-        String address  = System.getenv("MYSQL_ADDRESS")  != null ? System.getenv("MYSQL_ADDRESS")  : "localhost";
-        String port     = System.getenv("MYSQL_PORT")     != null ? System.getenv("MYSQL_PORT")     : "3306";
+        String address = System.getenv("MYSQL_ADDRESS") != null ? System.getenv("MYSQL_ADDRESS") : "localhost";
+        String port = System.getenv("MYSQL_PORT") != null ? System.getenv("MYSQL_PORT") : "3306";
         String database = System.getenv("MYSQL_DATABASE") != null ? System.getenv("MYSQL_DATABASE") : "superdatabasename";
-        this.user       = System.getenv("MYSQL_USER")     != null ? System.getenv("MYSQL_USER")     : "superadminname";
-        this.password   = System.getenv("MYSQL_PASSWORD") != null ? System.getenv("MYSQL_PASSWORD") : "supersuperadminpassword";
-        this.url        = String.format("jdbc:mysql://%s:%s/%s", address, port, database);
+        this.user = System.getenv("MYSQL_USER") != null ? System.getenv("MYSQL_USER") : "superadminname";
+        this.password = System.getenv("MYSQL_PASSWORD") != null ? System.getenv("MYSQL_PASSWORD") : "supersuperadminpassword";
+        this.url = String.format("jdbc:mysql://%s:%s/%s", address, port, database);
     }
 
     @SuppressWarnings("DoubleCheckedLocking") // I would rather check two times than fuck up my DB!
@@ -57,6 +57,5 @@ public class MySQLConnector {
         }
     }
 }
-    // FIX: closeConnection() removed — there is no longer a shared connection
-    // to close. Each caller closes its own connection via try-with-resources.
-}
+// FIX: closeConnection() removed — there is no longer a shared connection
+// to close. Each caller closes its own connection via try-with-resources.

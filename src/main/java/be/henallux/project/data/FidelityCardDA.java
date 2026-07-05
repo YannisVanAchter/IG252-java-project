@@ -1,9 +1,9 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.FidelityCard;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.model.ClientSupplier;
+import be.henallux.project.model.FidelityCard;
+import be.henallux.project.model.exception.DataValidationException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -143,6 +143,19 @@ public class FidelityCardDA extends CRUD<FidelityCard> {
         return fidelityCards;
     }
 
+    public FidelityCard getByClientId(int clientId) throws DataBaseException, DataValidationException {
+        String query = "SELECT * FROM " + TABLE_NAME + " WHERE clientId = ?";
+        try (PreparedStatement ps = connector.getConnection().prepareStatement(query)) {
+            ps.setInt(1, clientId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return mapDataToObject(rs, true);
+            }
+        } catch (SQLException e) {
+            throw new DataBaseException("Error getting fidelity card by clientId", e);
+        }
+        return null;
+    }
+
     @Override
     public boolean insert(FidelityCard model)
             throws DataBaseException, DataValidationException {
@@ -179,6 +192,7 @@ public class FidelityCardDA extends CRUD<FidelityCard> {
                     model.setId(generatedId);
 
                     IDS_MAPPING_OBJECT.put(generatedId, model);
+                    ClientSupplierDA.getInstance().invalidateCache(model.getClient().getId());
                 }
             }
 

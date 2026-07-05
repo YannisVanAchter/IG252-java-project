@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 import java.sql.ResultSet;
 import java.sql.Date;
@@ -7,10 +7,10 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.List;
 
-import main.java.be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.data.exception.DataBaseException;
 
-import main.java.be.henallux.project.model.Model;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.Model;
+import be.henallux.project.model.exception.DataValidationException;
 
 public abstract class CRUD<M extends Model> {
     protected static volatile CRUD<?> instance;
@@ -43,7 +43,7 @@ public abstract class CRUD<M extends Model> {
     /**
      * Check if a given instance of a Model exists in the database
      * @param model the model to evaluate
-     * @effect If the model does not exist in the DB, it will insert the object
+     * effect If the model does not exist in the DB, it will insert the object
      */
     abstract boolean checkExist(M model) throws DataBaseException, DataValidationException;
 

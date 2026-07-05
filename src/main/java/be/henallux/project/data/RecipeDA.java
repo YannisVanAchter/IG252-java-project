@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import main.java.be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.data.exception.DataBaseException;
 
-import main.java.be.henallux.project.model.Product;
-import main.java.be.henallux.project.model.Recipe;
-import main.java.be.henallux.project.model.RecipeComposition;
+import be.henallux.project.model.Product;
+import be.henallux.project.model.Recipe;
+import be.henallux.project.model.RecipeComposition;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.exception.DataValidationException;
 
 public class RecipeDA extends CRUD<Recipe> {
 

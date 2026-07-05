@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,9 +8,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.model.Recipe;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.model.Recipe;
+import be.henallux.project.model.exception.DataValidationException;
 
 public class RecipeSearchDA {
 
@@ -29,32 +29,44 @@ public class RecipeSearchDA {
         return instance;
     }
 
-    public List<Recipe> search(String nom, String productName) throws DataBaseException, DataValidationException {
+    public List<Recipe> search(String nom, List<String> ingredients) throws DataBaseException, DataValidationException {
         List<Recipe> recipes = new ArrayList<>();
-        StringBuilder SQLInstruction = new StringBuilder("""
-                SELECT Recipe.id_ as recipeID
-                FROM Recipe, RecipeComposition AS Composition, Product
-                WHERE Recipe.id_ = Composition.recipeId AND Composition.productId = Product.id_
-                """);
+
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT r.id_ AS recipeID FROM Recipe r");
+
+        // JOIN sur les ingrédients seulement si on filtre par ingrédient
+        if (ingredients != null && !ingredients.isEmpty()) {
+            for (int i = 0; i < ingredients.size(); i++) {
+                sql.append(" JOIN RecipeComposition rc").append(i)
+                        .append(" ON r.id_ = rc").append(i).append(".recipeId")
+                        .append(" JOIN Product p").append(i)
+                        .append(" ON rc").append(i).append(".productId = p").append(i).append(".id_");
+            }
+        }
+
+        sql.append(" WHERE 1=1");
 
         if (nom != null && !nom.isEmpty()) {
-            SQLInstruction.append(" AND Recipe.name_ = ?");
+            sql.append(" AND r.name_ LIKE ?");
         }
-        if (productName != null && !productName.isEmpty()) {
-            SQLInstruction.append(" AND Product.name_ = ?");
+        if (ingredients != null && !ingredients.isEmpty()) {
+            for (int i = 0; i < ingredients.size(); i++) {
+                sql.append(" AND p").append(i).append(".name_ LIKE ?");
+            }
         }
 
         try (
                 Connection connection = MySQLConnector.getInstance().getConnection();
-                PreparedStatement statement = connection.prepareStatement(SQLInstruction + ";")
+                PreparedStatement statement = connection.prepareStatement(sql + ";")
         ) {
-            int currentIndex = 1;
+            int idx = 1;
             if (nom != null && !nom.isEmpty()) {
-                statement.setString(currentIndex, nom);
-                currentIndex++;
+                statement.setString(idx++, "%" + nom + "%");
             }
-            if (productName != null && !productName.isEmpty()) {
-                statement.setString(currentIndex, productName);
+            if (ingredients != null && !ingredients.isEmpty()) {
+                for (String ing : ingredients) {
+                    statement.setString(idx++, "%" + ing + "%");
+                }
             }
 
             ResultSet result = statement.executeQuery();

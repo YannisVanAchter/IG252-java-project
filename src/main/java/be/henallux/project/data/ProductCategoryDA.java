@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,10 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.data.CRUD;
-import main.java.be.henallux.project.model.ProductCategory;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.data.CRUD;
+import be.henallux.project.model.ProductCategory;
+import be.henallux.project.model.exception.DataValidationException;
 
 public class ProductCategoryDA extends CRUD<ProductCategory> {
     private static volatile ProductCategoryDA instance;

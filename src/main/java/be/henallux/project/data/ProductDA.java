@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -11,16 +11,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.data.CRUD;
-import main.java.be.henallux.project.data.DiscountDA;
-import main.java.be.henallux.project.data.QuantityProductDA;
-import main.java.be.henallux.project.data.LocationProductDA;
-import main.java.be.henallux.project.data.ProductCategoryDA;
-import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.Product;
-import main.java.be.henallux.project.model.QuantityProduct;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.data.CRUD;
+import be.henallux.project.data.DiscountDA;
+import be.henallux.project.data.QuantityProductDA;
+import be.henallux.project.data.LocationProductDA;
+import be.henallux.project.data.ProductCategoryDA;
+import be.henallux.project.model.ClientSupplier;
+import be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.Product;
+import be.henallux.project.model.QuantityProduct;
 
 public class ProductDA extends CRUD<Product> {
     private static volatile ProductDA instance;
@@ -99,15 +99,15 @@ public class ProductDA extends CRUD<Product> {
                 );
 
                 dataMappingObject.put(id, product);
+            }
 
-                if (mapping) {
-                    getDiscountDA().getAll(); // Discounts set by getting all discounts
-                    List<Integer> idsLocation = getLocationDA().getAll().stream().map(location ->
-                            QuantityProduct.hashCode(location, product)
-                    ).toList();
-
-                    product.setLocation(getQuantityDA().getsByIds(idsLocation));
-                }
+            if (mapping) {
+                getDiscountDA().getAll();
+                final int productId = id;
+                List<QuantityProduct> productLocations = getQuantityDA().getAll().stream()
+                        .filter(qp -> qp.getProduct().getId() == productId)
+                        .toList();
+                dataMappingObject.get(id).setLocation(new ArrayList<>(productLocations));
             }
 
         } catch (SQLException e) {
@@ -497,11 +497,18 @@ public class ProductDA extends CRUD<Product> {
 
             Map<ClientSupplier, List<Product>> supplier_mapping_product = new HashMap<>();
             ClientSupplierDA supplierDA = ClientSupplierDA.getInstance();
-            result.next();
+
+            if (!result.next()) {
+                return supplier_mapping_product;
+            }
+
             ClientSupplier supplier = supplierDA.getById(result.getInt("supplierId"));
             do {
                 if (supplier == null || supplier.getId() != result.getInt("supplierId")) {
                     supplier = supplierDA.getById(result.getInt("supplierId"));
+                    supplier_mapping_product.put(supplier, new ArrayList<>());
+                }
+                if (!supplier_mapping_product.containsKey(supplier)) {
                     supplier_mapping_product.put(supplier, new ArrayList<>());
                 }
                 supplier_mapping_product
@@ -513,5 +520,9 @@ public class ProductDA extends CRUD<Product> {
         } catch (SQLException e) {
             throw new DataBaseException(e.getMessage(), e);
         }
+    }
+
+    public void invalidateCache(int productId) {
+        dataMappingObject.remove(productId);
     }
 }

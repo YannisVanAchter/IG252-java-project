@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,17 +11,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import main.java.be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.data.exception.DataBaseException;
 
-import main.java.be.henallux.project.model.Address;
-import main.java.be.henallux.project.model.Detail;
-import main.java.be.henallux.project.model.Document;
-import main.java.be.henallux.project.model.DocumentDetails;
-import main.java.be.henallux.project.model.DocumentType;
-import main.java.be.henallux.project.model.Recipe;
-import main.java.be.henallux.project.model.WorkFlow;
+import be.henallux.project.model.Address;
+import be.henallux.project.model.Detail;
+import be.henallux.project.model.Document;
+import be.henallux.project.model.DocumentDetails;
+import be.henallux.project.model.DocumentType;
+import be.henallux.project.model.Recipe;
+import be.henallux.project.model.WorkFlow;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.exception.DataValidationException;
 
 public class DocumentDA extends CRUD<Document>
 {
@@ -33,11 +33,13 @@ public class DocumentDA extends CRUD<Document>
     private final DetailDA detailDA;
     private final DocumentTypeDA documentTypeDA;
     private final AddressDA addressDA;
+    private final RecipeDA recipeDA;
 
     private DocumentDA() {
         detailDA = DetailDA.getInstance();
         documentTypeDA = DocumentTypeDA.getInstance();
         addressDA = AddressDA.getInstance();
+        recipeDA = RecipeDA.getInstance();
     }
 
     public static DocumentDA getInstance()
@@ -106,6 +108,12 @@ public class DocumentDA extends CRUD<Document>
             if(addressId != null)
                 address = addressDA.getById(addressId, mapping);
 
+            Recipe recipe = null;
+            int recipeId = data.getInt("recipeId");
+            if (!data.wasNull()) {
+                recipe = recipeDA.getById(recipeId, mapping);
+            }
+
             Document document = new Document(
                     id,
                     dateOfCreation,
@@ -120,7 +128,7 @@ public class DocumentDA extends CRUD<Document>
                     workflow,
                     address,
                     commentary,
-                    (Recipe) null
+                    recipe
             );
 
             IDS_MAPPING_OBJECT.put(id, document);
@@ -146,7 +154,10 @@ public class DocumentDA extends CRUD<Document>
     {
         List<Document> documents = new ArrayList<>();
 
-        String query = "SELECT * FROM " + TABLE_NAME;
+        String query =
+                "SELECT d.*, po.recipeId " +
+                        "FROM " + TABLE_NAME + " d " +
+                        "LEFT JOIN PreparationOrder po ON po.documentId = d.id_";
 
         try (
                 Statement statement = connector.getConnection().createStatement();
@@ -156,7 +167,6 @@ public class DocumentDA extends CRUD<Document>
             {
                 documents.add(mapDataToObject(result, true));
             }
-
             return documents;
         }
         catch(SQLException e)
@@ -174,7 +184,11 @@ public class DocumentDA extends CRUD<Document>
         if(mapping && IDS_MAPPING_OBJECT.containsKey(id))
             return IDS_MAPPING_OBJECT.get(id);
 
-        String query = "SELECT * FROM " + TABLE_NAME + " WHERE id_ = ?";
+        String query =
+                "SELECT d.*, po.recipeId " +
+                        "FROM " + TABLE_NAME + " d " +
+                        "LEFT JOIN PreparationOrder po ON po.documentId = d.id_ " +
+                        "WHERE d.id_ = ?";
 
         try (
                 PreparedStatement statement =
@@ -408,30 +422,27 @@ public class DocumentDA extends CRUD<Document>
     {
         String query = "DELETE FROM " + TABLE_NAME + " WHERE id_ = ?";
 
-        for (Detail detail: document.getDetails())
+        for (Detail detail : document.getDetails())
             detailDA.delete(detail);
 
-        try (
-                PreparedStatement statement =
-                        connector.getConnection().prepareStatement(query)
-        ) {
+        String deleteWorkFlowDoc = "DELETE FROM WorkFlowDocument WHERE documentId = ?";
+        try (PreparedStatement stmt = connector.getConnection().prepareStatement(deleteWorkFlowDoc)) {
+            stmt.setInt(1, document.getId());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataBaseException("Error while deleting WorkFlowDocument entries : " + e.getMessage());
+        }
+
+        try (PreparedStatement statement = connector.getConnection().prepareStatement(query)) {
             statement.setInt(1, document.getId());
-
             int affectedRows = statement.executeUpdate();
-
-            if(affectedRows > 0)
-            {
+            if (affectedRows > 0) {
                 IDS_MAPPING_OBJECT.remove(document.getId());
                 return true;
             }
-
             return false;
-        }
-        catch(SQLException e)
-        {
-            throw new DataBaseException(
-                    "Error while deleting document : " + e.getMessage()
-            );
+        } catch (SQLException e) {
+            throw new DataBaseException("Error while deleting document : " + e.getMessage());
         }
     }
 

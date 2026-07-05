@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,11 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.data.CRUD;
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.LocationProduct;
-import main.java.be.henallux.project.model.QuantityProduct;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.data.CRUD;
+import be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.LocationProduct;
+import be.henallux.project.model.QuantityProduct;
 
 public class LocationProductDA extends CRUD<LocationProduct> {
     private static volatile LocationProductDA instance;
@@ -105,6 +105,9 @@ public class LocationProductDA extends CRUD<LocationProduct> {
     }
 
     public LocationProduct getById(int id, boolean mapping) throws DataBaseException, DataValidationException {
+        if (!dataMappingObject.isEmpty() && dataMappingObject.containsKey(id)) {
+            return dataMappingObject.get(id);
+        }
         getAll();
         return dataMappingObject.get(id);
     }

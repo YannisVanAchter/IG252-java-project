@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 
 import java.sql.Connection;
@@ -11,11 +11,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.java.be.henallux.project.data.MySQLConnector;
-import main.java.be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.data.MySQLConnector;
+import be.henallux.project.data.exception.DataBaseException;
 
-import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.ClientSupplier;
+import be.henallux.project.model.exception.DataValidationException;
 
 public class ClientSupplierSearchDA {
     private CRUD<ClientSupplier> clientSupplierDA;
@@ -33,13 +33,13 @@ public class ClientSupplierSearchDA {
         StringBuilder SQLInstruction = new StringBuilder("""
                     SELECT cs.id_ as ID
                     FROM Client_supplier AS cs
-                    WHERE 1=1
+                    WHERE cs.isClient = 1
                     """); // ? Add '1=1', if all parameters are null, the where clause would create problems
         if (nom != null && !nom.isEmpty()) {
-            SQLInstruction.append(" AND cs.name_=?");
+            SQLInstruction.append(" AND (cs.name_ LIKE ? OR cs.firstname LIKE ?)");
         }
         if (email != null && !email.isEmpty()) {
-            SQLInstruction.append(" AND email=?");
+            SQLInstruction.append(" AND email LIKE ?");
         }
         if (isFidelityCardValid != null && isFidelityCardValid){
             SQLInstruction.append("""
@@ -53,11 +53,13 @@ public class ClientSupplierSearchDA {
             PreparedStatement statement = connection.prepareStatement(SQLInstruction.toString() + ";");
             int currentIndex = 1;
             if (nom != null && !nom.isEmpty()) {
-                statement.setString(currentIndex, nom);
+                statement.setString(currentIndex, "%" + nom + "%");
+                currentIndex++;
+                statement.setString(currentIndex, "%" + nom + "%");
                 currentIndex++;
             }
             if (email != null && !email.isEmpty()) {
-                statement.setString(currentIndex, email);
+                statement.setString(currentIndex, "%" + email + "%");
                 currentIndex++;
             }
             if (isFidelityCardValid != null && isFidelityCardValid) {
@@ -67,7 +69,7 @@ public class ClientSupplierSearchDA {
 
             ResultSet result = statement.executeQuery();
             while  (result.next()) {
-                clientSupplier.add(clientSupplierDA.getById(result.getInt("ID")));
+                clientSupplier.add(clientSupplierDA.getById(result.getInt("ID"), true));
             }
             return clientSupplier;
         } catch (SQLException e) {

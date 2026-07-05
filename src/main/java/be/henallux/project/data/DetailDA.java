@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -10,12 +10,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.model.Batch;
-import main.java.be.henallux.project.model.Detail;
-import main.java.be.henallux.project.model.Document;
-import main.java.be.henallux.project.model.Product;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.model.Batch;
+import be.henallux.project.model.Detail;
+import be.henallux.project.model.Document;
+import be.henallux.project.model.Product;
+import be.henallux.project.model.exception.DataValidationException;
 
 public class DetailDA extends CRUD<Detail>
 {
@@ -70,8 +70,8 @@ public class DetailDA extends CRUD<Detail>
         Product product;
         Document document;
         try {
-            product = productDA.getById(data.getInt("productId"), mapping);
-            document = documentDA.getById(data.getInt("documentId"), mapping);
+            product = getProductDA().getById(data.getInt("productId"), mapping);
+            document = getDocumentDA().getById(data.getInt("documentId"), mapping);
         } catch (SQLException e) {
             throw new DataBaseException("Error reading detail fields from ResultSet", e);
         }
@@ -84,7 +84,7 @@ public class DetailDA extends CRUD<Detail>
         int quantity;
         try {
             priceVAT = data.getDouble("priceVAT");
-            vat = data.getBigDecimal("VAT");
+            vat = data.getBigDecimal("VAT").divide(BigDecimal.valueOf(100));
             fidelityPointsEarned = data.getInt("fidelityPointsEarned");
             quantity = data.getInt("quantity");
         } catch (SQLException e) {
@@ -180,8 +180,8 @@ public class DetailDA extends CRUD<Detail>
     public boolean insert(Detail detail)
             throws DataBaseException, DataValidationException
     {
-        productDA.checkExist(detail.getProduct());
-        documentDA.checkExist(detail.getDocument());
+        getProductDA().checkExist(detail.getProduct());
+        getDocumentDA().checkExist(detail.getDocument());
 
         try (PreparedStatement ps =
                      connector.getConnection().prepareStatement(

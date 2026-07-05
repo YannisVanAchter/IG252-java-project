@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import main.java.be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.data.exception.DataBaseException;
 
-import main.java.be.henallux.project.model.Address;
-import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.FidelityCard;
+import be.henallux.project.model.Address;
+import be.henallux.project.model.ClientSupplier;
+import be.henallux.project.model.FidelityCard;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.exception.DataValidationException;
 
 public class ClientSupplierDA extends CRUD<ClientSupplier> {
 
@@ -97,6 +97,9 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
 
             if (isClient && mapping) {
                 fidelityCardDA.getAll();
+            }
+            if (isClient && mapping) {
+                clientSupplier.setFidelityCard(fidelityCardDA.getByClientId(id));
             }
 
             return clientSupplier;
@@ -256,10 +259,10 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
                 if (generatedKeys.next()) {
 
                     int generatedId = generatedKeys.getInt(1);
-
+                    clientSupplier.setId(generatedId);
                     IDS_MAPPING_OBJECT.put(
                             generatedId,
-                            getById(generatedId)
+                            getById(generatedId, true)
                     );
                 }
             }
@@ -604,5 +607,9 @@ public class ClientSupplierDA extends CRUD<ClientSupplier> {
         }
 
         return suppliers;
+    }
+
+    public void invalidateCache(int id) {
+        IDS_MAPPING_OBJECT.remove(id);
     }
 }

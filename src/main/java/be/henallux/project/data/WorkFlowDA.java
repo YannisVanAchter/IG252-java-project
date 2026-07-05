@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,15 +8,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import main.java.be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.data.exception.DataBaseException;
 
-import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.Document;
-import main.java.be.henallux.project.model.Status;
-import main.java.be.henallux.project.model.WorkFlow;
-import main.java.be.henallux.project.model.WorkFlowType;
+import be.henallux.project.model.ClientSupplier;
+import be.henallux.project.model.Document;
+import be.henallux.project.model.Status;
+import be.henallux.project.model.WorkFlow;
+import be.henallux.project.model.WorkFlowType;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.exception.DataValidationException;
 
 public class WorkFlowDA extends CRUD<WorkFlow> {
 
@@ -248,7 +248,7 @@ public class WorkFlowDA extends CRUD<WorkFlow> {
                 if (generatedKeys.next()) {
 
                     int generatedId = generatedKeys.getInt(1);
-
+                    workflow.setId(generatedId);
                     IDS_MAPPING_OBJECT.put(
                             generatedId,
                             getById(generatedId)
@@ -492,6 +492,22 @@ public class WorkFlowDA extends CRUD<WorkFlow> {
                     "Error while updating workflow other party",
                     e
             );
+        }
+    }
+
+    public void deleteByClientSupplierId(int id) throws DataBaseException, DataValidationException {
+        String query = "SELECT * FROM " + TABLE_NAME + " WHERE usId = ? OR otherId = ?";
+        try (PreparedStatement stmt = connector.getConnection().prepareStatement(query)) {
+            stmt.setInt(1, id);
+            stmt.setInt(2, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    WorkFlow wf = mapDataToObject(rs, false);
+                    delete(wf);
+                }
+            }
+        } catch (Exception e) {
+            throw new DataBaseException("Error while deleting workflows for client supplier", e);
         }
     }
 }

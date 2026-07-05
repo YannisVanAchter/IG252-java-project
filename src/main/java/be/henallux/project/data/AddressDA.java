@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -10,12 +10,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.data.CRUD;
-import main.java.be.henallux.project.data.LocalityDA;
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.Address;
-import main.java.be.henallux.project.model.Locality;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.data.CRUD;
+import be.henallux.project.data.LocalityDA;
+import be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.Address;
+import be.henallux.project.model.Locality;
 
 public class AddressDA extends CRUD<Address> {
     private static volatile AddressDA instance;

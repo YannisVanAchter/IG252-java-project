@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,11 +10,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import main.java.be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.data.exception.DataBaseException;
 
-import main.java.be.henallux.project.model.Status;
-import main.java.be.henallux.project.model.WorkFlowStatusRepository;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.Status;
+import be.henallux.project.model.WorkFlowStatusRepository;
+import be.henallux.project.model.exception.DataValidationException;
 
 public class StatusDA extends CRUD<Status> {
 

@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.data;
+package be.henallux.project.data;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -13,9 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.Discount;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.Discount;
 
 public class DiscountDA extends CRUD<Discount> {
     private static volatile DiscountDA instance;
