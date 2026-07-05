@@ -1,11 +1,11 @@
-package main.java.be.henallux.project.model;
+package be.henallux.project.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.Model;
-import main.java.be.henallux.project.model.Product;
+import be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.Model;
+import be.henallux.project.model.Product;
 
 public class Discount implements Model {
     private int requiredQuantity;
@@ -128,7 +128,9 @@ public class Discount implements Model {
         return requiredQuantity == other.getRequiredQuantity() &&
                 discountPercentage.compareTo(other.getDiscountPercentage()) == 0 &&
                 startDate.equals(other.getStartDate()) &&
-                endDate.equals(other.getEndDate());
+                endDate.equals(other.getEndDate()) &&
+                name.equals(other.getName()) &&
+                product.equals(other.getProduct());
     }
 
     public static int hashCode(int quantity, BigDecimal percent, LocalDate start, LocalDate end) {

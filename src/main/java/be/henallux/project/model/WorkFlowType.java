@@ -1,6 +1,6 @@
-package main.java.be.henallux.project.model;
+package be.henallux.project.model;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.exception.DataValidationException;
 
 /**
  * A workflow type defines if the linked workflow is a buy, sell, or internal workflow.
@@ -24,6 +24,9 @@ public class WorkFlowType implements Model {
     }
 
     private void check() throws DataValidationException {
+        if (!isBuy && !isSell && !isInternal) {
+            throw new DataValidationException("A workflow type must be at least one of: buy, sell, internal.");
+        }
         if (isBuy && isSell) {
             throw new DataValidationException("A workflow type cannot be both buy and sell.");
         }

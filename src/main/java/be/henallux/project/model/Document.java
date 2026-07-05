@@ -1,10 +1,10 @@
-package main.java.be.henallux.project.model;
+package be.henallux.project.model;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.exception.DataValidationException;
 
 /**
  * This class represents a document, which can be of various types (e.g., delivery, command, etc.).
@@ -350,7 +350,7 @@ public class Document implements Model {
     }
 
     public void setRecipeOrder(Recipe recipeOrder) throws DataValidationException {
-        if (TYPES_REQUIRING_RECIPE_ORDER.contains(getDocumentType())) {
+        if (recipeOrder == null && TYPES_REQUIRING_RECIPE_ORDER.contains(getDocumentType())) {
             throw new DataValidationException(
                 String.format(  "Recipe cannot be null for %s document types.",
                                         TYPES_REQUIRING_RECIPE_ORDER.toString())

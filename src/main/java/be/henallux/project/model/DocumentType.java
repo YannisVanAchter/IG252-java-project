@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.model;
+package be.henallux.project.model;
 
 /**
  * A document type with a name.

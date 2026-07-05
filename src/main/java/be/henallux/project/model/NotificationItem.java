@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.model;
+package be.henallux.project.model;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

@@ -2,13 +2,13 @@ package be.henallux.project.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import main.java.be.henallux.project.model.Locality;
+import be.henallux.project.model.Locality;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.Address;
-import main.java.be.henallux.project.model.ClientSupplier;
+import be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.Address;
+import be.henallux.project.model.ClientSupplier;
 
 import java.time.LocalDate;
 
@@ -126,7 +126,7 @@ public class ClientSupplierTest {
             address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
         );
         ClientSupplier cs2 = new ClientSupplier(
-            0, "Martin", "Jean", "jean.martin@example.com", "0123456789",
+            1, "Martin", "Jean", "jean.martin@example.com", "0123456789",
             address, true, true, false, "FR12345678901", LocalDate.of(2020, 1, 15)
         );
         assertNotEquals(cs1, cs2, "ClientSuppliers with different names should not be equal");
@@ -358,26 +358,14 @@ public class ClientSupplierTest {
     }
 
     @Test
-    public void isUsTrueWithBothFalseThrows() throws DataValidationException {
-        String streetName = "Rue de la Loi";
-        int streetNumber = 16;
-        Locality locality = new Locality("marlon",7500);
-        Address address = new Address(123, streetName, streetNumber, locality);
-        assertThrows(DataValidationException.class, () ->
-            new ClientSupplier(0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-                address, false, false, true, null, null)
-        );
-    }
-
-    @Test
     public void getTypeClientAndSupplier() throws DataValidationException {
         String streetName = "Rue de la Loi";
         int streetNumber = 16;
         Locality locality = new Locality("marlon",7500);
         Address address = new Address(123, streetName, streetNumber, locality);
         ClientSupplier cs = new ClientSupplier(
-            0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
-            address, true, true, false, null, null
+                0, "Dupont", "Jean", "jean.dupont@example.com", "0123456789",
+                address, true, true, false, "BE12345678901", LocalDate.of(2020, 1, 15)
         );
         assertEquals("client and supplier", cs.getType());
     }

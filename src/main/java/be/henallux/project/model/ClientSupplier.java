@@ -1,8 +1,8 @@
-package main.java.be.henallux.project.model;
+package be.henallux.project.model;
 
 import java.time.LocalDate;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.exception.DataValidationException;
 
 /**
  * This class represents a client or supplier, which can be either a client, a supplier, or both.
@@ -201,19 +201,19 @@ public class ClientSupplier implements Model {
 
     @Override
     public String toString() {
-        return  "ClientSupplier{id=" + id + 
-                                ", name='" + name + 
-                                ", firstname='" + firstname + 
-                                "'', email='" + email + 
-                                "'', phoneNumber='" + phoneNumber + 
-                                "', address=" + (address != null ? address.toString() : "null") + 
-                                ", isClient=" + isClient + 
-                                ", isSupplier=" + isSupplier + 
-                                ", isUs=" + isUs + 
-                                ", VATNumber='" + VATNumber + 
-                                "', becameClientDate=" + becameClientDate + 
-                                ", fidelityCard=" + ( (fidelityCard != null) ? fidelityCard.toString(): "null") +
-                                "}";
+        return "ClientSupplier{id=" + id +
+                ", name='" + name + "'" +
+                ", firstname='" + firstname + "'" +
+                ", email='" + email + "'" +
+                ", phoneNumber='" + phoneNumber + "'" +
+                ", address=" + (address != null ? address.toString() : "null") +
+                ", isClient=" + isClient +
+                ", isSupplier=" + isSupplier +
+                ", isUs=" + isUs +
+                ", VATNumber='" + VATNumber + "'" +
+                ", becameClientDate=" + becameClientDate +
+                ", fidelityCard=" + (fidelityCard != null ? fidelityCard.toString() : "null") +
+                "}";
     }
 
     @Override

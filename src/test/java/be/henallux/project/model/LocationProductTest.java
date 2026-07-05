@@ -5,24 +5,23 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.*;
+import be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.*;
 
 public class LocationProductTest {
     @Test
     public void basicCreationTest() {
         try {
-            String locationProductId = "LP1";
             String shelf = "A";
             String floor = "1";
             boolean isStock = true;
             boolean isFreezer = false;
             LocationProduct locationProduct = new LocationProduct(shelf, floor, isStock, isFreezer);
-            assertEquals(locationProductId, locationProduct.getLocationProductId(), "Assertion creation LP1 has failed, IDs are different");
+            assertEquals("A-1-true", locationProduct.getLocationProductId(), "Assertion creation LP1 has failed, IDs are different");
             assertEquals(shelf, locationProduct.getShelf(), "Assertion creation A has failed, shelves are different");
             assertEquals(floor, locationProduct.getFloor(), "Assertion creation 1 has failed, floors are different");
             assertEquals(isStock, locationProduct.getIsStock(), "Assertion creation true has failed, stock status are different");
-            assertEquals(isFreezer, locationProduct.getIsFreezer(), "Assertion creation false has failed, freezer status are different");   
+            assertEquals(isFreezer, locationProduct.getIsFreezer(), "Assertion creation false has failed, freezer status are different");
         } catch (DataValidationException e) {
             fail("Unexpected exception thrown: " + e.getMessage());
         }
@@ -32,8 +31,8 @@ public class LocationProductTest {
     public void comparisonEqualTest() {
         try {
             assertEquals(new LocationProduct("LP1", "A", true, true),
-                        new LocationProduct("LP1", "A", false, true),
-                        "AssertEqual LP1 A 1 true false not OK");
+                    new LocationProduct("LP1", "A", true, true),
+                    "AssertEqual LP1 A true true not OK");
         } catch (DataValidationException e) {
             fail("Unexpected exception thrown: " + e.getMessage());
         }

@@ -7,11 +7,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.java.be.henallux.project.model.*;
+import be.henallux.project.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.exception.DataValidationException;
 
 public class DiscountTest {
 
@@ -216,12 +216,11 @@ public class DiscountTest {
     @Test
     public void comparisonNotEqualDifferentProduct() throws DataValidationException {
         ProductCategory fruitsCategory = new ProductCategory(1, "Fruits");
-
         Product otherProduct = new Product(2, "Laptop", new BigDecimal("1000"), new BigDecimal("100"), 5,
-        true, 10, fruitsCategory, null, null);
+                true, 10, fruitsCategory, null, null);
         assertNotEquals(
-            buildValid(),
-            new Discount(requiredQuantity, discountPercentage, startDate, endDate, name, otherProduct)
+                buildValid(),
+                new Discount(requiredQuantity + 1, discountPercentage, startDate, endDate, name, otherProduct) // ← quantité différente
         );
     }
 }

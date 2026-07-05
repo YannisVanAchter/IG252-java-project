@@ -1,6 +1,6 @@
-package main.java.be.henallux.project.model;
+package be.henallux.project.model;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.exception.DataValidationException;
 
 public class RecipeComposition implements Model {
     private int quantity;

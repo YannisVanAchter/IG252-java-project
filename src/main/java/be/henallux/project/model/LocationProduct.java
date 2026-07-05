@@ -1,7 +1,7 @@
-package main.java.be.henallux.project.model;
+package be.henallux.project.model;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.Model;
+import be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.Model;
 
 public class LocationProduct implements Model {
     private String locationProductId;

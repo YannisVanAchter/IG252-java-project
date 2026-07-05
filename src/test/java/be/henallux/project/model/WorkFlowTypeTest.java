@@ -3,8 +3,8 @@ package be.henallux.project.model;
 import static org.junit.jupiter.api.Assertions.*; 
 import org.junit.jupiter.api.Test;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.*;
+import be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.*;
 
 public class WorkFlowTypeTest {
     @Test
@@ -24,8 +24,8 @@ public class WorkFlowTypeTest {
 
     @Test
     public void wrongCombination() {
-        assertThrows(DataValidationException.class, () -> { new WorkFlowType(123, "madame leroy", true, false, false); });
-        assertThrows(DataValidationException.class, () -> { new WorkFlowType(456, "madame louise", false, true, false); });
-        assertThrows(DataValidationException.class, () -> { new WorkFlowType(789, "madame leboeuf", false, false, true); });
+        assertThrows(DataValidationException.class, () -> { new WorkFlowType(123, "madame leroy", true, true, false); });   // buy + sell
+        assertThrows(DataValidationException.class, () -> { new WorkFlowType(456, "madame louise", true, false, true); });  // buy + internal ← corrigé
+        assertThrows(DataValidationException.class, () -> { new WorkFlowType(789, "madame leboeuf", false, true, true); }); // sell + internal
     }
 }

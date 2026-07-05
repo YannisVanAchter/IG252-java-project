@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.*;
+import be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.*;
 
 public class StatusTest {
     @Test

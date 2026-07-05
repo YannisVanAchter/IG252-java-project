@@ -1,6 +1,6 @@
-package main.java.be.henallux.project.model;
+package be.henallux.project.model;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.exception.DataValidationException;
 
 public class FidelityCard implements Model {
     private int id;
@@ -39,7 +39,7 @@ public class FidelityCard implements Model {
         return totalPoint;
     }
 
-    private void setTotalPoint(int totalPoint) throws DataValidationException {
+    public void setTotalPoint(int totalPoint) throws DataValidationException {
         if (totalPoint < 0) {
             String message = "Total point setting error, total point is lower than 0 when it shouldn't (current value: " + totalPoint + ")";
             throw new DataValidationException(message);

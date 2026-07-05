@@ -1,10 +1,10 @@
-package main.java.be.henallux.project.model;
+package be.henallux.project.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.exception.DataValidationException;
 
 /**
  * A workfow as an id, a status and a workflow type.

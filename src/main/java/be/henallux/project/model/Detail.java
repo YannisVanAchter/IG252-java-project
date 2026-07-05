@@ -1,11 +1,11 @@
-package main.java.be.henallux.project.model;
+package be.henallux.project.model;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.exception.DataValidationException;
 
 public class Detail implements Model {
     private int id;

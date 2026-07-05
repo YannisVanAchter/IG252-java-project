@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.model;
+package be.henallux.project.model;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -6,19 +6,19 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.java.be.henallux.project.model.*;
+import be.henallux.project.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.model.Product;
-import main.java.be.henallux.project.model.ProductCategory;
+import be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.model.Product;
+import be.henallux.project.model.ProductCategory;
 
 
 public class ProductTest {
 
-private int id;
+    private int id;
     private String name;
     private BigDecimal priceEVAT;
     private BigDecimal vat;
@@ -28,7 +28,7 @@ private int id;
     private ProductCategory category;
     private List<Discount> discounts;
     private Product product;
-    private LocationProduct  locationProduct;
+    private LocationProduct locationProduct;
 
     @BeforeEach
     public void setUp() throws DataValidationException {
@@ -44,12 +44,18 @@ private int id;
             id = 1;
             name = "Laptop";
             priceEVAT = new BigDecimal("1000");
-            vat = new BigDecimal("500");
+            vat = new BigDecimal("21");
             fidelityPoint = 10;
             isEdible = false;
             minStockQuantity = 5;
 
             discounts = new ArrayList<>();
+
+            product = new Product(
+                    id, name, priceEVAT, vat,
+                    fidelityPoint, isEdible, minStockQuantity,
+                    category, null, null
+            );
         } catch (DataValidationException e) {
             fail("Failed to initialize test dependencies");
         }
@@ -57,22 +63,22 @@ private int id;
 
     @Test
     public void basicCreationTest() {
-        assertEquals(id,   product.getId(),   "id should be 1");
+        assertEquals(id, product.getId(), "id should be 1");
         assertEquals(name, product.getName(), "name should be Laptop");
-        assertEquals(0, priceEVAT.compareTo(product.getPriceEVAT()),       "costPrice should be 1000");
+        assertEquals(0, priceEVAT.compareTo(product.getPriceEVAT()), "costPrice should be 1000");
         assertEquals(0, vat.compareTo(product.getVat()), "sellingPrice should be 1500");
-        assertEquals(minStockQuantity,     product.getStockQuantity(), "stockQuantity should be 100");
-        assertEquals(minStockQuantity, product.getMinStockQuantity(),      "minStock should be 5");
-        assertEquals(category,   product.getCategory(),      "category should be Electronics");
-        assertNotNull(product.getDiscounts(),                      "discounts should not be null");
+        assertEquals(0, product.getStockQuantity(), "stockQuantity should be 0 at creation");
+        assertEquals(minStockQuantity, product.getMinStockQuantity(), "minStock should be 5");
+        assertEquals(category, product.getCategory(), "category should be Electronics");
+        assertNotNull(product.getDiscounts(), "discounts should not be null");
     }
 
     @Test
     public void comparisonEqualTest() throws DataValidationException {
         Product product2 = new Product(
-            id, name, priceEVAT, vat,
-            fidelityPoint, isEdible, minStockQuantity,
-            category, null,discounts
+                id, name, priceEVAT, vat,
+                fidelityPoint, isEdible, minStockQuantity,
+                category, null, discounts
         );
         assertEquals(product, product2, "Two identical Products should be equal");
     }
@@ -88,9 +94,9 @@ private int id;
     @Test
     public void negativeIdThrows() {
         assertThrows(DataValidationException.class, () ->
-            new Product(-1, name, priceEVAT, vat,
-                fidelityPoint, isEdible, minStockQuantity,
-                category, null,discounts)
+                new Product(-1, name, priceEVAT, vat,
+                        fidelityPoint, isEdible, minStockQuantity,
+                        category, null, discounts)
         );
     }
 }

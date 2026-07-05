@@ -1,8 +1,8 @@
-package main.java.be.henallux.project.model;
+package be.henallux.project.model;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.Locality;
-import main.java.be.henallux.project.model.Model;
+import be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.Locality;
+import be.henallux.project.model.Model;
 
 /**
  * This class represents an address, which consists of a street name, street number, and a locality.
@@ -67,7 +67,7 @@ public class Address implements Model {
 
     public Locality getLocality() { return locality; }
 
-    private void setLocality(Locality locality) throws DataValidationException {
+    public void setLocality(Locality locality) throws DataValidationException {
         if (locality == null) {
             String message = "locality setting error, locality is null when it shouldn't";
             throw new DataValidationException(message);

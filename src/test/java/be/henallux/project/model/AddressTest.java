@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import main.java.be.henallux.project.model.Locality;
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.Address;
+import be.henallux.project.model.Locality;
+import be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.Address;
 
 public class AddressTest {
     private Locality locality;
@@ -20,7 +20,7 @@ public class AddressTest {
             e.printStackTrace();
         }
     }
-    
+
     @Test
     public void basicCreationTest() {
         try {
@@ -67,9 +67,10 @@ public class AddressTest {
     @Test
     public void comparisonNotEqualTest() {
         try {
-            Locality locality = new Locality("marlon",7500);
-            Address address = new Address(123, "Rue de la Loi", 16, locality);
-            assertNotEquals(address, address, "AssertEqual Rue de la Loi 16 VS 17 Namur 5000 not OK");
+            Locality locality = new Locality("marlon", 7500);
+            Address address1 = new Address(123, "Rue de la Loi", 16, locality);
+            Address address2 = new Address(456, "Rue de la Loi", 17, locality); // ← numéro différent
+            assertNotEquals(address1, address2, "AssertNotEqual Rue de la Loi 16 VS 17 Namur 5000 not OK");
         } catch (DataValidationException e) {
             e.printStackTrace();
         }

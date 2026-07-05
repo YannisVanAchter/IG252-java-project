@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.ProductCategory;
+import be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.ProductCategory;
 
 public class ProductCategoryTest {
 
@@ -46,7 +46,7 @@ public class ProductCategoryTest {
     public void comparisonNotEqualDifferentName() throws DataValidationException {
         assertNotEquals(
             new ProductCategory(1, "Category 1"),
-            new ProductCategory(1, "Category 2"),
+            new ProductCategory(2, "Category 2"),
             "ProductCategories with different names should not be equal"
         );
     }

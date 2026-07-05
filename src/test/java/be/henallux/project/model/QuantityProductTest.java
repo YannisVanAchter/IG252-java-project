@@ -5,13 +5,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import main.java.be.henallux.project.model.exception.DataValidationException;
-import main.java.be.henallux.project.model.LocationProduct;
-import main.java.be.henallux.project.model.QuantityProduct;
+import be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.LocationProduct;
+import be.henallux.project.model.QuantityProduct;
+
+import java.math.BigDecimal;
 
 public class QuantityProductTest {
     private LocationProduct locationProduct;
-    
+
     @BeforeEach
     public void setUp() {
         try {
@@ -89,7 +91,10 @@ public class QuantityProductTest {
     @Test
     public void quantityNegativeTest() {
         try {
-            new QuantityProduct(locationProduct, null, -1);
+            ProductCategory category = new ProductCategory(1, "Electronics");
+            Product product = new Product(1, "Smartphone", new BigDecimal("500"), new BigDecimal("21"),
+                    10, true, 5, category, null, null);
+            new QuantityProduct(locationProduct, product, -1);
             fail("Creation of QuantityProduct with quantity -1 should have thrown a DataValidationException");
         } catch (DataValidationException e) {
             assertEquals("Quantity setting error, quantity is lower than 0 when it shouldn't (current value: -1)", e.getMessage(), "Assertion quantity setting error message has failed, messages are different");
@@ -130,7 +135,10 @@ public class QuantityProductTest {
     @Test
     public void setQuantityNegativeTest() {
         try {
-            QuantityProduct qp = new QuantityProduct(locationProduct, null, 10);
+            ProductCategory category = new ProductCategory(1, "Electronics");
+            Product product = new Product(1, "Smartphone", new BigDecimal("500"), new BigDecimal("21"),
+                    10, true, 5, category, null, null);
+            QuantityProduct qp = new QuantityProduct(locationProduct, product, 10);
             qp.setQuantity(-1);
             fail("Setting quantity to -1 should have thrown a DataValidationException");
         } catch (DataValidationException e) {
