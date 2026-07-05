@@ -698,15 +698,14 @@ WHERE p.id_ = dt.productId
   AND dt.documentId = d.id_
   AND d.workflowId = w.id_
   AND w.workFlowTypeId = wt.id_
-  AND wt.isSupplier = TRUE
+  AND wt.isBuy = TRUE
   AND w.otherId = cs.id_;
 
 CREATE VIEW vw_LowQuantity_ProductSupplier AS
-SELECT v.productId as productID, v.supplierId as supplierId
-FROM vw_ProductSuppliers v,
-     Product p
-WHERE v.productId = p.id_
-  AND p.minStockQuantity * 1.1 >= (SELECT SUM(q.quantity)
+SELECT DISTINCT v.productId AS productID, v.supplierId AS supplierId
+FROM vw_ProductSuppliers v
+         JOIN Product p ON v.productId = p.id_
+WHERE p.minStockQuantity * 1.1 >= (SELECT COALESCE(SUM(q.quantity), 0)
                                    FROM QuantityProduct q
                                    WHERE p.id_ = q.productId)
 ORDER BY v.supplierId;
@@ -807,7 +806,6 @@ VALUES
 (45, 'Dried Oregano 15g', 0.99, 6.00, 1, TRUE, 30, 14),
 -- Seafood (15)
 (46, 'Atlantic Salmon Fillet 300g', 7.99, 6.00, 4, TRUE, 15, 15),
-(47, 'Cooked Shrimps 200g', 5.49, 6.00, 3, TRUE, 15, 15),
 (48, 'Cod Fillet 400g', 6.99, 6.00, 3, TRUE, 15, 15),
 -- Deli & Charcuterie (16)
 (49, 'Sliced Ham 150g', 2.99, 6.00, 2, TRUE, 20, 16),
@@ -877,8 +875,10 @@ VALUES
 (98, 'Croissant Ham and Cheese Sandwich (préparé)', 5.49, 6.00, 3, TRUE, 5, 6),
 (99, 'Greek Yogurt Banana Bowl (préparé)', 4.99, 6.00, 3, TRUE, 5, 5),
 (100, 'Paprika Chicken with Frozen Fries (préparé)', 9.49, 6.00, 5, TRUE, 5, 4),
-(101, 'Cod with Tomato Sauce and Rice (préparé)', 9.99, 6.00, 5, TRUE, 5, 15);
-
+(101, 'Cod with Tomato Sauce and Rice (préparé)', 9.99, 6.00, 5, TRUE, 5, 15),
+(102, 'Chocolate Mousse', 5.99, 6.00, 3, TRUE, 10, 10),
+(103, 'Banana Chocolate Pancakes', 6.49, 6.00, 3, TRUE, 10, 10),
+(104, 'Greek Yogurt with Honey and Chocolate', 4.99, 6.00, 3, TRUE, 10, 10);
 
 INSERT INTO LocationProduct (shelf, floor_, isStock, isFreezer)
 VALUES ('A-a', 1, TRUE, FALSE),
@@ -891,13 +891,14 @@ VALUES ('A-a', 1, TRUE, FALSE),
        ('B-b', 1, FALSE, TRUE);
 
 INSERT INTO QuantityProduct (shelf, floor_, isStock, productId, quantity)
-VALUES ('A-a', 1, TRUE, 1, 12),
+VALUES ('A-a', 1, TRUE, 1, 2),
        ('A-a', 1, TRUE, 2, 18),
        ('A-a', 1, TRUE, 3, 7),
        ('A-a', 1, TRUE, 4, 4),
        ('A-a', 1, TRUE, 5, 4),
        ('A-a', 1, TRUE, 6, 10),
        ('A-a', 1, TRUE, 7, 10),
+       ('A-a', 1, TRUE, 22, 100),
        ('A-a', 1, TRUE, 25, 30),
        ('A-a', 1, TRUE, 26, 40),
        ('A-a', 1, TRUE, 27, 45),
@@ -960,7 +961,7 @@ VALUES ('A-a', 1, TRUE, 1, 12),
        ('A-a', 2, TRUE, 89, 12),
        ('A-a', 2, TRUE, 90, 12),
        ('A-a', 2, TRUE, 91, 22),
-       ('A-a', 2, TRUE, 92, 10),
+       ('A-a', 2, TRUE, 92, 15),
        ('A-a', 2, TRUE, 93, 12),
 
        ('A-a', 3, TRUE, 23, 30),
@@ -982,16 +983,26 @@ VALUES ('A-a', 1, TRUE, 1, 12),
        ('A-b', 1, TRUE, 20, 30),
        ('A-b', 1, TRUE, 21, 48),
        ('A-b', 1, TRUE, 46, 18),
-       ('A-b', 1, TRUE, 47, 18),
        ('A-b', 1, TRUE, 48, 18),
        ('A-b', 1, TRUE, 49, 24),
        ('A-b', 1, TRUE, 50, 22),
        ('A-b', 1, TRUE, 51, 18),
        ('A-b', 1, TRUE, 53, 14),
-       ('A-b', 1, TRUE, 87, 24);
+       ('A-b', 1, TRUE, 87, 24),
+       ('A-b', 1, TRUE, 94, 20),
+       ('A-b', 1, TRUE, 95, 10),
+       ('A-b', 1, TRUE, 96, 10),
+       ('A-b', 1, TRUE, 97, 10),
+       ('A-b', 1, TRUE, 98, 10),
+       ('A-b', 1, TRUE, 99, 10),
+       ('A-b', 1, TRUE, 100, 10),
+       ('A-b', 1, TRUE, 101, 10),
+       ('A-b', 1, TRUE, 102, 25),
+       ('A-b', 1, TRUE, 103, 30),
+       ('A-b', 1, TRUE, 104, 35);
 
 INSERT INTO QuantityProduct (shelf, floor_, isStock, productId, quantity)
-VALUES ('B-a', 1, FALSE, 1, 10),
+VALUES ('B-a', 1, FALSE, 1, 1),
        ('B-a', 1, FALSE, 2, 15),
        ('B-a', 1, FALSE, 3, 5),
        ('B-a', 1, FALSE, 4, 3),
@@ -1048,7 +1059,7 @@ VALUES ('B-a', 1, FALSE, 1, 10),
        ('B-a', 2, FALSE, 77, 10),
        ('B-a', 2, FALSE, 78, 10),
        ('B-a', 2, FALSE, 79, 15),
-       ('B-a', 2, FALSE, 80, 5),
+       ('B-a', 2, FALSE, 80, 15),
        ('B-a', 2, FALSE, 81, 5),
        ('B-a', 2, FALSE, 82, 8),
        ('B-a', 2, FALSE, 83, 8),
@@ -1081,7 +1092,6 @@ VALUES ('B-a', 1, FALSE, 1, 10),
        ('B-b', 1, FALSE, 20, 25),
        ('B-b', 1, FALSE, 21, 40),
        ('B-b', 1, FALSE, 46, 15),
-       ('B-b', 1, FALSE, 47, 15),
        ('B-b', 1, FALSE, 48, 15),
        ('B-b', 1, FALSE, 49, 20),
        ('B-b', 1, FALSE, 50, 20),
@@ -1111,40 +1121,38 @@ VALUES (20.00, 1, '2023-12-20', '2024-01-02', 'Promo Fêtes', 29),
        (20.00, 5, '2025-01-15', '2025-01-31', 'Déstockage', 91);
 -- Discount active
 INSERT INTO Discount (discountPercentage, requiredQuantity, startDate, endDate, name_, productId)
-VALUES (15.00, 2, '2025-05-01', '2025-06-15', 'Seasonal Vegetables', 10),
-       (10.00, 3, '2025-05-01', '2025-06-15', 'Seasonal Vegetables', 9),
-       (20.00, 1, '2025-05-26', '2025-06-08', 'Fish Week', 46),
-       (15.00, 1, '2025-05-26', '2025-06-08', 'Fish Week', 48),
-       (10.00, 2, '2025-05-26', '2025-06-08', 'Fish Week', 47),
-       (10.00, 2, '2025-05-15', '2025-06-14', 'Hygiene Plus', 54),
-       (12.00, 3, '2025-05-20', '2025-06-20', 'Grocery Bundle', 37),
-       (10.00, 3, '2025-05-20', '2025-06-20', 'Grocery Bundle', 39),
-       (18.00, 1, '2025-06-01', '2025-06-30', 'Tech June', 79),
-       (22.00, 1, '2025-06-01', '2025-06-30', 'Tech June', 80),
-       (15.00, 2, '2025-06-01', '2025-06-30', 'Happy Pets', 64),
-       (20.00, 6, '2025-05-28', '2025-06-07', 'Weekend Snacks', 31),
-       (15.00, 4, '2025-05-28', '2025-06-07', 'Weekend Snacks', 33);
-
+VALUES (15.00, 2, '2026-05-15', '2026-08-15', 'Seasonal Vegetables', 10),
+       (10.00, 3, '2026-05-15', '2026-08-15', 'Seasonal Vegetables', 9),
+       (20.00, 1, '2026-05-26', '2026-08-15', 'Fish Week', 46),
+       (15.00, 1, '2026-05-26', '2026-08-15', 'Fish Week', 48),
+       (10.00, 2, '2026-05-15', '2026-08-15', 'Hygiene Plus', 54),
+       (12.00, 3, '2026-05-20', '2026-08-15', 'Grocery Bundle', 37),
+       (10.00, 3, '2026-05-20', '2026-08-15', 'Grocery Bundle', 39),
+       (18.00, 1, '2026-06-01', '2026-08-15', 'Tech June', 79),
+       (22.00, 1, '2026-06-01', '2026-08-15', 'Tech June', 80),
+       (15.00, 2, '2026-06-01', '2026-08-15', 'Happy Pets', 64),
+       (20.00, 6, '2026-05-28', '2026-08-15', 'Weekend Snacks', 31),
+       (15.00, 4, '2026-05-28', '2026-08-15', 'Weekend Snacks', 33);
 -- Discount futur
 INSERT INTO Discount (discountPercentage, requiredQuantity, startDate, endDate, name_, productId)
-VALUES (30.00, 1, '2025-07-01', '2025-07-31', 'Summer Sale', 73),
-       (25.00, 1, '2025-07-01', '2025-07-31', 'Summer Sale', 75),
-       (35.00, 1, '2025-07-01', '2025-07-31', 'Summer Sale', 76),
-       (20.00, 1, '2025-07-01', '2025-07-31', 'Summer Sale', 77),
-       (21.00, 1, '2025-07-21', '2025-07-21', 'National Day', 28),
-       (25.00, 1, '2025-07-21', '2025-07-21', 'National Day ', 29),
-       (15.00, 2, '2025-08-20', '2025-09-15', 'Back to School', 67),
-       (10.00, 2, '2025-08-20', '2025-09-15', 'Back to School', 68),
-       (12.00, 3, '2025-08-20', '2025-09-15', 'Back to School', 69),
-       (20.00, 1, '2025-08-20', '2025-09-15', 'Back to School', 92),
-       (20.00, 1, '2025-09-01', '2025-09-30', 'Autumn Gardening', 85),
-       (15.00, 1, '2025-09-01', '2025-09-30', 'Autumn Gardening', 86),
-       (35.00, 1, '2025-11-28', '2025-11-30', 'Black Friday', 4),
-       (40.00, 1, '2025-11-28', '2025-11-30', 'Black Friday', 5),
-       (30.00, 1, '2025-11-28', '2025-11-30', 'Black Friday', 81),
-       (20.00, 1, '2025-12-15', '2025-12-31', 'Christmas', 30),
-       (15.00, 3, '2025-12-15', '2025-12-31', 'Christmas', 32),
-       (10.00, 2, '2025-12-15', '2025-12-31', 'Christmas', 51);
+VALUES (30.00, 1, '2026-08-20', '2026-10-20', 'Summer Sale', 73),
+       (25.00, 1, '2026-08-20', '2026-10-20', 'Summer Sale', 75),
+       (35.00, 1, '2026-08-20', '2026-10-20', 'Summer Sale', 76),
+       (20.00, 1, '2026-08-20', '2026-10-20', 'Summer Sale', 77),
+       (21.00, 1, '2026-07-21', '2026-07-21', 'National Day', 28),
+       (25.00, 1, '2026-07-21', '2026-07-21', 'National Day ', 29),
+       (15.00, 2, '2026-08-20', '2026-10-15', 'Back to School', 67),
+       (10.00, 2, '2026-08-20', '2026-10-15', 'Back to School', 68),
+       (12.00, 3, '2026-08-20', '2026-10-15', 'Back to School', 69),
+       (20.00, 1, '2026-08-20', '2026-10-15', 'Back to School', 92),
+       (20.00, 1, '2026-09-01', '2026-10-15', 'Autumn Gardening', 85),
+       (15.00, 1, '2026-09-01', '2026-10-15', 'Autumn Gardening', 86),
+       (35.00, 1, '2026-11-28', '2026-11-30', 'Black Friday', 4),
+       (40.00, 1, '2026-11-28', '2026-11-30', 'Black Friday', 5),
+       (30.00, 1, '2026-11-28', '2026-11-30', 'Black Friday', 81),
+       (20.00, 1, '2026-12-15', '2026-12-31', 'Christmas', 30),
+       (15.00, 3, '2026-12-15', '2026-12-31', 'Christmas', 32),
+       (10.00, 2, '2026-12-15', '2026-12-31', 'Christmas', 51);
 
 INSERT INTO Locality (postalId, city)
 VALUES (1000, 'Bruxelles'),
@@ -1189,23 +1197,23 @@ VALUES ('Rue de la Java', 1, 1000, 'Bruxelles'),
        ('Avenue de Stassart', 28, 5000, 'Namur');
 
 -- Magasin
-INSERT INTO Client_supplier (name_, firstname, email, phoneNumber, isClient, isSupplier, isUs, addressId)
-VALUES ('Le grand Bazard', NULL, 'contact@magasin.be', '047123456789', false, false, true, 1);
+INSERT INTO Client_supplier (id_, name_, firstname, email, phoneNumber, isClient, isSupplier, isUs, addressId)
+VALUES (1, 'Le grand Bazard', NULL, 'contact@magasin.be', '047123456789', false, false, true, 1);
 
 -- Clients
-INSERT INTO Client_supplier (name_, firstname, email, phoneNumber, isClient, isSupplier, isUs, VATNumber,
+INSERT INTO Client_supplier (id_, name_, firstname, email, phoneNumber, isClient, isSupplier, isUs, VATNumber,
                              dateBecameClient, addressId)
-VALUES ('Dupont', 'Marie', 'marie.dupont@gmail.com', '0470123456', TRUE, FALSE, FALSE, NULL, '2021-03-15', 2),
-       ('Lejeune', 'Thomas', 'thomas.lejeune@hotmail.com', '0478234567', TRUE, FALSE, FALSE, NULL, '2020-07-22', 3),
-       ('Peeters', 'Sofie', 'sofie.peeters@outlook.com', '0492345678', TRUE, FALSE, FALSE, NULL, '2019-11-05', 4),
-       ('De Smet', 'Jonas', 'jonas.desmet@gmail.com', '0456456789', TRUE, FALSE, FALSE, NULL, '2022-01-30', 5),
-       ('Lambert', 'Isabelle', 'isabelle.lambert@yahoo.fr', '0471567890', TRUE, FALSE, FALSE, NULL, '2018-06-10', 6),
-       ('Maes', 'Pieter', 'pieter.maes@gmail.com', '0493678901', TRUE, FALSE, FALSE, NULL, '2023-02-14', 7),
-       ('Renard', 'Claire', 'claire.renard@proximus.be', '0487789012', TRUE, FALSE, FALSE, NULL, '2021-09-03', 8),
-       ('Claes', 'Bram', 'bram.claes@telenet.be', '0465890123', TRUE, FALSE, FALSE, NULL, '2020-04-18', 9),
-       ('Fontaine', 'Nathalie', 'nathalie.fontaine@gmail.com', '0479901234', TRUE, FALSE, FALSE, NULL, '2017-12-01',
+VALUES (2, 'Dupont', 'Marie', 'marie.dupont@gmail.com', '0470123456', TRUE, FALSE, FALSE, NULL, '2021-03-15', 2),
+       (3, 'Lejeune', 'Thomas', 'thomas.lejeune@hotmail.com', '0478234567', TRUE, FALSE, FALSE, NULL, '2020-07-22', 3),
+       (4, 'Peeters', 'Sofie', 'sofie.peeters@outlook.com', '0492345678', TRUE, FALSE, FALSE, NULL, '2019-11-05', 4),
+       (5, 'De Smet', 'Jonas', 'jonas.desmet@gmail.com', '0456456789', TRUE, FALSE, FALSE, NULL, '2022-01-30', 5),
+       (6, 'Lambert', 'Isabelle', 'isabelle.lambert@yahoo.fr', '0471567890', TRUE, FALSE, FALSE, NULL, '2018-06-10', 6),
+       (7, 'Maes', 'Pieter', 'pieter.maes@gmail.com', '0493678901', TRUE, FALSE, FALSE, NULL, '2023-02-14', 7),
+       (8, 'Renard', 'Claire', 'claire.renard@proximus.be', '0487789012', TRUE, FALSE, FALSE, NULL, '2021-09-03', 8),
+       (9, 'Claes', 'Bram', 'bram.claes@telenet.be', '0465890123', TRUE, FALSE, FALSE, NULL, '2020-04-18', 9),
+       (10, 'Fontaine', 'Nathalie', 'nathalie.fontaine@gmail.com', '0479901234', TRUE, FALSE, FALSE, NULL, '2017-12-01',
         10),
-       ('Willems', 'Kevin', 'kevin.willems@hotmail.be', '0468012345', TRUE, FALSE, FALSE, NULL, '2022-08-25', 11);
+       (11, 'Willems', 'Kevin', 'kevin.willems@hotmail.be', '0468012345', TRUE, FALSE, FALSE, NULL, '2022-08-25', 11);
 
 -- Fournisseurs
 INSERT INTO Client_supplier (name_, firstname, email, phoneNumber, isClient, isSupplier, isUs, VATNumber,
@@ -1233,14 +1241,11 @@ VALUES ('BioFresh SA', NULL, 'contact@biofresh.be', '010441122', FALSE, TRUE, FA
 
 -- Fidelity Cards
 INSERT INTO FidelityCard (points, isValid, clientId)
-VALUES (150, TRUE, 2),
-       (320, TRUE, 3),
-       (80, TRUE, 5),
-       (5000, FALSE, 6),
+VALUES (80, TRUE, 5),
+       (5000, TRUE, 6),
        (540, TRUE, 7),
        (210, TRUE, 8),
-       (1050, TRUE, 10),
-       (75, TRUE, 11);
+       (1050, TRUE, 10);
 
 INSERT INTO DocumentType (id_, name_)
 VALUES (1, 'Purchase Order'),
@@ -1259,9 +1264,10 @@ VALUES ('Pending'),
        ('Paid');
 
 INSERT INTO WorkFlowType (id_, name_, isBuy, isSupplier, isInternal)
-VALUES (1, 'Buy', TRUE, FALSE, FALSE),
-       (2, 'Sell', FALSE, TRUE, FALSE),
-       (3, 'Internal', FALSE, FALSE, TRUE);
+VALUES (1, 'Resupply', TRUE, FALSE, FALSE),
+       (2, 'Delivery', FALSE, TRUE, FALSE),
+       (3, 'Prepared Dishes', FALSE, FALSE, TRUE),
+       (4, 'Store Sale', FALSE, TRUE, FALSE);
 
 INSERT INTO WorkFlow (id_, workFlowTypeId, statusId, usId, otherId)
 VALUES (1, 1, 'Delivered', 1, 12),
@@ -1271,35 +1277,49 @@ VALUES (1, 1, 'Delivered', 1, 12),
        (5, 2, 'Delivered', 1, 2),
        (6, 2, 'Pending', 1, 3),
        (7, 2, 'Delivered', 1, 4),
-       (8, 2, 'Paid', 1, 11),
+       (8, 2, 'Paid', 1, 12),
        (9, 3, 'Delivered', 1, NULL),
        (10, 3, 'In Progress', 1, NULL),
-       (11, 3, 'Pending', 1, NULL);
+       (11, 3, 'Pending', 1, NULL),
+       (12, 1, 'Delivered', 1, 14),
+       (13, 1, 'Delivered', 1, 15),
+       (14, 1, 'Delivered', 1, 17),
+       (15, 1, 'Delivered', 1, 18),
+       (16, 1, 'Delivered', 1, 19),
+       (18, 4, 'Pending', 1, 2),
+       (17, 1, 'Delivered', 1, 21);
 
 INSERT INTO Document_ (id_, date_, plannedSendingDate, plannedReceiveDate, effectiveSendingDate, effectiveReceiveDate,
                        paymentDelay, commentary, isChecked, workflowId, documentTypeId, addressId)
-VALUES (1, '2025-01-10', '2026-06-01', '2026-06-11', '2025-01-10', NULL, 30, NULL, TRUE, 1, 1, 12),
-       (2, '2025-01-17', NULL, '2025-01-17', NULL, '2025-01-17', 0, NULL, TRUE, 1, 2, NULL),
-       (3, '2025-01-17', NULL, NULL, NULL, '2025-01-17', 30, NULL, TRUE, 1, 3, NULL),
-       (4, '2025-05-20', '2026-06-01', '2026-06-15', '2025-05-20', NULL, 45, NULL, FALSE, 2, 1, 13),
-       (5, '2025-03-01', '2026-06-01', '2026-06-15', NULL, NULL, 30, NULL, FALSE, 3, 1, 18),
-       (6, '2025-03-05', NULL, NULL, NULL, NULL, 0, NULL, TRUE, 3, 4, NULL),
-       (7, '2025-04-02', '2026-06-01', '2026-06-11', '2025-04-02', NULL, 60, NULL, TRUE, 4, 1, 20),
-       (8, '2025-04-11', NULL, '2025-04-11', NULL, '2025-04-11', 0, NULL, TRUE, 4, 2, NULL),
-       (9, '2025-04-11', NULL, NULL, NULL, '2025-04-11', 60, NULL, TRUE, 4, 3, NULL),
+VALUES (1, '2025-01-10', '2026-07-10', '2026-07-20', '2025-01-10', NULL, 30, NULL, TRUE, 1, 1, 12),
+       (2, '2025-01-17', NULL, '2025-01-17', NULL, '2025-01-17', 0, NULL, TRUE, 1, 2, 1),
+       (3, '2025-01-17', NULL, NULL, NULL, '2025-01-17', 30, NULL, TRUE, 1, 3, 5),
+       (4, '2025-05-20', '2026-07-10', '2026-07-20', '2025-05-20', NULL, 45, NULL, FALSE, 2, 1, 13),
+       (5, '2025-03-01', '2026-07-10', '2026-07-20', NULL, NULL, 30, NULL, FALSE, 3, 1, 18),
+       (6, '2025-03-05', NULL, NULL, NULL, NULL, 0, NULL, TRUE, 3, 4, 7),
+       (7, '2025-04-02', '2026-07-10', '2026-07-20', '2025-04-02', NULL, 60, NULL, TRUE, 4, 1, 20),
+       (8, '2025-04-11', NULL, '2025-04-11', NULL, '2025-04-11', 0, NULL, TRUE, 4, 2, 9),
+       (9, '2025-04-11', NULL, NULL, NULL, '2025-04-11', 60, NULL, TRUE, 4, 3, 22),
        (10, '2025-02-14', NULL, NULL, '2025-02-14', '2025-02-14', 0, NULL, TRUE, 5, 3, 2),
-       (11, '2025-02-14', NULL, '2025-02-14', '2025-02-14', '2025-02-14', 0, NULL, TRUE, 5, 2, NULL),
+       (11, '2025-02-14', NULL, '2025-02-14', '2025-02-14', '2025-02-14', 0, NULL, TRUE, 5, 2, 19),
        (12, '2025-05-28', NULL, NULL, NULL, NULL, 15, NULL, FALSE, 6, 3, 3),
        (13, '2025-03-10', NULL, NULL, '2025-03-10', '2025-03-10', 0, NULL, TRUE, 7, 3, 4),
-       (14, '2025-03-10', NULL, '2025-03-10', '2025-03-10', '2025-03-10', 0, NULL, TRUE, 7, 2, NULL),
-       (15, '2025-03-15', NULL, NULL, '2025-03-15', NULL, 0, 'Partial return — 2 damaged items', TRUE, 7, 4, NULL),
+       (14, '2025-03-10', NULL, '2025-03-10', '2025-03-10', '2025-03-10', 0, NULL, TRUE, 7, 2, 10),
+       (15, '2025-03-15', NULL, NULL, '2025-03-15', NULL, 0, 'Partial return — 2 damaged items', TRUE, 7, 4, 6),
        (16, '2025-04-22', NULL, NULL, '2025-04-22', '2025-04-22', 30, NULL, TRUE, 8, 3, 11),
-       (17, '2025-04-22', NULL, '2025-04-22', '2025-04-22', '2025-04-22', 0, NULL, TRUE, 8, 2, NULL),
-       (18, '2025-05-05', NULL, NULL, '2025-05-05', '2025-05-05', 0, NULL, TRUE, 9, 6, NULL),
-       (19, '2025-05-30', NULL, '2025-06-02', NULL, NULL, 0, 'Prepare 20 units of fresh croissant assortment', FALSE,
-        10, 5, NULL),
-       (20, '2025-06-01', NULL, '2025-06-01', NULL, NULL, 0, 'Monthly stock count — freezer section A-a/3', FALSE, 11,
-        6, NULL);
+       (17, '2025-04-22', NULL, '2025-04-22', '2025-04-22', '2025-04-22', 0, NULL, TRUE, 8, 2, 11),
+       (18, '2025-05-05', NULL, NULL, '2025-05-05', '2025-05-05', 0, NULL, TRUE, 9, 6, 8),
+       (19, '2025-05-30', '2026-07-10', '2026-07-20', NULL, NULL, 0, 'Prepare 20 units of fresh croissant assortment',
+        FALSE, 10, 5, 16),
+       (20, '2025-06-01', NULL, '2026-07-15', NULL, NULL, 0, 'Monthly stock count — freezer section A-a/3', FALSE, 11,
+        6, 21),
+       (21, '2025-01-10', '2026-07-10', '2026-07-20', '2025-01-10', '2025-01-20', 30, NULL, TRUE, 12, 1, 14),
+       (22, '2025-01-10', '2026-07-10', '2026-07-20', '2025-01-10', '2025-01-20', 30, NULL, TRUE, 13, 1, 15),
+       (23, '2025-01-10', '2026-07-10', '2026-07-20', '2025-01-10', '2025-01-20', 30, NULL, TRUE, 14, 1, 17),
+       (24, '2025-01-10', '2026-07-10', '2026-07-20', '2025-01-10', '2025-01-20', 30, NULL, TRUE, 15, 1, 19),
+       (25, '2025-01-10', '2026-07-10', '2026-07-20', '2025-01-10', '2025-01-20', 30, NULL, TRUE, 16, 1, 20),
+       (26, '2025-01-10', '2026-07-10', '2026-07-20', '2025-01-10', '2025-01-20', 30, NULL, TRUE, 17, 1, 21),
+       (27, '2025-06-01', NULL, NULL, NULL, NULL, 0, NULL, FALSE, 18, 3, 1);
 
 INSERT INTO WorkFlowDocument (workflowId, documentId)
 VALUES (1, 1),
@@ -1321,7 +1341,14 @@ VALUES (1, 1),
        (8, 17),
        (9, 18),
        (10, 19),
-       (11, 20);
+       (11, 20),
+       (12, 21),
+       (13, 22),
+       (14, 23),
+       (15, 24),
+       (16, 25),
+       (17, 26),
+       (18, 27);
 
 INSERT INTO Recipe (id_, name_, instructions, finalProductId)
 VALUES (1, 'Spaghetti Bolognese',
@@ -1378,7 +1405,35 @@ VALUES (1, 'Spaghetti Bolognese',
         3. Season the sauce with dried oregano, black pepper, and paprika powder.
         4. In a separate pan, sear the cod fillets for 3 minutes per side until flaky and opaque.
         5. Plate the rice, place the cod on top, and spoon the tomato sauce generously over the fish.',
-        101);
+        101),
+
+       (8, 'Chocolate Mousse',
+        '1. Melt the dark chocolate in a bain-marie, stirring until smooth, then let cool slightly.
+        2. Separate the eggs. Beat the yolks with the sugar until pale and creamy.
+        3. Stir the melted chocolate into the yolk mixture.
+        4. In a separate bowl, whip the cream to soft peaks and fold gently into the chocolate mixture.
+        5. Beat the egg whites to stiff peaks and fold carefully into the mixture in two batches.
+        6. Pour into serving glasses and refrigerate for at least 2 hours before serving.',
+        102),
+
+       (9, 'Banana Chocolate Pancakes',
+        '1. Mash the bananas in a large bowl until smooth.
+        2. Add the eggs and milk, whisk to combine.
+        3. Sift in the flour and mix until a smooth batter forms.
+        4. Heat a non-stick pan over medium heat with a small knob of butter.
+        5. Pour small ladles of batter into the pan and cook for 2 minutes per side until golden.
+        6. Melt the dark chocolate and drizzle over the stacked pancakes before serving.',
+        103),
+
+       (10, 'Greek Yogurt with Honey and Chocolate',
+        '1. Spoon the greek yogurt into a bowl.
+        2. Drizzle honey generously over the yogurt.
+        3. Grate or shave dark chocolate on top.
+        4. Serve immediately as a quick dessert or snack.',
+        104);
+
+INSERT INTO PreparationOrder (documentId, recipeId)
+VALUES (19, 4);
 
 INSERT INTO RecipeComposition (recipeId, productId, quantity)
 VALUES (1, 37, 2),
@@ -1419,4 +1474,140 @@ VALUES (1, 37, 2),
        (7, 36, 1),
        (7, 45, 1),
        (7, 43, 1),
-       (7, 44, 1);
+       (7, 44, 1),
+
+       (8, 50, 1),
+       (8, 51, 3),
+       (8, 52, 2),
+       (8, 53, 1),
+
+       (9, 8, 2),
+       (9, 51, 2),
+       (9, 54, 1),
+       (9, 55, 1),
+       (9, 50, 1),
+
+       (10, 18, 1),
+       (10, 56, 1),
+       (10, 50, 1);
+
+INSERT INTO Detail (documentId, productId, quantity, priceVAT, VAT, fidelityPointsEarned)
+VALUES (1, 1, 2, 15.71, 21.00, 10),
+       (1, 2, 5, 10.27, 21.00, 15),
+       (5, 80, 6, 10.87, 21.00, 8);
+
+
+INSERT INTO Detail (documentId, productId, quantity, priceVAT, VAT, fidelityPointsEarned)
+VALUES (1, 8, 100, 1.37, 6.00, 1),
+       (1, 9, 80, 2.64, 6.00, 1),
+       (1, 10, 60, 2.11, 6.00, 1),
+       (1, 11, 80, 3.17, 6.00, 1),
+       (1, 12, 40, 6.35, 6.00, 3),
+       (1, 13, 40, 6.88, 6.00, 3),
+       (1, 14, 30, 9.53, 6.00, 4),
+       (1, 15, 120, 1.16, 6.00, 1),
+       (1, 16, 80, 2.43, 6.00, 1),
+       (1, 17, 60, 4.23, 6.00, 2),
+       (1, 18, 70, 2.64, 6.00, 1),
+       (1, 19, 60, 2.00, 6.00, 1),
+       (1, 20, 50, 3.70, 6.00, 2),
+       (1, 21, 80, 1.37, 6.00, 1),
+       (1, 22, 50, 3.17, 6.00, 2),
+       (1, 23, 40, 4.76, 6.00, 2),
+       (1, 24, 40, 2.32, 6.00, 1),
+       (1, 25, 80, 3.49, 6.00, 2),
+       (1, 26, 70, 2.64, 6.00, 1),
+       (1, 27, 80, 2.43, 6.00, 1),
+       (1, 31, 100, 2.11, 6.00, 1),
+       (1, 32, 100, 1.90, 6.00, 1),
+       (1, 33, 90, 1.58, 6.00, 1),
+       (1, 34, 80, 1.69, 6.00, 1),
+       (1, 35, 80, 1.05, 6.00, 1),
+       (1, 36, 70, 0.94, 6.00, 1),
+       (1, 37, 100, 1.37, 6.00, 1),
+       (1, 38, 80, 2.64, 6.00, 1),
+       (1, 39, 60, 3.17, 6.00, 1),
+       (1, 40, 60, 2.32, 6.00, 1),
+       (1, 41, 60, 2.64, 6.00, 1),
+       (1, 42, 50, 2.11, 6.00, 1),
+       (1, 43, 60, 1.58, 6.00, 1),
+       (1, 44, 60, 1.37, 6.00, 1),
+       (1, 45, 60, 1.05, 6.00, 1),
+       (1, 46, 30, 8.47, 6.00, 4),
+       (1, 48, 30, 7.41, 6.00, 3),
+       (1, 49, 40, 3.17, 6.00, 2),
+       (1, 50, 40, 3.70, 6.00, 2),
+       (1, 51, 30, 5.29, 6.00, 3),
+       (1, 54, 20, 21.19, 6.00, 9),
+       (1, 88, 40, 2.64, 6.00, 1),
+       (1, 95, 20, 9.53, 6.00, 5),
+       (1, 96, 20, 11.65, 6.00, 6),
+       (1, 97, 20, 7.41, 6.00, 4),
+       (1, 98, 20, 5.82, 6.00, 3),
+       (1, 99, 20, 5.29, 6.00, 3),
+       (1, 100, 20, 10.06, 6.00, 5),
+       (1, 101, 20, 10.59, 6.00, 5),
+       (1, 102, 50, 6.35, 6.00, 3),
+       (1, 103, 60, 6.88, 6.00, 3),
+       (1, 104, 70, 5.29, 6.00, 3);
+
+INSERT INTO Detail (documentId, productId, quantity, priceVAT, VAT, fidelityPointsEarned)
+VALUES (4, 2, 30, 10.27, 21.00, 3),
+       (4, 3, 15, 30.24, 21.00, 10),
+       (4, 4, 10, 108.89, 21.00, 40),
+       (4, 5, 10, 145.19, 21.00, 55),
+       (4, 6, 20, 36.29, 21.00, 12),
+       (4, 7, 20, 24.19, 21.00, 8),
+       (4, 83, 20, 15.71, 21.00, 6),
+       (4, 84, 20, 19.35, 21.00, 8),
+       (4, 85, 25, 7.85, 21.00, 3);
+
+INSERT INTO Detail (documentId, productId, quantity, priceVAT, VAT, fidelityPointsEarned)
+VALUES (7, 86, 25, 8.46, 21.00, 3),
+       (7, 87, 30, 6.04, 21.00, 2),
+       (7, 89, 30, 4.22, 21.00, 2),
+       (7, 90, 25, 6.04, 21.00, 2),
+       (7, 91, 40, 9.67, 21.00, 4),
+       (7, 92, 40, 3.62, 21.00, 1),
+       (7, 93, 20, 20.56, 21.00, 8),
+       (7, 94, 25, 12.09, 21.00, 5);
+
+INSERT INTO Detail (documentId, productId, quantity, priceVAT, VAT, fidelityPointsEarned)
+VALUES (21, 62, 40, 3.98, 21.00, 2),
+       (21, 63, 30, 9.67, 21.00, 4),
+       (21, 65, 20, 18.14, 21.00, 7),
+       (21, 66, 20, 14.51, 21.00, 6),
+       (21, 67, 20, 7.25, 21.00, 3),
+       (21, 68, 40, 4.22, 21.00, 2),
+       (21, 69, 30, 7.25, 21.00, 3),
+       (21, 70, 40, 2.77, 21.00, 1),
+       (21, 76, 30, 7.85, 21.00, 3);
+
+    INSERT INTO Detail (documentId, productId, quantity, priceVAT, VAT, fidelityPointsEarned)
+VALUES (22, 71, 20, 24.19, 21.00, 10),
+       (22, 72, 20, 15.71, 21.00, 6),
+       (22, 73, 30, 4.83, 21.00, 2),
+       (22, 74, 25, 15.71, 21.00, 6),
+       (22, 75, 25, 12.09, 21.00, 5),
+       (22, 76, 30, 7.85, 21.00, 3),
+       (22, 77, 15, 30.24, 21.00, 12),
+       (22, 78, 25, 9.67, 21.00, 4),
+       (22, 79, 25, 12.09, 21.00, 5);
+
+INSERT INTO Detail (documentId, productId, quantity, priceVAT, VAT, fidelityPointsEarned)
+VALUES (23, 52, 25, 18.14, 21.00, 7),
+       (23, 53, 35, 4.22, 21.00, 2),
+       (23, 55, 40, 5.43, 21.00, 2),
+       (23, 56, 50, 2.77, 21.00, 1),
+       (23, 57, 40, 3.86, 21.00, 2),
+       (23, 58, 40, 4.22, 21.00, 2),
+       (23, 59, 30, 4.83, 21.00, 2),
+       (23, 60, 25, 9.06, 21.00, 4),
+       (23, 61, 35, 3.01, 21.00, 1),
+       (23, 81, 15, 60.49, 21.00, 25),
+       (23, 82, 15, 42.34, 21.00, 17);
+
+INSERT INTO Detail (documentId, productId, quantity, priceVAT, VAT, fidelityPointsEarned)
+VALUES (24, 28, 40, 9.67, 21.00, 4),
+       (24, 29, 30, 12.09, 21.00, 5),
+       (24, 30, 30, 10.27, 21.00, 4);
