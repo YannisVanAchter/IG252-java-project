@@ -1,16 +1,16 @@
-package main.java.be.henallux.project.controller;
+package be.henallux.project.controller;
 
-import main.java.be.henallux.project.business.ClientSupplierSearchManager;
-import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.business.ClientSupplierSearchManager;
+import be.henallux.project.business.exception.BusinessException;
+import be.henallux.project.model.ClientSupplier;
+import be.henallux.project.model.exception.DataValidationException;
 
 import java.util.List;
 
 /**
  * Controller for client/supplier search operations.
  *
- * @see main.java.be.henallux.project.view.ClientSearchTable
+ * @see be.henallux.project.view.ClientSearchTable
  * @see ClientSupplierSearchManager
  */
 public class ClientSupplierSearchController {

@@ -1,6 +1,6 @@
-package main.java.be.henallux.project.controller;
+package be.henallux.project.controller;
 
-import main.java.be.henallux.project.model.NotificationItem;
+import be.henallux.project.model.NotificationItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,8 @@ public class NotificationController {
         Runnable originalAction = notif.getAction();
         notif.setAction(() -> {
             if (originalAction != null) originalAction.run();
-            notifyListeners(notif);
+            notif.setIsRead(true);
+            notifyListeners(null);
         });
 
         notifications.add(notif);

@@ -1,11 +1,11 @@
-package main.java.be.henallux.project.controller;
+package be.henallux.project.controller;
 
-import main.java.be.henallux.project.business.AddressManager;
-import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.data.AddressDA;
-import main.java.be.henallux.project.model.Address;
-import main.java.be.henallux.project.model.Locality;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.business.AddressManager;
+import be.henallux.project.business.exception.BusinessException;
+import be.henallux.project.data.AddressDA;
+import be.henallux.project.model.Address;
+import be.henallux.project.model.Locality;
+import be.henallux.project.model.exception.DataValidationException;
 
 import java.util.List;
 

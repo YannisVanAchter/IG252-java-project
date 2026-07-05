@@ -1,15 +1,15 @@
-package main.java.be.henallux.project.controller;
+package be.henallux.project.controller;
 
-import main.java.be.henallux.project.business.ProductManager;
-import main.java.be.henallux.project.business.StockManager;
-import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.model.Product;
-import main.java.be.henallux.project.model.ProductCategory;
-import main.java.be.henallux.project.model.LocationProduct;
-import main.java.be.henallux.project.model.QuantityProduct;
-import main.java.be.henallux.project.model.Discount;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.business.ProductManager;
+import be.henallux.project.business.StockManager;
+import be.henallux.project.business.exception.BusinessException;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.model.Product;
+import be.henallux.project.model.ProductCategory;
+import be.henallux.project.model.LocationProduct;
+import be.henallux.project.model.QuantityProduct;
+import be.henallux.project.model.Discount;
+import be.henallux.project.model.exception.DataValidationException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

@@ -1,14 +1,15 @@
-package main.java.be.henallux.project.controller;
+package be.henallux.project.controller;
 
-import main.java.be.henallux.project.business.WorkFlowManager;
-import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.model.Document;
-import main.java.be.henallux.project.model.Status;
-import main.java.be.henallux.project.model.WorkFlow;
-import main.java.be.henallux.project.model.WorkFlowType;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.business.WorkFlowManager;
+import be.henallux.project.business.exception.BusinessException;
+import be.henallux.project.model.Document;
+import be.henallux.project.model.Status;
+import be.henallux.project.model.WorkFlow;
+import be.henallux.project.model.WorkFlowType;
+import be.henallux.project.model.exception.DataValidationException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**

@@ -1,13 +1,13 @@
-package main.java.be.henallux.project.controller;
+package be.henallux.project.controller;
 
-import main.java.be.henallux.project.business.DocumentManager;
-import main.java.be.henallux.project.business.WorkFlowManager;
-import main.java.be.henallux.project.business.ClientSupplierManager;
-import main.java.be.henallux.project.business.AddressManager;
-import main.java.be.henallux.project.controller.ClientSupplierController;
-import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.model.*;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.business.DocumentManager;
+import be.henallux.project.business.WorkFlowManager;
+import be.henallux.project.business.ClientSupplierManager;
+import be.henallux.project.business.AddressManager;
+import be.henallux.project.controller.ClientSupplierController;
+import be.henallux.project.business.exception.BusinessException;
+import be.henallux.project.model.*;
+import be.henallux.project.model.exception.DataValidationException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -115,13 +115,13 @@ public class DocumentController {
     /**
      * Creates a document with address, workflow, and document type.
      * @param document the {@link Document} to create
-     * @return the created {@link Document}
      * @see DocumentManager#createDocument(Document)
      */
     public void createDocument(Document document) throws BusinessException, DataValidationException {
         addressManager.createAddress(document.getAddress(), document.getAddress().getLocality());
         workFlowManager.createWorkFlow(document.getWorkflow());
         documentManager.addDocumentType(document.getDocumentType());
+        documentManager.createDocument(document);
     }
 
     /**

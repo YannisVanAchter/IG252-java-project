@@ -1,15 +1,15 @@
-package main.java.be.henallux.project.controller;
+package be.henallux.project.controller;
 
-import main.java.be.henallux.project.business.RecipeSearchManager;
-import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.model.Recipe;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.business.RecipeSearchManager;
+import be.henallux.project.business.exception.BusinessException;
+import be.henallux.project.model.Recipe;
+import be.henallux.project.model.exception.DataValidationException;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @see main.java.be.henallux.project.view.RecipeSearchTable
+ * @see be.henallux.project.view.RecipeSearchTable
  * @see RecipeSearchManager
  */
 public class RecipeSearchController {

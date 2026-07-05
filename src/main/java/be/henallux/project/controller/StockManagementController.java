@@ -1,10 +1,11 @@
-package main.java.be.henallux.project.controller;
+package be.henallux.project.controller;
 
-import main.java.be.henallux.project.business.StockManager;
-import main.java.be.henallux.project.model.NotificationItem;
-import main.java.be.henallux.project.model.Product;
-import main.java.be.henallux.project.model.ClientSupplier;
+import be.henallux.project.business.StockManager;
+import be.henallux.project.model.NotificationItem;
+import be.henallux.project.model.Product;
+import be.henallux.project.model.ClientSupplier;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +31,8 @@ public class StockManagementController extends Thread {
      * <p>Used to avoid duplicate stock alert notifications when an order is already in progress.</p>
      */
     private final Map<Product, Integer> orderedData = new HashMap<>();
+
+    private Runnable onDataUpdated;
 
     private Thread thread;
     private volatile boolean running = false;
@@ -83,6 +86,9 @@ public class StockManagementController extends Thread {
         }
     }
 
+    public void askStockCheckUp(){
+        askStockCheckUp(false);
+    }
     /**
      * Fetches all low-stock products and their suppliers, then updates the shared resource.
      * <p>Acts as the <b>producer</b>: writes to the shared zone inside {@code synchronized(data)},
@@ -92,7 +98,7 @@ public class StockManagementController extends Thread {
      * accounting for pending orders are included in the alert.</p>
      * <p>A notification is pushed only if the alert list has changed since the last check.</p>
      */
-    public void askStockCheckUp() {
+    public void askStockCheckUp(boolean silent) {
         try {
             Map<ClientSupplier, List<Product>> lowStockMap = stockManager.getAllShortSuppliedProduct();
 
@@ -116,10 +122,15 @@ public class StockManagementController extends Thread {
                 data.addAll(newData);
                 data.notifyAll();
 
-                if (hasChanged && !newData.isEmpty()) {
-                    notificationController.push(
-                            new NotificationItem("Stock alert", "Low stock detected", NotificationItem.Type.WARNING)
-                    );
+                if (hasChanged) {
+                    if (!newData.isEmpty() && !silent) {
+                        notificationController.push(
+                                new NotificationItem("Stock alert", "Low stock detected", NotificationItem.Type.WARNING)
+                        );
+                    }
+                    if (onDataUpdated != null) {
+                        SwingUtilities.invokeLater(onDataUpdated);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -179,5 +190,9 @@ public class StockManagementController extends Thread {
                 orderedData.put(product, remaining);
             }
         }
+    }
+
+    public void setOnDataUpdated(Runnable callback) {
+        this.onDataUpdated = callback;
     }
 }

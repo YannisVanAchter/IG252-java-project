@@ -1,11 +1,11 @@
-package main.java.be.henallux.project.controller;
+package be.henallux.project.controller;
 
-import main.java.be.henallux.project.business.PreparationOrderManager;
-import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.model.Product;
-import main.java.be.henallux.project.model.Recipe;
-import main.java.be.henallux.project.model.RecipeComposition;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.business.PreparationOrderManager;
+import be.henallux.project.business.exception.BusinessException;
+import be.henallux.project.model.Product;
+import be.henallux.project.model.Recipe;
+import be.henallux.project.model.RecipeComposition;
+import be.henallux.project.model.exception.DataValidationException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
