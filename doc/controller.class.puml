@@ -6,155 +6,153 @@ title "Diagramme de classe du package Controller"
 skinparam linetype ortho
 ' skinparam linetype polyline
 
-package controller {
 
-    class DocumentController {
-        +getAllDocuments(): ArrayList<Document>
-        +getDocument(id: int): Document
-        +getAllDocumentTypes(): ArrayList<DocumentType>
-        +addDocumentType(name: String): DocumentType
-        +getAllClientSupplier(): ArrayList<ClientSupplier>
-        +receiveDelivery(documentId: int, date: LocalDate): void
-        +sendDelivery(documentId: int, date: LocalDate): void
-        +deleteDocument(doc: Document): boolean
-        +createDocument(All): Document
-        +updateDocument(id + All): void
-    }
-
-    class PreparationOrderController {
-        +getAllRecipes(): ArrayList<Recipe>
-        +getRecipe(recipeName: String): Recipe
-        +getIngredients(recipeName: String): ArrayList<Pair<Product, Integer>>
-        +createNewRecipe(newRecipe: Recipe, ingredients: ArrayList<Pair<Product, Integer>>): boolean
-    }
-
-    class WorkFlowController {
-        +getAllWorkFlows(): ArrayList<WorkFlow>
-        +getAllBuying(): ArrayList<WorkFlow>
-        +getBuyingWorkFlowType(): WorkFlowType
-        +getAllInternal(): ArrayList<WorkFlow>
-        +getAllSelling(): ArrayList<WorkFlow>
-        +getWorkFlowTypes(): ArrayList<WorkFlowType>
-        +getWorkFlowStatus(): ArrayList<Status>
-        +addWorkFlowType(newWorkFlowType: WorkFlowType): boolean
-        +addWorkFlow(workflow: WorkFlow): boolean
-        +changeStatus(workflowId: int, status: Status): boolean
-        +addDocument(workflowId: int, document: Document): boolean
-    }
-
-    abstract class ClientSupplierController {
-        +getAllClientsSuppliers(): ArrayList<ClientSupplier>
-        +getClientSupplier(id: int): ClientSupplier
-        +createClientSupplier(newClient: ClientSupplier): ClientSupplier
-        +changeAddress(id: int, newAddress: Address): void
-        +changePhoneNumber(id: int, newPhoneNumber: int): void
-        +changeEmail(id: int, newEmail: String): void
-        +deleteClientSupplier(id: int): boolean
-        {abstract} +placeOrder(clientSupplierID: int, products: List<Product>): void
-    }
-
-    class ClientController {
-        +getAllClients(): ArrayList<ClientSupplier>
-        +createFidelityCard(clientID: int): FidelityCard
-        +getClientByCardID(cardID: int): ClientSupplier
-        +validateFidelityCardOwnership(clientID: int, cardID: int): boolean
-        +addCheckout(products: LinkedHashMap<Product, Integer>): void
-        +addCheckout(products: LinkedHashMap<Product, Integer>, clientID: int): void
-        +addCheckout(products: LinkedHashMap<Product, Integer>, clientID: int, fidelityCard: FidelityCard): void
-        +addCheckout(products: LinkedHashMap<Product, Integer>, clientID: int, fidelityCard: FidelityCard, useFidelityPoint: boolean): void
-        +deleteClientAccount(clientID: int)
-        +deleteClientAccount(clientID: int, cardID: int): void
-        +getDeliveryOrders(): List<Document>
-    }
-
-    class SupplierController {
-        +getAllSuppliers(): ArrayList<ClientSupplier>
-        +getAllProduct(supplierID: int): ArrayList<Product>
-        +getSupplierByProduct(productID: int): ClientSupplier
-        +changeVATNumber(supplierID: int, newVATNumber: String): void
-    }
-
-    class ProductController {
-        +getAllProduct(): ArrayList<Product>
-        +getProduct(productID: int): Product
-        +getAllProductCategory(): List<ProductCategory>
-        +createNewProduct(newProduct: Product): void
-        +changeProductPrice(productID: int, newPrice: double): void
-        +changeProductVAT(productID: int, newVAT: double): void
-        +changeFidelityPoint(productID: int, newPoints: int): void
-        +changeMinimalQuantity(productID: int, newQuantity: int): void
-        +deleteProductOffer(productID: int): void
-        +createNewProductCategory(name: String): void
-
-        +addStockLocation(newLocation: Location): void
-        +addToStocks(productID: int, quantity: int, storeLocation: LocationProduct): void
-        +subtractFromStock(productID: int, quantity: int, storeLocation: LocationProduct): void
-        +deleteStockLocation(location: Location): void
-        +addDiscount(newDiscount: Discount): void
-        +deleteDiscount(discount: Discount): void
-    }
-
-    class EmployeeController {
-        +getAllEmployee(): List<Employee>
-        +getEmployee(employeeID: int): Employee
-        +changeAddress(employeeID: int, newAddress: Address): void
-        +changePassword(employeeID: int, newPassword: String): void
-        +changeManager(employeeID: int, newManager: Employee): void
-        +changeBankAccount(employeeID: int, newIBAN: String): void
-        +changeHoursSalary(employeeID: int, newSalary: double): void
-        +changeHalfDayBreak(employeeID: int, newNbHalfDay: int): void
-
-        +assignPosition(employeeID: int, position: Position): void
-        +addPosition(position: Position): void
-        +revokePosition(employeeID: int, position: Position): void
-        +checkIn(employeeID: int): void
-        +checkOut(employeeID: int): void
-        +addNonAttendance(employeeID: int, type: NonAttendanceType, description: String): void
-        +addNonAttendance(employeeID: int, type: NonAttendanceType, description: String, startDate: LocalDate): void
-        +addNonAttendance(employeeID: int, type: NonAttendanceType, description: String, startDate: LocalDate, endDate: LocalDate): void
-        +changeNonAttendance(employeeID: int, startDate: LocalDate, endDate: LocalDate): void
-    }
-
-    class AddressController {
-        +getAllAddress(): List<Address>
-        +createAddress(address: Address): void
-        +createLocality(locality: Locality): void
-        +deleteAddress(address: Address): void
-    }
-
-    class ProductSearchController {
-        +searchProducts(name: String, category: String, promotion: Boolean): ArrayList<Product>
-    }
-
-    class RecipeSearchController {
-        +searchRecipes(name: String, ingredients: List<String>): ArrayList<Recipe>
-    }
-
-    class ClientSupplierSearchController {
-        +search(name: String, email: String, fidelityCardNumber: String): List<ClientSupplier>
-    }
-
-    class StockManagementController {
-        {static} data: List<Map.Entry<Product, ClientSupplier>>
-        {static} thread: Thread
-        {static} startAgent(): boolean
-        {static} stopAgent(): void
-        {static} askStockCheckUp(): void
-        {static} getSharedResource(): List<Map.Entry<Product, ClientSupplier>>
-    }
-
-    class NotificationController {
-        +push(notif: NotificationItem): void
-        +addListener(listener: Consumer<NotificationItem>): void
-        +getAll(): List<NotificationItem>
-        +unreadCount(): int
-        +markAllRead(): void
-        -notifyListeners(notif: NotificationItem): void
-    }
-
-    DocumentController <|-- PreparationOrderController
-    ClientSupplierController <|.. ClientController: implement
-    ClientSupplierController <|.. SupplierController: implement
+class DocumentController {
+    +getAllDocuments(): ArrayList<Document>
+    +getDocument(id: int): Document
+    +getAllDocumentTypes(): ArrayList<DocumentType>
+    +addDocumentType(name: String): DocumentType
+    +getAllClientSupplier(): ArrayList<ClientSupplier>
+    +receiveDelivery(documentId: int, date: LocalDate): void
+    +sendDelivery(documentId: int, date: LocalDate): void
+    +deleteDocument(doc: Document): boolean
+    +createDocument(All): Document
+    +updateDocument(id + All): void
 }
+
+class PreparationOrderController {
+    +getAllRecipes(): ArrayList<Recipe>
+    +getRecipe(recipeName: String): Recipe
+    +getIngredients(recipeName: String): ArrayList<Pair<Product, Integer>>
+    +createNewRecipe(newRecipe: Recipe, ingredients: ArrayList<Pair<Product, Integer>>): boolean
+}
+
+class WorkFlowController {
+    +getAllWorkFlows(): ArrayList<WorkFlow>
+    +getAllBuying(): ArrayList<WorkFlow>
+    +getBuyingWorkFlowType(): WorkFlowType
+    +getAllInternal(): ArrayList<WorkFlow>
+    +getAllSelling(): ArrayList<WorkFlow>
+    +getWorkFlowTypes(): ArrayList<WorkFlowType>
+    +getWorkFlowStatus(): ArrayList<Status>
+    +addWorkFlowType(newWorkFlowType: WorkFlowType): boolean
+    +addWorkFlow(workflow: WorkFlow): boolean
+    +changeStatus(workflowId: int, status: Status): boolean
+    +addDocument(workflowId: int, document: Document): boolean
+}
+
+abstract class ClientSupplierController {
+    +getAllClientsSuppliers(): ArrayList<ClientSupplier>
+    +getClientSupplier(id: int): ClientSupplier
+    +createClientSupplier(newClient: ClientSupplier): ClientSupplier
+    +changeAddress(id: int, newAddress: Address): void
+    +changePhoneNumber(id: int, newPhoneNumber: int): void
+    +changeEmail(id: int, newEmail: String): void
+    +deleteClientSupplier(id: int): boolean
+    {abstract} +placeOrder(clientSupplierID: int, products: List<Product>): void
+}
+
+class ClientController {
+    +getAllClients(): ArrayList<ClientSupplier>
+    +createFidelityCard(clientID: int): FidelityCard
+    +getClientByCardID(cardID: int): ClientSupplier
+    +validateFidelityCardOwnership(clientID: int, cardID: int): boolean
+    +addCheckout(products: LinkedHashMap<Product, Integer>): void
+    +addCheckout(products: LinkedHashMap<Product, Integer>, clientID: int): void
+    +addCheckout(products: LinkedHashMap<Product, Integer>, clientID: int, fidelityCard: FidelityCard): void
+    +addCheckout(products: LinkedHashMap<Product, Integer>, clientID: int, fidelityCard: FidelityCard, useFidelityPoint: boolean): void
+    +deleteClientAccount(clientID: int)
+    +deleteClientAccount(clientID: int, cardID: int): void
+    +getDeliveryOrders(): List<Document>
+}
+
+class SupplierController {
+    +getAllSuppliers(): ArrayList<ClientSupplier>
+    +getAllProduct(supplierID: int): ArrayList<Product>
+    +getSupplierByProduct(productID: int): ClientSupplier
+    +changeVATNumber(supplierID: int, newVATNumber: String): void
+}
+
+class ProductController {
+    +getAllProduct(): ArrayList<Product>
+    +getProduct(productID: int): Product
+    +getAllProductCategory(): List<ProductCategory>
+    +createNewProduct(newProduct: Product): void
+    +changeProductPrice(productID: int, newPrice: double): void
+    +changeProductVAT(productID: int, newVAT: double): void
+    +changeFidelityPoint(productID: int, newPoints: int): void
+    +changeMinimalQuantity(productID: int, newQuantity: int): void
+    +deleteProductOffer(productID: int): void
+    +createNewProductCategory(name: String): void
+
+    +addStockLocation(newLocation: Location): void
+    +addToStocks(productID: int, quantity: int, storeLocation: LocationProduct): void
+    +subtractFromStock(productID: int, quantity: int, storeLocation: LocationProduct): void
+    +deleteStockLocation(location: Location): void
+    +addDiscount(newDiscount: Discount): void
+    +deleteDiscount(discount: Discount): void
+}
+
+class EmployeeController {
+    +getAllEmployee(): List<Employee>
+    +getEmployee(employeeID: int): Employee
+    +changeAddress(employeeID: int, newAddress: Address): void
+    +changePassword(employeeID: int, newPassword: String): void
+    +changeManager(employeeID: int, newManager: Employee): void
+    +changeBankAccount(employeeID: int, newIBAN: String): void
+    +changeHoursSalary(employeeID: int, newSalary: double): void
+    +changeHalfDayBreak(employeeID: int, newNbHalfDay: int): void
+
+    +assignPosition(employeeID: int, position: Position): void
+    +addPosition(position: Position): void
+    +revokePosition(employeeID: int, position: Position): void
+    +checkIn(employeeID: int): void
+    +checkOut(employeeID: int): void
+    +addNonAttendance(employeeID: int, type: NonAttendanceType, description: String): void
+    +addNonAttendance(employeeID: int, type: NonAttendanceType, description: String, startDate: LocalDate): void
+    +addNonAttendance(employeeID: int, type: NonAttendanceType, description: String, startDate: LocalDate, endDate: LocalDate): void
+    +changeNonAttendance(employeeID: int, startDate: LocalDate, endDate: LocalDate): void
+}
+
+class AddressController {
+    +getAllAddress(): List<Address>
+    +createAddress(address: Address): void
+    +createLocality(locality: Locality): void
+    +deleteAddress(address: Address): void
+}
+
+class ProductSearchController {
+    +searchProducts(name: String, category: String, promotion: Boolean): ArrayList<Product>
+}
+
+class RecipeSearchController {
+    +searchRecipes(name: String, ingredients: List<String>): ArrayList<Recipe>
+}
+
+class ClientSupplierSearchController {
+    +search(name: String, email: String, fidelityCardNumber: String): List<ClientSupplier>
+}
+
+class StockManagementController {
+    {static} data: List<Map.Entry<Product, ClientSupplier>>
+    {static} thread: Thread
+    {static} startAgent(): boolean
+    {static} stopAgent(): void
+    {static} askStockCheckUp(): void
+    {static} getSharedResource(): List<Map.Entry<Product, ClientSupplier>>
+}
+
+class NotificationController {
+    +push(notif: NotificationItem): void
+    +addListener(listener: Consumer<NotificationItem>): void
+    +getAll(): List<NotificationItem>
+    +unreadCount(): int
+    +markAllRead(): void
+    -notifyListeners(notif: NotificationItem): void
+}
+
+DocumentController <|-- PreparationOrderController
+ClientSupplierController <|.. ClientController: implement
+ClientSupplierController <|.. SupplierController: implement
 
 @enduml

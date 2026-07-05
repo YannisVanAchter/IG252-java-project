@@ -670,4 +670,40 @@ class Batch {
 Batch "*" --> "1" Product
 Batch "*" <-- "1" Detail
 
+class NotificationItem {
+    + enum Type {INFO, SUCCESS, WARNING, ERROR}
+
+    - String title;
+    - String message;
+    - Type type;
+    - Runnable action;
+    - final LocalDateTime time;
+    - boolean read;
+
+    + NotificationItem(title, message, type, action)
+    + NotificationItem(title, message, type)
+    + NotificationItem(title, message)
+
+    +getTitle(): String
+    +setTitle(title): void
+
+    +getMessage(): String
+    +setMessage(message): void
+
+    +getType(): String
+    +setType(type): void
+
+    +getAction(): String
+    +setAction(action): void
+
+    +getIsRead(): String
+    +setIsRead(read): void
+
+    +getFormattedTime(): String
+}
+
+package exception {
+    exception DataValidationException
+}
+
 @enduml

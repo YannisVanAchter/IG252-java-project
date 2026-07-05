@@ -1,0 +1,13 @@
+IG-B2-B
+
+Groupe 3
+
+Dieu Antoine — etu53365@student.henallux.be
+Nelisse Clément — etu57369@student.henallux.be
+VanAchter Yannis — etu57930@student.henallux.be
+
+Lien du repository :
+https://github.com/YannisVanAchter/IG252-java-project
+
+Authentification :
+Aucun login ni mot de passe n’est nécessaire pour utiliser l’application.

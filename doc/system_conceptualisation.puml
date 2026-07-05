@@ -37,6 +37,14 @@ package OpenJDK <<Node>> {
             to process the different jobs tasks
             Package details: ./business.class.puml
         end note
+
+        package exception {
+            note as n5
+                The goal of this package is
+                to abstract other exception through 
+                personal exception of the application
+            end note
+        }
     }
 
     controller --> business
@@ -47,23 +55,17 @@ package OpenJDK <<Node>> {
             to interact with database
             Package details: ./data.class.puml
         end note
+
+        package exception {
+            note as n5
+                The goal of this package is
+                to abstract other exception through 
+                personal exception of the application
+            end note
+        }
     }
 
     business --> data
-
-    package exception {
-        note as n5
-            The goal of this package is
-            to abstract other exception through 
-            personal exception of the application
-            Package details: ./exception.class.puml
-        end note
-    }
-
-    view --> exception
-    controller --> exception
-    business --> exception
-    data --> exception
 
     package model {
         note as n6
@@ -72,6 +74,14 @@ package OpenJDK <<Node>> {
             sections of the database we currently need
             Package details: ./model.class.puml
         end note
+
+        package exception {
+            note as n5
+                The goal of this package is
+                to abstract other exception through 
+                personal exception of the application
+            end note
+        }
     }
 
     view --> model

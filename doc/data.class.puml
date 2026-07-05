@@ -8,6 +8,10 @@ skinparam linetype polyline
 
 ' TODO: finish diagram before implementing this layer (deadline: may 15th 2026)
 
+package exception {
+    exception DataBaseException
+}
+
 class SingletonConnection {
     {static} {volatile} -instance : Connection
     -url : String
@@ -25,12 +29,13 @@ abstract class CRUD<model.M> {
     - modelMappingDataAccess: HashMap<model.M.class, class> 
 
     {abstract} +getAll(): List<model.M>
-    {abstract} +get(id: String): model.M
-    {abstract} +gets(ids: List<String>): List<model.M>
+    {abstract} +getById(id: String, boolean mapping): model.M
+    + getById(id): model.M
+    {abstract} +getByIds(ids: List<String>, boolean mapping): List<model.M>
+    + getByIds(ids): List<model.M>
     {abstract} +insert(new: model.M): void
     {abstract} +update(old: model.M, new: model.M): void
     {abstract} +delete(old: model.M): void
-    #getDBAccessClass(class): class ' Might not be necessary depending on modelMappingDataAccess '
 }
 
 class LocalityDA {

@@ -6,151 +6,152 @@ title "Diagramme de class du package Business"
 skinparam linetype ortho
 ' skinparam linetype polyline
 
-package business {
+class DocumentManager {
+    +getAllDocuments() : List<Document>
+    +getDocument(id: int): Document
+    +getDocumentTypes(): List<DocumentType>
+    +addDocumentType(docType: DocumentType): void
+    +createDocument(document: Document) : void
+    +receiveDelivery(documentId: int, date: LocalDate): void
+    +sendDelivery(documentId: int, date: LocalDate): void
+    +deleteDocument(id : int) : void
+    +getDeliveryOrders(): List<Document>
+}
 
-    class DocumentManager {
-        +getAllDocuments() : List<Document>
-        +getDocument(id: int): Document
-        +getDocumentTypes(): List<DocumentType>
-        +addDocumentType(docType: DocumentType): void
-        +createDocument(document: Document) : void
-        +receiveDelivery(documentId: int, date: LocalDate): void
-        +sendDelivery(documentId: int, date: LocalDate): void
-        +deleteDocument(id : int) : void
-        +getDeliveryOrders(): List<Document>
-    }
+class PreparationOrderManager {
+    +getAllRecipes(): List<Recipe>
+    +getRecipe(recipeName: String): Recipe
+    +getIngredient(recipeName: String): List<Pair<Product, Integer>>
+    +createRecipe(newRecipe: Recipe, ingredients: List<Pair<Product, Integer>>): void
+}
 
-    class PreparationOrderManager {
-        +getAllRecipes(): List<Recipe>
-        +getRecipe(recipeName: String): Recipe
-        +getIngredient(recipeName: String): List<Pair<Product, Integer>>
-        +createRecipe(newRecipe: Recipe, ingredients: List<Pair<Product, Integer>>): void
-    }
+class WorkFlowManager {
+    +getAllWorkFlows(): List<WorkFlow>
+    +getAllBuying(): List<WorkFlow>
+    +getAllInternal(): List<WorkFlow>
+    +getAllSelling(): List<WorkFlow>
+    +getWorkFlowType(): List<WorkFlowType>
+    +addWorkFlowType(workFlowType: WorkFlowType): void
+    +addWorkFlow(workflow: WorkFlow): void
+    +changeStatus(workflowId: int, status: Status): void
+    +addDocument(workflowId: int, document: Document): void
+}
 
-    class WorkFlowManager {
-        +getAllWorkFlows(): List<WorkFlow>
-        +getAllBuying(): List<WorkFlow>
-        +getAllInternal(): List<WorkFlow>
-        +getAllSelling(): List<WorkFlow>
-        +getWorkFlowType(): List<WorkFlowType>
-        +addWorkFlowType(workFlowType: WorkFlowType): void
-        +addWorkFlow(workflow: WorkFlow): void
-        +changeStatus(workflowId: int, status: Status): void
-        +addDocument(workflowId: int, document: Document): void
-    }
+abstract class ClientSupplierManager {
+    +getAllClientsSuppliers() : List<ClientSupplier>
+    +getClientSupplier(id: int): ClientSupplier
+    +createClientSupplier(client: ClientSupplier) : void
+    +changeAddress(id : int, address: Address) : void
+    +changePhoneNumber(id: int, phoneNumber: int): void
+    +changeEmail(id: int, email: String) : void
+    +deleteClientSupplier(id : int) : void
+    {abstract} + placeOrder(clientSupplierID: int, products: List<Product>): void
+}
 
-    abstract class ClientSupplierManager {
-        +getAllClientsSuppliers() : List<ClientSupplier>
-        +getClientSupplier(id: int): ClientSupplier
-        +createClientSupplier(client: ClientSupplier) : void
-        +changeAddress(id : int, address: Address) : void
-        +changePhoneNumber(id: int, phoneNumber: int): void
-        +changeEmail(id: int, email: String) : void
-        +deleteClientSupplier(id : int) : void
-        {abstract} + placeOrder(clientSupplierID: int, products: List<Product>): void
-    }
+class ClientManager {
+    +getAllClients(): List<ClientSupplier>
+    +createFidelityCard(clientID: int): void
+    +validateFidelityCardOwnership(clientID: int, cardID: int): boolean
+    +addCheckout(products: List<Product>): void
+    +addCheckout(products: List<Product>, clientID: int): void
+    +addCheckout(products: List<Product>, clientID: int, fidelityCard: FidelityCard, useFidelityPoint: boolean): void
+    +addCheckout(products: List<Product>, clientID: int, fidelityCard: FidelityCard): void
+    +deleteClientAccount(clientID: int)
+    +deleteClientAccount(clientID: int, cardID: int): void
+}
 
-    class ClientManager {
-        +getAllClients(): List<ClientSupplier>
-        +createFidelityCard(clientID: int): void
-        +validateFidelityCardOwnership(clientID: int, cardID: int): boolean
-        +addCheckout(products: List<Product>): void
-        +addCheckout(products: List<Product>, clientID: int): void
-        +addCheckout(products: List<Product>, clientID: int, fidelityCard: FidelityCard, useFidelityPoint: boolean): void
-        +addCheckout(products: List<Product>, clientID: int, fidelityCard: FidelityCard): void
-        +deleteClientAccount(clientID: int)
-        +deleteClientAccount(clientID: int, cardID: int): void
-    }
+class SupplierManager {
+    +getAllSuppliers(): List<ClientSupplier>
+    +getAllProducts(supplierID: int): List<Product>
+    +changeVATNumber(supplierID: int, VATNumber: String): void
+}
 
-    class SupplierManager {
-        +getAllSuppliers(): List<ClientSupplier>
-        +getAllProducts(supplierID: int): List<Product>
-        +changeVATNumber(supplierID: int, VATNumber: String): void
-    }
+class ProductManager {
+    +getAllProducts(): List<Product>
+    +getProduct(productID: int): Product
+    +getAllProductCategory(): List<Category>
+    +createProduct(Product: Product): void
+    +changeProductPrice(productID: int, price: double): void
+    +changeProductVAT(productID, vat: double): void
+    +changeFidelityPoint(productID, points: int): void
+    +changeMinimalQuantity(productID: int, quantity: int): void
+    +deleteProductOffer(productID: int): void
+    +createNewProductCategory(name: String): void
 
-    class ProductManager {
-        +getAllProducts(): List<Product>
-        +getProduct(productID: int): Product
-        +getAllProductCategory(): List<Category>
-        +createProduct(Product: Product): void
-        +changeProductPrice(productID: int, price: double): void
-        +changeProductVAT(productID, vat: double): void
-        +changeFidelityPoint(productID, points: int): void
-        +changeMinimalQuantity(productID: int, quantity: int): void
-        +deleteProductOffer(productID: int): void
-        +createNewProductCategory(name: String): void
+    +addDiscount(discount: Discount): void
+    +deleteDiscount(discount: Discount): void
+}
 
-        +addDiscount(discount: Discount): void
-        +deleteDiscount(discount: Discount): void
-    }
+class EmployeeManager {
+    +getAllEmployees(): List<Employee>
+    +getEmployee(employeeID: int): Employee
+    +changeAddress(employeeID: int, address: Address): void
+    +changePassword(employeeID: int, password: String): void
+    +changeManager(employeeID: int, manager: Employee): void
+    +changeBankAccount(employeeID: int, IBAN: String): void
+    +changeHoursSalary(employeeID: int, salary: double): void
+    +changeHalfDayBreak(employeeID: int, nbHalfDay: int): void
 
-    class EmployeeManager {
-        +getAllEmployees(): List<Employee>
-        +getEmployee(employeeID: int): Employee
-        +changeAddress(employeeID: int, address: Address): void
-        +changePassword(employeeID: int, password: String): void
-        +changeManager(employeeID: int, manager: Employee): void
-        +changeBankAccount(employeeID: int, IBAN: String): void
-        +changeHoursSalary(employeeID: int, salary: double): void
-        +changeHalfDayBreak(employeeID: int, nbHalfDay: int): void
+    +assignPosition(employeeID: int, position: Position): void
+    +addPosition(position: Position): void
+    +revokePosition(employeeID: int, position: Position): void
+    +checkIn(employeeID: int): void
+    +checkOut(employeeID: int): void
+    +addNonAttendance(employeeID: int, type: NonAttendanceType, description: String): void
+    +addNonAttendance(employeeID: int, type: NonAttendanceType, description: String, startDate: LocalDate): void
+    +addNonAttendance(employeeID: int, type: NonAttendanceType, description: String, startDate: LocalDate, endDate: LocalDate): void
+    +changeNonAttendance(employeeID: int, startDate: LocalDate, endDate: LocalDate): void
+}
 
-        +assignPosition(employeeID: int, position: Position): void
-        +addPosition(position: Position): void
-        +revokePosition(employeeID: int, position: Position): void
-        +checkIn(employeeID: int): void
-        +checkOut(employeeID: int): void
-        +addNonAttendance(employeeID: int, type: NonAttendanceType, description: String): void
-        +addNonAttendance(employeeID: int, type: NonAttendanceType, description: String, startDate: LocalDate): void
-        +addNonAttendance(employeeID: int, type: NonAttendanceType, description: String, startDate: LocalDate, endDate: LocalDate): void
-        +changeNonAttendance(employeeID: int, startDate: LocalDate, endDate: LocalDate): void
-    }
+class AddressManager {
+    +getAllAddresses(): List<Address>
+    +createAddress(address: Address): void
+    +createLocality(locality: Locality): void
+    +deleteAddress(address: Address): void
+}
 
-    class AddressManager {
-        +getAllAddresses(): List<Address>
-        +createAddress(address: Address): void
-        +createLocality(locality: Locality): void
-        +deleteAddress(address: Address): void
-    }
+class ProductSearchManager {
+    +searchProducts(name : String, category : String, promotion : boolean) : List<Product>
+}
 
-    class ProductSearchManager {
-        +searchProducts(name : String, category : String, promotion : boolean) : List<Product>
-    }
+class RecipeSearchManager {
+    +searchRecipes(name : String, product : String) : List<Recipe>
+}
 
-    class RecipeSearchManager {
-        +searchRecipes(name : String, product : String) : List<Recipe>
-    }
+class ClientSupplierSearchManager {
+    +search(name : String, email : String, fidelityValid : boolean) : List<ClientSupplier>
+}
 
-    class ClientSupplierSearchManager {
-        +search(name : String, email : String, fidelityValid : boolean) : List<ClientSupplier>
-    }
+class StockManager {
+    +addStockLocation(location: LocationProduct): void
+    +addToStocks(productID: int, quantity: int, storeLocation: LocationProduct): void
+    +subtractFromStock(productID: int, quantity: int, storeLocation: LocationProduct): void
+    +deleteStockLocation(location: LocationProduct): void
+    +getAllShortSuppliedProducts(): List<Product>
+}
 
-    class StockManager {
-        +addStockLocation(location: LocationProduct): void
-        +addToStocks(productID: int, quantity: int, storeLocation: LocationProduct): void
-        +subtractFromStock(productID: int, quantity: int, storeLocation: LocationProduct): void
-        +deleteStockLocation(location: LocationProduct): void
-        +getAllShortSuppliedProducts(): List<Product>
-    }
+DocumentManager <|-- PreparationOrderManager
 
-    DocumentManager <|-- PreparationOrderManager
+ClientSupplierManager <|.. ClientManager: implement
+ClientSupplierManager <|.. SupplierManager: implement
 
-    ClientSupplierManager <|.. ClientManager: implement
-    ClientSupplierManager <|.. SupplierManager: implement
+ClientSupplierManager ..> DocumentManager: use
+ClientSupplierManager ..> WorkFlowManager: use
 
-    ClientSupplierManager ..> DocumentManager: use
-    ClientSupplierManager ..> WorkFlowManager: use
+EmployeeManager ..> AddressManager: use
+ClientSupplierManager ..> AddressManager: use
+DocumentManager ..> AddressManager: use
 
-    EmployeeManager ..> AddressManager: use
-    ClientSupplierManager ..> AddressManager: use
-    DocumentManager ..> AddressManager: use
+DocumentManager ..> StockManager: use
+DocumentManager ..> ProductManager: use
 
-    DocumentManager ..> StockManager: use
-    DocumentManager ..> ProductManager: use
+PreparationOrderManager ..> ProductManager: use
+PreparationOrderManager ..> StockManager: use
 
-    PreparationOrderManager ..> ProductManager: use
-    PreparationOrderManager ..> StockManager: use
+WorkFlowManager ..> DocumentManager: use
 
-    WorkFlowManager ..> DocumentManager: use
+package exception {
+    exception BusinessException
 }
 
 @enduml
