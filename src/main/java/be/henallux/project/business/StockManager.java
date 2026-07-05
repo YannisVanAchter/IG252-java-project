@@ -1,17 +1,17 @@
-package main.java.be.henallux.project.business;
+package be.henallux.project.business;
 
-import main.java.be.henallux.project.data.ProductDA;
-import main.java.be.henallux.project.data.QuantityProductDA;
-import main.java.be.henallux.project.data.LocationProductDA;
-import main.java.be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.data.ProductDA;
+import be.henallux.project.data.QuantityProductDA;
+import be.henallux.project.data.LocationProductDA;
+import be.henallux.project.data.exception.DataBaseException;
 
-import main.java.be.henallux.project.business.exception.BusinessException;
+import be.henallux.project.business.exception.BusinessException;
 
-import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.LocationProduct;
-import main.java.be.henallux.project.model.Product;
-import main.java.be.henallux.project.model.QuantityProduct;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.ClientSupplier;
+import be.henallux.project.model.LocationProduct;
+import be.henallux.project.model.Product;
+import be.henallux.project.model.QuantityProduct;
+import be.henallux.project.model.exception.DataValidationException;
 
 import java.util.List;
 import java.util.Map;
@@ -116,6 +116,7 @@ public class StockManager {
         try {
             return productDA.getLowQuantityProduct();
         } catch (DataBaseException e) {
+            e.printStackTrace();
             throw new BusinessException("Error occurred while retrieving products.", e);
         }
     }

@@ -1,12 +1,12 @@
-package main.java.be.henallux.project.business;
+package be.henallux.project.business;
 
-import main.java.be.henallux.project.data.ClientSupplierDA;
-import main.java.be.henallux.project.data.ClientSupplierSearchDA;
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.FidelityCard;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.data.ClientSupplierDA;
+import be.henallux.project.data.ClientSupplierSearchDA;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.business.exception.BusinessException;
+import be.henallux.project.model.ClientSupplier;
+import be.henallux.project.model.FidelityCard;
+import be.henallux.project.model.exception.DataValidationException;
 
 import java.util.List;
 

@@ -1,22 +1,23 @@
-package main.java.be.henallux.project.business;
+package be.henallux.project.business;
 
-import main.java.be.henallux.project.data.ClientSupplierDA;
-import main.java.be.henallux.project.data.DocumentDA;
-import main.java.be.henallux.project.data.DocumentTypeDA;
-import main.java.be.henallux.project.data.FidelityCardDA;
-import main.java.be.henallux.project.data.ProductDA;
-import main.java.be.henallux.project.data.QuantityProductDA;
-import main.java.be.henallux.project.data.StatusDA;
-import main.java.be.henallux.project.data.WorkFlowDA;
-import main.java.be.henallux.project.data.WorkFlowTypeDA;
-import main.java.be.henallux.project.data.DetailDA;
-import main.java.be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.data.ClientSupplierDA;
+import be.henallux.project.data.DocumentDA;
+import be.henallux.project.data.DocumentTypeDA;
+import be.henallux.project.data.FidelityCardDA;
+import be.henallux.project.data.ProductDA;
+import be.henallux.project.data.QuantityProductDA;
+import be.henallux.project.data.StatusDA;
+import be.henallux.project.data.WorkFlowDA;
+import be.henallux.project.data.WorkFlowTypeDA;
+import be.henallux.project.data.DetailDA;
+import be.henallux.project.data.exception.DataBaseException;
 
-import main.java.be.henallux.project.business.exception.BusinessException;
+import be.henallux.project.business.exception.BusinessException;
 
-import main.java.be.henallux.project.model.*;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.*;
+import be.henallux.project.model.exception.DataValidationException;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -134,7 +135,7 @@ public class ClientSupplierManager {
         try {
             List<FidelityCard> fidelityCardList = fidelityCardDA.getAll();
             boolean cardFound = fidelityCardList.stream()
-                    .anyMatch(fc -> fc.getClient() == fidelityCard.getClient());
+                    .anyMatch(fc -> fc.getClient().getId() == fidelityCard.getClient().getId());
             if (cardFound) {
                 throw new BusinessException("Error: This client already has a loyalty card.");
             }
@@ -188,8 +189,7 @@ public class ClientSupplierManager {
                 List<QuantityProduct> stocks = new ArrayList<>();
 
                 for (QuantityProduct qp : quantityProductDA.getAll()) {
-                    if (qp.getProduct().getId() == product.getId()
-                            && qp.getLocationProduct().getIsStock()) {
+                    if (qp.getProduct().getId() == product.getId()) {
                         stocks.add(qp);
                     }
                 }
@@ -198,12 +198,18 @@ public class ClientSupplierManager {
                     throw new BusinessException("Error: No stock entry found for product: " + product.getName());
                 }
 
-                QuantityProduct stock = stocks.getFirst();
-                int newQuantity = stock.getQuantity() - quantityBought;
-                if (newQuantity < 0) {
+                int totalAvailable = stocks.stream().mapToInt(QuantityProduct::getQuantity).sum();
+                if (totalAvailable < quantityBought) {
                     throw new BusinessException("Error: Insufficient stock for product: " + product.getName());
                 }
-                quantityProductDA.update(stock, newQuantity);
+
+                int remaining = quantityBought;
+                for (QuantityProduct qp : stocks) {
+                    if (remaining <= 0) break;
+                    int take = Math.min(remaining, qp.getQuantity());
+                    quantityProductDA.update(qp, qp.getQuantity() - take);
+                    remaining -= take;
+                }
 
                 if (fidelityCard != null) {
                     totalPointsEarned += product.getFidelityPoint() * quantityBought;
@@ -214,7 +220,69 @@ public class ClientSupplierManager {
                 int currentPoints = fidelityCard.getTotalPoint();
                 int pointsToDeduct = useFidelityPoints ? currentPoints : 0;
                 int newTotal = currentPoints - pointsToDeduct + totalPointsEarned;
+                fidelityCard.setTotalPoint(newTotal);
                 fidelityCardDA.updateTotalPoint(fidelityCard, newTotal);
+            }
+
+            if (clientId > 0) {
+
+                WorkFlowType storeSaleType = workFlowTypeDA.getByName("Store Sale");
+                if (storeSaleType == null) {
+                    throw new BusinessException("Error: WorkFlowType 'Store Sale' not found.");
+                }
+
+                Status delivered = statusDA.getByName("Delivered");
+                if (delivered == null) {
+                    throw new BusinessException("Error: Status 'Delivered' not found.");
+                }
+
+                ClientSupplier us = getUs();
+                ClientSupplier client = clientSupplierDA.getById(clientId);
+
+                WorkFlow workflow = new WorkFlow(delivered, storeSaleType, us, client);
+                workFlowDA.insert(workflow);
+
+                DocumentType receiptType = documentTypeDA.getAll().stream()
+                        .filter(dt -> "Invoice".equals(dt.getName()))
+                        .findFirst()
+                        .orElseThrow(() -> new BusinessException("Error: DocumentType 'Invoice' not found."));
+
+                StringBuilder comment = new StringBuilder("Receipt - Total: ");
+                double total = 0;
+                for (HashMap.Entry<Product, Integer> entry : products.entrySet()) {
+                    total += entry.getKey().getPrice() * entry.getValue();
+                }
+                comment.append(String.format("%.2f€ | ", total));
+                comment.append("Products: ");
+                products.forEach((p, q) -> comment.append(p.getName()).append(" x").append(q).append(", "));
+
+                Document receipt = new Document(
+                        LocalDate.now(), receiptType, true,
+                        null, null, null, null,
+                        0, workflow, null,
+                        comment.toString().replaceAll(", $", "")
+                );
+
+                documentDA.insert(receipt);
+
+                for (HashMap.Entry<Product, Integer> entry : products.entrySet()) {
+                    Product product = entry.getKey();
+                    int quantity = entry.getValue();
+
+                    Detail detail = new Detail(
+                            0,
+                            product.getPrice(),
+                            product.getVat().divide(BigDecimal.valueOf(100)),
+                            product.getFidelityPoint() * quantity,
+                            quantity,
+                            receipt,
+                            product,
+                            null
+                    );
+                    detailDA.insert(detail);
+                    receipt.addDetail(detail);
+                }
+
             }
 
         } catch (DataBaseException e) {
@@ -238,8 +306,8 @@ public class ClientSupplierManager {
             throw new BusinessException("The email is not in a valid format.");
         }
         if (newModel.getPhoneNumber() != null && !newModel.getPhoneNumber().isBlank()
-                && newModel.getPhoneNumber().length() != 11) {
-            throw new BusinessException("The phone number must be 11 digits.");
+                && newModel.getPhoneNumber().length() != 10) {
+            throw new BusinessException("The phone number must be 10 digits.");
         }
         if (newModel.getIsUs() && (newModel.getIsSupplier() || newModel.getIsClient())) {
             throw new BusinessException("The client supplier cannot be Us and (supplier or client).");
@@ -260,6 +328,7 @@ public class ClientSupplierManager {
             throw new BusinessException("The client supplier cannot be null.");
         }
         try {
+            workFlowDA.deleteByClientSupplierId(clientSupplier.getId());
             clientSupplierDA.delete(clientSupplier);
             return true;
         } catch (DataBaseException e) {
@@ -302,7 +371,8 @@ public class ClientSupplierManager {
             if (clientSupplier == null) {
                 return false;
             }
-            return clientSupplier.getFidelityCard().getId() == cardId;
+            FidelityCard card = clientSupplier.getFidelityCard();
+            return card != null && card.getId() == cardId;
         } catch (DataBaseException e) {
             throw new BusinessException("Error validating loyalty card ownership.", e);
         }
@@ -324,7 +394,7 @@ public class ClientSupplierManager {
 
             ClientSupplier us = getUs();
 
-            WorkFlowType buyType = workFlowTypeDA.getByName("Buy");
+            WorkFlowType buyType = workFlowTypeDA.getByName("Resupply");
             if (buyType == null) {
                 throw new BusinessException("Error: WorkFlowType 'Buy' not found.");
             }
@@ -348,8 +418,10 @@ public class ClientSupplierManager {
                     purchaseOrderType,
                     null,
                     false,
-                    LocalDate.now(), null,
-                    LocalDate.now(), null,
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(30),
+                    LocalDate.now(),
+                    LocalDate.now(),
                     30,
                     workflow,
                     supplier.getAddress(),
@@ -370,7 +442,7 @@ public class ClientSupplierManager {
                 Detail detail = new Detail(
                         0,
                         product.getPrice(),
-                        product.getVat(),
+                        product.getVat().divide(BigDecimal.valueOf(100)),
                         0,
                         quantityOrdered,
                         purchaseOrder,

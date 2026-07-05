@@ -1,13 +1,13 @@
 /*
-package main.java.be.henallux.project.business;
+package be.henallux.project.business;
 
-import main.java.be.henallux.project.data.EmployeeDA;
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.model.Employee;
-import main.java.be.henallux.project.model.Address;
-import main.java.be.henallux.project.model.Position;
-import main.java.be.henallux.project.model.NonAttendanceType;
+import be.henallux.project.data.EmployeeDA;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.business.exception.BusinessException;
+import be.henallux.project.model.Employee;
+import be.henallux.project.model.Address;
+import be.henallux.project.model.Position;
+import be.henallux.project.model.NonAttendanceType;
 import java.time.LocalDate;
 import java.util.List;
 

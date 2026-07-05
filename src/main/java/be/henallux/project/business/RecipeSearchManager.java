@@ -1,13 +1,12 @@
-package main.java.be.henallux.project.business;
+package be.henallux.project.business;
 
-import main.java.be.henallux.project.data.RecipeSearchDA;
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.business.exception.BusinessException;
+import be.henallux.project.data.RecipeSearchDA;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.business.exception.BusinessException;
 
-import main.java.be.henallux.project.model.Recipe;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.Recipe;
+import be.henallux.project.model.exception.DataValidationException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class RecipeSearchManager {
@@ -20,19 +19,7 @@ public class RecipeSearchManager {
     public List<Recipe> searchRecipes(String name, List<String> products)
             throws BusinessException, DataValidationException {
         try {
-
-            if (products == null) {
-                return new ArrayList<>();
-            }
-
-            List<Recipe> recipes = new ArrayList<>();
-
-            for (String product : products) {
-                recipes.addAll(recipeSearchDA.search(name, product));
-            }
-
-            return recipes.stream().distinct().toList();
-
+            return recipeSearchDA.search(name, products);
         } catch (DataBaseException e) {
             throw new BusinessException("Error occurred while searching for recipes.", e);
         }

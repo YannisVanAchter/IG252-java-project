@@ -1,12 +1,12 @@
-package main.java.be.henallux.project.business;
+package be.henallux.project.business;
 
-import main.java.be.henallux.project.data.AddressDA;
-import main.java.be.henallux.project.data.LocalityDA;
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.business.exception.BusinessException;
-import main.java.be.henallux.project.model.Address;
-import main.java.be.henallux.project.model.Locality;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.data.AddressDA;
+import be.henallux.project.data.LocalityDA;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.business.exception.BusinessException;
+import be.henallux.project.model.Address;
+import be.henallux.project.model.Locality;
+import be.henallux.project.model.exception.DataValidationException;
 
 import java.util.List;
 
@@ -73,8 +73,24 @@ public class AddressManager {
             throw new BusinessException("Error: Street name is required.");
         }
         try {
-            if (localityDA.checkExist(locality)) {
+            createLocality(locality);
+
+            List<Address> existing = addressDA.getByLocality(locality);
+
+            Address found = null;
+
+            for (Address a : existing) {
+                if (found == null
+                        && a.getStreetName().equalsIgnoreCase(address.getStreetName())
+                        && a.getStreetNumber() == address.getStreetNumber()) {
+                    found = a;
+                }
+            }
+
+            if (found == null) {
                 addressDA.insert(address);
+            } else {
+                address.setAddressId(found.getAddressId());
             }
         } catch (DataBaseException e) {
             throw new BusinessException("Error creating address.", e);

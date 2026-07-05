@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.business.exception;
+package be.henallux.project.business.exception;
 
 public class BusinessException extends Exception {
     public BusinessException(String message) {

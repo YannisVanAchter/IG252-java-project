@@ -1,10 +1,10 @@
-package main.java.be.henallux.project.business;
-import main.java.be.henallux.project.data.WorkFlowDA;
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.business.exception.BusinessException;
+package be.henallux.project.business;
+import be.henallux.project.data.WorkFlowDA;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.business.exception.BusinessException;
 
-import main.java.be.henallux.project.model.*;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.*;
+import be.henallux.project.model.exception.DataValidationException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

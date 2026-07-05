@@ -1,14 +1,14 @@
-package main.java.be.henallux.project.business;
+package be.henallux.project.business;
 
-import main.java.be.henallux.project.data.LocationProductDA;
-import main.java.be.henallux.project.model.LocationProduct;
-import main.java.be.henallux.project.data.DocumentDA;
-import main.java.be.henallux.project.data.DocumentTypeDA;
-import main.java.be.henallux.project.data.exception.DataBaseException;
-import main.java.be.henallux.project.business.exception.BusinessException;
+import be.henallux.project.data.LocationProductDA;
+import be.henallux.project.model.LocationProduct;
+import be.henallux.project.data.DocumentDA;
+import be.henallux.project.data.DocumentTypeDA;
+import be.henallux.project.data.exception.DataBaseException;
+import be.henallux.project.business.exception.BusinessException;
 
-import main.java.be.henallux.project.model.*;
-import main.java.be.henallux.project.model.exception.DataValidationException;
+import be.henallux.project.model.*;
+import be.henallux.project.model.exception.DataValidationException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -76,6 +76,13 @@ public class DocumentManager {
             throw new BusinessException("The document type cannot be null.");
         }
         try {
+            // Chercher si un type avec ce nom existe déjà
+            List<DocumentType> allTypes = documentTypeDA.getAll();
+            for (DocumentType existing : allTypes) {
+                if (existing.getName().equalsIgnoreCase(docType.getName())) {
+                    return existing; // ← retourne l'existant au lieu d'insérer
+                }
+            }
             documentTypeDA.insert(docType);
             return docType;
         } catch (DataBaseException e) {
