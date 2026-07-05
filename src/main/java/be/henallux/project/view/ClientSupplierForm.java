@@ -1,6 +1,6 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.*;
+import be.henallux.project.controller.*;
 
 import java.awt.*;
 import java.time.*;
@@ -9,7 +9,7 @@ import java.util.Objects;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-import main.java.be.henallux.project.model.*;
+import be.henallux.project.model.*;
 
 /**
  * ClientSupplierForm represents the form for creating and modifying a Client or Supplier.
@@ -92,7 +92,7 @@ public class ClientSupplierForm extends JPanel {
      * <p>The header provides a back button whose behavior depends on the current
      * display mode:
      * <ul><li>closes the dialog if the form is opened in modal mode</li>
-     *     <li>navigates back using {@link MainWindow#goBack()} otherwise</li>/ul>
+     *     <li>navigates back using {@link MainWindow#goBack()} otherwise</li></ul>
      *
      * @return a {@link JPanel} representing the form header
      * @see MainWindow#goBack()
@@ -177,9 +177,10 @@ public class ClientSupplierForm extends JPanel {
         leftContent.add(ViewUtils.labeledRequired("Phone number", txtPhoneNumber));
 
         txtVATNumber = new JTextField(10);
-        txtVATNumber.setToolTipText("BE + 10 digits");
+        txtVATNumber.setToolTipText("BE + 10 digits. \nSelect supplier to add a TVA number.");
         txtVATNumber.setText("BE");
         ViewUtils.setCursor(txtVATNumber);
+        toggleEditable(txtVATNumber, false);
         leftContent.add(ViewUtils.labeledRequired("VAT number", txtVATNumber));
 
         becameClientDate = ViewUtils.createDateSpinner();
@@ -188,6 +189,9 @@ public class ClientSupplierForm extends JPanel {
         chkIsClient = new JCheckBox("Client");
         chkIsSupplier = new JCheckBox("Supplier");
         chkIsMember = new JCheckBox("Staff member");
+        chkIsSupplier.addActionListener(e -> { buildLoyaltyPanel(); updateVATField(); });
+        chkIsClient.addActionListener(e -> { buildLoyaltyPanel(); updateVATField(); });
+        chkIsMember.addActionListener(e -> { buildLoyaltyPanel(); updateVATField(); });
 
         JPanel typeRow = new JPanel();
         typeRow.setLayout(new BoxLayout(typeRow, BoxLayout.X_AXIS));
@@ -242,7 +246,7 @@ public class ClientSupplierForm extends JPanel {
         addressPanel.add(ViewUtils.labeledRequired("City", txtCity));
 
         txtCountry = new JTextField("Belgium");
-        toggleEditable(txtCity, false);
+        toggleEditable(txtCountry, false);
         addressPanel.add(ViewUtils.labeled("Country", txtCountry));
 
         addressPanel.add(Box.createVerticalStrut(10));
@@ -270,6 +274,15 @@ public class ClientSupplierForm extends JPanel {
         loyaltyPanel.removeAll();
         loyaltyPanel.setBorder(BorderFactory.createTitledBorder("Loyalty"));
 
+        boolean isSupplierOnly = chkIsSupplier.isSelected() && !chkIsClient.isSelected() && !chkIsMember.isSelected();
+        if (isSupplierOnly) {
+            loyaltyPanel.setVisible(false);
+            loyaltyPanel.revalidate();
+            loyaltyPanel.repaint();
+            return;
+        }
+
+        loyaltyPanel.setVisible(true);
         FidelityCard card = newCard;
 
         if (card == null && currentClientSupplier != null) {
@@ -285,7 +298,7 @@ public class ClientSupplierForm extends JPanel {
             chkCreateFidelityCard.setSelected(true);
             loyaltyPanel.add(chkCreateFidelityCard);
 
-        } else if (card == null || !card.getIsValid()) {
+        } else if (card == null) {
             JButton btnCreateCard = new JButton("Create fidelity card");
             ViewUtils.setCursor(btnCreateCard);
             btnCreateCard.addActionListener(e -> onCreateFidelityCard());
@@ -360,8 +373,12 @@ public class ClientSupplierForm extends JPanel {
             JOptionPane.showMessageDialog(this, "Phone number is required.", "Validation", JOptionPane.WARNING_MESSAGE);
             return false;
         }
-        if (txtVATNumber.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "VAT number is required.", "Validation", JOptionPane.WARNING_MESSAGE);
+        if (txtPhoneNumber.getText().trim().length() < 10) {
+            JOptionPane.showMessageDialog(this, "Phone number must contain at least 10 digits.", "Validation", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        if (chkIsSupplier.isSelected() && txtVATNumber.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "VAT number is required for suppliers.", "Validation", JOptionPane.WARNING_MESSAGE);
             return false;
         }
         if (!chkIsClient.isSelected() && !chkIsSupplier.isSelected() && !chkIsMember.isSelected()) {
@@ -465,7 +482,7 @@ public class ClientSupplierForm extends JPanel {
         toggleEditable(txtFirstName, true);
         txtMail.setText("");
         txtPhoneNumber.setText("");
-        txtVATNumber.setText("BE");
+        txtVATNumber.setText("");
 
         becameClientDate.setValue(new Date());
         toggleEditable(becameClientDate, true);
@@ -479,6 +496,7 @@ public class ClientSupplierForm extends JPanel {
         toggleEditable(chkIsClient, true);
         toggleEditable(chkIsSupplier, true);
         toggleEditable(chkIsMember, true);
+        updateVATField();
 
 
         spnStreetNumber.setValue(0);
@@ -512,8 +530,9 @@ public class ClientSupplierForm extends JPanel {
         toggleEditable(txtName, false);
         txtFirstName.setText(ViewUtils.safeText(cs.getFirstname(), ""));
         toggleEditable(txtFirstName, false);
+        txtPhoneNumber.setText(ViewUtils.safeText(cs.getPhoneNumber(), ""));
         txtMail.setText(ViewUtils.safeText(cs.getEmail(), ""));
-        txtVATNumber.setText(ViewUtils.safeText(cs.getVATNumber(), "BE"));
+        txtVATNumber.setText(ViewUtils.safeText(cs.getVATNumber(), ""));
 
         if (cs.getBecameClientDate() != null) {
             becameClientDate.setValue(ViewUtils.toDate(cs.getBecameClientDate()));
@@ -528,6 +547,7 @@ public class ClientSupplierForm extends JPanel {
         toggleEditable(chkIsClient, false);
         toggleEditable(chkIsSupplier, false);
         toggleEditable(chkIsMember, false);
+        updateVATField();
 
         Address address = cs.getAddress();
         if (address != null) {
@@ -572,8 +592,21 @@ public class ClientSupplierForm extends JPanel {
             buildLoyaltyPanel(newCard);
             JOptionPane.showMessageDialog(this, "Fidelity card created successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Active ou désactive le champ VAT number en fonction du type sélectionné.
+     * Le VAT number est uniquement requis pour les Suppliers.
+     * Si Supplier est décoché, le champ est vidé et désactivé.
+     */
+    private void updateVATField() {
+        boolean isSupplier = chkIsSupplier.isSelected();
+        toggleEditable(txtVATNumber, isSupplier);
+        if (!isSupplier) {
+            txtVATNumber.setText("");
         }
     }
 
@@ -587,7 +620,7 @@ public class ClientSupplierForm extends JPanel {
         txtField.setEditable(isEditable);
         txtField.setBackground(isEditable ? UIManager.getColor("TextField.background") : Color.LIGHT_GRAY);
         txtField.setForeground(isEditable ? UIManager.getColor("TextField.foreground") : Color.DARK_GRAY);
-        txtField.setFocusable(false);
+        txtField.setFocusable(isEditable);
     }
 
     /**

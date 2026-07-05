@@ -1,8 +1,8 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.ClientSupplierController;
-import main.java.be.henallux.project.controller.ProductController;
-import main.java.be.henallux.project.model.*;
+import be.henallux.project.controller.ClientSupplierController;
+import be.henallux.project.controller.ProductController;
+import be.henallux.project.model.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -22,11 +22,11 @@ import java.util.*;
  *     <li>Validate and complete the payment</li></ul>
  *
  * <p>The receipt data is stored using a {@link java.util.LinkedHashMap}
- * where {@code Key} is {@link main.java.be.henallux.project.model.Product}. {@code Value} is {@code Integer} representing purchased quantity.
+ * where {@code Key} is {@link be.henallux.project.model.Product}. {@code Value} is {@code Integer} representing purchased quantity.
  *
- * @see main.java.be.henallux.project.model.Product
- * @see main.java.be.henallux.project.model.ClientSupplier
- * @see main.java.be.henallux.project.model.Discount
+ * @see be.henallux.project.model.Product
+ * @see be.henallux.project.model.ClientSupplier
+ * @see be.henallux.project.model.Discount
  * @see ReceiptCreateView
  * @see java.util.LinkedHashMap
  */
@@ -95,7 +95,7 @@ public class ReceiptPayment extends JPanel {
     private JPanel buildClientPanel() {
         JPanel panel = section("Client Information");
         if (clientSupplier != null) {
-            panel.add(row("Name:", clientSupplier.getName() + " " + clientSupplier.getFirstname()));
+            panel.add(row("Name:", clientSupplier.getName() + (clientSupplier.getFirstname() != null ? " " + clientSupplier.getFirstname() : "")));
             panel.add(row("Email:", clientSupplier.getEmail()));
         } else {
             panel.add(row("No client selected", null));
@@ -366,7 +366,7 @@ public class ReceiptPayment extends JPanel {
             receiptCreateView.clearAll();
             mainWindow.setPage("RECEIPT");
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(this, "Payment failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }

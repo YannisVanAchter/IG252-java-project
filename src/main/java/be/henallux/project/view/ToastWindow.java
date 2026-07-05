@@ -1,6 +1,6 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.model.NotificationItem;
+import be.henallux.project.model.NotificationItem;
 
 import javax.swing.*;
 import java.awt.*;

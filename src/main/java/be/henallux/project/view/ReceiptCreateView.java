@@ -1,9 +1,9 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.ProductController;
-import main.java.be.henallux.project.controller.ProductSearchController;
-import main.java.be.henallux.project.model.Product;
-import main.java.be.henallux.project.model.ProductCategory;
+import be.henallux.project.controller.ProductController;
+import be.henallux.project.controller.ProductSearchController;
+import be.henallux.project.model.Product;
+import be.henallux.project.model.ProductCategory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -62,7 +62,7 @@ public class ReceiptCreateView extends JPanel {
         try {
             loaded = productController.getAllProduct();
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             mainWindow.goBack();
         }
@@ -300,30 +300,32 @@ public class ReceiptCreateView extends JPanel {
      * @see #addToReceipt(Product)
      */
     private void onScanClick() {
-        String input = JOptionPane.showInputDialog("Enter the code of product");
-        if (input == null || input.trim().isEmpty()) return;
+        boolean continueScanning;
+        do {
+            String input = JOptionPane.showInputDialog("Enter the code of product");
+            continueScanning = input != null && !input.trim().isEmpty();
 
-        int productCode;
-        try {
-            productCode = Integer.parseInt(input.trim());
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Code format invalide", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        try {
-            Product product = productController.getProduct(productCode);
-            if (product != null) {
-                addToReceipt(product);
-            } else {
-                JOptionPane.showMessageDialog(this, "No product found", "Information", JOptionPane.INFORMATION_MESSAGE);
+            if (continueScanning) {
+                try {
+                    int productCode = Integer.parseInt(input.trim());
+                    try {
+                        Product product = productController.getProduct(productCode);
+                        if (product != null) {
+                            addToReceipt(product);
+                        } else {
+                            JOptionPane.showMessageDialog(this, "No product found", "Information", JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    } catch (Exception e) {
+                        JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(this, "Code format invalide", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }    /**
+
+        } while (continueScanning);
+    }
+    /**
      * Clears the product search input field.
      */
     private void onClearClick() {
@@ -332,10 +334,10 @@ public class ReceiptCreateView extends JPanel {
 
     /**
      * Filters displayed products based on user input in {@link #txtSearch}.
-     * <p>This method is triggered on keyboard input and delegates the search to {@link ProductSearchController#searchProducts(String, ProductCategory, Boolean)}.
+     * <p>This method is triggered on keyboard input and delegates the search to {@link ProductSearchController#searchProducts(String, ProductCategory, boolean)}.
      * <p>Results are applied to {@link #displayProducts} and the product table model is refreshed.
      *
-     * @see ProductSearchController#searchProducts(String, ProductCategory, Boolean)
+     * @see ProductSearchController#searchProducts(String, ProductCategory, boolean)
      */
     private void onFilterClick() {
         String txtQuery = txtSearch.getText().trim();
@@ -343,7 +345,7 @@ public class ReceiptCreateView extends JPanel {
             displayProducts = productSearchController.searchProducts(txtQuery, null, false);
             productModel.setProducts(displayProducts);
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -356,7 +358,7 @@ public class ReceiptCreateView extends JPanel {
      * @param product product to add to receipt
      */
     private void addToReceipt(Product product) {
-        int stock = product.getNonStockQuantity();
+        int stock = product.getTotalQuantity();
         int alreadyInCart = receipt.getOrDefault(product, 0);
         if (alreadyInCart >= stock) {
             JOptionPane.showMessageDialog(this, "Insufficient stock for this product", "Error", JOptionPane.WARNING_MESSAGE);

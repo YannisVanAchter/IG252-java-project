@@ -1,9 +1,9 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.model.Address;
-import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.FidelityCard;
-import main.java.be.henallux.project.model.Locality;
+import be.henallux.project.model.Address;
+import be.henallux.project.model.ClientSupplier;
+import be.henallux.project.model.FidelityCard;
+import be.henallux.project.model.Locality;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

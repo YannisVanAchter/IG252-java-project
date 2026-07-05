@@ -1,8 +1,9 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.ProductController;
-import main.java.be.henallux.project.controller.ProductSearchController;
-import main.java.be.henallux.project.model.*;
+import be.henallux.project.controller.ProductController;
+import be.henallux.project.controller.ProductSearchController;
+import be.henallux.project.model.*;
+import be.henallux.project.model.exception.DataValidationException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -36,7 +37,7 @@ public class ProductSearchTable extends JPanel {
     private ArrayList<Product> displayProducts;
 
     private JTextField txtProductName;
-    private JComboBox<String> comboCategory;
+    private JComboBox<ProductCategory> comboCategory;
     private JCheckBox chkPromotion;
 
     private JTable table;
@@ -50,7 +51,7 @@ public class ProductSearchTable extends JPanel {
         try {
             loaded = productSearchController.searchProducts(null, null, false);
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         this.displayProducts = loaded;
@@ -88,17 +89,17 @@ public class ProductSearchTable extends JPanel {
         try {
             setCategory(productController.getAllProductCategory());
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-        ViewUtils.addFilterListener(comboCategory, this::onSearchClick);
+        //ViewUtils.addFilterListener(comboCategory, this::onSearchClick);
         ViewUtils.setCursor(comboCategory);
-        ViewUtils.addFilterListener(comboCategory, this::onSearchClick);
+        //ViewUtils.addFilterListener(comboCategory, this::onSearchClick);
         JPanel categoryFields = new JPanel(new BorderLayout(0, 4));
         categoryFields.add(new JLabel("Category"), BorderLayout.NORTH);
         categoryFields.add(comboCategory, BorderLayout.CENTER);
 
-        chkPromotion = ViewUtils.addFilterListener(new JCheckBox("Promotion only"), this::onSearchClick);
+        chkPromotion = new JCheckBox("Promotion only");
         ViewUtils.setCursor(chkPromotion);
 
         JButton btnSearch = new JButton("Search");
@@ -169,13 +170,13 @@ public class ProductSearchTable extends JPanel {
         try {
             ArrayList<Product> results = productSearchController.searchProducts(
                     name.isBlank() ? null : name,
-                    category == null || category.equals("All") ? null : category,
+                    category == null || category.getId() == 0 ? null : category,
                     promo
             );
             displayProducts = results;
             model.setProducts(new ArrayList<>(results));
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -196,10 +197,30 @@ public class ProductSearchTable extends JPanel {
      * @param categories from  {@link ProductController#getAllProductCategory()}
      */
     private void setCategory(ArrayList<ProductCategory> categories) {
-        comboCategory.removeAllItems();
-        comboCategory.addItem("All");
-        for (ProductCategory category : categories) {
-            comboCategory.addItem(category.getLabel());
+        ProductCategory allCateg;
+        try {
+            allCateg = new ProductCategory(0, "All");
+        } catch (DataValidationException e) {
+            return;
         }
+        comboCategory.removeAllItems();
+        comboCategory.addItem(allCateg);
+        for (ProductCategory category : categories) {
+            comboCategory.addItem(category);
+        }
+        comboCategory.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
+            JLabel label = new JLabel(value != null ? value.getLabel() : "");
+            if (isSelected) {
+                label.setBackground(list.getSelectionBackground());
+                label.setForeground(list.getSelectionForeground());
+                label.setOpaque(true);
+            }
+            return label;
+        });
     }
+
+    public void refresh() {
+        onSearchClick();
+    }
+
 }

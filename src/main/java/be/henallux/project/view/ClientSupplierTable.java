@@ -1,6 +1,6 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.*;
+import be.henallux.project.controller.*;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-import main.java.be.henallux.project.model.*;
+import be.henallux.project.model.*;
 
 /**
  * This view allows users to manage and search through a list of clients and suppliers.
@@ -53,7 +53,7 @@ public class ClientSupplierTable extends JPanel {
         try {
             loaded = clientSupplierController.getAllClientsSuppliers();
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             mainWindow.goBack();
         }
@@ -301,6 +301,13 @@ public class ClientSupplierTable extends JPanel {
             return;
         }
 
+        ClientSupplier csToDelete = displayClientSupplier.get(selectedRow);
+
+        if (csToDelete.getId() == 1) {
+            JOptionPane.showMessageDialog(this, "This entry cannot be deleted.", "Forbidden", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         int confirm = JOptionPane.showConfirmDialog(
                 this,
                 "Are you sure you want to delete this entry?",
@@ -309,8 +316,6 @@ public class ClientSupplierTable extends JPanel {
         );
 
         if (confirm == JOptionPane.YES_OPTION) {
-
-            ClientSupplier csToDelete = displayClientSupplier.get(selectedRow);
             onDeleteClick(csToDelete);
         }
     }
@@ -337,6 +342,7 @@ public class ClientSupplierTable extends JPanel {
                     NotificationItem.Type.ERROR,
                     () -> onDeleteClick(csToDelete)
             ));
+            return;
         }
         clientSuppliers.remove(csToDelete);
         displayClientSupplier.remove(csToDelete);
@@ -348,5 +354,16 @@ public class ClientSupplierTable extends JPanel {
                 NotificationItem.Type.SUCCESS,
                 null
         ));
+    }
+
+    public void refresh() {
+        try {
+            clientSuppliers.clear();
+            clientSuppliers.addAll(clientSupplierController.getAllClientsSuppliers());
+            displayClientSupplier = new ArrayList<>(clientSuppliers);
+            model.setClientSuppliers(displayClientSupplier);
+        } catch (Exception e) {
+
+        }
     }
 }

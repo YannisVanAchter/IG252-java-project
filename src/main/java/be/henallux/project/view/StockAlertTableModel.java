@@ -1,6 +1,6 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.model.Product;
+import be.henallux.project.model.Product;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;

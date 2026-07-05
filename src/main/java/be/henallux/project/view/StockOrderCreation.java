@@ -1,8 +1,8 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.ClientSupplierController;
-import main.java.be.henallux.project.controller.StockManagementController;
-import main.java.be.henallux.project.model.*;
+import be.henallux.project.controller.ClientSupplierController;
+import be.henallux.project.controller.StockManagementController;
+import be.henallux.project.model.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -356,10 +356,11 @@ public class StockOrderCreation extends JPanel {
             timer.setRepeats(false);
             timer.start();
 
+            stockManagementController.askStockCheckUp(true);
             mainWindow.setPage("STOCK");
 
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }

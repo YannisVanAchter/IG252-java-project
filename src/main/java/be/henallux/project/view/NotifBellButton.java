@@ -1,9 +1,14 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.NotificationController;
+import be.henallux.project.controller.NotificationController;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.AWTEvent;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.AWTEventListener;
+import java.awt.event.MouseEvent;
 
 
 /**
@@ -18,6 +23,7 @@ public class NotifBellButton extends JButton {
     private final NotificationController controller;
     private NotificationDropdown dropdown;
     private boolean opened = false;
+    private AWTEventListener outsideClickListener;
 
 
     /**
@@ -85,10 +91,46 @@ public class NotifBellButton extends JButton {
             dropdown.setVisible(true);
             layeredPane.repaint();
             opened = true;
+
+            outsideClickListener = event -> {
+                MouseEvent me = (MouseEvent) event;
+                if (me.getID() != MouseEvent.MOUSE_PRESSED) return;
+
+                Point clickOnScreen = me.getLocationOnScreen();
+                Rectangle dropdownBounds = new Rectangle(dropdown.getLocationOnScreen(), dropdown.getSize());
+
+                Rectangle buttonBounds = new Rectangle(getLocationOnScreen(), getSize());
+
+                boolean inDropdown = dropdownBounds.contains(clickOnScreen);
+                boolean inButton = buttonBounds.contains(clickOnScreen);
+
+                if (!inDropdown && !inButton) {
+                    SwingUtilities.invokeLater(this::hideDropdown);
+                }
+            };
+
+            Toolkit.getDefaultToolkit().addAWTEventListener(
+                    outsideClickListener,
+                    AWTEvent.MOUSE_EVENT_MASK
+            );
+
         } else {
-            layeredPane.remove(dropdown);
-            layeredPane.repaint();
-            opened = false;
+            hideDropdown();
+        }
+    }
+
+    private void hideDropdown() {
+        Window window = SwingUtilities.getWindowAncestor(this);
+        if (!(window instanceof JFrame frame)) return;
+
+        JLayeredPane layeredPane = frame.getLayeredPane();
+        layeredPane.remove(dropdown);
+        layeredPane.repaint();
+        opened = false;
+
+        if (outsideClickListener != null) {
+            Toolkit.getDefaultToolkit().removeAWTEventListener(outsideClickListener);
+            outsideClickListener = null;
         }
     }
 }

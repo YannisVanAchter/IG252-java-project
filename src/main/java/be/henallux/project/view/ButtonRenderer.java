@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;

@@ -1,9 +1,9 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.ClientSupplierController;
-import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.FidelityCard;
-import main.java.be.henallux.project.model.Product;
+import be.henallux.project.controller.ClientSupplierController;
+import be.henallux.project.model.ClientSupplier;
+import be.henallux.project.model.FidelityCard;
+import be.henallux.project.model.Product;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -50,7 +50,7 @@ public class ReceiptClientInfoDialog extends JPanel {
         try {
             loaded = controller.getAllClientsSuppliers();
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         this.allClients = loaded;
@@ -153,7 +153,7 @@ public class ReceiptClientInfoDialog extends JPanel {
             JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
             JLabel lblName = new JLabel("Name:");
             lblName.setPreferredSize(labelSize);
-            JLabel lblNameValue = new JLabel(selectedClient.getFirstname() + " " + selectedClient.getName());
+            JLabel lblNameValue = new JLabel((selectedClient.getFirstname() != null ? selectedClient.getFirstname() + " " : "") + selectedClient.getName());
             namePanel.add(lblName);
             namePanel.add(lblNameValue);
             infoPanel.add(namePanel);
@@ -221,7 +221,7 @@ public class ReceiptClientInfoDialog extends JPanel {
         try {
             cardNumber = Integer.parseInt(input.trim());
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(this, "The number is invalid", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -235,7 +235,7 @@ public class ReceiptClientInfoDialog extends JPanel {
                 JOptionPane.showMessageDialog(this, "No customers found", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -254,6 +254,7 @@ public class ReceiptClientInfoDialog extends JPanel {
         dialog.setContentPane(form);
 
         dialog.pack();
+        dialog.setMinimumSize(new Dimension(760, 580));
         dialog.setLocationRelativeTo(mainWindow);
         dialog.setVisible(true);
         ClientSupplier newClient = form.getCurrentClientSupplier();

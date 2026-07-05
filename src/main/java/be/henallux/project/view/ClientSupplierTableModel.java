@@ -1,7 +1,7 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.ClientSupplierController;
-import main.java.be.henallux.project.model.ClientSupplier;
+import be.henallux.project.controller.ClientSupplierController;
+import be.henallux.project.model.ClientSupplier;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class ClientSupplierTableModel extends AbstractTableModel {
      *    <li>deleting or updating an entry</li></ul>
      *
      * @param clientSuppliers to display
-     * @see AbstractTableModel#fireTableDataChanged();
+     * @see AbstractTableModel#fireTableDataChanged()
      */
     public void setClientSuppliers(ArrayList<ClientSupplier> clientSuppliers) {
         this.clientSuppliers = clientSuppliers;

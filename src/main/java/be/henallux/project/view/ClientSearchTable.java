@@ -1,7 +1,7 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.ClientSupplierSearchController;
-import main.java.be.henallux.project.model.ClientSupplier;
+import be.henallux.project.controller.ClientSupplierSearchController;
+import be.henallux.project.model.ClientSupplier;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -56,7 +56,7 @@ public class ClientSearchTable extends JPanel {
         try {
             loaded = controller.search(null, null, null);
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             mainWindow.goBack();
         }
@@ -104,7 +104,7 @@ public class ClientSearchTable extends JPanel {
 
         chkFidelityCard = new JCheckBox("Has valid fidelity card");
         ViewUtils.setCursor(chkFidelityCard);
-        ViewUtils.addFilterListener(chkFidelityCard, this::onSearchClick);
+        //ViewUtils.addFilterListener(chkFidelityCard, this::onSearchClick);
 
         JButton btnSearch = new JButton("Search");
         btnSearch.addActionListener(e -> onSearchClick());
@@ -190,7 +190,7 @@ public class ClientSearchTable extends JPanel {
             );
             model.setClients(new ArrayList<>(results));
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -207,6 +207,11 @@ public class ClientSearchTable extends JPanel {
         int selectedRow = table.getSelectedRow();
         if (selectedRow == -1) return;
 
-        mainWindow.openClientView(displayClients.get(selectedRow));
+        int modelRow = table.convertRowIndexToModel(selectedRow);
+        mainWindow.openClientView(model.getClient(modelRow));
+    }
+
+    public void refresh() {
+        onSearchClick();
     }
 }

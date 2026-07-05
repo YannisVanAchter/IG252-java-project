@@ -1,6 +1,6 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.model.Document;
+import be.henallux.project.model.Document;
 
 import javax.swing.table.AbstractTableModel;
 import java.time.LocalDate;
@@ -75,7 +75,7 @@ public class DocumentTableModel extends AbstractTableModel {
      *   <li>Workflow label (or "N/A" if not available)</li>
      *   <li>Date of creation</li>
      *   <li>Send date if available, otherwise receipt date</li>
-     *   <li>Edit & Delete action label</li></ul>
+     *   <li>Edit &amp; Delete action label</li></ul>
      *
      * <p>Date values are formatted for display using {@link ViewUtils#formatDate(LocalDate)}.
      * Missing workflow labels are replaced using {@link ViewUtils#safeText(String, String)}.

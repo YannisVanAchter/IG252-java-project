@@ -1,7 +1,7 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.RecipeSearchController;
-import main.java.be.henallux.project.model.*;
+import be.henallux.project.controller.RecipeSearchController;
+import be.henallux.project.model.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -47,7 +47,7 @@ public class RecipeSearchTable extends JPanel {
         try {
             loaded = controller.searchRecipes(null, null);
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         this.displayRecipes = loaded;
@@ -190,7 +190,7 @@ public class RecipeSearchTable extends JPanel {
         row.add(search, BorderLayout.CENTER);
         row.add(btnRemove, BorderLayout.EAST);
 
-        JTextField finalSearch = ViewUtils.addFilterListener(search, this::onSearchClick);
+        JTextField finalSearch = search;
         row.remove(search);
         row.add(finalSearch, BorderLayout.CENTER);
 
@@ -238,7 +238,7 @@ public class RecipeSearchTable extends JPanel {
             );
             model.setRecipes(displayRecipes);
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }

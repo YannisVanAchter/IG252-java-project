@@ -1,8 +1,8 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.model.Product;
-import main.java.be.henallux.project.model.Recipe;
-import main.java.be.henallux.project.model.RecipeComposition;
+import be.henallux.project.model.Product;
+import be.henallux.project.model.Recipe;
+import be.henallux.project.model.RecipeComposition;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

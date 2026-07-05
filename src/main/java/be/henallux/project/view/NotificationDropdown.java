@@ -1,7 +1,7 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.NotificationController;
-import main.java.be.henallux.project.model.NotificationItem;
+import be.henallux.project.controller.NotificationController;
+import be.henallux.project.model.NotificationItem;
 
 import javax.swing.*;
 import java.awt.*;
@@ -112,8 +112,15 @@ public class NotificationDropdown extends JPanel {
         lblTime.setFont(FONT_TIME);
         lblTime.setForeground(Color.GRAY);
 
-        JLabel lblMsg = new JLabel(notif.getMessage());
+        JTextArea lblMsg = new JTextArea(notif.getMessage());
         lblMsg.setFont(FONT_MESSAGE);
+        lblMsg.setEditable(false);
+        lblMsg.setFocusable(false);
+        lblMsg.setOpaque(false);
+        lblMsg.setLineWrap(true);
+        lblMsg.setWrapStyleWord(true);
+        lblMsg.setBorder(null);
+        lblMsg.setBackground(new Color(0, 0, 0, 0));
 
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
@@ -245,7 +252,7 @@ public class NotificationDropdown extends JPanel {
      *
      * @param item the {@link NotificationItem} whose read state is checked
      * @return {@link Color#WHITE} if the notification has been read,
-     *         a light blue ({@code #EBF3FF}) otherwise
+     * a light blue ({@code #EBF3FF}) otherwise
      */
     private Color baseColor(NotificationItem item) {
         return item.getIsRead() ? Color.WHITE : new Color(235, 243, 255);

@@ -1,6 +1,6 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.model.ClientSupplier;
+import be.henallux.project.model.ClientSupplier;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.List;
@@ -56,6 +56,10 @@ public class ClientSearchTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    public ClientSupplier getClient(int index) {
+        return clients.get(index);
+    }
+
     /** {@inheritDoc} */
     @Override public int getRowCount()    { return clients.size(); }
     /** {@inheritDoc} */
@@ -77,7 +81,7 @@ public class ClientSearchTableModel extends AbstractTableModel {
      * @param col the column index identifying the requested field
      * @return the value displayed inside the requested table cell
      * @see ClientSupplier
-     * @see ViewUtils#safeText(String) 
+     * @see ViewUtils#safeText(String)
      */
     @Override
     public Object getValueAt(int row, int col) {
@@ -88,7 +92,7 @@ public class ClientSearchTableModel extends AbstractTableModel {
             case 2  -> ViewUtils.safeText(cs.getPhoneNumber());
             case 3  -> ViewUtils.formatDate(cs.getBecameClientDate());
             case 4  -> cs.getFidelityCard() != null ? cs.getFidelityCard().getTotalPoint() : "-";
-            case 5  -> cs.getFidelityCard() != null ? cs.getFidelityCard().getId() : "-";
+            case 5  -> cs.getFidelityCard() != null ? cs.getFidelityCard().getId() + (cs.getFidelityCard().getIsValid() ? " ✓" : " ✗") : "-";
             case 6  -> cs.getAddress() != null ? cs.getAddress().getLocality().getCity() : "-";
             case 7  -> cs.getAddress() != null ? cs.getAddress().getLocality().getPostalCode() : "-";
             case 8  -> "See";

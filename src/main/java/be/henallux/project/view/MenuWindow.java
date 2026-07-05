@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
 import javax.swing.*;
 import java.awt.*;
@@ -37,7 +37,7 @@ public class MenuWindow extends JMenuBar {
 
         homeItem = new JMenuItem("Home");
         homeItem.setMnemonic(KeyEvent.VK_H);
-        homeItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H, shortcut));
+        homeItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, shortcut));
         homeItem.addActionListener(e -> window.setPage("MAIN"));
         fileMenu.add(homeItem);
 

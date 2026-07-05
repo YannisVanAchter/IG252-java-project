@@ -1,8 +1,8 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.model.Discount;
-import main.java.be.henallux.project.model.Product;
-import main.java.be.henallux.project.model.QuantityProduct;
+import be.henallux.project.model.Discount;
+import be.henallux.project.model.Product;
+import be.henallux.project.model.QuantityProduct;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -205,5 +205,9 @@ public class ProductSearchView extends JPanel {
 
     private String formatPrice(float price) {
         return String.format("%.2f €", price);
+    }
+
+    public void refresh() {
+
     }
 }

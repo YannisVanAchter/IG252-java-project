@@ -1,4 +1,4 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -206,7 +206,7 @@ public class HelpPanel extends JPanel {
                 {"Institution", "Henallux — Haute École de Namur-Liège-Luxembourg"},
                 {"Unit", "IG252 UE Projet informatique intégré"},
                 {"Course", "Programmation orientée objet avancée"},
-                {"Academic year", "2024 — 2025"},
+                {"Academic year", "2025 — 2026"},
         };
 
         for (String[] row : info) {

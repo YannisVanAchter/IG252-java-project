@@ -1,8 +1,8 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.StockManagementController;
-import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.Product;
+import be.henallux.project.controller.StockManagementController;
+import be.henallux.project.model.ClientSupplier;
+import be.henallux.project.model.Product;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -61,6 +61,7 @@ public class StockAlertView extends JPanel {
         setLayout(new BorderLayout());
         setBorder(new EmptyBorder(16, 16, 16, 16));
 
+        stockManagementController.setOnDataUpdated(this::loadFromThread);
         loadFromThread();
     }
 
@@ -226,7 +227,7 @@ public class StockAlertView extends JPanel {
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         row.setPreferredSize(new Dimension(0, 50));
 
-        JLabel lblName = new JLabel(supplier.getName() + " " + supplier.getFirstname());
+        JLabel lblName = new JLabel(supplier.getName());
         lblName.setFont(FONT_REG);
         lblName.setBorder(new EmptyBorder(0, 16, 0, 0));
 

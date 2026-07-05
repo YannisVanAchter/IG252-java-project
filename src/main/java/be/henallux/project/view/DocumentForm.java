@@ -1,14 +1,9 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.DocumentController;
-import main.java.be.henallux.project.controller.WorkFlowController;
-import main.java.be.henallux.project.model.Document;
-import main.java.be.henallux.project.model.ClientSupplier;
-import main.java.be.henallux.project.model.DocumentType;
-import main.java.be.henallux.project.model.Address;
-import main.java.be.henallux.project.model.WorkFlow;
-import main.java.be.henallux.project.model.WorkFlowType;
-import main.java.be.henallux.project.model.Status;
+import be.henallux.project.controller.AddressController;
+import be.henallux.project.controller.DocumentController;
+import be.henallux.project.controller.WorkFlowController;
+import be.henallux.project.model.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -32,6 +27,7 @@ public class DocumentForm extends JPanel {
     private final MainWindow mainWindow;
     private final DocumentController documentController;
     private final WorkFlowController workFlowController;
+    private final AddressController addressController;
     private Document currentDocument;
 
     private final ArrayList<ClientSupplier> allClients;
@@ -79,12 +75,13 @@ public class DocumentForm extends JPanel {
         this.mainWindow = mainWindow;
         this.documentController = new DocumentController();
         this.workFlowController = new WorkFlowController();
+        this.addressController = new AddressController();
 
         ArrayList<ClientSupplier> loaded = new ArrayList<>();
         try {
             loaded = documentController.getAllClientSupplier();
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         this.allClients = loaded;
@@ -158,7 +155,7 @@ public class DocumentForm extends JPanel {
         try {
             setDocumentTypes(documentController.getAllDocumentTypes());
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
@@ -232,7 +229,7 @@ public class DocumentForm extends JPanel {
         try {
             setWorkflowTypes(workFlowController.getWorkFlowTypes());
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         workflowPanel.add(ViewUtils.labeledRequired("Workflow Type Name", comboWorkflowType));
@@ -244,7 +241,7 @@ public class DocumentForm extends JPanel {
         try {
             setWorkflowStatus(workFlowController.getAllWorkFlows());
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
@@ -436,6 +433,12 @@ public class DocumentForm extends JPanel {
                 return false;
             }
         }
+
+        if (typeName.equalsIgnoreCase("Delivery Note") && !commentary.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Delivery Note must not have a commentary.", "Validation", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+
         return true;
     }
 
@@ -486,7 +489,10 @@ public class DocumentForm extends JPanel {
     private void saveEditForm() {
         if (!validateForm()) return;
 
-        String commentaryText = commentary.getText().trim();
+        String typeName = getSelectedTypeName();
+        String commentaryText = typeName.equalsIgnoreCase("Delivery Note")
+                ? null
+                : commentary.getText().trim();
 
         LocalDate plannedSend = chkPlannedSendDate.isSelected() ? ViewUtils.getDate(pickerPlannedSendDate) : null;
         LocalDate plannedReception = chkPlannedReceptionDate.isSelected() ? ViewUtils.getDate(pickerPlannedReceptionDate) : null;
@@ -520,7 +526,7 @@ public class DocumentForm extends JPanel {
             try {
                 documentType = documentController.addDocumentType(text.trim());
             } catch (Exception e) {
-                e.printStackTrace();
+
                 JOptionPane.showMessageDialog(this, "Unable to create document type: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -533,12 +539,15 @@ public class DocumentForm extends JPanel {
 
         try {
             ClientSupplier clientSupplier = (ClientSupplier) clientItem.getObject();
+            Locality locality = new Locality(txtCity.getText().trim(), (int) spnPostalCode.getValue());
             Address address = new Address(
                     txtStreet.getText().trim(),
                     (int) spnStreetNumber.getValue(),
                     txtCity.getText().trim(),
                     (int) spnPostalCode.getValue()
             );
+            address.setLocality(locality);
+            addressController.createAddress(address, locality);
 
             WorkFlowType type = new WorkFlowType(
                     workFlowType.getId(),
@@ -549,7 +558,8 @@ public class DocumentForm extends JPanel {
             );
 
             ClientSupplier us = documentController.getUs();
-            WorkFlow workflow = new WorkFlow(workflowStatus, type, us, clientSupplier);
+            int workflowId = (currentDocument != null) ? currentDocument.getWorkflow().getId() : 0;
+            WorkFlow workflow = new WorkFlow(workflowId ,workflowStatus, type, us, clientSupplier);
 
             if (currentDocument == null) {
                 Document newDoc = new Document(
@@ -563,8 +573,10 @@ public class DocumentForm extends JPanel {
 
             } else {
                 Document updatedDoc = new Document(
+                        currentDocument.getId(),
                         currentDocument.getDateOfCreation(),
                         documentType,
+                        null,
                         isChecked,
                         plannedSend,
                         plannedReception,
@@ -573,7 +585,8 @@ public class DocumentForm extends JPanel {
                         paymentDelay,
                         workflow,
                         address,
-                        commentaryText
+                        commentaryText,
+                        currentDocument.getRecipeOrder()
                 );
                 documentController.updateDocument(currentDocument, updatedDoc);
             }
@@ -684,6 +697,7 @@ public class DocumentForm extends JPanel {
             ComboBoxItem.selectComboItem(comboWorkflowStatus, doc.getWorkflow().getStatus());
             ComboBoxItem.selectComboItem(comboDocumentType, doc.getDocumentType());
             ComboBoxItem.selectComboItem(comboClientSupplier, doc.getWorkflow().getOtherParty());
+            ComboBoxItem.selectComboItem(comboWorkflowType, doc.getWorkflow().getWorkflowType());
         }
         toggleEditable(comboDocumentType, false);
 
@@ -738,8 +752,11 @@ public class DocumentForm extends JPanel {
      */
     public void setWorkflowStatus(ArrayList<WorkFlow> workFlows) {
         comboWorkflowStatus.removeAllItems();
+        LinkedHashSet<Status> seen = new LinkedHashSet<>();
         for (WorkFlow workFlow : workFlows) {
-            Status s = workFlow.getStatus();
+            if (workFlow.getStatus() != null) seen.add(workFlow.getStatus());
+        }
+        for (Status s : seen) {
             comboWorkflowStatus.addItem(new ComboBoxItem<>(s, s.getName()));
         }
     }
@@ -792,6 +809,8 @@ public class DocumentForm extends JPanel {
         dialog.setContentPane(form);
 
         dialog.pack();
+        dialog.setMinimumSize(new Dimension(760, 580));
+        dialog.setLocationRelativeTo(mainWindow);
         dialog.setLocationRelativeTo(mainWindow);
         dialog.setVisible(true);
 

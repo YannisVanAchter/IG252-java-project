@@ -1,7 +1,7 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.model.*;
-import main.java.be.henallux.project.controller.*;
+import be.henallux.project.model.*;
+import be.henallux.project.controller.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,9 +26,13 @@ public class MainWindow extends JFrame {
     private String currentPage;
     private final StockManagementController stockManagementController;
     private final NotificationController notificationController;
+    private final DocumentTable documentTable;
     private final DocumentForm documentForm;
+    private final ClientSupplierTable clientSupplierTable;
     private final ClientSupplierForm clientSupplierForm;
+    private final ClientSearchTable clientSearchTable;
     private final ClientSearchView clientSearchView;
+    private final ProductSearchTable productSearchTable;
     private final ProductSearchView productSearchView;
     private final RecipeSearchView recipeSearchView;
     private final StockOrderCreation orderView;
@@ -46,7 +50,7 @@ public class MainWindow extends JFrame {
         setLocationRelativeTo(null);
 
         notificationController.addListener(notif -> {
-            new ToastWindow(this, notif);
+            if (notif != null) new ToastWindow(this, notif);
         });
 
         setJMenuBar(new MenuWindow(this));
@@ -55,19 +59,23 @@ public class MainWindow extends JFrame {
 
         addPage(new HomePanel(this), "MAIN");
 
-        addPage(new DocumentTable(this), "DOCUMENT");
+        documentTable = new DocumentTable(this);
+        addPage(documentTable, "DOCUMENT");
         documentForm = new DocumentForm(this);
         addPage(documentForm, "DOCUMENT_FORM");
 
-        addPage(new ClientSupplierTable(this), "CLIENT_SUPPLIER");
+        clientSupplierTable = new ClientSupplierTable(this);
+        addPage(clientSupplierTable, "CLIENT_SUPPLIER");
         clientSupplierForm = new ClientSupplierForm(this);
         addPage(clientSupplierForm, "CLIENT_SUPPLIER_FORM");
 
-        addPage(new ClientSearchTable(this), "CLIENT");
+        clientSearchTable = new ClientSearchTable(this);
+        addPage(clientSearchTable, "CLIENT");
         clientSearchView = new ClientSearchView(this);
         addPage(clientSearchView, "CLIENT_VIEW");
 
-        addPage(new ProductSearchTable(this), "PRODUCT");
+        productSearchTable = new ProductSearchTable(this);
+        addPage(productSearchTable, "PRODUCT");
         productSearchView = new ProductSearchView(this);
         addPage(productSearchView, "PRODUCT_VIEW");
 
@@ -106,6 +114,10 @@ public class MainWindow extends JFrame {
         }
         currentPage = name;
         cardLayout.show(container, name);
+        if (name.equals("CLIENT_SUPPLIER")) clientSupplierTable.refresh();
+        if (name.equals("CLIENT")) clientSearchTable.refresh();
+        if (name.equals("DOCUMENT")) documentTable.refresh();
+        if (name.equals("PRODUCT")) productSearchTable.refresh();
     }
 
     /**
@@ -119,6 +131,10 @@ public class MainWindow extends JFrame {
             String previous = history.pop();
             currentPage = previous;
             cardLayout.show(container, previous);
+            if (previous.equals("CLIENT_SUPPLIER")) clientSupplierTable.refresh();
+            if (previous.equals("CLIENT")) clientSearchTable.refresh();
+            if (previous.equals("DOCUMENT")) documentTable.refresh();
+            if (previous.equals("PRODUCT")) productSearchTable.refresh();
         }
     }
 

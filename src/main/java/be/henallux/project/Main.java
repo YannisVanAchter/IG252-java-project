@@ -1,8 +1,8 @@
-package main.java.be.henallux.project;
+package be.henallux.project;
 
-import main.java.be.henallux.project.controller.NotificationController;
-import main.java.be.henallux.project.controller.StockManagementController;
-import main.java.be.henallux.project.view.MainWindow;
+import be.henallux.project.controller.NotificationController;
+import be.henallux.project.controller.StockManagementController;
+import be.henallux.project.view.MainWindow;
 
 import javax.swing.JOptionPane;
 
@@ -13,7 +13,7 @@ public class Main {
      * 
      * TODO: clear the method. 
      * 
-     * @effect create a thread for stocks management. 
+     * effect create a thread for stocks management.
      */
     public static void main(String[] args) {
         System.out.println("Test is running");

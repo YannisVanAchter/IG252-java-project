@@ -1,9 +1,9 @@
-package main.java.be.henallux.project.view;
+package be.henallux.project.view;
 
-import main.java.be.henallux.project.controller.DocumentController;
-import main.java.be.henallux.project.model.NotificationItem;
-import main.java.be.henallux.project.model.Document;
-import main.java.be.henallux.project.model.DocumentType;
+import be.henallux.project.controller.DocumentController;
+import be.henallux.project.model.NotificationItem;
+import be.henallux.project.model.Document;
+import be.henallux.project.model.DocumentType;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -61,7 +61,7 @@ public class DocumentTable extends JPanel {
         try {
             loaded = controller.getAllDocuments();
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         documents = loaded;
@@ -113,7 +113,7 @@ public class DocumentTable extends JPanel {
         try {
             setDocumentTypes(controller.getAllDocumentTypes());
         } catch (Exception e) {
-            e.printStackTrace();
+
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         ViewUtils.addFilterListener(comboTypeDocumentFilter, this::onFilterClick);
@@ -382,6 +382,18 @@ public class DocumentTable extends JPanel {
         comboTypeDocumentFilter.addItem(new ComboBoxItem<>(null, "All"));
         for (DocumentType documentType : types) {
             comboTypeDocumentFilter.addItem(new ComboBoxItem<>(documentType, documentType.getName()));
+        }
+    }
+
+    public void refresh() {
+        try {
+            documents.clear();
+            documents.addAll(controller.getAllDocuments());
+            displayDocuments = new ArrayList<>(documents);
+            model.setDocuments(displayDocuments);
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
